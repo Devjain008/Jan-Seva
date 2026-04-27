@@ -9,10 +9,19 @@ from sqlalchemy import text
 import sys, os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
+
 app = FastAPI(title="AI Citizen Grievance System", version="2.0.0")
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
                    allow_methods=["*"], allow_headers=["*"])
+
+
+
+
+# test route
+@app.get("/")
+def root():
+    return {"message": "API running"}
 
 os.makedirs("uploads/schemes", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
