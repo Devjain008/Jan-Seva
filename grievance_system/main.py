@@ -6,6 +6,8 @@ from backend import models
 from backend.routers import auth, complaints, admin, schemes
 import hashlib, os
 from sqlalchemy import text
+import sys, os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 app = FastAPI(title="AI Citizen Grievance System", version="2.0.0")
 
