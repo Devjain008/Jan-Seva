@@ -2357,6 +2357,263 @@ PAGE_SIZE  = 10   # complaints visible per page
 # ═══════════════════════════════════════════════════════════════════════════
 # CSS  ── injected once per session, never again
 # ═══════════════════════════════════════════════════════════════════════════
+@st.cache_data(show_spinner=False)
+def _voice_html(lang_code: str) -> str:
+    """
+    Full self-contained voice recorder iframe (proper HTML document).
+    Features:
+     - Live interim transcript shown while speaking
+     - Final transcript highlighted in green
+     - Waveform animation while recording
+     - ✅ Use This Text  →  postMessage to parent bridge
+     - 🔄 Record Again  →  resets state, starts fresh (no page reload)
+    Bridge (separate iframe below) catches postMessage and writes URL param → 1 rerun.
+    """
+    path = os.path.join(os.path.dirname(__file__), "components", "voice_component.html")
+    if os.path.exists(path):
+        with open(path, "r", encoding="utf-8") as f:
+            return f.read().replace("%LANG%", lang_code)
+ 
+    is_hi = "hi" in lang_code
+    tap   = "बोलने के लिए दबाएं"     if is_hi else "Tap mic to speak"
+    lst   = "🎙️ सुन रहा हूँ…"        if is_hi else "🎙️ Listening…"
+    dn    = "✅ हो गया! नीचे दबाएं"  if is_hi else "✅ Done! Use text below"
+    nth   = "❌ कुछ नहीं सुना"        if is_hi else "❌ Nothing heard. Try again"
+    use   = "✅ इस टेक्स्ट का उपयोग करें" if is_hi else "✅  Use This Text"
+    again = "🔄 दोबारा बोलें"         if is_hi else "🔄  Record Again"
+    lv    = "लाइव ट्रांसक्रिप्ट"      if is_hi else "Live Transcript"
+    lv_ph = "आप जो बोलेंगे वह यहाँ दिखेगा…" if is_hi else "What you speak will appear here…"
+ 
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{font-family:'DM Sans','Segoe UI',system-ui,sans-serif;background:transparent;}}
+ 
+/* ── outer card ── */
+.vc{{
+    background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.04));
+    border:1.5px solid rgba(99,102,241,.18);
+    border-radius:20px;padding:18px 16px 14px;text-align:center;
+}}
+.vc-hdr{{
+    font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+    color:#818CF8;margin-bottom:14px;
+    display:flex;align-items:center;justify-content:center;gap:8px;
+}}
+.vc-hdr::before,.vc-hdr::after{{content:'';flex:1;height:1px;background:rgba(99,102,241,.20);}}
+ 
+/* ── mic button ── */
+#vbtn{{
+    background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;
+    border-radius:50%;width:68px;height:68px;font-size:1.75rem;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 24px rgba(139,92,246,.50);transition:all .18s;
+}}
+#vbtn:hover{{transform:scale(1.08);box-shadow:0 10px 32px rgba(139,92,246,.60);}}
+@keyframes mp{{0%{{box-shadow:0 0 0 0 rgba(236,72,153,.70);}}
+    70%{{box-shadow:0 0 0 22px rgba(236,72,153,0);}}100%{{box-shadow:0 0 0 0 rgba(236,72,153,0);}}}}
+.rec{{animation:mp 1.1s ease-in-out infinite!important;}}
+ 
+/* ── waveform ── */
+.wf{{
+    display:none;align-items:center;justify-content:center;
+    gap:3px;height:28px;margin:10px auto 0;
+}}
+.wb{{width:3px;background:#818CF8;border-radius:99px;animation:wv 1.1s ease-in-out infinite;}}
+.wb:nth-child(1){{height:8px;animation-delay:0s;}}
+.wb:nth-child(2){{height:14px;animation-delay:.10s;}}
+.wb:nth-child(3){{height:24px;animation-delay:.20s;}}
+.wb:nth-child(4){{height:17px;animation-delay:.30s;}}
+.wb:nth-child(5){{height:28px;animation-delay:.40s;}}
+.wb:nth-child(6){{height:17px;animation-delay:.50s;}}
+.wb:nth-child(7){{height:9px;animation-delay:.60s;}}
+@keyframes wv{{0%,100%{{transform:scaleY(.3);opacity:.4;}}50%{{transform:scaleY(1);opacity:1;}}}}
+ 
+/* ── status line ── */
+#vstatus{{font-size:.74rem;color:#8892AA;margin:10px 0 0;font-weight:500;min-height:18px;}}
+ 
+/* ── transcript box ── */
+.vt{{
+    display:none;
+    background:rgba(255,255,255,.06);
+    border:1px solid rgba(99,102,241,.20);
+    border-radius:14px;padding:12px 14px;margin-top:10px;text-align:left;
+}}
+.vtlbl{{
+    font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.10em;
+    color:#818CF8;margin-bottom:7px;display:flex;align-items:center;gap:6px;
+}}
+.vdot{{
+    width:7px;height:7px;border-radius:50%;background:#EC4899;
+    animation:dp .9s infinite;flex-shrink:0;display:none;
+}}
+@keyframes dp{{0%,100%{{opacity:1;transform:scale(1);}}50%{{opacity:.3;transform:scale(.55);}}}}
+ 
+/* interim text — grey italic (what's being processed) */
+#vi{{
+    color:rgba(180,190,255,.50);font-style:italic;
+    font-size:.78rem;min-height:16px;line-height:1.6;
+    word-break:break-word;
+}}
+/* final text — bright bold (confirmed words) */
+#vf{{
+    font-weight:700;color:#A5B4FC;
+    font-size:.85rem;line-height:1.65;margin-top:5px;
+    word-break:break-word;
+    min-height:18px;
+}}
+/* placeholder shown before any speech */
+.vph{{
+    font-size:.76rem;color:rgba(180,190,255,.30);
+    font-style:italic;padding:4px 0;
+}}
+ 
+/* ── action buttons row ── */
+.vactions{{
+    display:none;flex-direction:column;gap:7px;margin-top:12px;
+}}
+#vub{{
+    width:100%;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;
+    border:none;border-radius:10px;padding:10px 0;
+    font-size:.78rem;font-weight:800;cursor:pointer;
+    box-shadow:0 4px 16px rgba(99,102,241,.40);
+    transition:all .15s;font-family:'DM Sans','Segoe UI',sans-serif;
+    letter-spacing:.01em;
+}}
+#vub:hover{{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.55);}}
+#vagain{{
+    width:100%;background:rgba(99,102,241,.12);color:#818CF8;
+    border:1.5px solid rgba(99,102,241,.28);
+    border-radius:10px;padding:8px 0;
+    font-size:.76rem;font-weight:700;cursor:pointer;
+    transition:all .15s;font-family:'DM Sans','Segoe UI',sans-serif;
+}}
+#vagain:hover{{background:rgba(99,102,241,.22);transform:translateY(-1px);}}
+</style></head>
+<body>
+<div class="vc">
+  <div class="vc-hdr">🎤 Voice Input</div>
+  <button id="vbtn" onclick="toggleV()">🎤</button>
+  <div class="wf" id="wf">
+    <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+  </div>
+  <div id="vstatus">{tap}</div>
+  <div class="vt" id="vt">
+    <div class="vtlbl">
+      <span class="vdot" id="vdot"></span>📝 {lv}
+    </div>
+    <div id="vi"><span class="vph">{lv_ph}</span></div>
+    <div id="vf"></div>
+  </div>
+  <div class="vactions" id="vactions">
+    <button id="vub"    onclick="sendUp()">{use}</button>
+    <button id="vagain" onclick="doAgain()">{again}</button>
+  </div>
+</div>
+ 
+<script>
+var cap='', rec=null, running=false;
+ 
+function toggleV(){{ running ? stopV() : startV(); }}
+ 
+function startV(){{
+    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){{ setSt('❌ Use Chrome or Edge for voice input','#EF4444'); return; }}
+ 
+    // reset display
+    cap = '';
+    setEl('vi', '<span class="vph">{lv_ph}</span>');
+    setEl('vf', '');
+    show('vactions', 'none');
+    show('vt', 'block');
+ 
+    rec = new SR();
+    rec.lang           = '{lang_code}';
+    rec.continuous     = true;
+    rec.interimResults = true;
+ 
+    rec.onresult = function(e){{
+        var interim='', finalT='';
+        for(var i=0; i<e.results.length; i++){{
+            if(e.results[i].isFinal) finalT += e.results[i][0].transcript + ' ';
+            else interim += e.results[i][0].transcript;
+        }}
+        // Update live transcript — interim grey, final bright
+        document.getElementById('vi').textContent = interim;
+        document.getElementById('vf').textContent = finalT.trim();
+        cap = (finalT + interim).trim();
+    }};
+ 
+    rec.onerror = function(e){{
+        setSt('❌ ' + e.error, '#EF4444');
+        setIdle();
+    }};
+ 
+    rec.onend = function(){{
+        // keep continuous recording across silence gaps
+        if(running){{ try{{ rec.start(); }}catch(ex){{ setIdle(); }} return; }}
+        setIdle();
+        if(cap){{
+            document.getElementById('vdot').style.display = 'none';
+            show('vactions', 'flex');
+            setSt('{dn}', '#10B981');
+        }} else {{
+            show('vt', 'none');
+            setSt('{nth}', '#EF4444');
+        }}
+    }};
+ 
+    try{{ rec.start(); }}
+    catch(e){{ setSt('❌ Could not start microphone', '#EF4444'); return; }}
+ 
+    running = true;
+    var btn = document.getElementById('vbtn');
+    btn.textContent = '⏹️';
+    btn.classList.add('rec');
+    show('wf', 'flex');
+    document.getElementById('vdot').style.display = 'inline-block';
+    setSt('{lst}', '#F59E0B');
+}}
+ 
+function stopV(){{
+    running = false;
+    if(rec) try{{ rec.stop(); }}catch(e){{}}
+}}
+ 
+function setIdle(){{
+    running = false;
+    var btn = document.getElementById('vbtn');
+    btn.textContent = '🎤';
+    btn.classList.remove('rec');
+    show('wf', 'none');
+    document.getElementById('vdot').style.display = 'none';
+}}
+ 
+function doAgain(){{
+    // reset everything and start fresh recording
+    cap = '';
+    setEl('vi', '<span class="vph">{lv_ph}</span>');
+    setEl('vf', '');
+    show('vactions', 'none');
+    show('vt', 'none');
+    setSt('{tap}', '#8892AA');
+    startV();
+}}
+ 
+function sendUp(){{
+    if(!cap) return;
+    window.parent.postMessage({{type:'VOICE_RESULT', text:cap}}, '*');
+    setSt('✅ Sent to form!', '#10B981');
+    show('vactions', 'none');
+}}
+ 
+// helpers
+function setEl(id, html){{ document.getElementById(id).innerHTML = html; }}
+function show(id, val){{ document.getElementById(id).style.display = val; }}
+function setSt(t, c){{ var e=document.getElementById('vstatus'); e.textContent=t; e.style.color=c||''; }}
+</script>
+</body></html>"""
 
 def _dashboard_render_hero(user: dict, comps: list, lang: str) -> None:
     hour       = datetime.now().hour
