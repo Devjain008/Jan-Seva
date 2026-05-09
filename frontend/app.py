@@ -2615,6 +2615,85 @@ function setSt(t, c){{ var e=document.getElementById('vstatus'); e.textContent=t
 </script>
 </body></html>"""
 
+ 
+@st.cache_data(show_spinner=False)
+def _bridge_html() -> str:
+    """
+    Zero-height postMessage bridge — must be a full HTML document.
+    Listens for VOICE_RESULT from voice iframe, writes to URL param → 1 rerun.
+    Guard flag prevents duplicate writes.
+    """
+    return """<!DOCTYPE html>
+<html><head><meta charset="utf-8"></head>
+<body><script>
+(function(){
+  if(window._voiceBridgeInstalled) return;
+  window._voiceBridgeInstalled = true;
+  window.addEventListener('message', function(ev){
+    if(!ev.data || ev.data.type !== 'VOICE_RESULT') return;
+    var text = (ev.data.text || '').trim();
+    if(!text) return;
+    var u = new URL(window.parent.location.href);
+    u.searchParams.set('voice_text', encodeURIComponent(text));
+    window.parent.history.pushState({}, '', u);
+    window.parent.dispatchEvent(new PopStateEvent('popstate', {state:{}}));
+  });
+})();
+</script></body></html>"""
+
+
+@st.cache_data(show_spinner=False)
+def _gps_html(label: str) -> str:
+    return f"""<style>
+#gpsbtn{{background:linear-gradient(135deg,#06b6d4,#6366F1);color:#fff;border:none;
+    border-radius:13px;width:100%;height:49px;font-size:.78rem;font-weight:700;
+    cursor:pointer;font-family:sans-serif;box-shadow:0 4px 14px rgba(6,182,212,.30);transition:transform .18s;}}
+#gpsbtn:hover{{transform:translateY(-2px);}}
+#gpsst{{font-size:.62rem;text-align:center;margin-top:5px;color:#64748B;font-family:sans-serif;min-height:14px;}}
+</style>
+<button id="gpsbtn" onclick="doGPS()">📍 GPS</button>
+<div id="gpsst">{label}</div>
+<script>
+function doGPS(){{
+  var s=document.getElementById('gpsst');s.textContent='⏳ Fetching…';s.style.color='#d97706';
+  if(!navigator.geolocation){{s.textContent='❌ Not supported';s.style.color='#dc2626';return;}}
+  navigator.geolocation.getCurrentPosition(
+    function(p){{s.textContent='✅ Got it!';s.style.color='#10b981';
+      var u=new URL(window.parent.location.href);
+      u.searchParams.set('gps_lat',p.coords.latitude);u.searchParams.set('gps_lon',p.coords.longitude);
+      window.parent.history.pushState({{}},'',u);
+      window.parent.dispatchEvent(new PopStateEvent('popstate',{{state:{{}}}}));}},
+    function(e){{s.textContent='❌ '+e.message;s.style.color='#dc2626';}},
+    {{timeout:10000,enableHighAccuracy:true}});
+}}
+</script>"""
+ 
+ 
+def _map_html(lat: float, lon: float, dark: bool) -> str:
+    bc = "#1E2A3D" if dark else "#E2E8F4"
+    return (
+        "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>"
+        "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>"
+        f"<div id='cmap' style='height:218px;border-radius:16px;overflow:hidden;"
+        f"border:1.5px solid {bc};box-shadow:0 4px 18px rgba(15,23,42,.08);margin-top:8px;'></div>"
+        "<script>(function(){"
+        "if(window._cmapI){window._cmapI.remove();}"
+        f"var m=L.map('cmap',{{zoomControl:true,attributionControl:false}}).setView([{lat},{lon}],15);"
+        "window._cmapI=m;"
+        "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',"
+        "{maxZoom:19,subdomains:['a','b','c']}).addTo(m);"
+        "var ic=L.divIcon({className:'',"
+        "html:'<div style=\"position:relative;width:32px;height:40px;\">"
+        "<div style=\"width:32px;height:32px;background:linear-gradient(135deg,#6366F1,#8B5CF6);"
+        "border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;"
+        "box-shadow:0 3px 14px rgba(99,102,241,.50);\"></div>"
+        "<div style=\"position:absolute;top:6px;left:6px;font-size:13px;transform:rotate(45deg);\">📍</div>"
+        "</div>',"
+        "iconSize:[32,40],iconAnchor:[16,40]});"
+        f"L.marker([{lat},{lon}],{{icon:ic}}).addTo(m).bindPopup('<b>📍 Your Location</b>').openPopup();"
+        "})();</script>"
+    )
+
 def _dashboard_render_hero(user: dict, comps: list, lang: str) -> None:
     hour       = datetime.now().hour
     greet_map  = [(12,"Good Morning","सुप्रभात","☀️"),
