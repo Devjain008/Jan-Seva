@@ -2209,6 +2209,138 @@ def pg_admin_login():
 # USER DASHBOARD
 # ═════════════════════════════════════════════════════════════════════════════
 
+def _inline_voice_html(lang_code: str = "en-IN") -> str:
+    """
+    Self-contained voice recorder iframe.
+    Posts result to parent via postMessage → parent writes it to query param
+    → Streamlit reads it on next rerun via st.query_params.
+    This lives in its OWN iframe scope so category button clicks, reruns, or
+    any other Streamlit interaction CANNOT kill the recognizer.
+    """
+    tap_lbl      = "Tap to speak"                        if "en" in lang_code else "बोलने के लिए दबाएं"
+    listen_lbl   = "🎙️ Listening…"                       if "en" in lang_code else "🎙️ सुन रहा हूँ…"
+    done_lbl     = "✅ Done — click Use Text below"       if "en" in lang_code else "✅ हो गया!"
+    nothing_lbl  = "❌ Nothing heard. Try again."         if "en" in lang_code else "❌ कुछ नहीं सुना।"
+    use_lbl      = "✅  Use This Text"                    if "en" in lang_code else "✅  इस टेक्स्ट का उपयोग करें"
+    live_lbl     = "Live Transcript"                     if "en" in lang_code else "लाइव ट्रांसक्रिप्ट"
+ 
+    return f"""
+<style>
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{font-family:'Segoe UI',sans-serif;background:transparent;}}
+.vc{{background:linear-gradient(135deg,rgba(99,102,241,.09),rgba(139,92,246,.06));
+    border:1px solid rgba(99,102,241,.20);border-radius:18px;padding:22px 18px;text-align:center;}}
+.vc-hdr{{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+    color:#818CF8;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}}
+.vc-hdr::before,.vc-hdr::after{{content:'';flex:1;height:1px;background:rgba(99,102,241,.2);}}
+#vbtn{{background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;
+    border-radius:50%;width:66px;height:66px;font-size:1.75rem;cursor:pointer;
+    display:inline-flex;align-items:center;justify-content:center;
+    box-shadow:0 6px 22px rgba(139,92,246,.45);transition:all .18s;}}
+#vbtn:hover{{transform:scale(1.08);}}
+.wf{{display:none;align-items:center;justify-content:center;gap:4px;height:32px;margin:10px auto 0;width:140px;}}
+.wb{{width:4px;background:#818CF8;border-radius:99px;animation:wv 1.1s ease-in-out infinite;}}
+.wb:nth-child(1){{height:10px;animation-delay:0s;}}
+.wb:nth-child(2){{height:18px;animation-delay:.1s;}}
+.wb:nth-child(3){{height:28px;animation-delay:.2s;}}
+.wb:nth-child(4){{height:20px;animation-delay:.3s;}}
+.wb:nth-child(5){{height:32px;animation-delay:.4s;}}
+.wb:nth-child(6){{height:22px;animation-delay:.5s;}}
+.wb:nth-child(7){{height:14px;animation-delay:.6s;}}
+@keyframes wv{{0%,100%{{transform:scaleY(.4);opacity:.5;}}50%{{transform:scaleY(1);opacity:1;}}}}
+#vstatus{{font-size:.75rem;color:#8892AA;margin:10px 0 4px;font-weight:500;}}
+.vt{{display:none;background:rgba(255,255,255,.05);border:1px solid rgba(99,102,241,.2);
+    border-radius:12px;padding:12px 14px;margin-top:10px;text-align:left;}}
+.vtlbl{{font-size:.60rem;font-weight:800;text-transform:uppercase;letter-spacing:.10em;
+    color:#818CF8;margin-bottom:6px;display:flex;align-items:center;gap:6px;}}
+.vdot{{width:7px;height:7px;border-radius:50%;background:#EC4899;
+    animation:dp .9s infinite;flex-shrink:0;display:none;}}
+@keyframes dp{{0%,100%{{opacity:1;transform:scale(1);}}50%{{opacity:.3;transform:scale(.6);}}}}
+#vi{{color:rgba(240,242,255,.35);font-style:italic;font-size:.80rem;min-height:16px;line-height:1.55;}}
+#vf{{font-weight:600;color:#F0F2FF;font-size:.84rem;line-height:1.6;margin-top:4px;}}
+#vub{{display:none;margin-top:10px;width:100%;
+    background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border:none;
+    border-radius:10px;padding:10px;font-size:.80rem;font-weight:800;cursor:pointer;
+    box-shadow:0 4px 16px rgba(99,102,241,.38);transition:all .15s;
+    font-family:'Segoe UI',sans-serif;}}
+#vub:hover{{transform:translateY(-2px);box-shadow:0 8px 26px rgba(99,102,241,.50);}}
+@keyframes mp{{0%{{box-shadow:0 0 0 0 rgba(236,72,153,.65);}}
+    70%{{box-shadow:0 0 0 20px rgba(236,72,153,0);}}100%{{box-shadow:0 0 0 0 rgba(236,72,153,0);}}}}
+.rec{{animation:mp 1.1s ease-in-out infinite!important;}}
+</style>
+<div class="vc">
+<div class="vc-hdr">🎤 Voice Input</div>
+<button id="vbtn" onclick="toggleV()">🎤</button>
+<div class="wf" id="wf">
+    <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
+</div>
+<div id="vstatus">{tap_lbl}</div>
+<div class="vt" id="vt">
+    <div class="vtlbl"><span class="vdot" id="vdot"></span>📝 {live_lbl}</div>
+    <div id="vi"></div>
+    <div id="vf"></div>
+    <button id="vub" onclick="sendUp()">{use_lbl}</button>
+</div>
+</div>
+<script>
+var cap='', rec=null, running=false;
+function toggleV(){{ running?stopV():startV(); }}
+function startV(){{
+    var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){{ setSt('❌ Browser does not support speech recognition','#EF4444'); return; }}
+    cap='';
+    document.getElementById('vf').textContent='';
+    document.getElementById('vi').textContent='';
+    document.getElementById('vub').style.display='none';
+    rec=new SR(); rec.lang='{lang_code}'; rec.continuous=true; rec.interimResults=true;
+    rec.onresult=function(e){{
+        var it='',ft='';
+        for(var i=0;i<e.results.length;i++){{
+            if(e.results[i].isFinal) ft+=e.results[i][0].transcript+' ';
+            else it+=e.results[i][0].transcript;
+        }}
+        document.getElementById('vi').textContent=it;
+        document.getElementById('vf').textContent=ft;
+        cap=(ft+it).trim();
+    }};
+    rec.onerror=function(e){{ setSt('❌ '+e.error,'#EF4444'); setIdle(); }};
+    rec.onend=function(){{
+        /* KEY FIX: auto-restart to keep continuous across silence gaps */
+        if(running){{ try{{rec.start();}}catch(e){{setIdle();}} return; }}
+        setIdle();
+        if(cap){{ document.getElementById('vub').style.display='block'; setSt('{done_lbl}','#10B981'); }}
+        else{{ document.getElementById('vt').style.display='none'; setSt('{nothing_lbl}','#EF4444'); }}
+    }};
+    try{{ rec.start(); }}catch(e){{ setSt('❌ Could not start mic','#EF4444'); return; }}
+    running=true;
+    var btn=document.getElementById('vbtn');
+    btn.textContent='⏹️'; btn.classList.add('rec');
+    document.getElementById('wf').style.display='flex';
+    document.getElementById('vt').style.display='block';
+    document.getElementById('vdot').style.display='inline-block';
+    setSt('{listen_lbl}','#F59E0B');
+}}
+function stopV(){{ running=false; if(rec)try{{rec.stop();}}catch(e){{}} }}
+function setIdle(){{
+    running=false;
+    var btn=document.getElementById('vbtn');
+    btn.textContent='🎤'; btn.classList.remove('rec');
+    document.getElementById('wf').style.display='none';
+    document.getElementById('vdot').style.display='none';
+}}
+function setSt(t,c){{ var e=document.getElementById('vstatus'); e.textContent=t; e.style.color=c||''; }}
+/* Send captured text to parent via postMessage.
+   Parent listens → writes to URL query param → Streamlit reads it on rerun.
+   This keeps voice completely isolated from Streamlit reruns. */
+function sendUp(){{
+    if(!cap) return;
+    window.parent.postMessage({{type:'VOICE_RESULT',text:cap}},'*');
+    setSt('✅ Sent to description!','#10B981');
+    document.getElementById('vub').style.display='none';
+}}
+</script>
+"""
 # ── Module-level imports (never re-imported on rerun) ──────────────────────
 import html as _html
 import re
