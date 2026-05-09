@@ -5185,7 +5185,7 @@ def _render_success(lang: str) -> None:
         "<div class='fc-success-sub'>" + sub + "</div>"
         "<div class='fc-success-id'>" + cid + "</div>"
         "<div class='fc-success-chips'>"
-        "<div class='fc-success-chip'>👤 " + asg + "</div>"
+        "<div class='fc-success-chip'>👤 " + str(asg or "Assign to the official") + "</div>"
         "<div class='fc-success-chip'>📂 " + sd.get("category","").title() + "</div>"
         + emg_html + "</div>"
         "<div class='fc-success-note'>" + note + "</div></div>",
@@ -5470,6 +5470,58 @@ def pg_tracking():
     #         "<div class='sla-ok'>⏱&nbsp;<span>"
     #         + t('Expected by', 'अपेक्षित') + ": <strong>" + str(sla) + "</strong></span></div>"
     #     )
+    def build_tl(status):
+        steps = [
+            ("Submitted", "done"),
+            ("In Review", "idle"),
+            ("In Progress", "idle"),
+            ("Resolved", "idle")
+        ]
+
+        status_map = {
+            "pending": 0,
+            "review": 1,
+            "in_progress": 2,
+            "resolved": 3,
+            "closed": 3
+        }
+
+        current = status_map.get(str(status).lower(), 0)
+
+        html = '<div class="prem-timeline">'
+
+        for i, (label, state) in enumerate(steps):
+
+            if i < current:
+                cls = "done"
+                icon = "✓"
+
+            elif i == current:
+                cls = "active"
+                icon = "●"
+
+            else:
+                cls = "idle"
+                icon = "○"
+
+            html += f'''
+            <div class="prem-tl-item">
+                <div class="prem-tl-dot {cls}">
+                    {icon}
+                </div>
+
+                <div class="prem-tl-info">
+                    <div class="prem-tl-label">{label}</div>
+                </div>
+            </div>
+            '''
+
+            if i < len(steps) - 1:
+                html += f'<div class="prem-tl-line {cls}"></div>'
+
+        html += '</div>'
+
+        return html
 
     def render_card(comp, expanded=False):
         cid      = comp.get("complaint_id", "N/A")
