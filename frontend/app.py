@@ -3323,7 +3323,7 @@ def _st_image(src, caption: str = "") -> None:
         except TypeError:
             # Ultimate fallback — no width control
             st.image(src, **kwargs)
-
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # STATE
 # ─────────────────────────────────────────────────────────────────────────────
@@ -3358,40 +3358,8 @@ _FC_DEFAULTS: dict[str, Any] = {
     "_img_bytes":      None,
     "_img_name":       "",
 }
-
-import requests
-
-def api(method, path, **kw):
-    try:
-        url = f"{API_BASE}{path}"
-        r = getattr(_req, method)(url, timeout=8, **kw)
-        
-        # Check if response is empty
-        if not r.text or r.text.strip() == "":
-            return {"error": f"Empty response from server. Status: {r.status_code}"}
-        
-        # Try to parse JSON
-        try:
-            data = r.json()
-            # If the response has an error field, return it but don't crash
-            if isinstance(data, dict) and data.get("error"):
-                return data
-            return data
-        except Exception as json_err:
-            # Return a dict with error instead of raising
-            return {
-                "error": f"Invalid JSON (Status {r.status_code})",
-                "status_code": r.status_code,
-                "raw_response": r.text[:200] if r.text else ""
-            }
-            
-    except _req.exceptions.ConnectionError:
-        return {"error": f"⚠️ Cannot connect to API at {API_BASE}. Make sure backend is running."}
-    except _req.exceptions.Timeout:
-        return {"error": "⚠️ Request timeout. Server might be overloaded."}
-    except Exception as e:
-        return {"error": str(e)}
-    
+ 
+ 
 def _init_fc() -> None:
     if "fc" not in st.session_state:
         st.session_state.fc = dict(_FC_DEFAULTS)
@@ -3399,23 +3367,20 @@ def _init_fc() -> None:
         for k, v in _FC_DEFAULTS.items():
             if k not in st.session_state.fc:
                 st.session_state.fc[k] = v
-
-
-def submit_offline_complaints():
-    pass
-
+ 
+ 
 def fc() -> dict[str, Any]:
     return st.session_state.fc  # type: ignore[return-value]
-
-
+ 
+ 
 def fc_set(**kw: Any) -> None:
     st.session_state.fc.update(kw)
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # REVERSE GEOCODE  (FIX 2 — now includes pincode)
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 @st.cache_data(ttl=300, show_spinner=False)
 def _reverse_geocode(lat: float, lon: float) -> dict:
     """
@@ -3439,7 +3404,7 @@ def _reverse_geocode(lat: float, lon: float) -> dict:
         if not r.ok:
             return empty
         addr = r.json().get("address", {})
-
+ 
         area     = (addr.get("neighbourhood") or addr.get("suburb")
                     or addr.get("village")    or addr.get("hamlet")
                     or addr.get("residential") or "")
@@ -3447,29 +3412,29 @@ def _reverse_geocode(lat: float, lon: float) -> dict:
         district = addr.get("county") or addr.get("district") or addr.get("state_district") or ""
         state    = addr.get("state", "")
         pincode  = addr.get("postcode", "")
-
+ 
         # Build display string: all non-empty parts joined
         parts = [p for p in [area, city, district, state] if p]
         base  = ", ".join(parts) if parts else f"{lat:.5f}, {lon:.5f}"
         display = f"{base} — {pincode}" if pincode else base
-
+ 
         return {
             "area": area, "city": city, "district": district,
             "state": state, "pincode": pincode, "display": display,
         }
     except Exception:
         return empty
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # QUERY PARAM INGESTION
 # FIX 1 & 3: Delete widget keys before rerun so widgets re-seed from fc()
 # FIX 3: Reset _voice_ingested on clear so next voice param is accepted
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def _ingest_query_params() -> bool:
     params = st.query_params
-
+ 
     # ── Voice text ───────────────────────────────────────────────────────────
     if "voice_text" in params and not fc()["_voice_ingested"]:
         text = unquote(params["voice_text"])
@@ -3483,13 +3448,13 @@ def _ingest_query_params() -> bool:
         # Delete widget key so textarea re-seeds from fc()["description"]
         st.session_state.pop("_fc_desc", None)
         return True
-
+ 
     # ── GPS location ─────────────────────────────────────────────────────────
     if "gps_lat" in params and not fc()["_gps_ingested"]:
         try:
             lat  = float(params["gps_lat"])
             lon  = float(params["gps_lon"])
-
+ 
             # JS iframe sends pre-built structured fields via URL params
             # Fall back to Python geocode only if JS fields are absent
             js_area     = unquote(params.get("gps_area",     ""))
@@ -3498,7 +3463,7 @@ def _ingest_query_params() -> bool:
             js_state    = unquote(params.get("gps_state",    ""))
             js_pincode  = unquote(params.get("gps_pincode",  ""))
             js_display  = unquote(params.get("gps_name",     ""))
-
+ 
             if js_display:
                 # JS already did the geocoding — use its structured fields
                 geo = {
@@ -3512,7 +3477,7 @@ def _ingest_query_params() -> bool:
             else:
                 # Fallback: Python-side geocode
                 geo = _reverse_geocode(lat, lon)
-
+ 
             fc_set(
                 lat           = lat,
                 lon           = lon,
@@ -3532,14 +3497,14 @@ def _ingest_query_params() -> bool:
             return True
         except (ValueError, KeyError, TypeError):
             pass
-
+ 
     return False
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # CSS (unchanged from v4 — all classes preserved)
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def _inject_page_css(dark: bool) -> None:
     CARD  = "#0D1220" if dark else "#FFFFFF"
     BG    = "#070B14" if dark else "#F4F7FD"
@@ -3559,10 +3524,10 @@ def _inject_page_css(dark: bool) -> None:
     RED_BG  = "#1A0505" if dark else "#FEF2F2"
     RED_BD  = "#991B1B" if dark else "#FECACA"
     RED_T   = "#FCA5A5" if dark else "#BE123C"
-
+ 
     css = f"""<style>
 @import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
-
+ 
 html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',system-ui,sans-serif;}}
 .main .block-container{{max-width:860px!important;margin:0 auto!important;padding:1.5rem 1.75rem 4rem!important;}}
 #MainMenu,footer,header,.stDeployButton{{display:none!important;}}
@@ -3571,7 +3536,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     animation:fc-stripe 6s ease infinite;}}
 @keyframes fc-stripe{{0%,100%{{background-position:0 50%;}}50%{{background-position:100% 50%;}}}}
 @keyframes fc-fade-up{{from{{opacity:0;transform:translateY(10px)}}to{{opacity:1;transform:translateY(0)}}}}
-
+ 
 .fc-hero{{background:linear-gradient(135deg,#1a1757 0%,#2e2b85 45%,#0d3461 100%);
     border-radius:24px;padding:30px 28px 24px;margin-bottom:20px;
     position:relative;overflow:hidden;box-shadow:0 20px 56px rgba(0,0,0,0.30);
@@ -3590,7 +3555,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .fc-chip{{background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.16);
     border-radius:20px;padding:4px 13px;font-size:.65rem;font-weight:700;color:#fff;
     display:inline-flex;align-items:center;gap:5px;}}
-
+ 
 .fc-steps{{display:flex;align-items:flex-start;background:{CARD};border:1px solid {BOR};
     border-radius:18px;padding:14px 18px;margin-bottom:22px;box-shadow:0 2px 10px rgba(0,0,0,0.07);}}
 .fc-step-col{{flex:1;text-align:center;}}
@@ -3602,13 +3567,13 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .fc-step-lbl.done{{color:{A1};}} .fc-step-lbl.idle{{color:{SUB};}}
 .fc-step-bar{{flex:0 0 20px;height:2px;border-radius:2px;margin-top:16px;transition:background .22s;}}
 .fc-step-bar.done{{background:{A1};}} .fc-step-bar.idle{{background:{BOR};}}
-
+ 
 .fc-sec{{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.10em;
     color:{SUB};margin:24px 0 11px;display:flex;align-items:center;gap:9px;}}
 .fc-sec::before{{content:'';width:3px;height:13px;
     background:linear-gradient(180deg,{A1},{A2});border-radius:99px;flex-shrink:0;}}
 .fc-sec::after{{content:'';flex:1;height:1px;background:linear-gradient(to right,{BOR},transparent);}}
-
+ 
 .fc-voice-wrap{{background:{"rgba(99,102,241,0.05)" if dark else "#F7F5FF"};
     border:1.5px solid {"rgba(99,102,241,0.16)" if dark else "#DDD6FE"};border-radius:20px;overflow:hidden;}}
 .fc-voice-captured{{background:{GRN_BG};border:1.5px solid {GRN_BD};border-left:4px solid {GRN};
@@ -3617,7 +3582,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     letter-spacing:.08em;color:{GRN_T};margin-bottom:5px;}}
 .fc-voice-captured-txt{{font-size:.80rem;color:{TXT};line-height:1.6;word-break:break-word;
     font-style:italic;margin-bottom:10px;}}
-
+ 
 /* ── CATEGORY ── */
 .fc-cat-cell .stButton>button{{
     background:{CARD}!important;border:1.5px solid {BOR}!important;
@@ -3635,7 +3600,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     background:{"rgba(99,102,241,0.14)" if dark else "#EEF2FF"}!important;
     border:2px solid {A1}!important;box-shadow:0 0 0 4px rgba(99,102,241,0.13)!important;
     color:{"#818CF8" if dark else "#3730A3"}!important;}}
-
+ 
 /* ── GPS LOCATION PILL ── */
 .fc-gps-pill{{background:{GRN_BG};border:1.5px solid {GRN_BD};border-left:4px solid {GRN};
     border-radius:12px;padding:10px 14px;margin-bottom:10px;
@@ -3646,7 +3611,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     letter-spacing:.08em;color:{GRN_T};margin-bottom:3px;}}
 .fc-gps-pill-name{{font-size:.82rem;font-weight:600;color:{TXT};line-height:1.45;}}
 .fc-gps-pill-coords{{font-size:.62rem;color:{SUB};margin-top:3px;font-family:'DM Mono',monospace;}}
-
+ 
 /* ── EMERGENCY ── */
 .fc-emg{{background:{"rgba(239,68,68,0.07)" if dark else "#FFF1F2"};
     border:1.5px solid {"rgba(239,68,68,0.18)" if dark else "#FECDD3"};
@@ -3655,7 +3620,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     letter-spacing:.10em;color:#EF4444;margin-bottom:10px;}}
 .fc-emg-warn{{background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.18);
     border-radius:10px;padding:8px 12px;font-size:.76rem;color:#EF4444;font-weight:600;margin-top:8px;}}
-
+ 
 .fc-ai{{background:{CARD};border:1.5px solid {"rgba(99,102,241,0.18)" if dark else "#C7D2FE"};
     border-left:4px solid {A1};border-radius:18px;padding:15px 18px;margin-top:12px;
     animation:fc-fade-up .22s ease both;}}
@@ -3667,7 +3632,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .fc-ai-pill{{border-radius:10px;padding:6px 11px;display:flex;align-items:center;
     gap:5px;font-size:.76rem;font-weight:700;border:1.5px solid;}}
 .fc-ai-hint{{font-size:.65rem;color:{SUB};margin-top:8px;font-style:italic;}}
-
+ 
 .fc-photo-wrap{{background:{"rgba(99,102,241,0.04)" if dark else "#F9FAFB"};
     border:2px dashed {"rgba(99,102,241,0.20)" if dark else "#C7D2FE"};
     border-radius:18px;padding:16px 18px;}}
@@ -3677,7 +3642,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     font-size:1.3rem;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,.28);}}
 .fc-photo-title{{font-size:.82rem;font-weight:800;color:{"#818CF8" if dark else "#3730A3"};}}
 .fc-photo-sub{{font-size:.64rem;color:{SUB};margin-top:2px;}}
-
+ 
 .fc-checklist{{background:{CARD};border:1px solid {BOR};border-radius:14px;
     padding:12px 16px;margin:12px 0 14px;}}
 .fc-checklist-title{{font-size:.60rem;font-weight:700;text-transform:uppercase;
@@ -3687,15 +3652,15 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
     border:1px solid {BOR};border-radius:9px;padding:5px 11px;font-size:.72rem;
     font-weight:600;color:{SUB};display:inline-flex;align-items:center;gap:5px;}}
 .fc-check.ok{{background:{GRN_BG};border-color:{GRN_BD};color:{GRN_T};}}
-
+ 
 .fc-tip{{background:{CARD};border:1px solid {BOR};border-radius:13px;
     padding:11px 16px;display:flex;align-items:flex-start;gap:10px;
     margin:10px 0 16px;font-size:.75rem;color:{SUB};line-height:1.55;}}
 .fc-tip strong{{color:{TXT};}}
-
+ 
 .fc-err{{background:{RED_BG};border:1.5px solid {RED_BD};border-radius:13px;
     padding:11px 16px;margin-top:8px;color:{RED_T};font-weight:600;font-size:.80rem;}}
-
+ 
 .fc-success{{background:linear-gradient(135deg,#064e3b 0%,#059669 55%,#047857 100%);
     border-radius:24px;padding:40px 28px;text-align:center;color:#fff;
     box-shadow:0 20px 56px rgba(16,185,129,0.38);margin-top:12px;animation:fc-fade-up .30s ease both;}}
@@ -3712,7 +3677,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .fc-success-chips{{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-bottom:12px;}}
 .fc-success-chip{{background:rgba(255,255,255,0.14);border-radius:9px;padding:6px 13px;font-size:.72rem;font-weight:600;}}
 .fc-success-note{{font-size:.70rem;opacity:.65;line-height:1.85;}}
-
+ 
 .fc-offline{{background:{AMB_BG};border:1.5px solid {AMB_BD};border-radius:18px;padding:18px;margin-top:10px;}}
 .fc-offline-head{{display:flex;align-items:center;gap:12px;margin-bottom:9px;}}
 .fc-offline-icon{{width:44px;height:44px;background:{"rgba(245,158,11,0.18)" if dark else "#FDE68A"};
@@ -3721,7 +3686,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .fc-offline-sub{{font-size:.70rem;color:{AMB_T};opacity:.78;margin-top:2px;}}
 .fc-offline-body{{background:rgba(255,255,255,0.08);border-radius:10px;
     padding:10px 12px;font-size:.74rem;color:{AMB_T};line-height:1.65;}}
-
+ 
 /* Streamlit native overrides */
 .stTextInput>div>div>input,.stTextArea>div>div>textarea{{
     background:{INP}!important;border:1.5px solid {BOR}!important;
@@ -3741,7 +3706,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .stFileUploader>div{{background:{INP}!important;
     border:1.5px dashed {"rgba(99,102,241,0.22)" if dark else "#C7D2FE"}!important;
     border-radius:14px!important;padding:14px!important;}}
-
+ 
 .fc-submit-col .stButton>button{{
     background:linear-gradient(135deg,{A1},{A2})!important;color:#fff!important;
     border:none!important;border-radius:18px!important;padding:14px 28px!important;
@@ -3751,7 +3716,7 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 .fc-submit-col .stButton>button:hover{{transform:translateY(-2px)!important;
     box-shadow:0 10px 32px rgba(99,102,241,0.50)!important;filter:brightness(1.06)!important;}}
 .fc-submit-col .stButton>button:active{{transform:translateY(0) scale(.985)!important;filter:brightness(.96)!important;}}
-
+ 
 @media(max-width:640px){{
     .fc-hero{{padding:22px 16px 18px;border-radius:18px;}}
     .fc-hero-title{{font-size:1.35rem;}}
@@ -3761,12 +3726,12 @@ html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',sy
 }}
 </style>"""
     st.markdown(css, unsafe_allow_html=True)
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # VOICE IFRAME  (unchanged from v4 — record-again works inside iframe)
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 @st.cache_data(show_spinner=False)
 def _voice_iframe_html(lang_code: str) -> str:
     ext_path = os.path.join(
@@ -3776,7 +3741,7 @@ def _voice_iframe_html(lang_code: str) -> str:
     if os.path.exists(ext_path):
         with open(ext_path, "r", encoding="utf-8") as f:
             return f.read().replace("%LANG%", lang_code)
-
+ 
     is_hi = "hi" in lang_code
     tap   = "बोलने के लिए दबाएं" if is_hi else "Tap to speak"
     lst   = "🎙️ सुन रहा हूँ…"    if is_hi else "🎙️ Listening…"
@@ -3785,7 +3750,7 @@ def _voice_iframe_html(lang_code: str) -> str:
     use   = "✅ उपयोग करें"        if is_hi else "✅ Use This Text"
     again = "🔄 दोबारा रिकॉर्ड करें" if is_hi else "🔄 Record Again"
     live  = "लाइव ट्रांसक्रिप्ट"   if is_hi else "Live Transcript"
-
+ 
     return f"""<!DOCTYPE html>
 <html><head><meta charset="utf-8">
 <style>
@@ -3909,8 +3874,8 @@ function sendUp(){{
   document.getElementById('vactions').style.display='none';
 }}
 </script></body></html>"""
-
-
+ 
+ 
 @st.cache_data(show_spinner=False)
 def _bridge_iframe_html() -> str:
     """
@@ -3918,7 +3883,7 @@ def _bridge_iframe_html() -> str:
     ROOT CAUSE FIX: The old 'window._voiceBridgeInstalled' guard persisted
     across reruns in the parent frame. After Clear & Re-record, the bridge
     was already 'installed' so it ignored the new voice message.
-
+ 
     FIX: Replace the guard with a timestamp-based debounce (500ms).
     The listener is re-added on every bridge render (which is fine — it
     replaces itself). Multiple fires within 500ms are collapsed to one.
@@ -3950,12 +3915,12 @@ def _bridge_iframe_html() -> str:
   window.addEventListener('message', window._voiceBridgeFn);
 })();
 </script></body></html>"""
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # GPS IFRAME  (FIX 4 — does reverse geocode in JS, sends name + coords)
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 @st.cache_data(show_spinner=False)
 def _gps_iframe_html(label: str) -> str:
     """
@@ -3990,21 +3955,21 @@ function doGPS(){{
   btn.disabled = true;
   s.textContent = '⏳ Getting location…';
   s.style.color = '#d97706';
-
+ 
   if(!navigator.geolocation){{
     s.textContent = '❌ Geolocation not supported';
     s.style.color = '#dc2626';
     btn.disabled = false;
     return;
   }}
-
+ 
   navigator.geolocation.getCurrentPosition(
     function(pos){{
       var lat = pos.coords.latitude;
       var lon = pos.coords.longitude;
       s.textContent = '📍 Fetching area name…';
       s.style.color = '#10b981';
-
+ 
       fetch(
         'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + lat +
         '&lon=' + lon + '&zoom=18&addressdetails=1',
@@ -4025,10 +3990,10 @@ function doGPS(){{
         var parts = [area, city, district, state].filter(function(p){{ return p && p.trim(); }});
         var base  = parts.length ? parts.join(', ') : (lat.toFixed(5) + ', ' + lon.toFixed(5));
         var disp  = pin ? base + ' — ' + pin : base;
-
+ 
         s.textContent = '✅ ' + disp;
         s.style.color = '#10b981';
-
+ 
         // Send all fields to parent
         var u = new URL(window.parent.location.href);
         u.searchParams.set('gps_lat',      lat);
@@ -4066,8 +4031,8 @@ function doGPS(){{
   );
 }}
 </script></body></html>"""
-
-
+ 
+ 
 def _map_html(lat: float, lon: float, dark: bool,
               area: str = "", city: str = "", district: str = "",
               state: str = "", pincode: str = "", display: str = "") -> str:
@@ -4077,7 +4042,7 @@ def _map_html(lat: float, lon: float, dark: bool,
     Falls back to raw display string if structured fields are empty.
     """
     bc = "#1E2A3D" if dark else "#E2E8F4"
-
+ 
     # Build popup HTML rows — only non-empty fields shown
     rows = []
     if area:     rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>Area</td><td style='font-weight:600;font-size:12px;'>{area}</td></tr>")
@@ -4085,7 +4050,7 @@ def _map_html(lat: float, lon: float, dark: bool,
     if district: rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>District</td><td style='font-weight:600;font-size:12px;'>{district}</td></tr>")
     if state:    rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>State</td><td style='font-weight:600;font-size:12px;'>{state}</td></tr>")
     if pincode:  rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>PIN Code</td><td style='font-weight:600;font-size:12px;letter-spacing:.04em;'>{pincode}</td></tr>")
-
+ 
     if rows:
         popup_inner = (
             "<div style='font-family:sans-serif;min-width:170px;'>"
@@ -4105,10 +4070,10 @@ def _map_html(lat: float, lon: float, dark: bool,
             f"<div style='font-size:12px;color:#475569;margin-top:4px;'>{label}</div>"
             "</div>"
         )
-
+ 
     # Escape the popup HTML for embedding in a JS string
     popup_js = popup_inner.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "")
-
+ 
     return (
         f"<!DOCTYPE html><html><head><meta charset='utf-8'>"
         f"<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>"
@@ -4140,12 +4105,12 @@ def _map_html(lat: float, lon: float, dark: bool,
         f".bindPopup('{popup_js}',{{maxWidth:280}}).openPopup();"
         f"}})();</script></body></html>"
     )
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # RENDER FUNCTIONS
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def _render_hero(lang: str) -> None:
     title  = "File a Complaint"  if lang == "en" else "शिकायत दर्ज करें"
     sub    = ("Speak or type — AI routes it to the right department instantly."
@@ -4166,8 +4131,8 @@ def _render_hero(lang: str) -> None:
         "</div></div>",
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_steps(lang: str, step: int) -> None:
     labels = (["Voice","Category","Location","Photo","Submit"]
               if lang == "en" else ["आवाज़","श्रेणी","स्थान","फोटो","जमा"])
@@ -4184,16 +4149,16 @@ def _render_steps(lang: str, step: int) -> None:
         if i < 4:
             html += "<div class='fc-step-bar " + ("done" if i < step else "idle") + "'></div>"
     st.markdown(html + "</div>", unsafe_allow_html=True)
-
-
+ 
+ 
 def _render_sec(icon: str, label: str) -> None:
     st.markdown("<div class='fc-sec'>" + icon + " " + label + "</div>", unsafe_allow_html=True)
-
-
+ 
+ 
 def _render_voice(lang: str) -> None:
     lang_code = "hi-IN" if lang == "hi" else "en-IN"
     _render_sec("🎤", "Voice Input" if lang == "en" else "आवाज़ इनपुट")
-
+ 
     st.markdown("<div class='fc-voice-wrap'>", unsafe_allow_html=True)
     # Embed reset key in a comment so Streamlit sees different HTML each time
     # voice_reset_key changes → iframe remounts with clean state
@@ -4202,7 +4167,7 @@ def _render_voice(lang: str) -> None:
         height=218,
     )
     st.markdown("</div>", unsafe_allow_html=True)
-
+ 
     # Bridge: embed bridge_key so a new bridge JS runs after every clear
     # This ensures the re-registered listener (with fresh debounce) is active
     bk = fc()["bridge_key"]
@@ -4210,18 +4175,14 @@ def _render_voice(lang: str) -> None:
         f"<!-- bridge-key:{bk} -->\n" + _bridge_iframe_html(),
         height=0,
     )
-
+ 
     vt = fc()["voice_text"]
     if vt:
         preview   = vt[:120] + ("…" if len(vt) > 120 else "")
         cap_lbl   = ("Voice Captured — edit below or clear to re-record"
                      if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित करें या मिटाएं")
-        clear_lbl = (
-            "🎤 If you want to speak again for your complaint, first speak the correct complaint, then click here to update the spoken complaint"
-            if lang == "en"
-            else "🎤 यदि आप अपनी शिकायत के लिए फिर से बोलना चाहते हैं, तो पहले सही शिकायत बोलें, फिर बोली गई शिकायत को अपडेट करने के लिए यहाँ क्लिक करें"
-        )
-
+        clear_lbl = "✕ Clear & Re-record" if lang == "en" else "✕ मिटाएं और दोबारा रिकॉर्ड करें"
+ 
         st.markdown(
             "<div class='fc-voice-captured'>"
             "<div class='fc-voice-captured-lbl'>🎤 " + cap_lbl + "</div>"
@@ -4229,7 +4190,7 @@ def _render_voice(lang: str) -> None:
             "</div>",
             unsafe_allow_html=True,
         )
-
+ 
         if st.button(clear_lbl, key="fc_voice_clear", type="secondary"):
             new_rk = fc()["voice_reset_key"] + 1
             new_bk = fc()["bridge_key"] + 1
@@ -4245,8 +4206,8 @@ def _render_voice(lang: str) -> None:
             st.session_state.pop("_fc_desc", None)
             st.session_state.pop("_fc_location", None)
             st.rerun()
-
-
+ 
+ 
 def _render_category(lang: str) -> None:
     cats: dict[str, tuple[str, str]] = {
         "water":       ("💧", "Water"        if lang == "en" else "पानी"),
@@ -4258,13 +4219,13 @@ def _render_category(lang: str) -> None:
         "other":       ("📋", "Other"         if lang == "en" else "अन्य"),
     }
     _render_sec("📂", "Select Category" if lang == "en" else "श्रेणी चुनें")
-
+ 
     active    = fc()["category"]
     keys      = list(cats.keys())
     col_count = 4
     padded    = keys + [None] * ((-len(keys)) % col_count)
     rows      = [padded[i:i+col_count] for i in range(0, len(padded), col_count)]
-
+ 
     for row in rows:
         cols = st.columns(col_count, gap="small")
         for col, k in zip(cols, row):
@@ -4284,32 +4245,32 @@ def _render_category(lang: str) -> None:
                     use_container_width=True,
                 )
                 st.markdown("</div>", unsafe_allow_html=True)
-
-
+ 
+ 
 def _render_emergency(lang: str) -> None:
     mode_lbl = "Emergency Mode" if lang == "en" else "आपातकालीन मोड"
     chk_lbl  = ("⚠️ This is an emergency (fire, accident, water leakage, etc.)"
                  if lang == "en" else "⚠️ यह आपातकालीन है (आग, दुर्घटना, पानी का रिसाव आदि)")
     warn_txt = ("Emergency complaints receive highest priority and immediate alerts."
                 if lang == "en" else "आपातकालीन शिकायतें तुरंत उच्चतम प्राथमिकता पर भेजी जाती हैं।")
-
+ 
     def _on_emg(): fc_set(is_emergency=st.session_state["_fc_emergency"])
-
+ 
     st.markdown("<div class='fc-emg'><div class='fc-emg-title'>🚨 " + mode_lbl + "</div>",
                 unsafe_allow_html=True)
     st.checkbox(chk_lbl, value=fc()["is_emergency"], key="_fc_emergency", on_change=_on_emg)
     if fc()["is_emergency"]:
         st.markdown("<div class='fc-emg-warn'>🚨 " + warn_txt + "</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-
-
+ 
+ 
 def _render_description(lang: str) -> None:
     ph = ("Describe the issue — what happened, where, how severe…"
           if lang == "en" else "समस्या विस्तार से बताएं — क्या हुआ, कहाँ, कितना गंभीर…")
     _render_sec("📝", "Describe Your Issue" if lang == "en" else "समस्या का विवरण")
-
+ 
     def _on_desc(): fc_set(description=st.session_state["_fc_desc"], voice_applied=False)
-
+ 
     st.text_area(
         "",
         value            = fc()["description"] or fc()["voice_text"],
@@ -4328,12 +4289,12 @@ def _render_description(lang: str) -> None:
             "color:#059669;margin-top:4px;'>" + note + "</div>",
             unsafe_allow_html=True,
         )
-
-
+ 
+ 
 def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
     if not desc.strip():
         return
-
+ 
     def _local(text: str, sel: str) -> tuple[str, str]:
         tl = text.lower()
         if   any(w in tl for w in ["water","पानी","tap","leak","pipeline"]): cat = "water"
@@ -4345,13 +4306,13 @@ def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
         else: cat = sel if sel != "other" else "other"
         urgent = ["urgent","emergency","critical","fire","injury","collapse","आग","खतरा"]
         return cat, "high" if (any(w in tl for w in urgent) or is_emg) else "medium"
-
+ 
     try:
         from backend.routers.complaints import ai_classify  # type: ignore[import]
         ai_cat, ai_pri = ai_classify(desc, fc()["category"])
     except Exception:
         ai_cat, ai_pri = _local(desc, fc()["category"])
-
+ 
     PRI = {
         "high":   ("#FEF2F2","#BE123C","#FECACA","🔴"),
         "medium": ("#FFFBEB","#B45309","#FDE68A","🟡"),
@@ -4361,7 +4322,7 @@ def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
     cat_lbl = "Category" if lang == "en" else "श्रेणी"
     pri_lbl = "Priority"  if lang == "en" else "प्राथमिकता"
     hint    = "Auto-detected — adjust category above if needed." if lang == "en" else "स्वतः पहचाना — ऊपर बदल सकते हैं।"
-
+ 
     st.markdown(
         "<div class='fc-ai'>"
         "<div class='fc-ai-head'><div class='fc-ai-icon'>🤖</div>"
@@ -4377,16 +4338,16 @@ def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
         "</div>",
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_location(lang: str, dark: bool) -> None:
     _render_sec("📍", "Location" if lang == "en" else "स्थान")
-
+ 
     col_gps, col_loc = st.columns([1, 3])
     with col_gps:
         auto_lbl = "Auto-detect" if lang == "en" else "स्थान पता करें"
         st.components.v1.html(_gps_iframe_html(auto_lbl), height=88)
-
+ 
     with col_loc:
         def _on_loc():
             # Manual edit → clear structured GPS fields, keep raw text
@@ -4396,7 +4357,7 @@ def _render_location(lang: str, dark: bool) -> None:
                 loc_area="", loc_city="", loc_district="",
                 loc_state="", loc_pincode="",
             )
-
+ 
         st.text_input(
             "",
             value            = fc()["location_name"],
@@ -4406,7 +4367,7 @@ def _render_location(lang: str, dark: bool) -> None:
             label_visibility = "collapsed",
             on_change        = _on_loc,
         )
-
+ 
     # ── Structured location detail card (only when GPS was used) ─────────────
     state = fc()
     if state["_gps_ingested"] and (state["loc_area"] or state["loc_city"] or state["loc_state"]):
@@ -4418,7 +4379,7 @@ def _render_location(lang: str, dark: bool) -> None:
         GRN_BG  = "#071A10" if dark else "#F0FDF4"
         GRN_BD  = "#166534" if dark else "#86EFAC"
         GRN_T   = "#4ADE80" if dark else "#166534"
-
+ 
         # Build rows for each non-empty field
         def _row(label: str, value: str, icon: str) -> str:
             if not value:
@@ -4433,7 +4394,7 @@ def _render_location(lang: str, dark: bool) -> None:
                 f"<div style='font-size:.82rem;font-weight:600;color:{TXT};'>{value}</div>"
                 f"</div></div>"
             )
-
+ 
         rows_html = (
             _row("Area / Neighbourhood", state["loc_area"],    "🏘️") +
             _row("City / Town",          state["loc_city"],    "🏙️") +
@@ -4441,11 +4402,11 @@ def _render_location(lang: str, dark: bool) -> None:
             _row("State",                state["loc_state"],   "📍") +
             _row("PIN Code",             state["loc_pincode"], "📮")
         )
-
+ 
         # Coords footer
         lat_s = f"{state['lat']:.6f}"
         lon_s = f"{state['lon']:.6f}"
-
+ 
         card_html = (
             f"<div style='background:{GRN_BG};border:1.5px solid {GRN_BD};"
             f"border-left:4px solid {GRN};border-radius:14px;"
@@ -4460,12 +4421,12 @@ def _render_location(lang: str, dark: bool) -> None:
             f"</div>"
         )
         st.markdown(card_html, unsafe_allow_html=True)
-
+ 
     # ── Map — only re-renders when coords change ──────────────────────────────
     lat, lon = state["lat"], state["lon"]
     if lat != state["_map_lat"] or lon != state["_map_lon"]:
         fc_set(_map_lat=lat, _map_lon=lon)
-
+ 
     st.components.v1.html(
         _map_html(
             lat      = state["_map_lat"],
@@ -4480,14 +4441,14 @@ def _render_location(lang: str, dark: bool) -> None:
         ),
         height=252,
     )
-
-
+ 
+ 
 def _render_photo(lang: str):
     lbl     = "Attach a Photo" if lang == "en" else "फोटो संलग्न करें"
     opt_lbl = "Optional"       if lang == "en" else "वैकल्पिक"
     note    = "Photos help resolve 3× faster" if lang == "en" else "फोटो से 3 गुना तेज़ समाधान"
     hint    = "JPG · PNG · WEBP · Max 5 MB"
-
+ 
     st.markdown(
         "<div class='fc-sec'>📷 " + lbl +
         " &nbsp;<span style='font-size:.54rem;background:rgba(99,102,241,0.12);"
@@ -4508,7 +4469,7 @@ def _render_photo(lang: str):
         key="_fc_image", label_visibility="collapsed",
     )
     st.markdown("</div>", unsafe_allow_html=True)
-
+ 
     if uploaded:
         fc_set(image_name=uploaded.name)
         ready = "Photo Ready" if lang == "en" else "फोटो तैयार"
@@ -4529,26 +4490,26 @@ def _render_photo(lang: str):
             )
     else:
         fc_set(image_name="")
-
+ 
     return uploaded
-
-
+ 
+ 
 def _render_checklist(lang: str, desc_ok: bool, loc_ok: bool, photo_ok: bool) -> None:
     title = "Ready to Submit?" if lang == "en" else "जमा करने के लिए तैयार?"
     d_lbl = "Description"      if lang == "en" else "विवरण"
     l_lbl = "Location"         if lang == "en" else "स्थान"
     p_lbl = "Photo (optional)" if lang == "en" else "फोटो (वैकल्पिक)"
-
+ 
     def chk(ok: bool, lbl: str) -> str:
         return "<div class='fc-check" + (" ok" if ok else "") + "'>" + ("✅" if ok else "⬜") + " " + lbl + "</div>"
-
+ 
     st.markdown(
         "<div class='fc-checklist'><div class='fc-checklist-title'>" + title + "</div>"
         "<div class='fc-checks'>" + chk(desc_ok,d_lbl) + chk(loc_ok,l_lbl) + chk(photo_ok,p_lbl) + "</div></div>",
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_tip(lang: str) -> None:
     tip = "Add landmarks & a photo for fastest resolution." if lang == "en" else "लैंडमार्क और फोटो जोड़ें।"
     lbl = "Tip:" if lang == "en" else "सुझाव:"
@@ -4556,13 +4517,13 @@ def _render_tip(lang: str) -> None:
         "<div class='fc-tip'>💡 <span><strong>" + lbl + "</strong> " + tip + "</span></div>",
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_submit(lang: str, uid, uploaded_file) -> bool:
     state = fc()
     if state["phase"] == "error":
         st.markdown("<div class='fc-err'>⚠️ " + state["error_msg"] + "</div>", unsafe_allow_html=True)
-
+ 
     lbl = "🚀  Submit Complaint" if lang == "en" else "🚀  शिकायत जमा करें"
     st.markdown("<div class='fc-submit-col'>", unsafe_allow_html=True)
     clicked = st.button(lbl, use_container_width=True, key="fc_sub",
@@ -4570,7 +4531,7 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
     st.markdown("</div>", unsafe_allow_html=True)
     if not clicked:
         return False
-
+ 
     desc = (st.session_state.get("_fc_desc") or state["description"] or state["voice_text"] or "").strip()
     loc  = (st.session_state.get("_fc_location") or state["location_name"] or "").strip()
     err  = ""
@@ -4583,7 +4544,7 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
     if err:
         st.markdown("<div class='fc-err'>❗ " + err + "</div>", unsafe_allow_html=True)
         return False
-
+ 
     img_bytes, img_name = None, ""
     if uploaded_file is not None:
         try:
@@ -4591,7 +4552,7 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
             img_name  = uploaded_file.name
         except Exception:
             pass
-
+ 
     fc_set(
         phase         = "submitting",
         description   = desc,
@@ -4603,12 +4564,12 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
         _img_name     = img_name,
     )
     return True
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # SUBMISSION
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def _run_submission(uid, lang: str) -> None:
     state = fc()
     with st.spinner("Submitting…" if lang == "en" else "जमा हो रहा है…"):
@@ -4634,9 +4595,9 @@ def _run_submission(uid, lang: str) -> None:
                            })
         except Exception as ex:
             resp = {"error": str(ex)}
-
+ 
     fc_set(_img_bytes=None, _img_name="")
-
+ 
     if resp.get("success"):
         fc_set(phase="success", success_data={
             "cid":          resp.get("complaint_id", "—"),
@@ -4654,14 +4615,14 @@ def _run_submission(uid, lang: str) -> None:
         fc_set(phase="offline")
     else:
         fc_set(phase="idle", error_msg=resp.get("error", resp.get("detail","Unknown error. Try again.")))
-
+ 
     st.rerun()
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # OUTCOME SCREENS
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def _render_success(lang: str) -> None:
     sd  = fc()["success_data"]
     cid = sd.get("cid","—")
@@ -4694,8 +4655,8 @@ def _render_success(lang: str) -> None:
             st.session_state.fc = dict(_FC_DEFAULTS)
             st.session_state.screen = "user_dashboard"
             st.rerun()
-
-
+ 
+ 
 def _render_offline(lang: str) -> None:
     title = "Saved Offline" if lang=="en" else "ऑफलाइन सहेजा गया"
     sub   = "Will submit when internet restores" if lang=="en" else "इंटरनेट मिलते ही जमा होगा"
@@ -4717,60 +4678,61 @@ def _render_offline(lang: str) -> None:
             fc_set(phase="idle")
             st.session_state.screen = "user_dashboard"
             st.rerun()
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN ENTRY
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def pg_file_complaint() -> None:
     submit_offline_complaints()   # type: ignore[name-defined]
-
+ 
     lang = st.session_state.language
     uid  = (st.session_state.user or {}).get("user_id")
     dark = st.session_state.get("dark_mode", False)
-
+ 
     _init_fc()
     _inject_page_css(dark)
-
+ 
     if _ingest_query_params():
         st.rerun()
         return
-
+ 
     phase = fc()["phase"]
     if phase == "success":   _render_success(lang);  return
     if phase == "offline":   _render_offline(lang);  return
     if phase == "submitting":_run_submission(uid, lang); return
-
+ 
     s    = fc()
     step = 0
     if s["description"] or s["voice_text"]:                      step = 1
     if s["category"] != "other":                                 step = 2
     if s["location_name"] not in ("","Bhopal, Madhya Pradesh"):  step = 3
     if s["image_name"]:                                          step = 4
-
+ 
     _render_hero(lang)
     _render_steps(lang, step)
     _render_voice(lang)
     _render_category(lang)
     _render_emergency(lang)
     _render_description(lang)
-
+ 
     desc_now = (st.session_state.get("_fc_desc") or s["description"] or s["voice_text"] or "").strip()
     is_emg   = st.session_state.get("_fc_emergency", s["is_emergency"])
     _render_ai_preview(lang, desc_now, is_emg)
-
+ 
     _render_location(lang, dark)
     uploaded = _render_photo(lang)
-
+ 
     desc_ok  = bool(desc_now)
     loc_ok   = bool((st.session_state.get("_fc_location") or s["location_name"] or "").strip())
     photo_ok = uploaded is not None
     _render_checklist(lang, desc_ok, loc_ok, photo_ok)
     _render_tip(lang)
-
+ 
     if _render_submit(lang, uid, uploaded):
         st.rerun()
+ 
 
 # ═════════════════════════════════════════════════════════════════════════════
 # TRACKING
@@ -4932,38 +4894,38 @@ def pg_tracking():
         "rejected":    [(t("Submitted","सबमिट"),True,False),(t("Reviewed","समीक्षित"),True,False),(t("Rejected","अस्वीकृत"),True,True),(t("—","—"),False,False)],
     }
 
-    def build_tl(status):
-        steps = TL_STEPS.get(status, TL_STEPS["pending"])
-        rows  = ["<div class='tl-wrap'>"]
-        for i, (lbl, done, act) in enumerate(steps):
-            dc = "done" if done else ("active" if act else "idle")
-            di = "✓"   if done else ("●"      if act else str(i + 1))
-            lc = "done" if done else "idle"
-            rows.append("<div class='tl-row'>")
-            rows.append("<div class='tl-col'>")
-            rows.append("<div class='tl-dot " + dc + "'>" + di + "</div>")
-            if i < len(steps) - 1:
-                rows.append("<div class='tl-line " + lc + "'></div>")
-            rows.append("</div>")
-            rows.append("<div class='tl-info'><div class='tl-lbl'>" + lbl + "</div></div>")
-            rows.append("</div>")
-        rows.append("</div>")
-        return "".join(rows)
+    # def build_tl(status):
+    #     steps = TL_STEPS.get(status, TL_STEPS["pending"])
+    #     rows  = ["<div class='tl-wrap'>"]
+    #     for i, (lbl, done, act) in enumerate(steps):
+    #         dc = "done" if done else ("active" if act else "idle")
+    #         di = "✓"   if done else ("●"      if act else str(i + 1))
+    #         lc = "done" if done else "idle"
+    #         rows.append("<div class='tl-row'>")
+    #         rows.append("<div class='tl-col'>")
+    #         rows.append("<div class='tl-dot " + dc + "'>" + di + "</div>")
+    #         if i < len(steps) - 1:
+    #             rows.append("<div class='tl-line " + lc + "'></div>")
+    #         rows.append("</div>")
+    #         rows.append("<div class='tl-info'><div class='tl-lbl'>" + lbl + "</div></div>")
+    #         rows.append("</div>")
+    #     rows.append("</div>")
+    #     return "".join(rows)
 
-    def build_sla(comp):
-        sla = comp.get("sla_deadline")
-        if not sla:
-            return ""
-        if comp.get("is_overdue"):
-            return (
-                "<div class='sla-late'>⏰&nbsp;<span><strong>"
-                + t('OVERDUE!', 'समय सीमा समाप्त!') + "</strong> "
-                + t('Expected by', 'अपेक्षित') + ": " + str(sla) + "</span></div>"
-            )
-        return (
-            "<div class='sla-ok'>⏱&nbsp;<span>"
-            + t('Expected by', 'अपेक्षित') + ": <strong>" + str(sla) + "</strong></span></div>"
-        )
+    # def build_sla(comp):
+    #     sla = comp.get("sla_deadline")
+    #     if not sla:
+    #         return ""
+    #     if comp.get("is_overdue"):
+    #         return (
+    #             "<div class='sla-late'>⏰&nbsp;<span><strong>"
+    #             + t('OVERDUE!', 'समय सीमा समाप्त!') + "</strong> "
+    #             + t('Expected by', 'अपेक्षित') + ": " + str(sla) + "</span></div>"
+    #         )
+    #     return (
+    #         "<div class='sla-ok'>⏱&nbsp;<span>"
+    #         + t('Expected by', 'अपेक्षित') + ": <strong>" + str(sla) + "</strong></span></div>"
+    #     )
 
     def render_card(comp, expanded=False):
         cid      = comp.get("complaint_id", "N/A")
