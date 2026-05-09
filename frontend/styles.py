@@ -315,7 +315,51 @@ table{{display:block;overflow-x:auto;}}
 #MainMenu,footer,.stDeployButton{{visibility:hidden!important;display:none!important;}}
 .viewerBadge_container__1QSob{{display:none!important;}}
 /* Keep header hidden (contains sidebar toggle on mobile — re-enable if needed) */
-header{{visibility:hidden!important;display:none!important;}}
+/* Keep Streamlit header hidden visually
+   BUT preserve sidebar toggle button */
+
+header{{
+    background:transparent!important;
+    height:0!important;
+}}
+
+/* Show sidebar collapse/expand button */
+button[kind="header"],
+[data-testid="collapsedControl"]{{
+    display:flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    z-index:999999!important;
+
+    background:var(--c-card)!important;
+    border:1px solid var(--c-border)!important;
+    border-radius:12px!important;
+
+    width:42px!important;
+    height:42px!important;
+
+    align-items:center!important;
+    justify-content:center!important;
+
+    box-shadow:var(--sh-md)!important;
+    transition:all .18s ease!important;
+}}
+
+/* Hover effect */
+button[kind="header"]:hover,
+[data-testid="collapsedControl"]:hover{{
+    background:var(--c-hover)!important;
+    transform:scale(1.05)!important;
+}}
+
+/* Arrow icon */
+button[kind="header"] svg,
+[data-testid="collapsedControl"] svg{{
+    fill:var(--c-text)!important;
+    color:var(--c-text)!important;
+    width:18px!important;
+    height:18px!important;
+}}
 
 /* ── ANIMATED TOP STRIPE ── */
 .stApp::before{{
