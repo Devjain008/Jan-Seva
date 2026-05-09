@@ -153,44 +153,6 @@ div[data-baseweb="layer"]{{
     background: transparent !important;
 }}
 
-/* Remove black backgrounds everywhere */
-div[data-baseweb]{{
-    color: #111827 !important;
-}}
-
-
-
-/* ── Dropdown panel ── */
-div[data-baseweb="popover"],
-div[data-baseweb="menu"],
-ul[data-testid="stWidgetDropdownList"]{{
-    background:{card_bg}!important;
-    border:1px solid {border}!important;
-    border-radius:16px!important;
-    box-shadow:{shadow_md}!important;
-}}
-
-/* ── Option rows: base / hover / selected ── */
-div[data-baseweb="option"],
-li[role="option"]{{
-    background:transparent!important;
-    color:{text}!important;
-    border-radius:10px!important;
-    margin:2px 6px!important;
-    padding:8px 12px!important;
-}}
-div[data-baseweb="option"]:hover,
-li[role="option"]:hover{{
-    background:{hover_bg}!important;
-    color:{text}!important;
-}}
-div[data-baseweb="option"][aria-selected="true"],
-li[role="option"][aria-selected="true"]{{
-    background:{a1_soft}!important;
-    color:{accent2}!important;
-    font-weight:700!important;
-}}
-
 /* ── Caret ── */
 .stTextInput input,.stTextArea textarea{{caret-color:{accent2}!important;}}
 
@@ -387,18 +349,17 @@ button[kind="header"]:active,
 }}
 
 /* Arrow icon */
+/* Sidebar toggle icon */
 button[kind="header"] svg,
 [data-testid="collapsedControl"] svg{{
 
-    width:20px!important;
-    height:20px!important;
+    width:18px!important;
+    height:18px!important;
 
-    fill:white!important;
-    color:white!important;
-
-    stroke:white!important;
+    fill:#000000!important;
+    color:#000000!important;
+    stroke:#000000!important;
 }}
-
 /* Mobile optimization */
 @media (max-width:768px){{
 
@@ -451,12 +412,17 @@ button[kind="header"]:hover,
 }}
 
 /* Arrow icon */
+/* Arrow icon — BLACK */
+/* Sidebar toggle icon */
 button[kind="header"] svg,
 [data-testid="collapsedControl"] svg{{
-    fill:var(--c-text)!important;
-    color:var(--c-text)!important;
+
     width:18px!important;
     height:18px!important;
+
+    fill:#000000!important;
+    color:#000000!important;
+    stroke:#000000!important;
 }}
 
 /* ── ANIMATED TOP STRIPE ── */
@@ -642,42 +608,7 @@ label,
 .stSelectbox svg{{fill:var(--c-sub)!important;}}
 
 /* ── DROPDOWN POPOVER (light + dark shared) ── */
-div[data-baseweb="popover"],
-div[data-baseweb="menu"],
-ul[data-testid="stWidgetDropdownList"]{{
-    background:var(--c-card)!important;
-    border:1px solid var(--c-border)!important;
-    border-radius:var(--r-lg)!important;
-    box-shadow:var(--sh-md)!important;
-    overflow:hidden!important;
-    max-height:60vh!important;
-    overflow-y:auto!important;
-    z-index:9999!important;
-}}
-div[data-baseweb="option"],
-li[role="option"]{{
-    background:transparent!important;
-    color:var(--c-text)!important;
-    padding:clamp(7px,2vw,10px) clamp(10px,2.5vw,14px)!important;
-    margin:2px 5px!important;
-    border-radius:var(--r-sm)!important;
-    font-size:var(--fs-base)!important;
-    font-weight:500!important;
-    transition:background var(--t-fast)!important;
-    word-break:break-word!important;
-    white-space:normal!important;
-}}
-div[data-baseweb="option"]:hover,
-li[role="option"]:hover{{
-    background:var(--c-hover)!important;
-    color:var(--c-text)!important;
-}}
-div[data-baseweb="option"][aria-selected="true"],
-li[role="option"][aria-selected="true"]{{
-    background:var(--c-a1-soft)!important;
-    color:var(--c-a1)!important;
-    font-weight:700!important;
-}}
+
 
 /* ── RADIO ── */
 .stRadio label{{
