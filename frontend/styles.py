@@ -322,7 +322,105 @@ header{{
     background:transparent!important;
     height:0!important;
 }}
+/* ═══════════════════════════════════════════════
+   PREMIUM SIDEBAR TOGGLE BUTTON
+═══════════════════════════════════════════════ */
 
+/* Keep header alive but invisible */
+header{{
+    background:transparent!important;
+    height:0!important;
+}}
+
+/* Sidebar toggle button */
+button[kind="header"],
+[data-testid="collapsedControl"]{{
+
+    position:fixed!important;
+    top:18px!important;
+    left:18px!important;
+
+    width:46px!important;
+    height:46px!important;
+
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+
+    border-radius:14px!important;
+
+    background:linear-gradient(
+        135deg,
+        #4F46E5,
+        #7C3AED
+    )!important;
+
+    border:1px solid rgba(255,255,255,.18)!important;
+
+    box-shadow:
+        0 10px 28px rgba(79,70,229,.35),
+        0 4px 12px rgba(0,0,0,.12)!important;
+
+    backdrop-filter:blur(14px)!important;
+
+    z-index:999999!important;
+
+    transition:all .18s ease!important;
+}}
+
+/* Hover effect */
+button[kind="header"]:hover,
+[data-testid="collapsedControl"]:hover{{
+
+    transform:translateY(-2px) scale(1.04)!important;
+
+    box-shadow:
+        0 14px 34px rgba(79,70,229,.45),
+        0 6px 18px rgba(0,0,0,.18)!important;
+}}
+
+/* Active click */
+button[kind="header"]:active,
+[data-testid="collapsedControl"]:active{{
+
+    transform:scale(.96)!important;
+}}
+
+/* Arrow icon */
+button[kind="header"] svg,
+[data-testid="collapsedControl"] svg{{
+
+    width:20px!important;
+    height:20px!important;
+
+    fill:white!important;
+    color:white!important;
+
+    stroke:white!important;
+}}
+
+/* Mobile optimization */
+@media (max-width:768px){{
+
+    button[kind="header"],
+    [data-testid="collapsedControl"]{{
+
+        width:42px!important;
+        height:42px!important;
+
+        top:14px!important;
+        left:14px!important;
+
+        border-radius:12px!important;
+    }}
+
+    button[kind="header"] svg,
+    [data-testid="collapsedControl"] svg{{
+
+        width:18px!important;
+        height:18px!important;
+    }}
+}}
 /* Show sidebar collapse/expand button */
 button[kind="header"],
 [data-testid="collapsedControl"]{{
