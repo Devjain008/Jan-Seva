@@ -170,14 +170,16 @@ div[data-baseweb="option"][aria-selected="true"] *,li[role="option"][aria-select
    RESET & BASE — Prevent overflow & improve performance
 ═══════════════════════════════════════════════════════ */
 *,*::before,*::after{{box-sizing:border-box;}}
-html,body,.stApp{{
+html,
+body,
+.stApp{{
     background-color:var(--c-bg)!important;
     color:var(--c-text)!important;
     font-family:'DM Sans','Noto Sans Devanagari',system-ui,sans-serif!important;
     font-size:var(--fs-base);
     line-height:1.6;
     -webkit-font-smoothing:antialiased;
-    overflow-x:clip!important;
+    
     max-width:100%!important;
 }}
 body, .stApp {{
@@ -190,7 +192,18 @@ p,span,label,small{{color:var(--c-text)!important;}}
 .prem-empty-state *{{color:var(--c-text)!important;opacity:1!important;}}
 .prem-section-header,
 .prem-section-header *{{color:var(--c-text)!important;}}
-#MainMenu,footer,header,.stDeployButton{{visibility:hidden!important;display:none!important;}}
+/* Hide only Streamlit default controls */
+#MainMenu,
+footer,
+.stDeployButton{{
+    visibility:hidden!important;
+    display:none!important;
+}}
+
+/* DO NOT hide header */
+header{{
+    background:transparent!important;
+}}
 .viewerBadge_container__1QSob{{display:none!important;}}
 
 /* ── ANIMATED TOP STRIPE ── */
@@ -199,7 +212,8 @@ p,span,label,small{{color:var(--c-text)!important;}}
     background:linear-gradient(90deg,{accent1},{accent2},{accent3},{accent1});
     background-size:200% 100%;
     animation:prem-gradient-move 6s ease infinite;
-    z-index:9999;pointer-events:none;
+    z-index:100;
+    pointer-events:none;
 }}
 
 /* ═══════════════════════════════════════════════════════
@@ -465,6 +479,51 @@ div[data-baseweb="option"] span {{
 .prem-notif-bar-text{{
     flex:1;
     min-width:150px;
+}}
+/* =========================================
+   RENDER NAVBAR FIX
+========================================= */
+
+header{{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    height:auto!important;
+    position:relative!important;
+    z-index:1000!important;
+}}
+
+/* Don't hide entire header */
+#MainMenu,
+footer,
+.stDeployButton{{
+    visibility:hidden!important;
+    display:none!important;
+}}
+
+/* Prevent overlay issues */
+.stApp::before{{
+    z-index:100!important;
+    pointer-events:none!important;
+}}
+
+/* Prevent navbar clipping */
+html,
+body,
+.stApp,
+[data-testid="stAppViewContainer"]{{
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+}}
+
+/* Sidebar/navbar layering */
+section[data-testid="stSidebar"]{{
+    z-index:999!important;
+}}
+
+/* Main content below navbar */
+.main .block-container{{
+    padding-top:2rem!important;
 }}
 
 /* ═══════════════════════════════════════════════════════
