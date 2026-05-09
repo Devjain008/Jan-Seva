@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, sans-serif; }
+        .voice-container {
+            background: linear-gradient(135deg, rgba(99,102,241,0.06), rgba(139,92,246,0.06));
+            border: 1.5px solid rgba(99,102,241,0.16);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+        }
+        .voice-label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #6366F1;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        .voice-label::before,
+        .voice-label::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(99,102,241,0.2);
+        }
+        #micBtn {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 72px;
+            height: 72px;
+            font-size: 2rem;
+            cursor: pointer;
+            transition: transform 0.18s, box-shadow 0.18s;
+            box-shadow: 0 8px 28px rgba(139,92,246,0.45);
+        }
+        #micBtn:hover { transform: scale(1.05); }
+        .recording {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(236,72,153,0.6); }
+            70% { box-shadow: 0 0 0 20px rgba(236,72,153,0); }
+            100% { box-shadow: 0 0 0 0 rgba(236,72,153,0); }
+        }
+        #status {
+            font-size: 0.78rem;
+            color: #64748B;
+            margin: 12px 0 0;
+            font-weight: 600;
+        }
+        #result {
+            background: #FFFBEB;
+            border-radius: 12px;
+            padding: 10px 14px;
+            font-size: 0.82rem;
+            display: none;
+            margin-top: 10px;
+            color: #1C1507;
+            border: 1.5px solid #EDE7D5;
+            text-align: left;
+            line-height: 1.55;
+        }
+    </style>
+</head>
+<body>
+<div class="voice-container">
+    <div class="voice-label">🎤 Voice Input</div>
+    <button id="micBtn">🎤</button>
+    <div id="status">Tap the mic and speak your complaint clearly</div>
+    <div id="result"></div>
+</div>
+<script>
+    (function() {
+        let recognition = null;
+        let isRecording = false;
+        let finalTranscript = '';
+
+        const micBtn = document.getElementById('micBtn');
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+
+        function updateParentWithTranscript(text) {
+            const url = new URL(window.parent.location.href);
+            url.searchParams.set('voice_text', encodeURIComponent(text));
+            window.parent.history.pushState({}, '', url);
+            window.parent.dispatchEvent(new PopStateEvent('popstate'));
+        }
+
+        function startRecognition() {
+            if (recognition) {
+                recognition.stop();
+                recognition = null;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                statusDiv.textContent = '❌ Voice not supported. Please use Chrome/Edge.';
+                return;
+            }
+            recognition = new SpeechRecognition();
+            recognition.lang = '%LANG%';
+            recognition.continuous = false;
+            recognition.interimResults = true;
+            recognition.maxAlternatives = 1;
+
+            recognition.onstart = () => {
+                isRecording = true;
+                micBtn.classList.add('recording');
+                micBtn.textContent = '⏸️';
+                statusDiv.textContent = '🎙️ Listening... speak now';
+                statusDiv.style.color = '#D97706';
+                finalTranscript = '';
+                resultDiv.style.display = 'none';
+            };
+
+            recognition.onresult = (event) => {
+                let interim = '';
+                let final = '';
+                for (let i = 0; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        final += transcript + ' ';
+                    } else {
+                        interim += transcript;
+                    }
+                }
+                if (final) {
+                    finalTranscript = final.trim();
+                    resultDiv.style.display = 'block';
+                    resultDiv.textContent = '📝 ' + finalTranscript;
+                    updateParentWithTranscript(finalTranscript);
+                } else if (interim) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.textContent = '📝 ' + interim + ' (listening...)';
+                }
+            };
+
+            recognition.onend = () => {
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                micBtn.textContent = '🎤';
+                if (finalTranscript) {
+                    statusDiv.textContent = '✅ Captured! Reloading page with text...';
+                    statusDiv.style.color = '#15803d';
+                } else {
+                    statusDiv.textContent = '❌ Nothing heard. Try again.';
+                    statusDiv.style.color = '#b91c1c';
+                }
+                recognition = null;
+            };
+
+            recognition.onerror = (e) => {
+                console.error('Speech recognition error:', e.error);
+                isRecording = false;
+                micBtn.classList.remove('recording');
+                micBtn.textContent = '🎤';
+                statusDiv.textContent = `❌ Error: ${e.error}`;
+                statusDiv.style.color = '#b91c1c';
+                recognition = null;
+            };
+
+            recognition.start();
+        }
+
+        micBtn.onclick = () => {
+            if (isRecording) {
+                if (recognition) recognition.stop();
+            } else {
+                startRecognition();
+            }
+        };
+    })();
+</script>
+</body>
+</html>
