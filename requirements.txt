@@ -1,6 +1,6 @@
+streamlit
 fastapi
 uvicorn
-streamlit
 sqlalchemy
 requests
 python-multipart
@@ -9,3 +9,4 @@ pandas
 numpy
 passlib[bcrypt]
 bcrypt
+email-validator
