@@ -5161,8 +5161,53 @@ def _run_submission(uid, lang: str) -> None:
         fc_set(phase="idle", error_msg=resp.get("error", resp.get("detail","Unknown error. Try again.")))
  
     st.rerun()
- 
- 
+
+def build_sla(comp):
+
+    try:
+        created = comp.get("created_at")
+        status = str(comp.get("status", "")).lower()
+
+        if not created:
+            return ""
+
+        # Parse datetime
+        if isinstance(created, str):
+            created_dt = datetime.fromisoformat(
+                created.replace("Z", "")
+            )
+        else:
+            created_dt = created
+
+        now = datetime.now()
+
+        days = (now - created_dt).days
+
+        # SLA limit
+        sla_limit = 7
+
+        overdue = days > sla_limit and status not in [
+            "resolved",
+            "closed"
+        ]
+
+        cls = "prem-sla-bar overdue" if overdue else "prem-sla-bar"
+
+        if overdue:
+            text = f"⚠️ Overdue by {days - sla_limit} day(s)"
+        else:
+            remaining = max(0, sla_limit - days)
+            text = f"⏳ {remaining} day(s) remaining"
+
+        return f'''
+        <div class="{cls}">
+            <strong>SLA Status:</strong>
+            {text}
+        </div>
+        '''
+
+    except Exception as e:
+        return ""
 # ─────────────────────────────────────────────────────────────────────────────
 # OUTCOME SCREENS
 # ─────────────────────────────────────────────────────────────────────────────
