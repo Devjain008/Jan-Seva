@@ -173,13 +173,37 @@ def run_migrations():
 
 @app.on_event("startup")
 async def startup():
+
     try:
+
+        # Create only missing tables
         Base.metadata.create_all(bind=engine)
+
+        # Run safe migrations
         run_migrations()
-        seed_data()
+
+        # Seed ONLY once
+        db = SessionLocal()
+
+        try:
+
+            has_admin = db.query(models.Admin).first()
+
+            if not has_admin:
+                print("🌱 Running first-time seed...")
+                seed_data()
+            else:
+                print("✅ Existing database detected")
+
+        finally:
+            db.close()
+
         print("✅ Database initialized successfully")
+
     except Exception as e:
+
         print(f"❌ Startup error: {e}")
+
         traceback.print_exc()
 
 @app.get("/")
