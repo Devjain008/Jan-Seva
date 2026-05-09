@@ -4200,54 +4200,55 @@ def _render_sec(icon: str, label: str) -> None:
  
 def _render_voice(lang: str) -> None:
     lang_code = "hi-IN" if lang == "hi" else "en-IN"
-    _render_sec("🎤", "Voice Input" if lang == "en" else "आवाज़ इनपुट")
- 
+    lbl = "Voice Input" if lang == "en" else "आवाज़ इनपुट"
+    _render_sec("🎤", lbl)
+
     st.markdown("<div class='fc-voice-wrap'>", unsafe_allow_html=True)
-    # Embed reset key in a comment so Streamlit sees different HTML each time
-    # voice_reset_key changes → iframe remounts with clean state
+    reset_key = fc()["voice_reset_key"]
+
+    voice_html = f"""
+    <!-- reset:{reset_key} -->
+    {_voice_iframe_html(lang_code)}
+    """
+
     st.components.v1.html(
-        f"<!-- voice-reset:{fc()['voice_reset_key']} -->\n" + _voice_iframe_html(lang_code),
+        voice_html,
         height=218,
     )
     st.markdown("</div>", unsafe_allow_html=True)
- 
-    # Bridge: embed bridge_key so a new bridge JS runs after every clear
-    # This ensures the re-registered listener (with fresh debounce) is active
-    bk = fc()["bridge_key"]
-    st.components.v1.html(
-        f"<!-- bridge-key:{bk} -->\n" + _bridge_iframe_html(),
-        height=0,
-    )
- 
+
+    # Zero-height bridge (proper HTML document now)
+    st.components.v1.html(_bridge_iframe_html(), height=0)
+
+    # Show captured voice text pill with a CLEAR button
     vt = fc()["voice_text"]
     if vt:
-        preview   = vt[:120] + ("…" if len(vt) > 120 else "")
-        cap_lbl   = ("Voice Captured — edit below or clear to re-record"
-                     if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित करें या मिटाएं")
-        clear_lbl = "✕ Clear & Re-record" if lang == "en" else "✕ मिटाएं और दोबारा रिकॉर्ड करें"
- 
+        preview    = vt[:120] + ("…" if len(vt) > 120 else "")
+        cap_lbl    = "Voice Captured — edit the text below, or clear to re-record" if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित करें या मिटाएं"
+        clear_lbl  = "✕ Clear & Re-record"  if lang == "en" else "✕ मिटाएं और दोबारा रिकॉर्ड करें"
         st.markdown(
             "<div class='fc-voice-captured'>"
-            "<div class='fc-voice-captured-lbl'>🎤 " + cap_lbl + "</div>"
+            "<div class='fc-voice-captured-lbl'>"
+            "🎤 " + cap_lbl +
+            "</div>"
             "<div class='fc-voice-captured-txt'>" + preview + "</div>"
             "</div>",
             unsafe_allow_html=True,
         )
- 
+        # The clear button is the ONE place we call st.rerun() for voice.
+        # It resets voice state so the iframe shows in its clean initial state.
         if st.button(clear_lbl, key="fc_voice_clear", type="secondary"):
-            new_rk = fc()["voice_reset_key"] + 1
-            new_bk = fc()["bridge_key"] + 1
             fc_set(
-                voice_text      = "",
-                description     = "",
-                voice_applied   = False,
-                _voice_ingested = False,   # ← allow next voice URL param through
-                voice_reset_key = new_rk,  # ← remount voice iframe
-                bridge_key      = new_bk,  # ← re-register bridge listener
+                voice_text="",
+                description="",
+                voice_applied=False,
+                _voice_ingested=False,
+                voice_reset_key=fc()["voice_reset_key"] + 1,
             )
-            # Delete Streamlit widget caches so they re-seed from fc()
-            st.session_state.pop("_fc_desc", None)
-            st.session_state.pop("_fc_location", None)
+
+            if "_fc_desc" in st.session_state:
+                del st.session_state["_fc_desc"]
+
             st.rerun()
  
  
@@ -4308,20 +4309,25 @@ def _render_emergency(lang: str) -> None:
  
  
 def _render_description(lang: str) -> None:
-    ph = ("Describe the issue — what happened, where, how severe…"
-          if lang == "en" else "समस्या विस्तार से बताएं — क्या हुआ, कहाँ, कितना गंभीर…")
-    _render_sec("📝", "Describe Your Issue" if lang == "en" else "समस्या का विवरण")
- 
-    def _on_desc(): fc_set(description=st.session_state["_fc_desc"], voice_applied=False)
- 
+    ph  = ("Describe the issue — what happened, where, how severe…"
+           if lang == "en" else "समस्या विस्तार से बताएं — क्या हुआ, कहाँ, कितना गंभीर…")
+    lbl = "Describe Your Issue" if lang == "en" else "समस्या का विवरण"
+    _render_sec("📝", lbl)
+
+    def _on_desc() -> None:
+        fc_set(description=st.session_state["_fc_desc"], voice_applied=False)
+
+    # Seed from voice if description is empty
+    default_val = fc()["description"] or fc()["voice_text"]
+
     st.text_area(
         "",
-        value            = fc()["description"] or fc()["voice_text"],
-        placeholder      = ph,
-        key              = "_fc_desc",
-        height           = 120,
-        label_visibility = "collapsed",
-        on_change        = _on_desc,
+        value              = default_val,
+        placeholder        = ph,
+        key                = "_fc_desc",
+        height             = 120,
+        label_visibility   = "collapsed",
+        on_change          = _on_desc,
     )
     if fc()["voice_applied"] and fc()["voice_text"]:
         note = ("🎤 Voice text applied — edit freely above."
@@ -4487,17 +4493,18 @@ def _render_location(lang: str, dark: bool) -> None:
  
  
 def _render_photo(lang: str):
-    lbl     = "Attach a Photo" if lang == "en" else "फोटो संलग्न करें"
-    opt_lbl = "Optional"       if lang == "en" else "वैकल्पिक"
-    note    = "Photos help resolve 3× faster" if lang == "en" else "फोटो से 3 गुना तेज़ समाधान"
-    hint    = "JPG · PNG · WEBP · Max 5 MB"
- 
-    st.markdown(
+    lbl      = "Attach a Photo" if lang == "en" else "फोटो संलग्न करें"
+    opt_lbl  = "Optional"       if lang == "en" else "वैकल्पिक"
+    note     = "Photos help resolve complaints 3× faster" if lang == "en" else "फोटो से 3 गुना तेज़ समाधान"
+    hint     = "JPG · PNG · WEBP · Max 5 MB"
+
+    sec_html = (
         "<div class='fc-sec'>📷 " + lbl +
         " &nbsp;<span style='font-size:.54rem;background:rgba(99,102,241,0.12);"
-        "color:#6366F1;border-radius:6px;padding:2px 7px;font-weight:700;'>" + opt_lbl + "</span></div>",
-        unsafe_allow_html=True,
+        "color:#6366F1;border-radius:6px;padding:2px 7px;font-weight:700;'>"
+        + opt_lbl + "</span></div>"
     )
+    st.markdown(sec_html, unsafe_allow_html=True)
     st.markdown(
         "<div class='fc-photo-wrap'>"
         "<div class='fc-photo-head'>"
@@ -4508,24 +4515,26 @@ def _render_photo(lang: str):
         unsafe_allow_html=True,
     )
     uploaded = st.file_uploader(
-        "", type=["jpg","jpeg","png","webp"],
-        key="_fc_image", label_visibility="collapsed",
+        "",
+        type             = ["jpg", "jpeg", "png", "webp"],
+        key              = "_fc_image",
+        label_visibility = "collapsed",
     )
     st.markdown("</div>", unsafe_allow_html=True)
- 
+
     if uploaded:
         fc_set(image_name=uploaded.name)
-        ready = "Photo Ready" if lang == "en" else "फोटो तैयार"
+        ready_lbl = "Photo Ready" if lang == "en" else "फोटो तैयार"
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
             st.markdown(
                 "<div style='background:rgba(16,185,129,0.07);border:1.5px solid #86EFAC;"
                 "border-radius:13px;padding:10px;text-align:center;margin-top:8px;'>"
                 "<div style='font-size:.58rem;font-weight:700;text-transform:uppercase;"
-                "letter-spacing:.07em;color:#166534;margin-bottom:7px;'>✅ " + ready + "</div>",
+                "letter-spacing:.07em;color:#166534;margin-bottom:7px;'>✅ " + ready_lbl + "</div>",
                 unsafe_allow_html=True,
             )
-            _st_image(uploaded)
+            st.image(uploaded, use_container_width=True)
             st.markdown(
                 "<div style='font-size:.63rem;color:#6B7280;margin-top:4px;'>"
                 + uploaded.name + "</div></div>",
@@ -4533,7 +4542,7 @@ def _render_photo(lang: str):
             )
     else:
         fc_set(image_name="")
- 
+
     return uploaded
  
  
