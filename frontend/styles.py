@@ -76,77 +76,89 @@ def get_css(dark_mode: bool = False) -> str:
 .stSelectbox svg,.stTextInput svg{{fill:{subtext}!important;}}
 
 /* ═══════════════════════════════════════════════
-   FIX DROPDOWN BLACK / WHITE UI ISSUE
+   STREAMLIT DROPDOWN BLACK FIX
 ═══════════════════════════════════════════════ */
 
 /* Main dropdown popup */
-div[data-baseweb="popover"],
-div[data-baseweb="menu"],
-ul[data-testid="stWidgetDropdownList"]{
-    background: var(--c-card) !important;
-    border: 1px solid var(--c-border) !important;
+div[data-baseweb="popover"]{{
+    background: #ffffff !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
     border-radius: 16px !important;
-    box-shadow: var(--sh-md) !important;
+    box-shadow: 0 12px 40px rgba(0,0,0,.12) !important;
     overflow: hidden !important;
     z-index: 999999 !important;
-}
+}}
+
+/* Dropdown menu */
+div[data-baseweb="menu"]{{
+    background: #ffffff !important;
+    color: #111827 !important;
+}}
 
 /* Dropdown options */
 div[data-baseweb="option"],
-li[role="option"]{
-    background: transparent !important;
-    color: var(--c-text) !important;
-    font-size: var(--fs-base) !important;
+li[role="option"]{{
+    background: #ffffff !important;
+    color: #111827 !important;
+    font-size: .95rem !important;
     font-weight: 500 !important;
     padding: 10px 14px !important;
     border-radius: 10px !important;
     margin: 4px 6px !important;
     transition: all .15s ease !important;
-}
+}}
 
-/* Hover state */
+/* Hover effect */
 div[data-baseweb="option"]:hover,
-li[role="option"]:hover{
-    background: var(--c-hover) !important;
-    color: var(--c-text) !important;
-}
+li[role="option"]:hover{{
+    background: rgba(99,102,241,.08) !important;
+    color: #111827 !important;
+}}
 
 /* Selected option */
 div[data-baseweb="option"][aria-selected="true"],
-li[role="option"][aria-selected="true"]{
-    background: var(--c-a1-soft) !important;
-    color: var(--c-a1) !important;
+li[role="option"][aria-selected="true"]{{
+    background: rgba(99,102,241,.12) !important;
+    color: #4F46E5 !important;
     font-weight: 700 !important;
-}
+}}
 
-/* Selectbox input area */
-.stSelectbox > div > div{
-    background: var(--c-input) !important;
-    border: 1px solid var(--c-border) !important;
-    color: var(--c-text) !important;
-}
+/* Selectbox input */
+.stSelectbox > div > div{{
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+    border-radius: 14px !important;
+}}
 
 /* Selected text */
-.stSelectbox div[data-baseweb="select"] span{
-    color: var(--c-text) !important;
-}
+.stSelectbox div[data-baseweb="select"] span{{
+    color: #111827 !important;
+}}
 
 /* Dropdown arrow */
-.stSelectbox svg{
-    fill: var(--c-text) !important;
-}
+.stSelectbox svg{{
+    fill: #111827 !important;
+}}
 
-/* Search input inside dropdown */
-div[data-baseweb="popover"] input{
-    background: var(--c-card2) !important;
-    color: var(--c-text) !important;
-    border: 1px solid var(--c-border) !important;
-}
+/* Search input */
+div[data-baseweb="popover"] input{{
+    background: #ffffff !important;
+    color: #111827 !important;
+    border: 1px solid rgba(0,0,0,.08) !important;
+}}
 
-/* Fix dark overlay bug */
-div[data-baseweb="layer"]{
+/* Prevent dark overlay */
+div[data-baseweb="layer"]{{
     background: transparent !important;
-}
+}}
+
+/* Remove black backgrounds everywhere */
+div[data-baseweb]{{
+    color: #111827 !important;
+}}
+
+
 
 /* ── Dropdown panel ── */
 div[data-baseweb="popover"],
