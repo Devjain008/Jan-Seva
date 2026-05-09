@@ -295,50 +295,48 @@ header{{
 }}
 
 /* Sidebar toggle button */
+/* ═══════════════════════════════════════
+   SIDEBAR TOGGLE BUTTON FIX
+═══════════════════════════════════════ */
+
+/* Sidebar buttons */
 button[kind="header"],
 [data-testid="collapsedControl"]{{
-
-    position:fixed!important;
-    top:18px!important;
-    left:18px!important;
-
-    width:46px!important;
-    height:46px!important;
 
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
 
-    border-radius:14px!important;
+    width:42px!important;
+    height:42px!important;
 
-    background:linear-gradient(
-        135deg,
-        #4F46E5,
-        #7C3AED
-    )!important;
+    border-radius:12px!important;
 
-    border:1px solid rgba(255,255,255,.18)!important;
+    background:#ffffff!important;
+    border:1px solid #d1d5db!important;
 
-    box-shadow:
-        0 10px 28px rgba(79,70,229,.35),
-        0 4px 12px rgba(0,0,0,.12)!important;
-
-    backdrop-filter:blur(14px)!important;
+    box-shadow:0 4px 14px rgba(0,0,0,.08)!important;
 
     z-index:999999!important;
-
-    transition:all .18s ease!important;
 }}
 
-/* Hover effect */
+/* FORCE BLACK ICON ALWAYS */
+button[kind="header"] svg,
+[data-testid="collapsedControl"] svg,
+
+button[kind="header"] path,
+[data-testid="collapsedControl"] path{{
+
+    fill:#000000!important;
+    stroke:#000000!important;
+    color:#000000!important;
+}}
+
+/* Hover */
 button[kind="header"]:hover,
 [data-testid="collapsedControl"]:hover{{
 
-    transform:translateY(-2px) scale(1.04)!important;
-
-    box-shadow:
-        0 14px 34px rgba(79,70,229,.45),
-        0 6px 18px rgba(0,0,0,.18)!important;
+    background:#f3f4f6!important;
 }}
 
 /* Active click */
