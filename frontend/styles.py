@@ -81,6 +81,26 @@ div[data-baseweb="option"]{{
     background:var(--c-card)!important;
     color:var(--c-text)!important;
 }}
+/* ═══════════════════════════════════
+   PRODUCTION APP SHELL
+═══════════════════════════════════ */
+
+:root{{
+  --content-max: 1380px;
+  --content-narrow: 1180px;
+  --sidebar-width: 300px;
+
+  --page-pad-x: clamp(14px, 2vw, 28px);
+  --page-pad-y: clamp(16px, 2vw, 32px);
+
+  --section-gap: clamp(18px, 2vw, 32px);
+  --card-gap: clamp(12px, 1.5vw, 22px);
+
+  --card-min: 280px;
+  --card-max: 420px;
+
+  --touch-size: 44px;
+}}
 
 div[data-baseweb="option"] *{{
     color:var(--c-text)!important;
