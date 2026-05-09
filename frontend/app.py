@@ -23,6 +23,49 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded",
 )
+import requests as _req
+
+# ─────────────────────────────────────────────
+# API HELPER
+# ─────────────────────────────────────────────
+
+def api(method, endpoint, **kwargs):
+
+    url = f"{API_BASE}{endpoint}"
+
+    try:
+
+        response = _req.request(
+            method=method.upper(),
+            url=url,
+            timeout=30,
+            **kwargs
+        )
+
+        response.raise_for_status()
+
+        try:
+            return response.json()
+
+        except Exception:
+            return {"success": True}
+
+    except _req.exceptions.HTTPError:
+
+        try:
+            return response.json()
+        except Exception:
+            return {
+                "success": False,
+                "error": f"HTTP {response.status_code}"
+            }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
 
 # In app.py, after st.set_page_config
 st.markdown("""
