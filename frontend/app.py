@@ -4702,7 +4702,11 @@ def _render_voice(lang: str):
         _A1     = "#6366F1"
  
         cap_lbl   = "Voice Captured — you can edit this text below" if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित कर सकते हैं"
-        clear_lbl = "✕ Clear & Re-record" if lang == "en" else "✕ मिटाएं और दोबारा बोलें"
+        clear_lbl = (
+            "🎙️ If the complaint is wrong, speak again and click here to update"
+            if lang == "en"
+            else "🎙️ अगर शिकायत गलत है तो फिर से बोलें और अपडेट करने के लिए यहाँ क्लिक करें"
+        )
         edit_note = "✅ This text has been filled in the description below — edit freely." if lang == "en" else "✅ यह टेक्स्ट नीचे विवरण में भरा गया है — स्वतंत्र रूप से संपादित करें।"
  
         # pill showing full captured text
