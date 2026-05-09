@@ -1,9 +1,11 @@
-streamlit
 fastapi
 uvicorn
+streamlit
 sqlalchemy
 requests
 python-multipart
 pillow
 pandas
 numpy
+passlib[bcrypt]
+bcrypt
