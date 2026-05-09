@@ -1,45 +1,3 @@
-"""
-premium_styles_v2.py  —  Single source-of-truth CSS for Jan Seva Portal
-
-ROOT CAUSES FIXED vs old file
-══════════════════════════════
-1. DUPLICATE get_css() — file had TWO definitions; second one silently won,
-   destroying all clamp() responsive fixes from the first. Now ONE function.
-
-2. BLACK/TEXT-COLORED BORDERS — three classes used var(--c-text) or #000 as
-   border color, making them jet-black in light mode and white in dark.
-   Fixed to use var(--c-border) everywhere.
-
-3. DUPLICATE @keyframes — all 7 animations were defined twice (once per
-   get_css). Browsers ignore duplicates but it bloats the injected CSS ~40%.
-
-4. DUPLICATE :root block — first version used clamp() responsive sizing,
-   second used fixed px; second always won. Merged into one block with
-   clamp() for every spacing/radius/font token.
-
-5. DUPLICATE dark_overrides — div[data-baseweb="option"] was declared 3+
-   times inside a single dark_overrides string with conflicting values.
-   Collapsed to one clean declaration per state (base / hover / selected).
-
-6. CONFLICTING HEADER VISIBILITY — first get_css showed the header, second
-   hid it. Resolved: header is hidden (Streamlit default) unless you want
-   the sidebar toggle; see HEADER section comment.
-
-7. Z-INDEX CASCADE — stApp::before was 9999 in one version, 100 in another;
-   sidebar was 999 in one version only. Unified z-index ladder:
-     stripe  =  200
-     sidebar = 1000
-     popover = 9999
-
-8. max-width CONFLICT — 1200px vs 1020px caused layout jumping on rerun.
-   Single value: clamp(900px, 88vw, 1080px) — fits laptop + wide screens.
-
-9. OVERFLOW-X on mobile — second version had no overflow-x:hidden on body/
-   .stApp. Added properly without breaking vertical scroll.
-
-10. STREAMLIT WIDGET OVERRIDES in dark_overrides had two separate blocks
-    for the same selectbox/option selectors. Merged into one cascade.
-"""
 
 
 def get_css(dark_mode: bool = False) -> str:
@@ -116,6 +74,79 @@ def get_css(dark_mode: bool = False) -> str:
         dark_overrides = f"""
 /* ── SVG icons in dark widgets ── */
 .stSelectbox svg,.stTextInput svg{{fill:{subtext}!important;}}
+
+/* ═══════════════════════════════════════════════
+   FIX DROPDOWN BLACK / WHITE UI ISSUE
+═══════════════════════════════════════════════ */
+
+/* Main dropdown popup */
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[data-testid="stWidgetDropdownList"]{
+    background: var(--c-card) !important;
+    border: 1px solid var(--c-border) !important;
+    border-radius: 16px !important;
+    box-shadow: var(--sh-md) !important;
+    overflow: hidden !important;
+    z-index: 999999 !important;
+}
+
+/* Dropdown options */
+div[data-baseweb="option"],
+li[role="option"]{
+    background: transparent !important;
+    color: var(--c-text) !important;
+    font-size: var(--fs-base) !important;
+    font-weight: 500 !important;
+    padding: 10px 14px !important;
+    border-radius: 10px !important;
+    margin: 4px 6px !important;
+    transition: all .15s ease !important;
+}
+
+/* Hover state */
+div[data-baseweb="option"]:hover,
+li[role="option"]:hover{
+    background: var(--c-hover) !important;
+    color: var(--c-text) !important;
+}
+
+/* Selected option */
+div[data-baseweb="option"][aria-selected="true"],
+li[role="option"][aria-selected="true"]{
+    background: var(--c-a1-soft) !important;
+    color: var(--c-a1) !important;
+    font-weight: 700 !important;
+}
+
+/* Selectbox input area */
+.stSelectbox > div > div{
+    background: var(--c-input) !important;
+    border: 1px solid var(--c-border) !important;
+    color: var(--c-text) !important;
+}
+
+/* Selected text */
+.stSelectbox div[data-baseweb="select"] span{
+    color: var(--c-text) !important;
+}
+
+/* Dropdown arrow */
+.stSelectbox svg{
+    fill: var(--c-text) !important;
+}
+
+/* Search input inside dropdown */
+div[data-baseweb="popover"] input{
+    background: var(--c-card2) !important;
+    color: var(--c-text) !important;
+    border: 1px solid var(--c-border) !important;
+}
+
+/* Fix dark overlay bug */
+div[data-baseweb="layer"]{
+    background: transparent !important;
+}
 
 /* ── Dropdown panel ── */
 div[data-baseweb="popover"],
