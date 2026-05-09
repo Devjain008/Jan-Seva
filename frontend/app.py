@@ -3476,686 +3476,826 @@ def _rating_card(c, uid, idx=0):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+# ─────────────────────────────────────────────────────────────────────────────
 
-from urllib.parse import unquote
-import os
-import secrets
-import requests as _req
-import streamlit as st
 
 # ─────────────────────────────────────────────────────────────────────────────
-# STATE DEFAULTS & HELPERS
+# VERSION-SAFE HELPERS
+# st.image(use_container_width=) was added in Streamlit 1.16.
+# Older installs (common on Windows with pip-cached packages) only have
+# use_column_width=. This wrapper tries the new arg first, falls back silently.
 # ─────────────────────────────────────────────────────────────────────────────
-_FC_DEFAULTS = {
-    "category": "other",
-    "description": "",
-    "location_name": "Bhopal, Madhya Pradesh",
-    "lat": 23.2599,
-    "lon": 77.4126,
-    "is_emergency": False,
-    "voice_text": "",
-    "voice_applied": False,
-    "image_name": "",
-    "phase": "idle",          # idle | submitting | success | error | offline
-    "submit_token": "",
-    "error_msg": "",
-    "success_data": {},
-    "_map_lat": 23.2599,
-    "_map_lon": 77.4126,
-    "_gps_ingested": False,
+
+def _st_image(src, caption: str = "") -> None:
+    """Display an image filling its container, compatible with all Streamlit versions."""
+    kwargs: dict = {"caption": caption} if caption else {}
+    try:
+        st.image(src, use_container_width=True, **kwargs)
+    except TypeError:
+        # Streamlit < 1.16 — use the old parameter name
+        try:
+            st.image(src, use_column_width=True, **kwargs)
+        except TypeError:
+            # Ultimate fallback — no width control
+            st.image(src, **kwargs)
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# STATE
+# ─────────────────────────────────────────────────────────────────────────────
+_FC_DEFAULTS: dict[str, Any] = {
+    "category":        "other",
+    "description":     "",
+    # Merged text shown in the text input widget
+    "location_name":   "Bhopal, Madhya Pradesh",
+    # Structured location fields — populated by GPS geocode
+    "loc_area":        "",   # neighbourhood / suburb / village
+    "loc_city":        "",   # city / town
+    "loc_district":    "",   # district / county
+    "loc_state":       "",   # state
+    "loc_pincode":     "",   # postcode
+    "lat":             23.2599,
+    "lon":             77.4126,
+    "is_emergency":    False,
+    "voice_text":      "",
+    "voice_reset_key": 0,
+    # bridge_key tracks how many times bridge must be fresh
+    "bridge_key":      0,
+    "voice_applied":   False,
+    "image_name":      "",
+    "phase":           "idle",
+    "submit_token":    "",
+    "error_msg":       "",
+    "success_data":    {},
+    "_map_lat":        23.2599,
+    "_map_lon":        77.4126,
+    "_gps_ingested":   False,
     "_voice_ingested": False,
+    "_img_bytes":      None,
+    "_img_name":       "",
 }
-
-
-def _init_fc():
+ 
+ 
+def _init_fc() -> None:
     if "fc" not in st.session_state:
         st.session_state.fc = dict(_FC_DEFAULTS)
     else:
         for k, v in _FC_DEFAULTS.items():
             if k not in st.session_state.fc:
                 st.session_state.fc[k] = v
-
-
-def fc():
-    return st.session_state.fc
-
-
-def fc_set(**kw):
+ 
+ 
+def fc() -> dict[str, Any]:
+    return st.session_state.fc  # type: ignore[return-value]
+ 
+ 
+def fc_set(**kw: Any) -> None:
     st.session_state.fc.update(kw)
-
-
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# REVERSE GEOCODE  (FIX 2 — now includes pincode)
+# ─────────────────────────────────────────────────────────────────────────────
+ 
 @st.cache_data(ttl=300, show_spinner=False)
-def _reverse_geocode(lat: float, lon: float) -> str:
+def _reverse_geocode(lat: float, lon: float) -> dict:
+    """
+    Returns a structured dict with all location fields.
+    Keys: area, city, district, state, pincode, display (merged string)
+    Never raises — always returns a valid dict.
+    """
+    empty = {
+        "area": "", "city": "", "district": "",
+        "state": "", "pincode": "",
+        "display": f"{lat:.5f}, {lon:.5f}",
+    }
     try:
+        import requests as _req
         r = _req.get(
-            f"https://nominatim.openstreetmap.org/reverse"
-            f"?format=jsonv2&lat={lat}&lon={lon}&zoom=16&addressdetails=1",
-            headers={"User-Agent": "JanSevaPortal/1.0"}, timeout=5,
+            "https://nominatim.openstreetmap.org/reverse"
+            f"?format=jsonv2&lat={lat}&lon={lon}&zoom=18&addressdetails=1",
+            headers={"User-Agent": "JanSevaPortal/1.0"},
+            timeout=6,
         )
-        if r.ok:
-            addr = r.json().get("address", {})
-            parts = [
-                addr.get("suburb") or addr.get("neighbourhood") or addr.get("village"),
-                addr.get("city") or addr.get("town") or addr.get("county"),
-                addr.get("state"),
-            ]
-            return ", ".join(p for p in parts if p) or f"{lat:.5f}, {lon:.5f}"
+        if not r.ok:
+            return empty
+        addr = r.json().get("address", {})
+ 
+        area     = (addr.get("neighbourhood") or addr.get("suburb")
+                    or addr.get("village")    or addr.get("hamlet")
+                    or addr.get("residential") or "")
+        city     = addr.get("city") or addr.get("town") or ""
+        district = addr.get("county") or addr.get("district") or addr.get("state_district") or ""
+        state    = addr.get("state", "")
+        pincode  = addr.get("postcode", "")
+ 
+        # Build display string: all non-empty parts joined
+        parts = [p for p in [area, city, district, state] if p]
+        base  = ", ".join(parts) if parts else f"{lat:.5f}, {lon:.5f}"
+        display = f"{base} — {pincode}" if pincode else base
+ 
+        return {
+            "area": area, "city": city, "district": district,
+            "state": state, "pincode": pincode, "display": display,
+        }
     except Exception:
-        pass
-    return f"{lat:.5f}, {lon:.5f}"
-
-
+        return empty
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# QUERY PARAM INGESTION
+# FIX 1 & 3: Delete widget keys before rerun so widgets re-seed from fc()
+# FIX 3: Reset _voice_ingested on clear so next voice param is accepted
+# ─────────────────────────────────────────────────────────────────────────────
+ 
 def _ingest_query_params() -> bool:
     params = st.query_params
+ 
+    # ── Voice text ───────────────────────────────────────────────────────────
     if "voice_text" in params and not fc()["_voice_ingested"]:
         text = unquote(params["voice_text"])
-        fc_set(voice_text=text, description=text, voice_applied=True, _voice_ingested=True)
+        fc_set(
+            voice_text      = text,
+            description     = text,
+            voice_applied   = True,
+            _voice_ingested = True,
+        )
         st.query_params.clear()
+        # Delete widget key so textarea re-seeds from fc()["description"]
+        st.session_state.pop("_fc_desc", None)
         return True
-    if "gps_lat" in params and "gps_lon" in params and not fc()["_gps_ingested"]:
+ 
+    # ── GPS location ─────────────────────────────────────────────────────────
+    if "gps_lat" in params and not fc()["_gps_ingested"]:
         try:
-            lat = float(params["gps_lat"])
-            lon = float(params["gps_lon"])
-            name = _reverse_geocode(lat, lon)
-            fc_set(lat=lat, lon=lon, location_name=name, _gps_ingested=True)
+            lat  = float(params["gps_lat"])
+            lon  = float(params["gps_lon"])
+ 
+            # JS iframe sends pre-built structured fields via URL params
+            # Fall back to Python geocode only if JS fields are absent
+            js_area     = unquote(params.get("gps_area",     ""))
+            js_city     = unquote(params.get("gps_city",     ""))
+            js_district = unquote(params.get("gps_district", ""))
+            js_state    = unquote(params.get("gps_state",    ""))
+            js_pincode  = unquote(params.get("gps_pincode",  ""))
+            js_display  = unquote(params.get("gps_name",     ""))
+ 
+            if js_display:
+                # JS already did the geocoding — use its structured fields
+                geo = {
+                    "area":     js_area,
+                    "city":     js_city,
+                    "district": js_district,
+                    "state":    js_state,
+                    "pincode":  js_pincode,
+                    "display":  js_display,
+                }
+            else:
+                # Fallback: Python-side geocode
+                geo = _reverse_geocode(lat, lon)
+ 
+            fc_set(
+                lat           = lat,
+                lon           = lon,
+                location_name = geo["display"],
+                loc_area      = geo["area"],
+                loc_city      = geo["city"],
+                loc_district  = geo["district"],
+                loc_state     = geo["state"],
+                loc_pincode   = geo["pincode"],
+                _map_lat      = lat,
+                _map_lon      = lon,
+                _gps_ingested = True,
+            )
             st.query_params.clear()
+            # Delete widget key so text input re-seeds from fc()
+            st.session_state.pop("_fc_location", None)
             return True
-        except (ValueError, KeyError):
+        except (ValueError, KeyError, TypeError):
             pass
+ 
     return False
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-# CSS INJECTION — single block, injected once at top of pg_file_complaint
+# CSS (unchanged from v4 — all classes preserved)
 # ─────────────────────────────────────────────────────────────────────────────
-def _inject_css(dark: bool):
+ 
+def _inject_page_css(dark: bool) -> None:
     CARD  = "#0D1220" if dark else "#FFFFFF"
     BG    = "#070B14" if dark else "#F4F7FD"
     BOR   = "#1E2A3D" if dark else "#E2E8F4"
     TXT   = "#EFF2FF" if dark else "#0B1428"
     SUB   = "#7C8FAC" if dark else "#64748B"
     INP   = "#0F1828" if dark else "#F0F4FB"
-    HOV   = "#16213A" if dark else "#E8EDF7"
     A1    = "#6366F1"
     A2    = "#8B5CF6"
     GRN   = "#10B981"
-
     GRN_BG  = "#071A10" if dark else "#F0FDF4"
     GRN_BD  = "#166534" if dark else "#86EFAC"
-    GRN_TXT = "#4ADE80" if dark else "#166534"
+    GRN_T   = "#4ADE80" if dark else "#166534"
     AMB_BG  = "#1A1000" if dark else "#FFFBEB"
     AMB_BD  = "#92400E" if dark else "#FDE68A"
-    AMB_TXT = "#FCD34D" if dark else "#92400E"
+    AMB_T   = "#FCD34D" if dark else "#92400E"
     RED_BG  = "#1A0505" if dark else "#FEF2F2"
     RED_BD  = "#991B1B" if dark else "#FECACA"
-    RED_TXT = "#FCA5A5" if dark else "#BE123C"
-    BLU_BG  = "#04091A" if dark else "#EFF6FF"
-    BLU_BD  = "#1E40AF" if dark else "#BFDBFE"
-    BLU_TXT = "#93C5FD" if dark else "#1E40AF"
-
+    RED_T   = "#FCA5A5" if dark else "#BE123C"
+ 
     css = f"""<style>
-@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@500&display=swap');
-
-html,body,.stApp{{background:{BG}!important;}}
+@import url('https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Mono:wght@400;500&display=swap');
+ 
+html,body,.stApp{{background:{BG}!important;color:{TXT};font-family:'DM Sans',system-ui,sans-serif;}}
 .main .block-container{{max-width:860px!important;margin:0 auto!important;padding:1.5rem 1.75rem 4rem!important;}}
-#MainMenu,footer,header,.stDeployButton{{visibility:hidden!important;display:none!important;}}
-.stApp::before{{content:'';display:block;position:fixed;top:0;left:0;right:0;height:2px;
+#MainMenu,footer,header,.stDeployButton{{display:none!important;}}
+.stApp::before{{content:'';position:fixed;top:0;left:0;right:0;height:2px;z-index:9999;pointer-events:none;
     background:linear-gradient(90deg,{A1},{A2},#22D3EE,{A1});background-size:200% 100%;
-    animation:fc-stripe 6s ease infinite;z-index:9999;pointer-events:none;}}
+    animation:fc-stripe 6s ease infinite;}}
 @keyframes fc-stripe{{0%,100%{{background-position:0 50%;}}50%{{background-position:100% 50%;}}}}
-
-/* ── hero ── */
+@keyframes fc-fade-up{{from{{opacity:0;transform:translateY(10px)}}to{{opacity:1;transform:translateY(0)}}}}
+ 
 .fc-hero{{background:linear-gradient(135deg,#1a1757 0%,#2e2b85 45%,#0d3461 100%);
-    border-radius:24px;padding:28px 28px 22px;margin-bottom:18px;
-    position:relative;overflow:hidden;box-shadow:0 24px 64px rgba(0,0,0,0.30);}}
+    border-radius:24px;padding:30px 28px 24px;margin-bottom:20px;
+    position:relative;overflow:hidden;box-shadow:0 20px 56px rgba(0,0,0,0.30);
+    animation:fc-fade-up .30s ease both;}}
 .fc-hero::before{{content:'';position:absolute;top:-80px;right:-80px;width:280px;height:280px;
-    border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 70%);pointer-events:none;}}
-.fc-hero::after{{content:'';position:absolute;bottom:-60px;left:10%;width:200px;height:200px;
-    border-radius:50%;background:radial-gradient(circle,rgba(139,92,246,0.09) 0%,transparent 70%);pointer-events:none;}}
-.fc-hero-eyebrow{{display:flex;align-items:center;gap:6px;font-size:.62rem;font-weight:800;
-    text-transform:uppercase;letter-spacing:.12em;color:rgba(255,255,255,0.58);margin-bottom:7px;position:relative;z-index:1;}}
+    border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 70%);}}
+.fc-hero-eyebrow{{font-size:.60rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+    color:rgba(255,255,255,0.55);margin-bottom:8px;display:flex;align-items:center;gap:7px;}}
 .fc-hero-dot{{width:6px;height:6px;background:#10B981;border-radius:50%;
     box-shadow:0 0 0 3px rgba(16,185,129,0.28);animation:fc-dot 2s ease infinite;}}
-@keyframes fc-dot{{0%,100%{{box-shadow:0 0 0 3px rgba(16,185,129,0.28);}}50%{{box-shadow:0 0 0 6px rgba(16,185,129,0.10);}}}}
-.fc-hero-title{{font-family:'Bricolage Grotesque','DM Sans',sans-serif;font-size:1.65rem;
-    font-weight:800;color:#fff;letter-spacing:-0.03em;line-height:1.2;
-    margin-bottom:7px;position:relative;z-index:1;}}
-.fc-hero-sub{{font-size:0.83rem;color:rgba(255,255,255,0.64);position:relative;z-index:1;
-    font-weight:500;line-height:1.6;}}
-.fc-hero-chips{{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;position:relative;z-index:1;}}
-.fc-chip{{background:rgba(255,255,255,0.11);border:1px solid rgba(255,255,255,0.18);
-    border-radius:20px;padding:4px 12px;font-size:.66rem;font-weight:700;
-    color:#fff;display:inline-flex;align-items:center;gap:5px;}}
-
-/* ── steps ── */
+@keyframes fc-dot{{0%,100%{{box-shadow:0 0 0 3px rgba(16,185,129,.28);}}50%{{box-shadow:0 0 0 7px rgba(16,185,129,.08);}}}}
+.fc-hero-title{{font-family:'Bricolage Grotesque',sans-serif;font-size:1.70rem;font-weight:800;
+    color:#fff;letter-spacing:-0.03em;line-height:1.2;margin-bottom:7px;}}
+.fc-hero-sub{{font-size:0.82rem;color:rgba(255,255,255,0.62);font-weight:500;line-height:1.6;}}
+.fc-hero-chips{{display:flex;gap:8px;flex-wrap:wrap;margin-top:15px;}}
+.fc-chip{{background:rgba(255,255,255,0.10);border:1px solid rgba(255,255,255,0.16);
+    border-radius:20px;padding:4px 13px;font-size:.65rem;font-weight:700;color:#fff;
+    display:inline-flex;align-items:center;gap:5px;}}
+ 
 .fc-steps{{display:flex;align-items:flex-start;background:{CARD};border:1px solid {BOR};
-    border-radius:18px;padding:14px 18px;margin-bottom:20px;
-    box-shadow:0 2px 8px rgba(15,23,42,0.05);}}
+    border-radius:18px;padding:14px 18px;margin-bottom:22px;box-shadow:0 2px 10px rgba(0,0,0,0.07);}}
 .fc-step-col{{flex:1;text-align:center;}}
 .fc-step-circle{{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;
-    justify-content:center;font-size:.88rem;font-weight:700;margin:0 auto 5px;transition:all .22s;}}
-.fc-step-circle.done{{background:{A1};color:#fff;box-shadow:0 3px 12px rgba(99,102,241,0.32);}}
+    justify-content:center;font-size:.88rem;margin:0 auto 5px;transition:all .22s;}}
+.fc-step-circle.done{{background:{A1};color:#fff;box-shadow:0 3px 12px rgba(99,102,241,.35);}}
 .fc-step-circle.idle{{background:{BOR};color:{SUB};}}
 .fc-step-lbl{{font-size:.54rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;}}
 .fc-step-lbl.done{{color:{A1};}} .fc-step-lbl.idle{{color:{SUB};}}
-.fc-step-bar{{flex:0 0 18px;height:2px;background:{BOR};margin-top:16px;border-radius:2px;transition:background .22s;}}
-.fc-step-bar.done{{background:{A1};}}
-
-/* ── section header ── */
-.fc-sec{{font-size:.66rem;font-weight:700;text-transform:uppercase;letter-spacing:.10em;
-    color:{SUB};margin:22px 0 10px;display:flex;align-items:center;gap:9px;}}
+.fc-step-bar{{flex:0 0 20px;height:2px;border-radius:2px;margin-top:16px;transition:background .22s;}}
+.fc-step-bar.done{{background:{A1};}} .fc-step-bar.idle{{background:{BOR};}}
+ 
+.fc-sec{{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.10em;
+    color:{SUB};margin:24px 0 11px;display:flex;align-items:center;gap:9px;}}
 .fc-sec::before{{content:'';width:3px;height:13px;
     background:linear-gradient(180deg,{A1},{A2});border-radius:99px;flex-shrink:0;}}
-.fc-sec::after{{content:'';flex:1;height:1px;
-    background:linear-gradient(to right,{BOR},transparent);}}
-
-/* ── voice ── */
-.fc-voice-wrap{{background:{"rgba(99,102,241,0.06)" if dark else "#F7F5FF"};
-    border:1.5px solid {"rgba(99,102,241,0.18)" if dark else "#DDD6FE"};
-    border-radius:20px;overflow:hidden;}}
-.fc-voice-pill{{background:{GRN_BG};border:1.5px solid {GRN_BD};border-left:4px solid {GRN};
-    border-radius:14px;padding:11px 15px;margin:8px 0;
-    display:flex;align-items:flex-start;gap:9px;}}
-.fc-voice-pill-lbl{{font-size:.58rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.07em;color:{GRN_TXT};margin-bottom:3px;}}
-.fc-voice-pill-txt{{font-size:.80rem;color:{TXT};line-height:1.6;word-break:break-word;}}
-
-/* ── category ── */
-.fc-cat-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-bottom:4px;}}
-.fc-cat-btn{{background:{CARD};border:1.5px solid {BOR};border-radius:15px;
-    padding:14px 8px 11px;text-align:center;cursor:pointer;transition:all .18s;}}
-.fc-cat-btn:hover{{transform:translateY(-2px);border-color:{A1};
-    box-shadow:0 6px 18px rgba(99,102,241,0.12);}}
-.fc-cat-btn.sel{{background:{"rgba(99,102,241,0.12)" if dark else "#EEF2FF"};
-    border:2px solid {A1};box-shadow:0 0 0 4px rgba(99,102,241,0.12);}}
-.fc-cat-icon{{font-size:1.4rem;display:block;margin-bottom:5px;}}
-.fc-cat-lbl{{font-size:.68rem;font-weight:700;color:{TXT};}}
-
-/* ── emergency ── */
+.fc-sec::after{{content:'';flex:1;height:1px;background:linear-gradient(to right,{BOR},transparent);}}
+ 
+.fc-voice-wrap{{background:{"rgba(99,102,241,0.05)" if dark else "#F7F5FF"};
+    border:1.5px solid {"rgba(99,102,241,0.16)" if dark else "#DDD6FE"};border-radius:20px;overflow:hidden;}}
+.fc-voice-captured{{background:{GRN_BG};border:1.5px solid {GRN_BD};border-left:4px solid {GRN};
+    border-radius:14px;padding:12px 15px;margin:8px 0;animation:fc-fade-up .2s ease both;}}
+.fc-voice-captured-lbl{{font-size:.58rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.08em;color:{GRN_T};margin-bottom:5px;}}
+.fc-voice-captured-txt{{font-size:.80rem;color:{TXT};line-height:1.6;word-break:break-word;
+    font-style:italic;margin-bottom:10px;}}
+ 
+/* ── CATEGORY ── */
+.fc-cat-cell .stButton>button{{
+    background:{CARD}!important;border:1.5px solid {BOR}!important;
+    border-radius:15px!important;padding:14px 6px 11px!important;
+    text-align:center!important;width:100%!important;min-height:72px!important;
+    display:flex!important;flex-direction:column!important;align-items:center!important;
+    justify-content:center!important;gap:5px!important;font-size:.70rem!important;
+    font-weight:700!important;color:{TXT}!important;line-height:1.25!important;
+    transition:all .18s ease!important;box-shadow:none!important;}}
+.fc-cat-cell .stButton>button:hover{{
+    border-color:{A1}!important;transform:translateY(-2px)!important;
+    box-shadow:0 6px 18px rgba(99,102,241,0.14)!important;
+    background:{"rgba(99,102,241,0.07)" if dark else "#F5F3FF"}!important;}}
+.fc-cat-active .stButton>button{{
+    background:{"rgba(99,102,241,0.14)" if dark else "#EEF2FF"}!important;
+    border:2px solid {A1}!important;box-shadow:0 0 0 4px rgba(99,102,241,0.13)!important;
+    color:{"#818CF8" if dark else "#3730A3"}!important;}}
+ 
+/* ── GPS LOCATION PILL ── */
+.fc-gps-pill{{background:{GRN_BG};border:1.5px solid {GRN_BD};border-left:4px solid {GRN};
+    border-radius:12px;padding:10px 14px;margin-bottom:10px;
+    display:flex;align-items:flex-start;gap:10px;animation:fc-fade-up .2s ease both;}}
+.fc-gps-pill-icon{{font-size:1.1rem;flex-shrink:0;margin-top:1px;}}
+.fc-gps-pill-body{{flex:1;}}
+.fc-gps-pill-lbl{{font-size:.56rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.08em;color:{GRN_T};margin-bottom:3px;}}
+.fc-gps-pill-name{{font-size:.82rem;font-weight:600;color:{TXT};line-height:1.45;}}
+.fc-gps-pill-coords{{font-size:.62rem;color:{SUB};margin-top:3px;font-family:'DM Mono',monospace;}}
+ 
+/* ── EMERGENCY ── */
 .fc-emg{{background:{"rgba(239,68,68,0.07)" if dark else "#FFF1F2"};
-    border:1.5px solid {"rgba(239,68,68,0.20)" if dark else "#FECDD3"};
-    border-radius:18px;padding:16px 18px;margin:16px 0 4px;}}
+    border:1.5px solid {"rgba(239,68,68,0.18)" if dark else "#FECDD3"};
+    border-radius:18px;padding:16px 18px;margin:16px 0 6px;}}
 .fc-emg-title{{font-size:.62rem;font-weight:800;text-transform:uppercase;
-    letter-spacing:.10em;color:#EF4444;margin-bottom:10px;
-    display:flex;align-items:center;gap:6px;}}
+    letter-spacing:.10em;color:#EF4444;margin-bottom:10px;}}
 .fc-emg-warn{{background:rgba(239,68,68,0.10);border:1px solid rgba(239,68,68,0.18);
-    border-radius:10px;padding:8px 12px;font-size:.76rem;color:#EF4444;
-    font-weight:600;margin-top:8px;display:flex;align-items:center;gap:7px;}}
-
-/* ── ai preview ── */
-.fc-ai{{background:{CARD};border:1.5px solid {"rgba(99,102,241,0.20)" if dark else "#C7D2FE"};
+    border-radius:10px;padding:8px 12px;font-size:.76rem;color:#EF4444;font-weight:600;margin-top:8px;}}
+ 
+.fc-ai{{background:{CARD};border:1.5px solid {"rgba(99,102,241,0.18)" if dark else "#C7D2FE"};
     border-left:4px solid {A1};border-radius:18px;padding:15px 18px;margin-top:12px;
-    box-shadow:0 0 0 3px {"rgba(99,102,241,0.07)" if dark else "#EEF2FF"};}}
-.fc-ai-head{{display:flex;align-items:center;gap:10px;margin-bottom:12px;}}
-.fc-ai-icon{{width:30px;height:30px;background:linear-gradient(135deg,{A1},{A2});
-    border-radius:9px;display:flex;align-items:center;justify-content:center;
-    font-size:.85rem;flex-shrink:0;box-shadow:0 3px 10px rgba(99,102,241,0.28);}}
-.fc-ai-lbl{{font-size:.62rem;font-weight:800;text-transform:uppercase;letter-spacing:.10em;color:{A1};}}
+    animation:fc-fade-up .22s ease both;}}
+.fc-ai-head{{display:flex;align-items:center;gap:10px;margin-bottom:10px;}}
+.fc-ai-icon{{width:28px;height:28px;background:linear-gradient(135deg,{A1},{A2});
+    border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.82rem;}}
+.fc-ai-lbl{{font-size:.60rem;font-weight:800;text-transform:uppercase;letter-spacing:.10em;color:{A1};}}
 .fc-ai-pills{{display:flex;gap:8px;flex-wrap:wrap;}}
-.fc-ai-pill{{border-radius:11px;padding:7px 12px;display:flex;align-items:center;
-    gap:6px;font-size:.78rem;font-weight:700;border:1.5px solid;}}
-.fc-ai-hint{{font-size:.66rem;color:{SUB};margin-top:9px;font-style:italic;}}
-
-/* ── photo ── */
-.fc-photo-card{{background:{"rgba(99,102,241,0.05)" if dark else "#F9FAFB"};
-    border:2px dashed {"rgba(99,102,241,0.22)" if dark else "#C7D2FE"};
-    border-radius:18px;padding:16px 18px;transition:border-color .18s;}}
-.fc-photo-card:hover{{border-color:{A1};}}
+.fc-ai-pill{{border-radius:10px;padding:6px 11px;display:flex;align-items:center;
+    gap:5px;font-size:.76rem;font-weight:700;border:1.5px solid;}}
+.fc-ai-hint{{font-size:.65rem;color:{SUB};margin-top:8px;font-style:italic;}}
+ 
+.fc-photo-wrap{{background:{"rgba(99,102,241,0.04)" if dark else "#F9FAFB"};
+    border:2px dashed {"rgba(99,102,241,0.20)" if dark else "#C7D2FE"};
+    border-radius:18px;padding:16px 18px;}}
 .fc-photo-head{{display:flex;align-items:center;gap:12px;margin-bottom:12px;}}
 .fc-photo-icon{{width:44px;height:44px;background:linear-gradient(135deg,{A1},{A2});
     border-radius:13px;display:flex;align-items:center;justify-content:center;
-    font-size:1.3rem;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,0.28);}}
-.fc-photo-title{{font-size:.82rem;font-weight:800;color:{"#818CF8" if dark else "#3730A3"};margin-bottom:3px;}}
-.fc-photo-sub{{font-size:.64rem;color:{SUB};}}
-.fc-photo-preview{{background:{"rgba(16,185,129,0.08)" if dark else "#ECFDF5"};
-    border:1.5px solid {"rgba(16,185,129,0.22)" if dark else "#A7F3D0"};
-    border-radius:14px;padding:11px;text-align:center;margin-top:8px;}}
-.fc-photo-preview-lbl{{font-size:.58rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.07em;color:{GRN_TXT};margin-bottom:7px;}}
-
-/* ── checklist ── */
-.fc-checklist{{background:{CARD};border:1.5px solid {BOR};border-radius:14px;
-    padding:13px 16px;margin:12px 0 14px;}}
+    font-size:1.3rem;flex-shrink:0;box-shadow:0 4px 12px rgba(99,102,241,.28);}}
+.fc-photo-title{{font-size:.82rem;font-weight:800;color:{"#818CF8" if dark else "#3730A3"};}}
+.fc-photo-sub{{font-size:.64rem;color:{SUB};margin-top:2px;}}
+ 
+.fc-checklist{{background:{CARD};border:1px solid {BOR};border-radius:14px;
+    padding:12px 16px;margin:12px 0 14px;}}
 .fc-checklist-title{{font-size:.60rem;font-weight:700;text-transform:uppercase;
     letter-spacing:.09em;color:{SUB};margin-bottom:9px;}}
 .fc-checks{{display:flex;gap:7px;flex-wrap:wrap;}}
-.fc-check{{background:{"rgba(255,255,255,0.05)" if dark else "#F8FAFF"};
-    border:1px solid {BOR};border-radius:9px;padding:5px 11px;
-    font-size:.72rem;font-weight:600;color:{TXT};
-    display:inline-flex;align-items:center;gap:5px;}}
-.fc-check.ok{{background:{GRN_BG};border-color:{GRN_BD};color:{GRN_TXT};}}
-
-/* ── tip ── */
+.fc-check{{background:{"rgba(255,255,255,0.04)" if dark else "#F8FAFF"};
+    border:1px solid {BOR};border-radius:9px;padding:5px 11px;font-size:.72rem;
+    font-weight:600;color:{SUB};display:inline-flex;align-items:center;gap:5px;}}
+.fc-check.ok{{background:{GRN_BG};border-color:{GRN_BD};color:{GRN_T};}}
+ 
 .fc-tip{{background:{CARD};border:1px solid {BOR};border-radius:13px;
-    padding:11px 16px;display:flex;align-items:center;gap:10px;
+    padding:11px 16px;display:flex;align-items:flex-start;gap:10px;
     margin:10px 0 16px;font-size:.75rem;color:{SUB};line-height:1.55;}}
 .fc-tip strong{{color:{TXT};}}
-
-/* ── error banner ── */
+ 
 .fc-err{{background:{RED_BG};border:1.5px solid {RED_BD};border-radius:13px;
-    padding:12px 16px;margin-top:8px;color:{RED_TXT};font-weight:600;font-size:.80rem;}}
-
-/* ── success ── */
+    padding:11px 16px;margin-top:8px;color:{RED_T};font-weight:600;font-size:.80rem;}}
+ 
 .fc-success{{background:linear-gradient(135deg,#064e3b 0%,#059669 55%,#047857 100%);
-    border-radius:24px;padding:36px 28px;text-align:center;color:#fff;
-    box-shadow:0 20px 56px rgba(16,185,129,0.38);margin-top:12px;}}
-.fc-success-ring{{width:74px;height:74px;background:rgba(255,255,255,0.18);border-radius:50%;
-    display:inline-flex;align-items:center;justify-content:center;font-size:2.2rem;
-    margin-bottom:16px;box-shadow:0 0 0 10px rgba(255,255,255,0.08);}}
-.fc-success-title{{font-family:'Bricolage Grotesque','DM Sans',sans-serif;
-    font-size:1.3rem;font-weight:800;margin-bottom:4px;letter-spacing:-0.02em;}}
-.fc-success-sub{{font-size:.87rem;opacity:.84;margin-bottom:20px;font-weight:500;}}
-.fc-success-id{{background:rgba(255,255,255,0.17);border:2px solid rgba(255,255,255,0.32);
-    border-radius:13px;padding:12px 22px;display:inline-block;
-    font-family:'DM Mono','Courier New',monospace;font-size:1.5rem;
-    font-weight:800;letter-spacing:4px;margin-bottom:18px;}}
-.fc-success-chips{{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-bottom:14px;}}
-.fc-success-chip{{background:rgba(255,255,255,0.14);border-radius:9px;
-    padding:6px 13px;font-size:.72rem;font-weight:600;}}
-.fc-success-note{{font-size:.71rem;opacity:.68;line-height:1.85;}}
-
-/* ── offline ── */
-.fc-offline{{background:{AMB_BG};border:1.5px solid {AMB_BD};border-radius:17px;
-    padding:18px;margin-top:10px;}}
+    border-radius:24px;padding:40px 28px;text-align:center;color:#fff;
+    box-shadow:0 20px 56px rgba(16,185,129,0.38);margin-top:12px;animation:fc-fade-up .30s ease both;}}
+.fc-success-ring{{width:72px;height:72px;background:rgba(255,255,255,0.18);border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;font-size:2.1rem;
+    margin-bottom:14px;box-shadow:0 0 0 10px rgba(255,255,255,0.08);}}
+.fc-success-title{{font-family:'Bricolage Grotesque',sans-serif;font-size:1.35rem;
+    font-weight:800;margin-bottom:4px;letter-spacing:-0.02em;}}
+.fc-success-sub{{font-size:.86rem;opacity:.82;margin-bottom:18px;font-weight:500;}}
+.fc-success-id{{background:rgba(255,255,255,0.16);border:2px solid rgba(255,255,255,0.30);
+    border-radius:13px;padding:11px 22px;display:inline-block;
+    font-family:'DM Mono',monospace;font-size:1.55rem;font-weight:800;
+    letter-spacing:4px;margin-bottom:16px;}}
+.fc-success-chips{{display:flex;justify-content:center;gap:9px;flex-wrap:wrap;margin-bottom:12px;}}
+.fc-success-chip{{background:rgba(255,255,255,0.14);border-radius:9px;padding:6px 13px;font-size:.72rem;font-weight:600;}}
+.fc-success-note{{font-size:.70rem;opacity:.65;line-height:1.85;}}
+ 
+.fc-offline{{background:{AMB_BG};border:1.5px solid {AMB_BD};border-radius:18px;padding:18px;margin-top:10px;}}
 .fc-offline-head{{display:flex;align-items:center;gap:12px;margin-bottom:9px;}}
-.fc-offline-icon{{width:44px;height:44px;background:{"rgba(245,158,11,0.20)" if dark else "#FDE68A"};
-    border-radius:13px;display:flex;align-items:center;justify-content:center;
-    font-size:1.3rem;flex-shrink:0;}}
-.fc-offline-title{{font-weight:800;color:{AMB_TXT};font-size:.90rem;}}
-.fc-offline-sub{{font-size:.70rem;color:{AMB_TXT};opacity:.80;margin-top:2px;}}
-.fc-offline-body{{background:rgba(255,255,255,0.10);border-radius:10px;
-    padding:10px 12px;font-size:.74rem;color:{AMB_TXT};line-height:1.65;}}
-
-/* ── inputs ── */
+.fc-offline-icon{{width:44px;height:44px;background:{"rgba(245,158,11,0.18)" if dark else "#FDE68A"};
+    border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;}}
+.fc-offline-title{{font-weight:800;color:{AMB_T};font-size:.90rem;}}
+.fc-offline-sub{{font-size:.70rem;color:{AMB_T};opacity:.78;margin-top:2px;}}
+.fc-offline-body{{background:rgba(255,255,255,0.08);border-radius:10px;
+    padding:10px 12px;font-size:.74rem;color:{AMB_T};line-height:1.65;}}
+ 
+/* Streamlit native overrides */
 .stTextInput>div>div>input,.stTextArea>div>div>textarea{{
     background:{INP}!important;border:1.5px solid {BOR}!important;
     border-radius:13px!important;color:{TXT}!important;
     font-size:.875rem!important;padding:10px 14px!important;
-    transition:border-color .18s,box-shadow .18s!important;}}
+    transition:border-color .15s,box-shadow .15s!important;font-family:'DM Sans',sans-serif!important;}}
 .stTextInput>div>div>input:focus,.stTextArea>div>div>textarea:focus{{
     border-color:{A1}!important;box-shadow:0 0 0 3px rgba(99,102,241,0.12)!important;
-    background:{CARD}!important;}}
+    background:{CARD}!important;outline:none!important;}}
 .stTextInput>div>div>input::placeholder,.stTextArea>div>div>textarea::placeholder{{
-    color:{SUB}!important;opacity:.65!important;}}
-label{{color:{SUB}!important;font-size:.66rem!important;font-weight:600!important;
-    text-transform:uppercase!important;letter-spacing:.07em!important;}}
+    color:{SUB}!important;opacity:.60!important;}}
+.stTextInput label,.stTextArea label,.stFileUploader label{{
+    color:{SUB}!important;font-size:.64rem!important;font-weight:600!important;
+    text-transform:uppercase!important;letter-spacing:.08em!important;}}
 .stCheckbox label{{text-transform:none!important;font-size:.85rem!important;
     letter-spacing:0!important;color:{TXT}!important;font-weight:500!important;}}
-
-/* ── hide radio widget (visual grid handles it) ── */
-.stRadio{{position:absolute!important;width:1px!important;height:1px!important;
-    overflow:hidden!important;opacity:0!important;pointer-events:none!important;}}
-
-@keyframes fc-fade-up{{from{{opacity:0;transform:translateY(12px);}}to{{opacity:1;transform:translateY(0);}}}}
-
-@media(max-width:600px){{
-    .fc-hero{{padding:1.4rem 1rem 1.3rem;border-radius:18px;}}
-    .fc-hero-title{{font-size:1.3rem;}}
-    .fc-cat-grid{{grid-template-columns:repeat(2,1fr);gap:7px;}}
-    .fc-steps{{padding:10px 12px;}}
+.stFileUploader>div{{background:{INP}!important;
+    border:1.5px dashed {"rgba(99,102,241,0.22)" if dark else "#C7D2FE"}!important;
+    border-radius:14px!important;padding:14px!important;}}
+ 
+.fc-submit-col .stButton>button{{
+    background:linear-gradient(135deg,{A1},{A2})!important;color:#fff!important;
+    border:none!important;border-radius:18px!important;padding:14px 28px!important;
+    font-size:.95rem!important;font-weight:700!important;letter-spacing:-.01em!important;
+    box-shadow:0 6px 22px rgba(99,102,241,0.38)!important;
+    transition:transform .18s,box-shadow .18s,filter .15s!important;}}
+.fc-submit-col .stButton>button:hover{{transform:translateY(-2px)!important;
+    box-shadow:0 10px 32px rgba(99,102,241,0.50)!important;filter:brightness(1.06)!important;}}
+.fc-submit-col .stButton>button:active{{transform:translateY(0) scale(.985)!important;filter:brightness(.96)!important;}}
+ 
+@media(max-width:640px){{
+    .fc-hero{{padding:22px 16px 18px;border-radius:18px;}}
+    .fc-hero-title{{font-size:1.35rem;}}
+    .fc-cat-cell{{}}
     .main .block-container{{padding:1rem .75rem 3rem!important;}}
+    .fc-steps{{padding:10px 10px;}}
 }}
 </style>"""
     st.markdown(css, unsafe_allow_html=True)
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-# IFRAME HTML — cached
+# VOICE IFRAME  (unchanged from v4 — record-again works inside iframe)
 # ─────────────────────────────────────────────────────────────────────────────
+ 
 @st.cache_data(show_spinner=False)
-def _voice_html(lang_code: str) -> str:
-    """
-    Full self-contained voice recorder iframe (proper HTML document).
-    Features:
-     - Live interim transcript shown while speaking
-     - Final transcript highlighted in green
-     - Waveform animation while recording
-     - ✅ Use This Text  →  postMessage to parent bridge
-     - 🔄 Record Again  →  resets state, starts fresh (no page reload)
-    Bridge (separate iframe below) catches postMessage and writes URL param → 1 rerun.
-    """
-    path = os.path.join(os.path.dirname(__file__), "components", "voice_component.html")
-    if os.path.exists(path):
-        with open(path, "r", encoding="utf-8") as f:
+def _voice_iframe_html(lang_code: str) -> str:
+    ext_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "components", "voice_component.html",
+    )
+    if os.path.exists(ext_path):
+        with open(ext_path, "r", encoding="utf-8") as f:
             return f.read().replace("%LANG%", lang_code)
-
+ 
     is_hi = "hi" in lang_code
-    tap   = "बोलने के लिए दबाएं"     if is_hi else "Tap mic to speak"
-    lst   = "🎙️ सुन रहा हूँ…"        if is_hi else "🎙️ Listening…"
-    dn    = "✅ हो गया! नीचे दबाएं"  if is_hi else "✅ Done! Use text below"
-    nth   = "❌ कुछ नहीं सुना"        if is_hi else "❌ Nothing heard. Try again"
-    use   = "✅ इस टेक्स्ट का उपयोग करें" if is_hi else "✅  Use This Text"
-    again = "🔄 दोबारा बोलें"         if is_hi else "🔄  Record Again"
-    lv    = "लाइव ट्रांसक्रिप्ट"      if is_hi else "Live Transcript"
-    lv_ph = "आप जो बोलेंगे वह यहाँ दिखेगा…" if is_hi else "What you speak will appear here…"
-
+    tap   = "बोलने के लिए दबाएं" if is_hi else "Tap to speak"
+    lst   = "🎙️ सुन रहा हूँ…"    if is_hi else "🎙️ Listening…"
+    dn    = "✅ हो गया!"            if is_hi else "✅ Done"
+    nth   = "❌ कुछ नहीं सुना"     if is_hi else "❌ Nothing heard"
+    use   = "✅ उपयोग करें"        if is_hi else "✅ Use This Text"
+    again = "🔄 दोबारा रिकॉर्ड करें" if is_hi else "🔄 Record Again"
+    live  = "लाइव ट्रांसक्रिप्ट"   if is_hi else "Live Transcript"
+ 
     return f"""<!DOCTYPE html>
-<html><head><meta charset="utf-8"><style>
+<html><head><meta charset="utf-8">
+<style>
 *{{box-sizing:border-box;margin:0;padding:0;}}
 body{{font-family:'DM Sans','Segoe UI',system-ui,sans-serif;background:transparent;}}
-
-/* ── outer card ── */
-.vc{{
-    background:linear-gradient(135deg,rgba(99,102,241,.07),rgba(139,92,246,.04));
-    border:1.5px solid rgba(99,102,241,.18);
-    border-radius:20px;padding:18px 16px 14px;text-align:center;
-}}
-.vc-hdr{{
-    font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
-    color:#818CF8;margin-bottom:14px;
-    display:flex;align-items:center;justify-content:center;gap:8px;
-}}
+.vc{{padding:18px 16px 14px;text-align:center;}}
+.vc-hdr{{font-size:.58rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+  color:#818CF8;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;}}
 .vc-hdr::before,.vc-hdr::after{{content:'';flex:1;height:1px;background:rgba(99,102,241,.20);}}
-
-/* ── mic button ── */
-#vbtn{{
-    background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;
-    border-radius:50%;width:68px;height:68px;font-size:1.75rem;cursor:pointer;
-    display:inline-flex;align-items:center;justify-content:center;
-    box-shadow:0 6px 24px rgba(139,92,246,.50);transition:all .18s;
-}}
-#vbtn:hover{{transform:scale(1.08);box-shadow:0 10px 32px rgba(139,92,246,.60);}}
-@keyframes mp{{0%{{box-shadow:0 0 0 0 rgba(236,72,153,.70);}}
-    70%{{box-shadow:0 0 0 22px rgba(236,72,153,0);}}100%{{box-shadow:0 0 0 0 rgba(236,72,153,0);}}}}
-.rec{{animation:mp 1.1s ease-in-out infinite!important;}}
-
-/* ── waveform ── */
-.wf{{
-    display:none;align-items:center;justify-content:center;
-    gap:3px;height:28px;margin:10px auto 0;
-}}
+#vbtn{{background:linear-gradient(135deg,#EC4899,#8B5CF6);color:#fff;border:none;
+  border-radius:50%;width:64px;height:64px;font-size:1.65rem;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 22px rgba(139,92,246,.45);transition:all .18s;}}
+#vbtn:hover{{transform:scale(1.08);}}
+.wf{{display:none;align-items:center;justify-content:center;gap:3px;height:26px;margin:8px auto 0;}}
 .wb{{width:3px;background:#818CF8;border-radius:99px;animation:wv 1.1s ease-in-out infinite;}}
-.wb:nth-child(1){{height:8px;animation-delay:0s;}}
-.wb:nth-child(2){{height:14px;animation-delay:.10s;}}
-.wb:nth-child(3){{height:24px;animation-delay:.20s;}}
-.wb:nth-child(4){{height:17px;animation-delay:.30s;}}
-.wb:nth-child(5){{height:28px;animation-delay:.40s;}}
-.wb:nth-child(6){{height:17px;animation-delay:.50s;}}
+.wb:nth-child(1){{height:8px;}} .wb:nth-child(2){{height:14px;animation-delay:.10s;}}
+.wb:nth-child(3){{height:22px;animation-delay:.20s;}} .wb:nth-child(4){{height:16px;animation-delay:.30s;}}
+.wb:nth-child(5){{height:26px;animation-delay:.40s;}} .wb:nth-child(6){{height:16px;animation-delay:.50s;}}
 .wb:nth-child(7){{height:9px;animation-delay:.60s;}}
-@keyframes wv{{0%,100%{{transform:scaleY(.3);opacity:.4;}}50%{{transform:scaleY(1);opacity:1;}}}}
-
-/* ── status line ── */
-#vstatus{{font-size:.74rem;color:#8892AA;margin:10px 0 0;font-weight:500;min-height:18px;}}
-
-/* ── transcript box ── */
-.vt{{
-    display:none;
-    background:rgba(255,255,255,.06);
-    border:1px solid rgba(99,102,241,.20);
-    border-radius:14px;padding:12px 14px;margin-top:10px;text-align:left;
-}}
-.vtlbl{{
-    font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.10em;
-    color:#818CF8;margin-bottom:7px;display:flex;align-items:center;gap:6px;
-}}
-.vdot{{
-    width:7px;height:7px;border-radius:50%;background:#EC4899;
-    animation:dp .9s infinite;flex-shrink:0;display:none;
-}}
-@keyframes dp{{0%,100%{{opacity:1;transform:scale(1);}}50%{{opacity:.3;transform:scale(.55);}}}}
-
-/* interim text — grey italic (what's being processed) */
-#vi{{
-    color:rgba(180,190,255,.50);font-style:italic;
-    font-size:.78rem;min-height:16px;line-height:1.6;
-    word-break:break-word;
-}}
-/* final text — bright bold (confirmed words) */
-#vf{{
-    font-weight:700;color:#A5B4FC;
-    font-size:.85rem;line-height:1.65;margin-top:5px;
-    word-break:break-word;
-    min-height:18px;
-}}
-/* placeholder shown before any speech */
-.vph{{
-    font-size:.76rem;color:rgba(180,190,255,.30);
-    font-style:italic;padding:4px 0;
-}}
-
-/* ── action buttons row ── */
-.vactions{{
-    display:none;flex-direction:column;gap:7px;margin-top:12px;
-}}
-#vub{{
-    width:100%;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;
-    border:none;border-radius:10px;padding:10px 0;
-    font-size:.78rem;font-weight:800;cursor:pointer;
-    box-shadow:0 4px 16px rgba(99,102,241,.40);
-    transition:all .15s;font-family:'DM Sans','Segoe UI',sans-serif;
-    letter-spacing:.01em;
-}}
-#vub:hover{{transform:translateY(-2px);box-shadow:0 8px 28px rgba(99,102,241,.55);}}
-#vagain{{
-    width:100%;background:rgba(99,102,241,.12);color:#818CF8;
-    border:1.5px solid rgba(99,102,241,.28);
-    border-radius:10px;padding:8px 0;
-    font-size:.76rem;font-weight:700;cursor:pointer;
-    transition:all .15s;font-family:'DM Sans','Segoe UI',sans-serif;
-}}
-#vagain:hover{{background:rgba(99,102,241,.22);transform:translateY(-1px);}}
+@keyframes wv{{0%,100%{{transform:scaleY(.4);opacity:.5;}}50%{{transform:scaleY(1);opacity:1;}}}}
+#vstatus{{font-size:.73rem;color:#8892AA;margin:10px 0 4px;font-weight:500;min-height:18px;}}
+.vt{{display:none;background:rgba(99,102,241,.06);border:1px solid rgba(99,102,241,.18);
+  border-radius:12px;padding:11px 13px;margin-top:10px;text-align:left;}}
+.vtlbl{{font-size:.56rem;font-weight:800;text-transform:uppercase;letter-spacing:.10em;
+  color:#818CF8;margin-bottom:5px;display:flex;align-items:center;gap:5px;}}
+.vdot{{width:6px;height:6px;border-radius:50%;background:#EC4899;animation:dp .9s infinite;flex-shrink:0;display:none;}}
+@keyframes dp{{0%,100%{{opacity:1;transform:scale(1);}}50%{{opacity:.3;transform:scale(.6);}}}}
+#vi{{color:rgba(200,210,255,.40);font-style:italic;font-size:.78rem;min-height:14px;line-height:1.55;}}
+#vf{{font-weight:600;color:#EFF2FF;font-size:.82rem;line-height:1.6;margin-top:4px;word-break:break-word;}}
+.vactions{{display:none;margin-top:10px;gap:8px;}}
+#vub{{flex:1;background:linear-gradient(135deg,#6366F1,#818CF8);color:#fff;border:none;
+  border-radius:9px;padding:9px 0;font-size:.76rem;font-weight:800;cursor:pointer;
+  box-shadow:0 4px 14px rgba(99,102,241,.38);transition:all .15s;font-family:'DM Sans',sans-serif;}}
+#vub:hover{{transform:translateY(-2px);}}
+#vagain{{flex:1;background:rgba(99,102,241,.12);color:#818CF8;
+  border:1.5px solid rgba(99,102,241,.25);border-radius:9px;padding:9px 0;
+  font-size:.76rem;font-weight:700;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}}
+#vagain:hover{{background:rgba(99,102,241,.22);transform:translateY(-2px);}}
+@keyframes mp{{0%{{box-shadow:0 0 0 0 rgba(236,72,153,.65);}}
+  70%{{box-shadow:0 0 0 18px rgba(236,72,153,0);}}100%{{box-shadow:0 0 0 0 rgba(236,72,153,0);}}}}
+.rec{{animation:mp 1.1s ease-in-out infinite!important;background:linear-gradient(135deg,#EF4444,#F87171)!important;}}
 </style></head>
-<body>
-<div class="vc">
-  <div class="vc-hdr">🎤 Voice Input</div>
-  <button id="vbtn" onclick="toggleV()">🎤</button>
-  <div class="wf" id="wf">
-    <div class="wb"></div><div class="wb"></div><div class="wb"></div>
-    <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
-  </div>
-  <div id="vstatus">{tap}</div>
-  <div class="vt" id="vt">
-    <div class="vtlbl">
-      <span class="vdot" id="vdot"></span>📝 {lv}
-    </div>
-    <div id="vi"><span class="vph">{lv_ph}</span></div>
-    <div id="vf"></div>
-  </div>
-  <div class="vactions" id="vactions">
-    <button id="vub"    onclick="sendUp()">{use}</button>
-    <button id="vagain" onclick="doAgain()">{again}</button>
-  </div>
+<body><div class="vc">
+<div class="vc-hdr">🎤 Voice Input</div>
+<button id="vbtn" onclick="toggleV()">🎤</button>
+<div class="wf" id="wf">
+  <div class="wb"></div><div class="wb"></div><div class="wb"></div>
+  <div class="wb"></div><div class="wb"></div><div class="wb"></div><div class="wb"></div>
 </div>
-
+<div id="vstatus">{tap}</div>
+<div class="vt" id="vt">
+  <div class="vtlbl"><span class="vdot" id="vdot"></span>📝 {live}</div>
+  <div id="vi"></div><div id="vf"></div>
+</div>
+<div class="vactions" id="vactions">
+  <button id="vagain" onclick="doAgain()">{again}</button>
+  <button id="vub"    onclick="sendUp()">{use}</button>
+</div>
+</div>
 <script>
-var cap='', rec=null, running=false;
-
-function toggleV(){{ running ? stopV() : startV(); }}
-
+var cap='',rec=null,running=false;
+function toggleV(){{running?stopV():startV();}}
 function startV(){{
-    var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if(!SR){{ setSt('❌ Use Chrome or Edge for voice input','#EF4444'); return; }}
-
-    // reset display
-    cap = '';
-    setEl('vi', '<span class="vph">{lv_ph}</span>');
-    setEl('vf', '');
-    show('vactions', 'none');
-    show('vt', 'block');
-
-    rec = new SR();
-    rec.lang           = '{lang_code}';
-    rec.continuous     = true;
-    rec.interimResults = true;
-
-    rec.onresult = function(e){{
-        var interim='', finalT='';
-        for(var i=0; i<e.results.length; i++){{
-            if(e.results[i].isFinal) finalT += e.results[i][0].transcript + ' ';
-            else interim += e.results[i][0].transcript;
-        }}
-        // Update live transcript — interim grey, final bright
-        document.getElementById('vi').textContent = interim;
-        document.getElementById('vf').textContent = finalT.trim();
-        cap = (finalT + interim).trim();
-    }};
-
-    rec.onerror = function(e){{
-        setSt('❌ ' + e.error, '#EF4444');
-        setIdle();
-    }};
-
-    rec.onend = function(){{
-        // keep continuous recording across silence gaps
-        if(running){{ try{{ rec.start(); }}catch(ex){{ setIdle(); }} return; }}
-        setIdle();
-        if(cap){{
-            document.getElementById('vdot').style.display = 'none';
-            show('vactions', 'flex');
-            setSt('{dn}', '#10B981');
-        }} else {{
-            show('vt', 'none');
-            setSt('{nth}', '#EF4444');
-        }}
-    }};
-
-    try{{ rec.start(); }}
-    catch(e){{ setSt('❌ Could not start microphone', '#EF4444'); return; }}
-
-    running = true;
-    var btn = document.getElementById('vbtn');
-    btn.textContent = '⏹️';
-    btn.classList.add('rec');
-    show('wf', 'flex');
-    document.getElementById('vdot').style.display = 'inline-block';
-    setSt('{lst}', '#F59E0B');
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){{setSt('❌ Browser not supported','#EF4444');return;}}
+  cap='';
+  document.getElementById('vi').textContent='';
+  document.getElementById('vf').textContent='';
+  document.getElementById('vactions').style.display='none';
+  document.getElementById('vt').style.display='block';
+  rec=new SR();rec.lang='{lang_code}';rec.continuous=true;rec.interimResults=true;
+  rec.onresult=function(e){{
+    var interim='',final_='';
+    for(var i=0;i<e.results.length;i++){{
+      if(e.results[i].isFinal)final_+=e.results[i][0].transcript+' ';
+      else interim+=e.results[i][0].transcript;
+    }}
+    document.getElementById('vi').textContent=interim;
+    document.getElementById('vf').textContent=final_;
+    cap=(final_+interim).trim();
+  }};
+  rec.onerror=function(e){{setSt('❌ '+e.error,'#EF4444');setIdle();}};
+  rec.onend=function(){{
+    if(running){{try{{rec.start();}}catch(e){{setIdle();}}return;}}
+    setIdle();
+    if(cap){{document.getElementById('vdot').style.display='none';
+      document.getElementById('vactions').style.display='flex';setSt('{dn}','#10B981');}}
+    else{{document.getElementById('vt').style.display='none';setSt('{nth}','#EF4444');}}
+  }};
+  try{{rec.start();}}catch(e){{setSt('❌ Could not start mic','#EF4444');return;}}
+  running=true;
+  var btn=document.getElementById('vbtn');
+  btn.textContent='⏹️';btn.classList.add('rec');
+  document.getElementById('wf').style.display='flex';
+  document.getElementById('vdot').style.display='inline-block';
+  setSt('{lst}','#F59E0B');
 }}
-
-function stopV(){{
-    running = false;
-    if(rec) try{{ rec.stop(); }}catch(e){{}}
-}}
-
+function stopV(){{running=false;if(rec)try{{rec.stop();}}catch(e){{}}}}
 function setIdle(){{
-    running = false;
-    var btn = document.getElementById('vbtn');
-    btn.textContent = '🎤';
-    btn.classList.remove('rec');
-    show('wf', 'none');
-    document.getElementById('vdot').style.display = 'none';
+  running=false;
+  var btn=document.getElementById('vbtn');
+  btn.textContent='🎤';btn.classList.remove('rec');
+  document.getElementById('wf').style.display='none';
+  document.getElementById('vdot').style.display='none';
 }}
-
+function setSt(t,c){{var e=document.getElementById('vstatus');e.textContent=t;if(c)e.style.color=c;}}
 function doAgain(){{
-    // reset everything and start fresh recording
-    cap = '';
-    setEl('vi', '<span class="vph">{lv_ph}</span>');
-    setEl('vf', '');
-    show('vactions', 'none');
-    show('vt', 'none');
-    setSt('{tap}', '#8892AA');
-    startV();
+  cap='';
+  document.getElementById('vi').textContent='';
+  document.getElementById('vf').textContent='';
+  document.getElementById('vactions').style.display='none';
+  document.getElementById('vt').style.display='none';
+  setSt('{tap}','#8892AA');
+  startV();
 }}
-
 function sendUp(){{
-    if(!cap) return;
-    window.parent.postMessage({{type:'VOICE_RESULT', text:cap}}, '*');
-    setSt('✅ Sent to form!', '#10B981');
-    show('vactions', 'none');
+  if(!cap)return;
+  window.parent.postMessage({{type:'VOICE_RESULT',text:cap}},'*');
+  setSt('✅ Sent to form!','#10B981');
+  document.getElementById('vactions').style.display='none';
 }}
-
-// helpers
-function setEl(id, html){{ document.getElementById(id).innerHTML = html; }}
-function show(id, val){{ document.getElementById(id).style.display = val; }}
-function setSt(t, c){{ var e=document.getElementById('vstatus'); e.textContent=t; e.style.color=c||''; }}
-</script>
-</body></html>"""
-
-
+</script></body></html>"""
+ 
+ 
 @st.cache_data(show_spinner=False)
-def _bridge_html() -> str:
+def _bridge_iframe_html() -> str:
     """
-    Zero-height postMessage bridge — must be a full HTML document.
-    Listens for VOICE_RESULT from voice iframe, writes to URL param → 1 rerun.
-    Guard flag prevents duplicate writes.
+    postMessage bridge.
+    ROOT CAUSE FIX: The old 'window._voiceBridgeInstalled' guard persisted
+    across reruns in the parent frame. After Clear & Re-record, the bridge
+    was already 'installed' so it ignored the new voice message.
+ 
+    FIX: Replace the guard with a timestamp-based debounce (500ms).
+    The listener is re-added on every bridge render (which is fine — it
+    replaces itself). Multiple fires within 500ms are collapsed to one.
+    This means Clear & Re-record always works regardless of how many times
+    the user records.
     """
     return """<!DOCTYPE html>
-<html><head><meta charset="utf-8"></head>
-<body><script>
+<html><head><meta charset="utf-8"></head><body>
+<script>
 (function(){
-  if(window._voiceBridgeInstalled) return;
-  window._voiceBridgeInstalled = true;
-  window.addEventListener('message', function(ev){
+  // Remove any previous listener to avoid duplicates from rerenders
+  if(window._voiceBridgeFn) {
+    window.removeEventListener('message', window._voiceBridgeFn);
+  }
+  var lastSent = 0;
+  window._voiceBridgeFn = function(ev) {
     if(!ev.data || ev.data.type !== 'VOICE_RESULT') return;
     var text = (ev.data.text || '').trim();
     if(!text) return;
+    // Debounce: ignore duplicate fires within 500ms
+    var now = Date.now();
+    if(now - lastSent < 500) return;
+    lastSent = now;
     var u = new URL(window.parent.location.href);
     u.searchParams.set('voice_text', encodeURIComponent(text));
     window.parent.history.pushState({}, '', u);
     window.parent.dispatchEvent(new PopStateEvent('popstate', {state:{}}));
-  });
+  };
+  window.addEventListener('message', window._voiceBridgeFn);
 })();
 </script></body></html>"""
-
-
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# GPS IFRAME  (FIX 4 — does reverse geocode in JS, sends name + coords)
+# ─────────────────────────────────────────────────────────────────────────────
+ 
 @st.cache_data(show_spinner=False)
-def _gps_html(label: str) -> str:
-    return f"""<style>
+def _gps_iframe_html(label: str) -> str:
+    """
+    GPS button that:
+    1. Gets browser coordinates
+    2. Reverse-geocodes via Nominatim IN JS (no extra Python call)
+    3. Sends ALL structured fields as separate URL params:
+       gps_lat, gps_lon, gps_name (display), gps_area, gps_city,
+       gps_district, gps_state, gps_pincode
+    Python reads each field individually so the map card can show
+    structured rows instead of one merged string.
+    """
+    return f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><style>
+*{{box-sizing:border-box;margin:0;padding:0;}}
+body{{font-family:'DM Sans',sans-serif;background:transparent;}}
 #gpsbtn{{background:linear-gradient(135deg,#06b6d4,#6366F1);color:#fff;border:none;
-    border-radius:13px;width:100%;height:49px;font-size:.78rem;font-weight:700;
-    cursor:pointer;font-family:sans-serif;box-shadow:0 4px 14px rgba(6,182,212,.30);transition:transform .18s;}}
-#gpsbtn:hover{{transform:translateY(-2px);}}
-#gpsst{{font-size:.62rem;text-align:center;margin-top:5px;color:#64748B;font-family:sans-serif;min-height:14px;}}
-</style>
+  border-radius:13px;width:100%;height:49px;font-size:.78rem;font-weight:700;
+  cursor:pointer;box-shadow:0 4px 14px rgba(6,182,212,.28);
+  transition:transform .18s,box-shadow .18s;}}
+#gpsbtn:hover{{transform:translateY(-2px);box-shadow:0 7px 22px rgba(6,182,212,.42);}}
+#gpsbtn:disabled{{opacity:.55;cursor:not-allowed;transform:none;}}
+#gpsst{{font-size:.60rem;text-align:center;margin-top:6px;color:#64748B;
+  min-height:34px;line-height:1.45;word-break:break-word;padding:0 2px;}}
+</style></head><body>
 <button id="gpsbtn" onclick="doGPS()">📍 GPS</button>
 <div id="gpsst">{label}</div>
 <script>
 function doGPS(){{
-  var s=document.getElementById('gpsst');s.textContent='⏳ Fetching…';s.style.color='#d97706';
-  if(!navigator.geolocation){{s.textContent='❌ Not supported';s.style.color='#dc2626';return;}}
+  var btn = document.getElementById('gpsbtn');
+  var s   = document.getElementById('gpsst');
+  btn.disabled = true;
+  s.textContent = '⏳ Getting location…';
+  s.style.color = '#d97706';
+ 
+  if(!navigator.geolocation){{
+    s.textContent = '❌ Geolocation not supported';
+    s.style.color = '#dc2626';
+    btn.disabled = false;
+    return;
+  }}
+ 
   navigator.geolocation.getCurrentPosition(
-    function(p){{s.textContent='✅ Got it!';s.style.color='#10b981';
-      var u=new URL(window.parent.location.href);
-      u.searchParams.set('gps_lat',p.coords.latitude);u.searchParams.set('gps_lon',p.coords.longitude);
-      window.parent.history.pushState({{}},'',u);
-      window.parent.dispatchEvent(new PopStateEvent('popstate',{{state:{{}}}}));}},
-    function(e){{s.textContent='❌ '+e.message;s.style.color='#dc2626';}},
-    {{timeout:10000,enableHighAccuracy:true}});
+    function(pos){{
+      var lat = pos.coords.latitude;
+      var lon = pos.coords.longitude;
+      s.textContent = '📍 Fetching area name…';
+      s.style.color = '#10b981';
+ 
+      fetch(
+        'https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=' + lat +
+        '&lon=' + lon + '&zoom=18&addressdetails=1',
+        {{ headers: {{'User-Agent': 'JanSevaPortal/1.0'}} }}
+      )
+      .then(function(r){{ return r.ok ? r.json() : null; }})
+      .then(function(data){{
+        var area='', city='', district='', state='', pin='';
+        if(data && data.address){{
+          var a = data.address;
+          area     = a.neighbourhood || a.suburb || a.village || a.hamlet || a.residential || '';
+          city     = a.city || a.town || '';
+          district = a.county || a.district || a.state_district || '';
+          state    = a.state || '';
+          pin      = a.postcode || '';
+        }}
+        // Build display string
+        var parts = [area, city, district, state].filter(function(p){{ return p && p.trim(); }});
+        var base  = parts.length ? parts.join(', ') : (lat.toFixed(5) + ', ' + lon.toFixed(5));
+        var disp  = pin ? base + ' — ' + pin : base;
+ 
+        s.textContent = '✅ ' + disp;
+        s.style.color = '#10b981';
+ 
+        // Send all fields to parent
+        var u = new URL(window.parent.location.href);
+        u.searchParams.set('gps_lat',      lat);
+        u.searchParams.set('gps_lon',      lon);
+        u.searchParams.set('gps_name',     encodeURIComponent(disp));
+        u.searchParams.set('gps_area',     encodeURIComponent(area));
+        u.searchParams.set('gps_city',     encodeURIComponent(city));
+        u.searchParams.set('gps_district', encodeURIComponent(district));
+        u.searchParams.set('gps_state',    encodeURIComponent(state));
+        u.searchParams.set('gps_pincode',  encodeURIComponent(pin));
+        window.parent.history.pushState({{}}, '', u);
+        window.parent.dispatchEvent(new PopStateEvent('popstate', {{state:{{}}}}));
+        btn.disabled = false;
+      }})
+      .catch(function(){{
+        // Geocode failed — send raw coords only
+        var disp = lat.toFixed(5) + ', ' + lon.toFixed(5);
+        s.textContent = '✅ Location detected';
+        s.style.color = '#10b981';
+        var u = new URL(window.parent.location.href);
+        u.searchParams.set('gps_lat',  lat);
+        u.searchParams.set('gps_lon',  lon);
+        u.searchParams.set('gps_name', encodeURIComponent(disp));
+        window.parent.history.pushState({{}}, '', u);
+        window.parent.dispatchEvent(new PopStateEvent('popstate', {{state:{{}}}}));
+        btn.disabled = false;
+      }});
+    }},
+    function(err){{
+      s.textContent = '❌ ' + err.message;
+      s.style.color = '#dc2626';
+      btn.disabled = false;
+    }},
+    {{ timeout: 12000, enableHighAccuracy: true }}
+  );
 }}
-</script>"""
-
-
-def _map_html(lat: float, lon: float, dark: bool) -> str:
+</script></body></html>"""
+ 
+ 
+def _map_html(lat: float, lon: float, dark: bool,
+              area: str = "", city: str = "", district: str = "",
+              state: str = "", pincode: str = "", display: str = "") -> str:
+    """
+    Leaflet map with a rich popup showing all location fields:
+    Area / Neighbourhood, City, District, State, PIN Code.
+    Falls back to raw display string if structured fields are empty.
+    """
     bc = "#1E2A3D" if dark else "#E2E8F4"
+ 
+    # Build popup HTML rows — only non-empty fields shown
+    rows = []
+    if area:     rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>Area</td><td style='font-weight:600;font-size:12px;'>{area}</td></tr>")
+    if city:     rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>City / Town</td><td style='font-weight:600;font-size:12px;'>{city}</td></tr>")
+    if district: rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>District</td><td style='font-weight:600;font-size:12px;'>{district}</td></tr>")
+    if state:    rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>State</td><td style='font-weight:600;font-size:12px;'>{state}</td></tr>")
+    if pincode:  rows.append(f"<tr><td style='color:#94A3B8;padding:2px 8px 2px 0;font-size:11px;'>PIN Code</td><td style='font-weight:600;font-size:12px;letter-spacing:.04em;'>{pincode}</td></tr>")
+ 
+    if rows:
+        popup_inner = (
+            "<div style='font-family:sans-serif;min-width:170px;'>"
+            "<div style='font-size:13px;font-weight:700;margin-bottom:6px;color:#1E293B;'>"
+            "📍 Your Location</div>"
+            "<table style='border-collapse:collapse;'>" + "".join(rows) + "</table>"
+            "</div>"
+        )
+    else:
+        # No structured data — show plain display string or coords
+        label = display or f"{lat:.5f}, {lon:.5f}"
+        # Escape single quotes for JS string safety
+        label = label.replace("'", "\\'").replace('"', '\\"')
+        popup_inner = (
+            "<div style='font-family:sans-serif;'>"
+            "<b style='font-size:13px;'>📍 Your Location</b>"
+            f"<div style='font-size:12px;color:#475569;margin-top:4px;'>{label}</div>"
+            "</div>"
+        )
+ 
+    # Escape the popup HTML for embedding in a JS string
+    popup_js = popup_inner.replace("\\", "\\\\").replace("'", "\\'").replace("\n", "")
+ 
     return (
-        "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>"
-        "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>"
-        f"<div id='cmap' style='height:218px;border-radius:16px;overflow:hidden;"
-        f"border:1.5px solid {bc};box-shadow:0 4px 18px rgba(15,23,42,.08);margin-top:8px;'></div>"
-        "<script>(function(){"
-        "if(window._cmapI){window._cmapI.remove();}"
-        f"var m=L.map('cmap',{{zoomControl:true,attributionControl:false}}).setView([{lat},{lon}],15);"
-        "window._cmapI=m;"
-        "L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',"
-        "{maxZoom:19,subdomains:['a','b','c']}).addTo(m);"
-        "var ic=L.divIcon({className:'',"
-        "html:'<div style=\"position:relative;width:32px;height:40px;\">"
-        "<div style=\"width:32px;height:32px;background:linear-gradient(135deg,#6366F1,#8B5CF6);"
-        "border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2.5px solid #fff;"
-        "box-shadow:0 3px 14px rgba(99,102,241,.50);\"></div>"
-        "<div style=\"position:absolute;top:6px;left:6px;font-size:13px;transform:rotate(45deg);\">📍</div>"
-        "</div>',"
-        "iconSize:[32,40],iconAnchor:[16,40]});"
-        f"L.marker([{lat},{lon}],{{icon:ic}}).addTo(m).bindPopup('<b>📍 Your Location</b>').openPopup();"
-        "})();</script>"
+        f"<!DOCTYPE html><html><head><meta charset='utf-8'>"
+        f"<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>"
+        f"<style>"
+        f"body{{margin:0;padding:0;}}"
+        f"#cmap{{height:230px;border-radius:16px;overflow:hidden;"
+        f"border:1.5px solid {bc};box-shadow:0 4px 18px rgba(15,23,42,.08);}}"
+        f".leaflet-popup-content-wrapper{{border-radius:12px!important;"
+        f"box-shadow:0 8px 28px rgba(0,0,0,.15)!important;padding:4px!important;}}"
+        f".leaflet-popup-content{{margin:10px 14px!important;}}"
+        f"</style>"
+        f"</head><body><div id='cmap'></div>"
+        f"<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>"
+        f"<script>(function(){{"
+        f"var m=L.map('cmap',{{zoomControl:true,attributionControl:false}}).setView([{lat},{lon}],16);"
+        f"L.tileLayer('https://{{s}}.tile.openstreetmap.org/{{z}}/{{x}}/{{y}}.png',"
+        f"{{maxZoom:19,subdomains:['a','b','c']}}).addTo(m);"
+        # Custom pin marker
+        f"var ic=L.divIcon({{className:'',"
+        f"html:'<div style=\"position:relative;width:36px;height:44px;\">"
+        f"<div style=\"width:36px;height:36px;"
+        f"background:linear-gradient(135deg,#6366F1,#8B5CF6);"
+        f"border-radius:50% 50% 50% 0;transform:rotate(-45deg);"
+        f"border:3px solid #fff;box-shadow:0 4px 16px rgba(99,102,241,.55);\"></div>"
+        f"<div style=\"position:absolute;top:5px;left:50%;transform:translateX(-50%);"
+        f"font-size:14px;\">📍</div></div>',"
+        f"iconSize:[36,44],iconAnchor:[18,44],popupAnchor:[0,-44]}});"
+        f"L.marker([{lat},{lon}],{{icon:ic}}).addTo(m)"
+        f".bindPopup('{popup_js}',{{maxWidth:280}}).openPopup();"
+        f"}})();</script></body></html>"
     )
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-# RENDER FUNCTIONS — each builds ONE string then calls st.markdown ONCE
+# RENDER FUNCTIONS
 # ─────────────────────────────────────────────────────────────────────────────
-def _render_hero(lang: str):
-    title = "File a Complaint" if lang == "en" else "शिकायत दर्ज करें"
-    sub   = ("Speak or type — AI routes it to the right department instantly."
-              if lang == "en" else "बोलें या टाइप करें — AI तुरंत सही विभाग को भेजेगा।")
-    v_lbl = "Voice" if lang == "en" else "आवाज़"
-    e_lbl = "Emergency" if lang == "en" else "आपातकाल"
-    ai_lbl= "AI-Powered" if lang == "en" else "AI सहायता"
-    html = (
+ 
+def _render_hero(lang: str) -> None:
+    title  = "File a Complaint"  if lang == "en" else "शिकायत दर्ज करें"
+    sub    = ("Speak or type — AI routes it to the right department instantly."
+               if lang == "en" else "बोलें या टाइप करें — AI तुरंत सही विभाग को भेजेगा।")
+    v_lbl  = "Voice"      if lang == "en" else "आवाज़"
+    e_lbl  = "Emergency"  if lang == "en" else "आपातकाल"
+    ai_lbl = "AI-Powered" if lang == "en" else "AI सहायता"
+    st.markdown(
         "<div class='fc-hero'>"
-        "<div class='fc-hero-eyebrow'>"
-        "<span class='fc-hero-dot'></span>"
-        + ai_lbl +
-        "</div>"
+        "<div class='fc-hero-eyebrow'><span class='fc-hero-dot'></span>" + ai_lbl + "</div>"
         "<div class='fc-hero-title'>📢 " + title + "</div>"
         "<div class='fc-hero-sub'>" + sub + "</div>"
         "<div class='fc-hero-chips'>"
@@ -4163,19 +4303,18 @@ def _render_hero(lang: str):
         "<span class='fc-chip'>📍 GPS</span>"
         "<span class='fc-chip'>🤖 AI</span>"
         "<span class='fc-chip'>🚨 " + e_lbl + "</span>"
-        "</div></div>"
+        "</div></div>",
+        unsafe_allow_html=True,
     )
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def _render_steps(lang: str, step: int):
+ 
+ 
+def _render_steps(lang: str, step: int) -> None:
     labels = (["Voice","Category","Location","Photo","Submit"]
               if lang == "en" else ["आवाज़","श्रेणी","स्थान","फोटो","जमा"])
     icons  = ["🎤","📂","📍","📷","🚀"]
-    html = "<div class='fc-steps'>"
+    html   = "<div class='fc-steps'>"
     for i, (ic, lb) in enumerate(zip(icons, labels)):
-        done = i <= step
-        cls  = "done" if done else "idle"
+        cls = "done" if i <= step else "idle"
         html += (
             "<div class='fc-step-col'>"
             "<div class='fc-step-circle " + cls + "'>" + ic + "</div>"
@@ -4183,20 +4322,17 @@ def _render_steps(lang: str, step: int):
             "</div>"
         )
         if i < 4:
-            bar_cls = "done" if i < step else ""
-            html += "<div class='fc-step-bar " + bar_cls + "'></div>"
-    html += "</div>"
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def _render_sec(icon: str, label: str):
+            html += "<div class='fc-step-bar " + ("done" if i < step else "idle") + "'></div>"
+    st.markdown(html + "</div>", unsafe_allow_html=True)
+ 
+ 
+def _render_sec(icon: str, label: str) -> None:
     st.markdown("<div class='fc-sec'>" + icon + " " + label + "</div>", unsafe_allow_html=True)
-
-
+ 
 def _render_voice(lang: str):
     """
     Voice section — iframe recorder + bridge + Streamlit-side result display.
-
+ 
     FLOW:
       1. User clicks mic in iframe → speaks → clicks "Use This Text"
          → postMessage → bridge writes to URL param → _ingest_query_params()
@@ -4206,19 +4342,19 @@ def _render_voice(lang: str):
          so the iframe shows clean initial state again.
     """
     import html as _html_mod
-
+ 
     lang_code = "hi-IN" if lang == "hi" else "en-IN"
     lbl = "Voice Input" if lang == "en" else "आवाज़ इनपुट"
     _render_sec("🎤", lbl)
-
+ 
     # ── iframe (stable — cached, never remounts unless lang changes) ──────
     st.markdown("<div class='fc-voice-wrap'>", unsafe_allow_html=True)
     st.components.v1.html(_voice_html(lang_code), height=260)
     st.markdown("</div>", unsafe_allow_html=True)
-
+ 
     # ── bridge (zero-height, catches postMessage from iframe) ─────────────
     st.components.v1.html(_bridge_html(), height=0)
-
+ 
     # ── Streamlit-side: show captured text + action buttons ───────────────
     vt = fc()["voice_text"]
     if vt:
@@ -4228,11 +4364,11 @@ def _render_voice(lang: str):
         _GRN_T  = "#4ADE80" if dark else "#166534"
         _TXT    = "#EFF2FF" if dark else "#0B1428"
         _A1     = "#6366F1"
-
+ 
         cap_lbl   = "Voice Captured — you can edit this text below" if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित कर सकते हैं"
         clear_lbl = "✕ Clear & Re-record" if lang == "en" else "✕ मिटाएं और दोबारा बोलें"
         edit_note = "✅ This text has been filled in the description below — edit freely." if lang == "en" else "✅ यह टेक्स्ट नीचे विवरण में भरा गया है — स्वतंत्र रूप से संपादित करें।"
-
+ 
         # pill showing full captured text
         safe_vt = _html_mod.escape(vt)
         pill_html = (
@@ -4248,7 +4384,7 @@ def _render_voice(lang: str):
             "</div>"
         )
         st.markdown(pill_html, unsafe_allow_html=True)
-
+ 
         # action row: Clear button (left) + info note (right)
         ca, cb = st.columns([1, 3])
         with ca:
@@ -4269,92 +4405,83 @@ def _render_voice(lang: str):
                 "padding:6px 4px;line-height:1.5;'>" + edit_note + "</div>",
                 unsafe_allow_html=True,
             )
-
+ 
         # PRE-SEED textarea widget — runs BEFORE st.text_area() below so the
         # widget picks up the voice text on the SAME render cycle it arrived.
         if "_fc_desc" not in st.session_state or st.session_state.get("_fc_desc") == "":
             st.session_state["_fc_desc"] = vt
-
-
-def _render_category(lang: str):
-    cats = {
-        "water":       ("💧", "Water"       if lang=="en" else "पानी"),
-        "electricity": ("⚡", "Electricity"  if lang=="en" else "बिजली"),
-        "road":        ("🛣️","Road"          if lang=="en" else "सड़क"),
-        "waste":       ("🗑️","Waste"         if lang=="en" else "कचरा"),
-        "drainage":    ("🌊","Drainage"      if lang=="en" else "नाला"),
-        "health":      ("🏥","Health"        if lang=="en" else "स्वास्थ्य"),
-        "other":       ("📋","Other"         if lang=="en" else "अन्य"),
+ 
+ 
+ 
+def _render_category(lang: str) -> None:
+    cats: dict[str, tuple[str, str]] = {
+        "water":       ("💧", "Water"        if lang == "en" else "पानी"),
+        "electricity": ("⚡", "Electricity"   if lang == "en" else "बिजली"),
+        "road":        ("🛣️", "Road"          if lang == "en" else "सड़क"),
+        "waste":       ("🗑️", "Waste"         if lang == "en" else "कचरा"),
+        "drainage":    ("🌊", "Drainage"      if lang == "en" else "नाला"),
+        "health":      ("🏥", "Health"        if lang == "en" else "स्वास्थ्य"),
+        "other":       ("📋", "Other"         if lang == "en" else "अन्य"),
     }
-    keys = list(cats.keys())
-    _render_sec("📂", "Select Category" if lang=="en" else "श्रेणी चुनें")
-
-    # Hidden radio (state)
-    def _on_cat():
-        fc_set(category=st.session_state["_fc_cat_radio"])
-
-    current_idx = keys.index(fc()["category"]) if fc()["category"] in keys else 0
-    st.radio("cat_r", options=keys,
-             format_func=lambda k: cats[k][0] + " " + cats[k][1],
-             index=current_idx, key="_fc_cat_radio", on_change=_on_cat,
-             label_visibility="collapsed", horizontal=True)
-
-    # Visual grid
-    ac = fc()["category"]
-    grid = "<div class='fc-cat-grid'>"
-    for k, (icon, label) in cats.items():
-        sel = " sel" if k == ac else ""
-        grid += (
-            "<div class='fc-cat-btn" + sel + "' onclick=\"selectCat('" + k + "')\">"
-            "<span class='fc-cat-icon'>" + icon + "</span>"
-            "<span class='fc-cat-lbl'>" + label + "</span>"
-            "</div>"
-        )
-    grid += (
-        "</div>"
-        "<script>"
-        "function selectCat(key){"
-        "var inputs=window.parent.document.querySelectorAll('div[data-testid=\"stRadio\"] input[type=\"radio\"]');"
-        "inputs.forEach(function(inp){if(inp.value===key)inp.click();});}"
-        "</script>"
-    )
-    st.markdown(grid, unsafe_allow_html=True)
-
-
-def _render_emergency(lang: str):
-    chk_lbl = ("⚠️ This is an emergency (fire, accident, water leakage, etc.)"
-               if lang == "en" else "⚠️ यह आपातकालीन है (आग, दुर्घटना, पानी का रिसाव आदि)")
+    _render_sec("📂", "Select Category" if lang == "en" else "श्रेणी चुनें")
+ 
+    active    = fc()["category"]
+    keys      = list(cats.keys())
+    col_count = 4
+    padded    = keys + [None] * ((-len(keys)) % col_count)
+    rows      = [padded[i:i+col_count] for i in range(0, len(padded), col_count)]
+ 
+    for row in rows:
+        cols = st.columns(col_count, gap="small")
+        for col, k in zip(cols, row):
+            if k is None:
+                continue
+            icon, label = cats[k]
+            cls = "fc-cat-cell fc-cat-active" if k == active else "fc-cat-cell"
+            with col:
+                st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+                def _make_select(key: str):
+                    def _select(): fc_set(category=key)
+                    return _select
+                st.button(
+                    f"{icon}\n{label}",
+                    key=f"fc_cat_{k}",
+                    on_click=_make_select(k),
+                    use_container_width=True,
+                )
+                st.markdown("</div>", unsafe_allow_html=True)
+ 
+ 
+def _render_emergency(lang: str) -> None:
+    mode_lbl = "Emergency Mode" if lang == "en" else "आपातकालीन मोड"
+    chk_lbl  = ("⚠️ This is an emergency (fire, accident, water leakage, etc.)"
+                 if lang == "en" else "⚠️ यह आपातकालीन है (आग, दुर्घटना, पानी का रिसाव आदि)")
     warn_txt = ("Emergency complaints receive highest priority and immediate alerts."
                 if lang == "en" else "आपातकालीन शिकायतें तुरंत उच्चतम प्राथमिकता पर भेजी जाती हैं।")
-    mode_lbl = "Emergency Mode" if lang == "en" else "आपातकालीन मोड"
-
-    def _on_emg():
-        fc_set(is_emergency=st.session_state["_fc_emergency"])
-
-    html_top = "<div class='fc-emg'><div class='fc-emg-title'>🚨 " + mode_lbl + "</div>"
-    st.markdown(html_top, unsafe_allow_html=True)
+ 
+    def _on_emg(): fc_set(is_emergency=st.session_state["_fc_emergency"])
+ 
+    st.markdown("<div class='fc-emg'><div class='fc-emg-title'>🚨 " + mode_lbl + "</div>",
+                unsafe_allow_html=True)
     st.checkbox(chk_lbl, value=fc()["is_emergency"], key="_fc_emergency", on_change=_on_emg)
     if fc()["is_emergency"]:
-        st.markdown(
-            "<div class='fc-emg-warn'>🚨 " + warn_txt + "</div>",
-            unsafe_allow_html=True,
-        )
+        st.markdown("<div class='fc-emg-warn'>🚨 " + warn_txt + "</div>", unsafe_allow_html=True)
     st.markdown("</div>", unsafe_allow_html=True)
-
-
+ 
+ 
 def _render_description(lang: str):
     ph = ("Describe the issue — what happened, where, how severe…"
           if lang == "en" else "समस्या विस्तार से बताएं — क्या हुआ, कहाँ, कितना गंभीर…")
     lbl = "Describe Your Issue" if lang == "en" else "समस्या का विवरण"
     _render_sec("📝", lbl)
-
+ 
     def _on_desc():
         fc_set(description=st.session_state["_fc_desc"], voice_applied=False)
-
+ 
     default_val = fc()["description"] or fc()["voice_text"]
     st.text_area("", value=default_val, placeholder=ph, key="_fc_desc",
                  height=118, label_visibility="collapsed", on_change=_on_desc)
-
+ 
     if fc()["voice_applied"] and fc()["voice_text"]:
         note = "🎤 Voice text applied — edit freely above." if lang=="en" else "🎤 आवाज़ टेक्स्ट लागू — ऊपर संपादित करें।"
         st.markdown(
@@ -4363,127 +4490,205 @@ def _render_description(lang: str):
             "color:#059669;margin-top:4px;'>" + note + "</div>",
             unsafe_allow_html=True,
         )
-
-
-def _render_ai_preview(lang: str, desc: str, is_emg: bool):
+ 
+ 
+def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
     if not desc.strip():
         return
-
-    def _predict(text, sel):
+ 
+    def _local(text: str, sel: str) -> tuple[str, str]:
         tl = text.lower()
-        if   any(w in tl for w in ["water","पानी","tap","leak","pipeline","jal"]): c = "water"
-        elif any(w in tl for w in ["electricity","बिजली","power","light","voltage"]): c = "electricity"
-        elif any(w in tl for w in ["road","सड़क","pothole","street","lane"]): c = "road"
-        elif any(w in tl for w in ["garbage","कचरा","waste","dump","litter"]): c = "waste"
-        elif any(w in tl for w in ["drain","नाला","sewer","blockage","flood"]): c = "drainage"
-        elif any(w in tl for w in ["hospital","स्वास्थ्य","clinic","doctor"]): c = "health"
-        else: c = sel if sel != "other" else "other"
-        urgent = ["urgent","emergency","critical","danger","fire","injury","collapse"]
-        return c, "high" if (any(w in tl for w in urgent) or is_emg) else "medium"
-
+        if   any(w in tl for w in ["water","पानी","tap","leak","pipeline"]): cat = "water"
+        elif any(w in tl for w in ["electricity","बिजली","power","light"]): cat = "electricity"
+        elif any(w in tl for w in ["road","सड़क","pothole","street"]): cat = "road"
+        elif any(w in tl for w in ["garbage","कचरा","waste","dump"]): cat = "waste"
+        elif any(w in tl for w in ["drain","नाला","sewer","flood"]): cat = "drainage"
+        elif any(w in tl for w in ["hospital","स्वास्थ्य","clinic"]): cat = "health"
+        else: cat = sel if sel != "other" else "other"
+        urgent = ["urgent","emergency","critical","fire","injury","collapse","आग","खतरा"]
+        return cat, "high" if (any(w in tl for w in urgent) or is_emg) else "medium"
+ 
     try:
-        from backend.routers.complaints import ai_classify
+        from backend.routers.complaints import ai_classify  # type: ignore[import]
         ai_cat, ai_pri = ai_classify(desc, fc()["category"])
     except Exception:
-        ai_cat, ai_pri = _predict(desc, fc()["category"])
-
+        ai_cat, ai_pri = _local(desc, fc()["category"])
+ 
     PRI = {
         "high":   ("#FEF2F2","#BE123C","#FECACA","🔴"),
         "medium": ("#FFFBEB","#B45309","#FDE68A","🟡"),
         "low":    ("#F0FDF4","#166534","#A7F3D0","🟢"),
     }
     pb, pt, pbd, pi = PRI.get(ai_pri, PRI["medium"])
-    hint = ("Auto-detected — adjust category above if needed."
-            if lang == "en" else "स्वतः पहचाना — ऊपर श्रेणी बदल सकते हैं।")
-    cat_lbl  = "Category" if lang == "en" else "श्रेणी"
-    pri_lbl  = "Priority"  if lang == "en" else "प्राथमिकता"
-
-    html = (
+    cat_lbl = "Category" if lang == "en" else "श्रेणी"
+    pri_lbl = "Priority"  if lang == "en" else "प्राथमिकता"
+    hint    = "Auto-detected — adjust category above if needed." if lang == "en" else "स्वतः पहचाना — ऊपर बदल सकते हैं।"
+ 
+    st.markdown(
         "<div class='fc-ai'>"
-        "<div class='fc-ai-head'>"
-        "<div class='fc-ai-icon'>🤖</div>"
-        "<span class='fc-ai-lbl'>AI Classification Preview</span>"
-        "</div>"
+        "<div class='fc-ai-head'><div class='fc-ai-icon'>🤖</div>"
+        "<span class='fc-ai-lbl'>AI Classification Preview</span></div>"
         "<div class='fc-ai-pills'>"
         "<div class='fc-ai-pill' style='background:rgba(99,102,241,0.09);"
-        "border-color:rgba(99,102,241,0.20);color:#3730A3;'>"
-        "<span style='font-size:.60rem;opacity:.7;'>" + cat_lbl + "</span>"
-        "📂 " + ai_cat.title() +
-        "</div>"
+        "border-color:rgba(99,102,241,0.22);color:#3730A3;'>"
+        "<span style='font-size:.60rem;opacity:.7;'>" + cat_lbl + "</span> 📂 " + ai_cat.title() + "</div>"
         "<div class='fc-ai-pill' style='background:" + pb + ";border-color:" + pbd + ";color:" + pt + ";'>"
-        "<span style='font-size:.60rem;opacity:.7;'>" + pri_lbl + "</span>"
-        + pi + " " + ai_pri.title() +
-        "</div>"
+        "<span style='font-size:.60rem;opacity:.7;'>" + pri_lbl + "</span> " + pi + " " + ai_pri.title() + "</div>"
         "</div>"
         "<div class='fc-ai-hint'>✨ " + hint + "</div>"
-        "</div>"
+        "</div>",
+        unsafe_allow_html=True,
     )
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def _render_location(lang: str, dark: bool):
-    lbl = "Location" if lang == "en" else "स्थान"
-    _render_sec("📍", lbl)
-
-    gc1, gc2 = st.columns([1, 3])
-    with gc1:
+ 
+ 
+def _render_location(lang: str, dark: bool) -> None:
+    _render_sec("📍", "Location" if lang == "en" else "स्थान")
+ 
+    col_gps, col_loc = st.columns([1, 3])
+    with col_gps:
         auto_lbl = "Auto-detect" if lang == "en" else "स्थान पता करें"
-        st.components.v1.html(_gps_html(auto_lbl), height=72)
-    with gc2:
+        st.components.v1.html(_gps_iframe_html(auto_lbl), height=88)
+ 
+    with col_loc:
         def _on_loc():
-            fc_set(location_name=st.session_state["_fc_location"], _gps_ingested=False)
-        st.text_input("", value=fc()["location_name"],
-                      placeholder="Area, colony, or nearby landmark" if lang=="en" else "क्षेत्र, कॉलोनी या लैंडमार्क",
-                      key="_fc_location", label_visibility="collapsed", on_change=_on_loc)
-
+            # Manual edit → clear structured GPS fields, keep raw text
+            fc_set(
+                location_name = st.session_state["_fc_location"],
+                _gps_ingested = False,
+                loc_area="", loc_city="", loc_district="",
+                loc_state="", loc_pincode="",
+            )
+ 
+        st.text_input(
+            "",
+            value            = fc()["location_name"],
+            placeholder      = ("Area, colony or nearby landmark"
+                                 if lang == "en" else "क्षेत्र, कॉलोनी या लैंडमार्क"),
+            key              = "_fc_location",
+            label_visibility = "collapsed",
+            on_change        = _on_loc,
+        )
+ 
+    # ── Structured location detail card (only when GPS was used) ─────────────
     state = fc()
+    if state["_gps_ingested"] and (state["loc_area"] or state["loc_city"] or state["loc_state"]):
+        CARD  = "#0D1220" if dark else "#FFFFFF"
+        BOR   = "#1E2A3D" if dark else "#E2E8F4"
+        TXT   = "#EFF2FF" if dark else "#0B1428"
+        SUB   = "#7C8FAC" if dark else "#64748B"
+        GRN   = "#10B981"
+        GRN_BG  = "#071A10" if dark else "#F0FDF4"
+        GRN_BD  = "#166534" if dark else "#86EFAC"
+        GRN_T   = "#4ADE80" if dark else "#166534"
+ 
+        # Build rows for each non-empty field
+        def _row(label: str, value: str, icon: str) -> str:
+            if not value:
+                return ""
+            return (
+                f"<div style='display:flex;align-items:center;gap:10px;"
+                f"padding:6px 0;border-bottom:1px solid {BOR};'>"
+                f"<span style='font-size:.88rem;flex-shrink:0;'>{icon}</span>"
+                f"<div style='flex:1;'>"
+                f"<div style='font-size:.55rem;font-weight:700;text-transform:uppercase;"
+                f"letter-spacing:.08em;color:{SUB};margin-bottom:1px;'>{label}</div>"
+                f"<div style='font-size:.82rem;font-weight:600;color:{TXT};'>{value}</div>"
+                f"</div></div>"
+            )
+ 
+        rows_html = (
+            _row("Area / Neighbourhood", state["loc_area"],    "🏘️") +
+            _row("City / Town",          state["loc_city"],    "🏙️") +
+            _row("District",             state["loc_district"],"🗺️") +
+            _row("State",                state["loc_state"],   "📍") +
+            _row("PIN Code",             state["loc_pincode"], "📮")
+        )
+ 
+        # Coords footer
+        lat_s = f"{state['lat']:.6f}"
+        lon_s = f"{state['lon']:.6f}"
+ 
+        card_html = (
+            f"<div style='background:{GRN_BG};border:1.5px solid {GRN_BD};"
+            f"border-left:4px solid {GRN};border-radius:14px;"
+            f"padding:12px 16px;margin-bottom:10px;'>"
+            f"<div style='font-size:.56rem;font-weight:800;text-transform:uppercase;"
+            f"letter-spacing:.09em;color:{GRN_T};margin-bottom:8px;"
+            f"display:flex;align-items:center;gap:7px;'>"
+            f"✅ GPS Location Detected</div>"
+            f"{rows_html}"
+            f"<div style='font-size:.60rem;color:{SUB};margin-top:8px;"
+            f"font-family:monospace;'>🌐 {lat_s}, {lon_s}</div>"
+            f"</div>"
+        )
+        st.markdown(card_html, unsafe_allow_html=True)
+ 
+    # ── Map — only re-renders when coords change ──────────────────────────────
     lat, lon = state["lat"], state["lon"]
     if lat != state["_map_lat"] or lon != state["_map_lon"]:
         fc_set(_map_lat=lat, _map_lon=lon)
-    st.components.v1.html(_map_html(state["_map_lat"], state["_map_lon"], dark), height=238)
-
-
+ 
+    st.components.v1.html(
+        _map_html(
+            lat      = state["_map_lat"],
+            lon      = state["_map_lon"],
+            dark     = dark,
+            area     = state.get("loc_area", ""),
+            city     = state.get("loc_city", ""),
+            district = state.get("loc_district", ""),
+            state    = state.get("loc_state", ""),
+            pincode  = state.get("loc_pincode", ""),
+            display  = state["location_name"],
+        ),
+        height=252,
+    )
+ 
+ 
 def _render_photo(lang: str):
-    lbl     = "Attach a Photo" if lang == "en" else "फोटो संलग्न करें"
-    opt_lbl = "Optional" if lang == "en" else "वैकल्पिक"
-    note    = "Photos help resolve complaints 3× faster" if lang == "en" else "फोटो से शिकायतें 3 गुना तेज़ हल होती हैं"
-    hint    = "JPG · PNG · WEBP · Max 5 MB" if lang == "en" else "JPG · PNG · WEBP · अधिकतम 5 MB"
-    ready   = "Photo Ready" if lang == "en" else "फोटो तैयार"
+    lbl      = "Attach a Photo" if lang == "en" else "फोटो संलग्न करें"
+    opt_lbl  = "Optional"       if lang == "en" else "वैकल्पिक"
+    note     = "Photos help resolve complaints 3× faster" if lang == "en" else "फोटो से 3 गुना तेज़ समाधान"
+    hint     = "JPG · PNG · WEBP · Max 5 MB"
 
     sec_html = (
         "<div class='fc-sec'>📷 " + lbl +
-        "&nbsp;<span style='font-size:.54rem;background:rgba(99,102,241,0.12);"
+        " &nbsp;<span style='font-size:.54rem;background:rgba(99,102,241,0.12);"
         "color:#6366F1;border-radius:6px;padding:2px 7px;font-weight:700;'>"
         + opt_lbl + "</span></div>"
     )
     st.markdown(sec_html, unsafe_allow_html=True)
-
-    card_html = (
-        "<div class='fc-photo-card'>"
+    st.markdown(
+        "<div class='fc-photo-wrap'>"
         "<div class='fc-photo-head'>"
         "<div class='fc-photo-icon'>📷</div>"
         "<div><div class='fc-photo-title'>" + note + "</div>"
         "<div class='fc-photo-sub'>" + hint + "</div></div>"
-        "</div>"
+        "</div>",
+        unsafe_allow_html=True,
     )
-    st.markdown(card_html, unsafe_allow_html=True)
-
-    uploaded = st.file_uploader("", type=["jpg","jpeg","png","webp"],
-                                 key="_fc_image", label_visibility="collapsed")
+    uploaded = st.file_uploader(
+        "",
+        type             = ["jpg", "jpeg", "png", "webp"],
+        key              = "_fc_image",
+        label_visibility = "collapsed",
+    )
     st.markdown("</div>", unsafe_allow_html=True)
 
     if uploaded:
         fc_set(image_name=uploaded.name)
+        ready_lbl = "Photo Ready" if lang == "en" else "फोटो तैयार"
         c1, c2, c3 = st.columns([1, 2, 1])
         with c2:
-            preview_html = (
-                "<div class='fc-photo-preview'>"
-                "<div class='fc-photo-preview-lbl'>✅ " + ready + "</div>"
+            st.markdown(
+                "<div style='background:rgba(16,185,129,0.07);border:1.5px solid #86EFAC;"
+                "border-radius:13px;padding:10px;text-align:center;margin-top:8px;'>"
+                "<div style='font-size:.58rem;font-weight:700;text-transform:uppercase;"
+                "letter-spacing:.07em;color:#166534;margin-bottom:7px;'>✅ " + ready_lbl + "</div>",
+                unsafe_allow_html=True,
             )
-            st.markdown(preview_html, unsafe_allow_html=True)
             st.image(uploaded, use_container_width=True)
             st.markdown(
-                "<div style='font-size:.64rem;color:#6B7280;margin-top:4px;'>"
+                "<div style='font-size:.63rem;color:#6B7280;margin-top:4px;'>"
                 + uploaded.name + "</div></div>",
                 unsafe_allow_html=True,
             )
@@ -4491,70 +4696,59 @@ def _render_photo(lang: str):
         fc_set(image_name="")
 
     return uploaded
-
-
-def _render_checklist(lang: str, desc_ok: bool, loc_ok: bool, photo_ok: bool):
-    title     = "Ready to Submit?" if lang == "en" else "जमा करने के लिए तैयार?"
-    d_lbl     = "Description" if lang == "en" else "विवरण"
-    l_lbl     = "Location" if lang == "en" else "स्थान"
-    p_lbl     = "Photo (optional)" if lang == "en" else "फोटो (वैकल्पिक)"
-
-    def chk(ok, lbl):
-        cls  = " ok" if ok else ""
-        mark = "✅" if ok else "⬜"
-        return "<div class='fc-check" + cls + "'>" + mark + " " + lbl + "</div>"
-
-    html = (
-        "<div class='fc-checklist'>"
-        "<div class='fc-checklist-title'>" + title + "</div>"
-        "<div class='fc-checks'>"
-        + chk(desc_ok, d_lbl)
-        + chk(loc_ok,  l_lbl)
-        + chk(photo_ok, p_lbl)
-        + "</div></div>"
+ 
+ 
+def _render_checklist(lang: str, desc_ok: bool, loc_ok: bool, photo_ok: bool) -> None:
+    title = "Ready to Submit?" if lang == "en" else "जमा करने के लिए तैयार?"
+    d_lbl = "Description"      if lang == "en" else "विवरण"
+    l_lbl = "Location"         if lang == "en" else "स्थान"
+    p_lbl = "Photo (optional)" if lang == "en" else "फोटो (वैकल्पिक)"
+ 
+    def chk(ok: bool, lbl: str) -> str:
+        return "<div class='fc-check" + (" ok" if ok else "") + "'>" + ("✅" if ok else "⬜") + " " + lbl + "</div>"
+ 
+    st.markdown(
+        "<div class='fc-checklist'><div class='fc-checklist-title'>" + title + "</div>"
+        "<div class='fc-checks'>" + chk(desc_ok,d_lbl) + chk(loc_ok,l_lbl) + chk(photo_ok,p_lbl) + "</div></div>",
+        unsafe_allow_html=True,
     )
-    st.markdown(html, unsafe_allow_html=True)
-
-
-def _render_tip(lang: str):
-    tip = ("Add landmarks & a photo for the fastest resolution."
-           if lang == "en" else "तेज़ समाधान के लिए लैंडमार्क और फोटो जोड़ें।")
+ 
+ 
+def _render_tip(lang: str) -> None:
+    tip = "Add landmarks & a photo for fastest resolution." if lang == "en" else "लैंडमार्क और फोटो जोड़ें।"
     lbl = "Tip:" if lang == "en" else "सुझाव:"
     st.markdown(
         "<div class='fc-tip'>💡 <span><strong>" + lbl + "</strong> " + tip + "</span></div>",
         unsafe_allow_html=True,
     )
-
-
+ 
+ 
 def _render_submit(lang: str, uid, uploaded_file) -> bool:
     state = fc()
     if state["phase"] == "error":
-        st.markdown(
-            "<div class='fc-err'>⚠️ " + state["error_msg"] + "</div>",
-            unsafe_allow_html=True,
-        )
-    lbl     = "🚀  Submit Complaint" if lang == "en" else "🚀  शिकायत जमा करें"
+        st.markdown("<div class='fc-err'>⚠️ " + state["error_msg"] + "</div>", unsafe_allow_html=True)
+ 
+    lbl = "🚀  Submit Complaint" if lang == "en" else "🚀  शिकायत जमा करें"
+    st.markdown("<div class='fc-submit-col'>", unsafe_allow_html=True)
     clicked = st.button(lbl, use_container_width=True, key="fc_sub",
                         disabled=(state["phase"] == "submitting"))
+    st.markdown("</div>", unsafe_allow_html=True)
     if not clicked:
         return False
-
+ 
     desc = (st.session_state.get("_fc_desc") or state["description"] or state["voice_text"] or "").strip()
     loc  = (st.session_state.get("_fc_location") or state["location_name"] or "").strip()
-
+    err  = ""
     if not desc:
         err = "Please describe the issue." if lang == "en" else "कृपया समस्या का विवरण दें।"
+    elif not loc:
+        err = "Please enter a location."   if lang == "en" else "कृपया स्थान दर्ज करें।"
+    elif not uid:
+        err = "Please log in first."       if lang == "en" else "पहले लॉगिन करें।"
+    if err:
         st.markdown("<div class='fc-err'>❗ " + err + "</div>", unsafe_allow_html=True)
         return False
-    if not loc:
-        err = "Please enter a location." if lang == "en" else "कृपया स्थान दर्ज करें।"
-        st.markdown("<div class='fc-err'>📍 " + err + "</div>", unsafe_allow_html=True)
-        return False
-    if not uid:
-        err = "Please log in first." if lang == "en" else "पहले लॉगिन करें।"
-        st.markdown("<div class='fc-err'>🔒 " + err + "</div>", unsafe_allow_html=True)
-        return False
-
+ 
     img_bytes, img_name = None, ""
     if uploaded_file is not None:
         try:
@@ -4562,83 +4756,89 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
             img_name  = uploaded_file.name
         except Exception:
             pass
-
+ 
     fc_set(
-        phase        = "submitting",
-        description  = desc,
-        location_name= loc,
-        is_emergency = st.session_state.get("_fc_emergency", state["is_emergency"]),
-        category     = st.session_state.get("_fc_cat_radio", state["category"]),
-        submit_token = secrets.token_hex(8),
-        _img_bytes   = img_bytes,
-        _img_name    = img_name,
+        phase         = "submitting",
+        description   = desc,
+        location_name = loc,
+        is_emergency  = st.session_state.get("_fc_emergency", state["is_emergency"]),
+        category      = state["category"],
+        submit_token  = secrets.token_hex(8),
+        _img_bytes    = img_bytes,
+        _img_name     = img_name,
     )
     return True
-
-
-def _run_submission(uid, lang: str):
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# SUBMISSION
+# ─────────────────────────────────────────────────────────────────────────────
+ 
+def _run_submission(uid, lang: str) -> None:
     state = fc()
-    spinner_txt = "Submitting…" if lang == "en" else "जमा हो रहा है…"
-    with st.spinner(spinner_txt):
+    with st.spinner("Submitting…" if lang == "en" else "जमा हो रहा है…"):
         try:
             img_bytes = state.get("_img_bytes")
             img_name  = state.get("_img_name", "image.jpg")
             if img_bytes:
-                resp = api("post", "/complaints/create-with-image",
-                           data={"user_id": str(uid), "category": state["category"],
-                                 "description": state["description"],
-                                 "location": state["location_name"],
-                                 "latitude": str(state["lat"]),
-                                 "longitude": str(state["lon"]),
-                                 "is_emergency": str(state["is_emergency"])},
+                resp = api("post", "/complaints/create-with-image",  # type: ignore[name-defined]
+                           data={
+                               "user_id":     str(uid), "category": state["category"],
+                               "description": state["description"], "location": state["location_name"],
+                               "latitude":    str(state["lat"]), "longitude": str(state["lon"]),
+                               "is_emergency":str(state["is_emergency"]),
+                           },
                            files={"image": (img_name, img_bytes, "image/jpeg")})
             else:
-                resp = api("post", "/complaints/create",
-                           json={"user_id": uid, "category": state["category"],
-                                 "description": state["description"],
-                                 "location": state["location_name"],
-                                 "latitude": state["lat"], "longitude": state["lon"],
-                                 "is_emergency": state["is_emergency"]})
+                resp = api("post", "/complaints/create",             # type: ignore[name-defined]
+                           json={
+                               "user_id":     uid, "category": state["category"],
+                               "description": state["description"], "location": state["location_name"],
+                               "latitude":    state["lat"], "longitude": state["lon"],
+                               "is_emergency":state["is_emergency"],
+                           })
         except Exception as ex:
             resp = {"error": str(ex)}
-
+ 
     fc_set(_img_bytes=None, _img_name="")
-
+ 
     if resp.get("success"):
         fc_set(phase="success", success_data={
-            "cid": resp.get("complaint_id", "—"),
-            "category": state["category"],
-            "assigned_to": resp.get("assigned_official_name", "Concerned Department"),
+            "cid":          resp.get("complaint_id", "—"),
+            "category":     state["category"],
+            "assigned_to":  resp.get("assigned_official_name", "Concerned Department"),
             "is_emergency": state["is_emergency"],
         })
-    elif "error" in resp and ("connect" in str(resp["error"]).lower()):
+    elif "connect" in str(resp.get("error","")).lower():
         st.session_state.setdefault("offline_complaints", []).append({
-            "user_id": uid, "category": state["category"],
+            "user_id":     uid,         "category":    state["category"],
             "description": state["description"], "location": state["location_name"],
-            "latitude": state["lat"], "longitude": state["lon"],
-            "is_emergency": state["is_emergency"],
+            "latitude":    state["lat"],"longitude":   state["lon"],
+            "is_emergency":state["is_emergency"],
         })
         fc_set(phase="offline")
     else:
-        fc_set(phase="idle", error_msg=resp.get("error", resp.get("detail", "Unknown error. Try again.")))
+        fc_set(phase="idle", error_msg=resp.get("error", resp.get("detail","Unknown error. Try again.")))
+ 
     st.rerun()
-
-
-def _render_success(lang: str):
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+# OUTCOME SCREENS
+# ─────────────────────────────────────────────────────────────────────────────
+ 
+def _render_success(lang: str) -> None:
     sd  = fc()["success_data"]
-    cid = sd.get("cid", "—")
-    asg = sd.get("assigned_to", "Concerned Department")
+    cid = sd.get("cid","—")
+    asg = sd.get("assigned_to","Concerned Department")
     emg = sd.get("is_emergency", False)
-
-    emg_chip = ("<div class='fc-success-chip' style='background:rgba(220,38,38,0.40);'>🚨 Emergency</div>"
+    title = "Submitted Successfully!" if lang=="en" else "सफलतापूर्वक जमा हुई!"
+    sub   = "Your complaint has been received." if lang=="en" else "शिकायत दर्ज हो गई।"
+    note  = "Use the ID to track from the dashboard." if lang=="en" else "इस ID से डैशबोर्ड पर ट्रैक करें।"
+    back  = "← Back to Dashboard" if lang=="en" else "← डैशबोर्ड पर वापस"
+    emg_html = ("<div class='fc-success-chip' style='background:rgba(220,38,38,.40);'>🚨 Emergency</div>"
                 if emg else "")
-    title = "Submitted Successfully!" if lang == "en" else "सफलतापूर्वक जमा हुई!"
-    sub   = "शिकायत दर्ज हो गई।" if lang == "en" else "Complaint registered!"
-    note  = ("Use the ID above to track from the dashboard."
-              if lang == "en" else "इस ID से डैशबोर्ड पर ट्रैक करें।")
-    back  = "← Back to Dashboard" if lang == "en" else "← डैशबोर्ड पर वापस"
-
-    html = (
+    st.markdown(
         "<div class='fc-success'>"
         "<div class='fc-success-ring'>✅</div>"
         "<div class='fc-success-title'>" + title + "</div>"
@@ -4647,118 +4847,93 @@ def _render_success(lang: str):
         "<div class='fc-success-chips'>"
         "<div class='fc-success-chip'>👤 " + asg + "</div>"
         "<div class='fc-success-chip'>📂 " + sd.get("category","").title() + "</div>"
-        + emg_chip +
-        "</div>"
-        "<div class='fc-success-note'>" + note + "</div>"
-        "</div>"
+        + emg_html + "</div>"
+        "<div class='fc-success-note'>" + note + "</div></div>",
+        unsafe_allow_html=True,
     )
-    st.markdown(html, unsafe_allow_html=True)
     st.balloons()
-
-    speak_en = "Complaint submitted. ID is " + cid + "."
-    speak_hi = "शिकायत जमा हो गई। संख्या है " + cid + "।"
-    st.components.v1.html(
-        "<script>(function(){function s(t,l,cb){var u=new SpeechSynthesisUtterance(t);"
-        "u.lang=l;u.rate=0.9;u.onend=function(){if(cb)setTimeout(cb,600);};"
-        "window.speechSynthesis.cancel();window.speechSynthesis.speak(u);}"
-        "s('" + speak_en + "','en-IN',function(){s('" + speak_hi + "','hi-IN',null);});})();</script>",
-        height=0,
-    )
     st.markdown("<br>", unsafe_allow_html=True)
-    bc1, bc2, bc3 = st.columns([1,2,1])
-    with bc2:
+    c1, c2, c3 = st.columns([1,2,1])
+    with c2:
         if st.button(back, key="success_back_btn", use_container_width=True):
             st.session_state.fc = dict(_FC_DEFAULTS)
             st.session_state.screen = "user_dashboard"
             st.rerun()
-
-
-def _render_offline(lang: str):
-    title = "Saved Offline" if lang == "en" else "ऑफलाइन सहेजा गया"
-    sub   = "Will submit when internet is restored" if lang == "en" else "इंटरनेट मिलते ही जमा होगा"
-    body  = ("Your complaint is saved and will be submitted automatically when you reconnect."
-             if lang == "en" else "आपकी शिकायत सहेज ली गई है। इंटरनेट मिलते ही स्वचालित रूप से जमा होगी।")
-    back  = "← Back to Dashboard" if lang == "en" else "← डैशबोर्ड पर वापस"
-
-    html = (
+ 
+ 
+def _render_offline(lang: str) -> None:
+    title = "Saved Offline" if lang=="en" else "ऑफलाइन सहेजा गया"
+    sub   = "Will submit when internet restores" if lang=="en" else "इंटरनेट मिलते ही जमा होगा"
+    body  = ("Saved locally. Will submit automatically on reconnect."
+             if lang=="en" else "सहेज ली गई। इंटरनेट मिलते ही जमा होगी।")
+    back  = "← Back to Dashboard" if lang=="en" else "← डैशबोर्ड पर वापस"
+    st.markdown(
         "<div class='fc-offline'>"
-        "<div class='fc-offline-head'>"
-        "<div class='fc-offline-icon'>📶</div>"
+        "<div class='fc-offline-head'><div class='fc-offline-icon'>📶</div>"
         "<div><div class='fc-offline-title'>" + title + "</div>"
-        "<div class='fc-offline-sub'>" + sub + "</div></div>"
-        "</div>"
-        "<div class='fc-offline-body'>✅ " + body + "</div>"
-        "</div>"
+        "<div class='fc-offline-sub'>" + sub + "</div></div></div>"
+        "<div class='fc-offline-body'>✅ " + body + "</div></div>",
+        unsafe_allow_html=True,
     )
-    st.markdown(html, unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    bc1, bc2, bc3 = st.columns([1,2,1])
-    with bc2:
+    c1, c2, c3 = st.columns([1,2,1])
+    with c2:
         if st.button(back, key="offline_back_btn", use_container_width=True):
             fc_set(phase="idle")
             st.session_state.screen = "user_dashboard"
             st.rerun()
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
 # MAIN ENTRY
 # ─────────────────────────────────────────────────────────────────────────────
-def pg_file_complaint():
-    submit_offline_complaints()
-
+ 
+def pg_file_complaint() -> None:
+    submit_offline_complaints()   # type: ignore[name-defined]
+ 
     lang = st.session_state.language
     uid  = (st.session_state.user or {}).get("user_id")
     dark = st.session_state.get("dark_mode", False)
-
+ 
     _init_fc()
-    _inject_css(dark)
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-
+    _inject_page_css(dark)
+ 
     if _ingest_query_params():
         st.rerun()
         return
-
+ 
     phase = fc()["phase"]
-
-    if phase == "success":
-        _render_success(lang)
-        return
-    if phase == "offline":
-        _render_offline(lang)
-        return
-    if phase == "submitting":
-        _run_submission(uid, lang)
-        return
-
-    # ── compute step ─────────────────────────────────────────────────────────
-    s = fc()
+    if phase == "success":   _render_success(lang);  return
+    if phase == "offline":   _render_offline(lang);  return
+    if phase == "submitting":_run_submission(uid, lang); return
+ 
+    s    = fc()
     step = 0
-    if s["description"] or s["voice_text"]:                step = 1
-    if s["category"] != "other":                            step = 2
-    if s["location_name"] not in ("", "Bhopal, Madhya Pradesh"): step = 3
-    if s["image_name"]:                                     step = 4
-
-    # ── render ───────────────────────────────────────────────────────────────
+    if s["description"] or s["voice_text"]:                      step = 1
+    if s["category"] != "other":                                 step = 2
+    if s["location_name"] not in ("","Bhopal, Madhya Pradesh"):  step = 3
+    if s["image_name"]:                                          step = 4
+ 
     _render_hero(lang)
     _render_steps(lang, step)
     _render_voice(lang)
     _render_category(lang)
     _render_emergency(lang)
     _render_description(lang)
-
+ 
     desc_now = (st.session_state.get("_fc_desc") or s["description"] or s["voice_text"] or "").strip()
     is_emg   = st.session_state.get("_fc_emergency", s["is_emergency"])
     _render_ai_preview(lang, desc_now, is_emg)
-
+ 
     _render_location(lang, dark)
     uploaded = _render_photo(lang)
-
+ 
     desc_ok  = bool(desc_now)
     loc_ok   = bool((st.session_state.get("_fc_location") or s["location_name"] or "").strip())
     photo_ok = uploaded is not None
     _render_checklist(lang, desc_ok, loc_ok, photo_ok)
     _render_tip(lang)
-
+ 
     if _render_submit(lang, uid, uploaded):
         st.rerun()
  
