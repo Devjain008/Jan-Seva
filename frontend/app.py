@@ -2377,7 +2377,7 @@ def _fetch_complaints(uid: int) -> list:
     """Single cached complaints fetch. TTL=30 s — fresh enough for dashboard."""
     import requests as _req
     try:
-        r = _req.get(f"http://localhost:8000/complaints/user/{uid}", timeout=10)
+        r = _req.get(f"https://bfo-backend.onrender.com/complaints/user/{uid}", timeout=10)
         if r.status_code == 200:
             data = r.json()
             return data if isinstance(data, list) else []
@@ -2391,7 +2391,7 @@ def _fetch_notifications(uid: int) -> list:
     """Cached notifications. Reused for both the banner and bottom section."""
     import requests as _req
     try:
-        r = _req.get(f"http://localhost:8000/schemes/user/notifications/{uid}", timeout=10)
+        r = _req.get(f"https://bfo-backend.onrender.com/schemes/user/notifications/{uid}", timeout=10)
         if r.status_code == 200:
             data = r.json()
             return data if isinstance(data, list) else []
@@ -2405,7 +2405,7 @@ def _fetch_officials_map() -> dict:
     """Fetch all officials once, return id→name dict for O(1) lookup."""
     import requests as _req
     try:
-        r = _req.get("http://localhost:8000/admin/officials/all", timeout=10)
+        r = _req.get("https://bfo-backend.onrender.com/admin/officials/all", timeout=10)
         if r.status_code == 200:
             data = r.json()
             if isinstance(data, list):
@@ -2419,7 +2419,7 @@ def _api_post(endpoint: str, json_body: dict) -> dict:
     """Lightweight POST helper; invalidates complaint cache on success."""
     import requests as _req
     try:
-        r = _req.post(f"http://localhost:8000{endpoint}", json=json_body, timeout=10)
+        r = _req.post(f"https://bfo-backend.onrender.com{endpoint}", json=json_body, timeout=10)
         if r.status_code != 200:
             return {"error": f"HTTP {r.status_code}: {r.text[:100]}"}
         return r.json()
@@ -2430,7 +2430,7 @@ def _api_post(endpoint: str, json_body: dict) -> dict:
 def _api_put(endpoint: str, json_body: dict) -> dict:
     import requests as _req
     try:
-        r = _req.put(f"http://localhost:8000{endpoint}", json=json_body, timeout=10)
+        r = _req.put(f"https://bfo-backend.onrender.com{endpoint}", json=json_body, timeout=10)
         if r.status_code != 200:
             return {"error": f"HTTP {r.status_code}: {r.text[:100]}"}
         return r.json()
@@ -2868,7 +2868,7 @@ def _render_single_complaint_card(
             if show_img:
 
                 st.image(
-                    f"http://localhost:8000{img_path}",
+                    f"https://bfo-backend.onrender.com{img_path}",
                     caption="Uploaded Complaint Evidence",
                     use_container_width=True
                 )
@@ -6383,7 +6383,7 @@ def pg_schemes():
 
             if s_img:
                 try:
-                    img_url = (f"http://localhost:8000{s_img}"
+                    img_url = (f"https://bfo-backend.onrender.com{s_img}"
                                if s_img.startswith("/") else s_img)
                     di1, di2 = st.columns([1, 2])
                     with di1:
@@ -11297,7 +11297,7 @@ div[data-testid="stButton"].sch-del > button:hover{{
             # image
             img_url = s.get("image_url","")
             if img_url and img_url.startswith("/"):
-                img_url = f"http://localhost:8000{img_url}"
+                img_url = f"https://bfo-backend.onrender.com{img_url}"
 
             st.markdown(
                 f"<div class='sch-row-card'>"

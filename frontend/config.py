@@ -1,4 +1,4 @@
-API_BASE = "http://localhost:8000"
+API_BASE = "https://bfo-backend.onrender.com"
 # frontend/config.py
 
 TRANSLATIONS = {
