@@ -5299,7 +5299,6 @@ def pg_tracking():
     css = (
         "<style>"
 
-        # ── Search input pill ──
         ".trk-search-wrap .stTextInput>div>div>input{"
         "border-radius:30px!important;padding:12px 20px!important;"
         "font-size:.88rem!important;border:1.5px solid " + _BOR + "!important;"
@@ -5309,7 +5308,6 @@ def pg_tracking():
         "border-color:#6366F1!important;"
         "box-shadow:0 0 0 3px rgba(99,102,241,.12)!important;}"
 
-        # ── Filter chips display ──
         ".trk-chips{display:flex;gap:8px;flex-wrap:wrap;padding:4px 0;margin-bottom:2px;}"
         ".trk-chip{padding:7px 16px;border-radius:30px;font-size:.76rem;font-weight:700;"
         "border:1.5px solid " + _BOR + ";background:" + _CARD + ";color:" + _SUB + ";"
@@ -5318,7 +5316,6 @@ def pg_tracking():
         "color:#fff;border-color:transparent;"
         "box-shadow:0 4px 12px rgba(99,102,241,.28);}"
 
-        # ── Hide radio dots (keep as click target) ──
         "div[data-testid='stRadio']>div>label>div:first-child{display:none!important;}"
         "div[data-testid='stRadio']>div{gap:4px!important;}"
         "div[data-testid='stRadio']>div>label{"
@@ -5326,7 +5323,6 @@ def pg_tracking():
         "opacity:0!important;padding:0!important;margin:0!important;"
         "min-height:0!important;pointer-events:auto!important;}"
 
-        # ── Section label ──
         ".trk-flabel{font-size:.70rem;font-weight:700;text-transform:uppercase;"
         "letter-spacing:.09em;color:" + _SUB + ";margin:18px 0 8px;"
         "display:flex;align-items:center;gap:8px;}"
@@ -5336,11 +5332,9 @@ def pg_tracking():
         ".trk-flabel::after{content:'';flex:1;height:1px;"
         "background:linear-gradient(to right," + _BOR + ",transparent);}"
 
-        # ── Count ──
         ".trk-count{font-size:.75rem;color:" + _SUB + ";font-weight:600;"
         "text-align:right;margin:8px 0 12px;}"
 
-        # ── Complaint card ──
         ".trk-card{background:" + _CARD + ";border:1px solid " + _BOR + ";"
         "border-left:4px solid;border-radius:18px;"
         "padding:18px 20px;margin-bottom:4px;"
@@ -5360,7 +5354,6 @@ def pg_tracking():
         ".trk-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.71rem;color:" + _SUB + ";"
         "padding-top:10px;border-top:1px solid " + _BOR + ";}"
 
-        # ── Timeline ──
         ".tl-wrap{margin-top:14px;padding:14px 16px;"
         "background:" + _BG2 + ";border-radius:14px;"
         "border:1px solid " + _BOR + ";}"
@@ -5382,7 +5375,6 @@ def pg_tracking():
         ".tl-info{padding:2px 0 16px;}"
         ".tl-lbl{font-size:.78rem;font-weight:600;color:" + _TXT + ";}"
 
-        # ── SLA bars ──
         ".sla-ok{background:" + ("#080F1C" if dark else "#EFF6FF") + ";"
         "border:1.5px solid " + ("#1E3A5F" if dark else "#BFDBFE") + ";"
         "border-radius:12px;padding:10px 16px;font-size:.76rem;"
@@ -5396,7 +5388,6 @@ def pg_tracking():
         "margin-top:12px;display:flex;gap:8px;align-items:center;"
         "font-weight:600;}"
 
-        # ── Empty ──
         ".trk-empty{text-align:center;padding:3rem 2rem;"
         "background:" + _CARD + ";border-radius:22px;"
         "border:1.5px dashed " + _BOR + ";margin:1rem 0;}"
@@ -5404,7 +5395,6 @@ def pg_tracking():
         ".trk-empty-title{font-size:.98rem;font-weight:700;color:" + _TXT + ";margin-bottom:8px;}"
         ".trk-empty-sub{font-size:.79rem;color:" + _SUB + ";line-height:1.6;}"
 
-        # ── Responsive ──
         "@media(max-width:600px){"
         ".trk-meta{flex-direction:column;gap:4px;}"
         ".trk-chips{gap:5px;}"
@@ -5413,119 +5403,118 @@ def pg_tracking():
     )
     st.markdown(css, unsafe_allow_html=True)
 
-    # ── SHARED LOOKUPS (unchanged) ─────────────────────────────────────────────
+    # ── SHARED LOOKUPS ─────────────────────────────────────────────────────────
     STATUS_D = {
-        "pending":     ("⏳", t("Pending","लंबित"),        "#FFFBEB","#B45309"),
-        "in_progress": ("🔄", t("In Progress","प्रगति"),   "#EFF6FF","#1D4ED8"),
-        "resolved":    ("✅", t("Resolved","समाधान"),      "#F0FDF4","#15803D"),
-        "closed":      ("🔒", t("Closed","बंद"),            "#F1F5F9","#475569"),
-        "rejected":    ("❌", t("Rejected","अस्वीकृत"),    "#FFF1F2","#BE123C"),
+        "pending":     ("⏳", t("Pending",     "लंबित"),       "#FFFBEB", "#B45309"),
+        "in_progress": ("🔄", t("In Progress", "प्रगति"),      "#EFF6FF", "#1D4ED8"),
+        "resolved":    ("✅", t("Resolved",    "समाधान"),      "#F0FDF4", "#15803D"),
+        "closed":      ("🔒", t("Closed",      "बंद"),          "#F1F5F9", "#475569"),
+        "rejected":    ("❌", t("Rejected",    "अस्वीकृत"),    "#FFF1F2", "#BE123C"),
     }
     PRIORITY_D = {
-        "high":   ("🔴", t("High","उच्च"),    "#FFF1F2","#BE123C","#EF4444"),
-        "medium": ("🟡", t("Medium","मध्यम"), "#FFFBEB","#B45309","#F59E0B"),
-        "low":    ("🟢", t("Low","निम्न"),    "#F0FDF4","#15803D","#22C55E"),
-    }
-    TL_STEPS = {
-        "pending":     [(t("Submitted","सबमिट"),True,False),(t("Assigned","असाइन"),False,True),(t("In Review","समीक्षा"),False,False),(t("Resolved","समाधान"),False,False)],
-        "in_progress": [(t("Submitted","सबमिट"),True,False),(t("Assigned","असाइन"),True,False),(t("In Review","समीक्षा"),True,True),(t("Resolved","समाधान"),False,False)],
-        "resolved":    [(t("Submitted","सबमिट"),True,False),(t("Assigned","असाइन"),True,False),(t("In Review","समीक्षा"),True,False),(t("Resolved","समाधान"),True,True)],
-        "closed":      [(t("Submitted","सबमिट"),True,False),(t("Assigned","असाइन"),True,False),(t("Resolved","समाधान"),True,False),(t("Closed","बंद"),True,True)],
-        "rejected":    [(t("Submitted","सबमिट"),True,False),(t("Reviewed","समीक्षित"),True,False),(t("Rejected","अस्वीकृत"),True,True),(t("—","—"),False,False)],
+        "high":   ("🔴", t("High",   "उच्च"),   "#FFF1F2", "#BE123C", "#EF4444"),
+        "medium": ("🟡", t("Medium", "मध्यम"),  "#FFFBEB", "#B45309", "#F59E0B"),
+        "low":    ("🟢", t("Low",    "निम्न"),  "#F0FDF4", "#15803D", "#22C55E"),
     }
 
-    # def build_tl(status):
-    #     steps = TL_STEPS.get(status, TL_STEPS["pending"])
-    #     rows  = ["<div class='tl-wrap'>"]
-    #     for i, (lbl, done, act) in enumerate(steps):
-    #         dc = "done" if done else ("active" if act else "idle")
-    #         di = "✓"   if done else ("●"      if act else str(i + 1))
-    #         lc = "done" if done else "idle"
-    #         rows.append("<div class='tl-row'>")
-    #         rows.append("<div class='tl-col'>")
-    #         rows.append("<div class='tl-dot " + dc + "'>" + di + "</div>")
-    #         if i < len(steps) - 1:
-    #             rows.append("<div class='tl-line " + lc + "'></div>")
-    #         rows.append("</div>")
-    #         rows.append("<div class='tl-info'><div class='tl-lbl'>" + lbl + "</div></div>")
-    #         rows.append("</div>")
-    #     rows.append("</div>")
-    #     return "".join(rows)
-
-    # def build_sla(comp):
-    #     sla = comp.get("sla_deadline")
-    #     if not sla:
-    #         return ""
-    #     if comp.get("is_overdue"):
-    #         return (
-    #             "<div class='sla-late'>⏰&nbsp;<span><strong>"
-    #             + t('OVERDUE!', 'समय सीमा समाप्त!') + "</strong> "
-    #             + t('Expected by', 'अपेक्षित') + ": " + str(sla) + "</span></div>"
-    #         )
-    #     return (
-    #         "<div class='sla-ok'>⏱&nbsp;<span>"
-    #         + t('Expected by', 'अपेक्षित') + ": <strong>" + str(sla) + "</strong></span></div>"
-    #     )
-    def build_tl(status):
+    # ── BUILD TIMELINE ────────────────────────────────────────────────────────
+    def build_tl(status: str) -> str:
         steps = [
-            ("Submitted", "done"),
-            ("In Review", "idle"),
-            ("In Progress", "idle"),
-            ("Resolved", "idle")
+            t("Submitted",  "सबमिट"),
+            t("In Review",  "समीक्षा"),
+            t("In Progress","प्रगति"),
+            t("Resolved",   "समाधान"),
         ]
-
         status_map = {
-            "pending": 0,
-            "review": 1,
+            "pending":     0,
+            "review":      1,
             "in_progress": 2,
-            "resolved": 3,
-            "closed": 3
+            "resolved":    3,
+            "closed":      3,
         }
-
         current = status_map.get(str(status).lower(), 0)
 
-        html = '<div class="prem-timeline">'
-
-        for i, (label, state) in enumerate(steps):
-
+        html = "<div class='prem-timeline'>"
+        for i, label in enumerate(steps):
             if i < current:
-                cls = "done"
+                cls  = "done"
                 icon = "✓"
-
             elif i == current:
-                cls = "active"
+                cls  = "active"
                 icon = "●"
-
             else:
-                cls = "idle"
+                cls  = "idle"
                 icon = "○"
 
-            html += f'''
-            <div class="prem-tl-item">
-                <div class="prem-tl-dot {cls}">
-                    {icon}
-                </div>
-
-                <div class="prem-tl-info">
-                    <div class="prem-tl-label">{label}</div>
-                </div>
-            </div>
-            '''
-
+            html += (
+                "<div class='prem-tl-item'>"
+                "<div class='prem-tl-dot " + cls + "'>" + icon + "</div>"
+                "<div class='prem-tl-info'>"
+                "<div class='prem-tl-label'>" + label + "</div>"
+                "</div></div>"
+            )
             if i < len(steps) - 1:
-                html += f'<div class="prem-tl-line {cls}"></div>'
+                html += "<div class='prem-tl-line " + cls + "'></div>"
 
-        html += '</div>'
-
+        html += "</div>"
         return html
 
-    def render_card(comp, expanded=False):
-        cid      = comp.get("complaint_id", "N/A")
-        status   = comp.get("status", "pending")
+    # ── BUILD SLA ─────────────────────────────────────────────────────────────
+    # FIX: build_sla was accidentally removed when build_tl was rewritten.
+    # Restored here — render_card references it.
+    def build_sla(comp: dict) -> str:
+        sla = comp.get("sla_deadline")
+        if not sla:
+            return ""
+        if comp.get("is_overdue"):
+            return (
+                "<div class='sla-late'>⏰&nbsp;<span><strong>"
+                + t("OVERDUE!", "समय सीमा समाप्त!") + "</strong> "
+                + t("Expected by", "अपेक्षित") + ": " + str(sla) + "</span></div>"
+            )
+        return (
+            "<div class='sla-ok'>⏱&nbsp;<span>"
+            + t("Expected by", "अपेक्षित")
+            + ": <strong>" + str(sla) + "</strong></span></div>"
+        )
+
+    # ─────────────────────────────────────────────────────────────────────────
+    # render_card — FIX: idx parameter added
+    #
+    # ROOT CAUSE of StreamlitDuplicateElementKey:
+    #   Streamlit renders ALL tab contents in a single pass.
+    #   Tab 1 called render_card(found) and Tab 2's loop also called
+    #   render_card(same_complaint) — both produced key="trk_v_GR4B5Q2G3J".
+    #   Streamlit sees two widgets with the same key → crash.
+    #
+    # FIX:
+    #   Every widget key inside render_card now includes BOTH the cid AND
+    #   the `idx` (loop counter / call-site discriminator).
+    #   Tab 1 always passes idx=0 (only one card rendered there).
+    #   Tab 2 passes the enumerate() index.
+    #   Even if the same complaint appears in both tabs, the keys differ:
+    #     Tab1: "trk_v_GR4B5Q2G3J_t1"
+    #     Tab2: "trk_v_GR4B5Q2G3J_0", "trk_v_GR4B5Q2G3J_1", ...
+    # ─────────────────────────────────────────────────────────────────────────
+    def render_card(comp: dict, expanded: bool = False, idx: int = 0,
+                    id_prefix: str = "t2") -> None:
+        """
+        Parameters
+        ----------
+        comp      : complaint dict
+        expanded  : whether expander starts open
+        idx       : position in the calling loop (0-based).
+                    Used to guarantee unique widget keys.
+        id_prefix : extra namespace — "t1" for Tab-1 search result,
+                    "t2" for Tab-2 list items.  Prevents key collision
+                    when the same complaint appears in both tabs.
+        """
+        cid      = comp.get("complaint_id") or comp.get("id") or "N/A"
+        status   = comp.get("status",   "pending")
         priority = comp.get("priority", "medium")
         cat      = comp.get("category", "other").title()
         desc     = comp.get("description", "")
-        loc      = comp.get("location", "—")
+        loc      = comp.get("location",  "—")
         date     = comp.get("created_at", "—")
         emg      = comp.get("is_emergency", False)
 
@@ -5540,14 +5529,20 @@ def pg_tracking():
             if emg else ""
         )
 
+        # Unique key base — combines prefix + cid + loop index
+        # Safe against: None cid, duplicate cids, same card in two tabs
+        _k = f"{id_prefix}_{str(cid)}_{idx}"
+
         with st.expander(exp_lbl, expanded=expanded):
-            if st.button("🔊 " + t("Listen", "सुनें"), key="trk_v_" + str(cid)):
+
+            # ── Listen / voice button ──────────────────────────────────────
+            if st.button("🔊 " + t("Listen", "सुनें"), key="trk_v_" + _k):
                 speak_text("Complaint " + str(cid) + ": " + desc, lang)
 
+            # ── Card HTML ─────────────────────────────────────────────────
             st.markdown(
                 "<div class='trk-card' style='border-left-color:" + bcol + ";'>"
 
-                # ID + badges row
                 "<div style='display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;'>"
                 "<span class='trk-cid'>#" + str(cid) + "</span>"
                 "<span class='trk-badge' style='background:" + sb + ";color:" + sf + ";'>" + si + " " + sl + "</span>"
@@ -5555,73 +5550,62 @@ def pg_tracking():
                 + emg_html +
                 "</div>"
 
-                # Title + desc
                 "<div class='trk-title'>" + cat + "</div>"
                 "<div class='trk-desc'>" + html.escape(desc[:200]) + ("…" if len(desc) > 200 else "") + "</div>"
 
-                # Meta row
                 "<div class='trk-meta'>"
                 "<span>📍 " + html.escape(str(loc)) + "</span>"
                 "<span>📅 " + str(date) + "</span>"
                 "</div>"
                 "</div>"
 
-                # Timeline label
-                + "<div class='trk-flabel' style='margin-top:16px;'>"
+                "<div class='trk-flabel' style='margin-top:16px;'>"
                 + t("Progress Timeline", "प्रगति टाइमलाइन") + "</div>"
                 + build_tl(status)
                 + build_sla(comp),
+
                 unsafe_allow_html=True,
             )
 
     # ════════════════════════════════════════════════════════
-    # HERO — premium gradient banner
+    # HERO
     # ════════════════════════════════════════════════════════
-    st.markdown("""
-    <div class="prem-hero" style="padding:28px 28px 24px;margin-bottom:0;">
-        <div class="prem-hero-avatar">🔍</div>
-        <div class="prem-hero-title">""" + t('Track Complaint', 'शिकायत ट्रैक करें') + """</div>
-        <p class="prem-hero-sub">""" + t('Check real-time status of your complaints', 'अपनी शिकायत की स्थिति जानें') + """</p>
-        <div class="prem-hero-stats">
-            <div class="prem-hstat h-blue">
-                <div class="prem-hstat-num">🔎</div>
-                <div class="prem-hstat-lbl">""" + t('Track by ID', 'ID से ट्रैक') + """</div>
-            </div>
-            <div class="prem-hstat h-amber">
-                <div class="prem-hstat-num">📋</div>
-                <div class="prem-hstat-lbl">""" + t('My Complaints', 'मेरी शिकायतें') + """</div>
-            </div>
-            <div class="prem-hstat h-green">
-                <div class="prem-hstat-num">⏱</div>
-                <div class="prem-hstat-lbl">""" + t('Live Status', 'लाइव स्थिति') + """</div>
-            </div>
-            <div class="prem-hstat h-red">
-                <div class="prem-hstat-num">🚨</div>
-                <div class="prem-hstat-lbl">""" + t('Emergency', 'आपातकाल') + """</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown(
+        "<div class='prem-hero' style='padding:28px 28px 24px;margin-bottom:0;'>"
+        "<div class='prem-hero-avatar'>🔍</div>"
+        "<div class='prem-hero-title'>" + t("Track Complaint", "शिकायत ट्रैक करें") + "</div>"
+        "<p class='prem-hero-sub'>" + t("Check real-time status of your complaints", "अपनी शिकायत की स्थिति जानें") + "</p>"
+        "<div class='prem-hero-stats'>"
+        "<div class='prem-hstat h-blue'><div class='prem-hstat-num'>🔎</div><div class='prem-hstat-lbl'>" + t("Track by ID", "ID से ट्रैक") + "</div></div>"
+        "<div class='prem-hstat h-amber'><div class='prem-hstat-num'>📋</div><div class='prem-hstat-lbl'>" + t("My Complaints", "मेरी शिकायतें") + "</div></div>"
+        "<div class='prem-hstat h-green'><div class='prem-hstat-num'>⏱</div><div class='prem-hstat-lbl'>" + t("Live Status", "लाइव स्थिति") + "</div></div>"
+        "<div class='prem-hstat h-red'><div class='prem-hstat-num'>🚨</div><div class='prem-hstat-lbl'>" + t("Emergency", "आपातकाल") + "</div></div>"
+        "</div></div>",
+        unsafe_allow_html=True,
+    )
 
     st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
 
     tab1, tab2 = st.tabs([
-        "🔎 " + t("Track by ID",      "ID से ट्रैक करें"),
-        "📋 " + t("My Complaints",    "मेरी शिकायतें"),
+        "🔎 " + t("Track by ID",   "ID से ट्रैक करें"),
+        "📋 " + t("My Complaints", "मेरी शिकायतें"),
     ])
 
     # ════════════════════════════════════════════════════════
-    # TAB 1 — Track by ID (unchanged logic)
+    # TAB 1 — Track by ID
     # ════════════════════════════════════════════════════════
     with tab1:
-        st.markdown('<div class="prem-section-header">🔎 ' + t('Enter Complaint ID', 'शिकायत ID दर्ज करें') + '</div>',
-                    unsafe_allow_html=True)
+        st.markdown(
+            "<div class='prem-section-header'>🔎 " + t("Enter Complaint ID", "शिकायत ID दर्ज करें") + "</div>",
+            unsafe_allow_html=True,
+        )
 
         sc1, sc2 = st.columns([4, 1])
         with sc1:
             st.markdown('<div class="trk-search-wrap">', unsafe_allow_html=True)
             search_id = st.text_input(
-                "tid", label_visibility="collapsed",
+                "tid",
+                label_visibility="collapsed",
                 placeholder=t("Enter Complaint ID  e.g. CMP-0041", "शिकायत ID दर्ज करें जैसे CMP-0041"),
                 key="trk_search_id",
             )
@@ -5639,40 +5623,42 @@ def pg_tracking():
                 raw = api("get", "/complaints/user/" + str(uid))
                 if isinstance(raw, list):
                     found = next(
-                        (c for c in raw if c.get("complaint_id", "").strip().lower() == sid.lower()),
-                        None
+                        (c for c in raw
+                         if c.get("complaint_id", "").strip().lower() == sid.lower()),
+                        None,
                     )
                     if found:
                         st.success(t("✅ Complaint found!", "✅ शिकायत मिली!"))
-                        render_card(found, expanded=True)
+                        # FIX: id_prefix="t1" ensures Tab-1 keys never clash with Tab-2 keys
+                        render_card(found, expanded=True, idx=0, id_prefix="t1")
                     else:
                         st.markdown(
-                            '<div class="trk-empty">'
-                            '<span class="trk-empty-icon">❌</span>'
-                            '<div class="trk-empty-title">'
-                            + t('Complaint not found', 'शिकायत नहीं मिली') +
-                            '</div>'
-                            '<div class="trk-empty-sub">'
-                            + t('Check the ID and ensure you are logged into the correct account.',
-                                'ID जाँचें या सुनिश्चित करें सही खाते में हैं।') +
-                            '</div></div>',
-                            unsafe_allow_html=True
+                            "<div class='trk-empty'>"
+                            "<span class='trk-empty-icon'>❌</span>"
+                            "<div class='trk-empty-title'>"
+                            + t("Complaint not found", "शिकायत नहीं मिली") +
+                            "</div>"
+                            "<div class='trk-empty-sub'>"
+                            + t("Check the ID and ensure you are logged into the correct account.",
+                                "ID जाँचें या सुनिश्चित करें सही खाते में हैं।") +
+                            "</div></div>",
+                            unsafe_allow_html=True,
                         )
                 else:
                     st.error(t("Unable to fetch. Please try again.", "डेटा प्राप्त नहीं हुआ। पुनः प्रयास करें।"))
 
     # ════════════════════════════════════════════════════════
-    # TAB 2 — My Complaints (unchanged logic)
+    # TAB 2 — My Complaints
     # ════════════════════════════════════════════════════════
     with tab2:
         if not uid:
             st.markdown(
-                '<div class="trk-empty">'
-                '<span class="trk-empty-icon">🔒</span>'
-                '<div class="trk-empty-title">' + t('Login Required', 'लॉगिन आवश्यक') + '</div>'
-                '<div class="trk-empty-sub">' + t('Please login to view your complaints.', 'लॉगिन करें।') + '</div>'
-                '</div>',
-                unsafe_allow_html=True
+                "<div class='trk-empty'>"
+                "<span class='trk-empty-icon'>🔒</span>"
+                "<div class='trk-empty-title'>" + t("Login Required", "लॉगिन आवश्यक") + "</div>"
+                "<div class='trk-empty-sub'>" + t("Please login to view your complaints.", "लॉगिन करें।") + "</div>"
+                "</div>",
+                unsafe_allow_html=True,
             )
             return
 
@@ -5681,32 +5667,38 @@ def pg_tracking():
 
         if not all_comps:
             st.markdown(
-                '<div class="trk-empty">'
-                '<span class="trk-empty-icon">📭</span>'
-                '<div class="trk-empty-title">' + t('No complaints yet', 'कोई शिकायत नहीं') + '</div>'
-                '<div class="trk-empty-sub">' + t('File your first complaint to get started.', 'पहली शिकायत दर्ज करें।') + '</div>'
-                '</div>',
-                unsafe_allow_html=True
+                "<div class='trk-empty'>"
+                "<span class='trk-empty-icon'>📭</span>"
+                "<div class='trk-empty-title'>" + t("No complaints yet", "कोई शिकायत नहीं") + "</div>"
+                "<div class='trk-empty-sub'>" + t("File your first complaint to get started.", "पहली शिकायत दर्ज करें।") + "</div>"
+                "</div>",
+                unsafe_allow_html=True,
             )
             ec1, ec2, ec3 = st.columns([1, 2, 1])
             with ec2:
-                if st.button(t("📢 File First Complaint", "📢 पहली शिकायत दर्ज करें"),
-                             key="trk_file_first", use_container_width=True):
+                if st.button(
+                    t("📢 File First Complaint", "📢 पहली शिकायत दर्ज करें"),
+                    key="trk_file_first",
+                    use_container_width=True,
+                ):
                     st.session_state.screen = "file_complaint"
                     st.rerun()
             return
 
-        # ── filter state (unchanged) ──────────────────────────
+        # ── Filter state defaults ──────────────────────────────────────────
         for k, v in [("trk_sf", "all"), ("trk_pf", "all"), ("trk_q", "")]:
             if k not in st.session_state:
                 st.session_state[k] = v
 
-        # ── search bar ────────────────────────────────────────
-        st.markdown('<div class="prem-section-header">🔍 ' + t('Filter & Search', 'खोजें और फ़िल्टर') + '</div>',
-                    unsafe_allow_html=True)
+        # ── Search bar ────────────────────────────────────────────────────
+        st.markdown(
+            "<div class='prem-section-header'>🔍 " + t("Filter & Search", "खोजें और फ़िल्टर") + "</div>",
+            unsafe_allow_html=True,
+        )
         st.markdown('<div class="trk-search-wrap">', unsafe_allow_html=True)
         srch = st.text_input(
-            "tsrch", label_visibility="collapsed",
+            "tsrch",
+            label_visibility="collapsed",
             placeholder="🔍 " + t("Search by ID, category, location…", "ID, श्रेणी, स्थान से खोजें…"),
             value=st.session_state.trk_q,
             key="trk_search_q",
@@ -5716,18 +5708,16 @@ def pg_tracking():
             st.session_state.trk_q = srch
             st.rerun()
 
-        # ── STATUS filter chips + radio (unchanged logic) ─────
+        # ── Status filter ─────────────────────────────────────────────────
         SF = [
-            ("all",         t("All","सभी"),           "📋"),
-            ("pending",     t("Pending","लंबित"),      "⏳"),
-            ("in_progress", t("In Progress","प्रगति"), "🔄"),
-            ("resolved",    t("Resolved","समाधान"),    "✅"),
-            ("closed",      t("Closed","बंद"),          "🔒"),
-            ("rejected",    t("Rejected","अस्वीकृत"),  "❌"),
+            ("all",         t("All",         "सभी"),          "📋"),
+            ("pending",     t("Pending",      "लंबित"),        "⏳"),
+            ("in_progress", t("In Progress",  "प्रगति"),       "🔄"),
+            ("resolved",    t("Resolved",     "समाधान"),       "✅"),
+            ("closed",      t("Closed",       "बंद"),           "🔒"),
+            ("rejected",    t("Rejected",     "अस्वीकृत"),     "❌"),
         ]
-
-        st.markdown("<div class='trk-flabel'>" + t('Status', 'स्थिति') + "</div>",
-                    unsafe_allow_html=True)
+        st.markdown("<div class='trk-flabel'>" + t("Status", "स्थिति") + "</div>", unsafe_allow_html=True)
         st.markdown(
             "<div class='trk-chips'>"
             + "".join(
@@ -5736,10 +5726,11 @@ def pg_tracking():
                 for v, lb, ic in SF
             )
             + "</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
         sf_choice = st.radio(
-            "sf_radio", label_visibility="collapsed",
+            "sf_radio",
+            label_visibility="collapsed",
             options=[v for v, lb, ic in SF],
             format_func=lambda v: next(ic + " " + lb for fv, lb, ic in SF if fv == v),
             index=next(i for i, (v, lb, ic) in enumerate(SF) if v == st.session_state.trk_sf),
@@ -5750,16 +5741,14 @@ def pg_tracking():
             st.session_state.trk_sf = sf_choice
             st.rerun()
 
-        # ── PRIORITY filter chips + radio (unchanged logic) ───
+        # ── Priority filter ───────────────────────────────────────────────
         PF = [
-            ("all",    t("All","सभी"),      "🔘"),
-            ("high",   t("High","उच्च"),    "🔴"),
-            ("medium", t("Medium","मध्यम"), "🟡"),
-            ("low",    t("Low","निम्न"),    "🟢"),
+            ("all",    t("All",    "सभी"),     "🔘"),
+            ("high",   t("High",   "उच्च"),    "🔴"),
+            ("medium", t("Medium", "मध्यम"),   "🟡"),
+            ("low",    t("Low",    "निम्न"),   "🟢"),
         ]
-
-        st.markdown("<div class='trk-flabel'>" + t('Priority', 'प्राथमिकता') + "</div>",
-                    unsafe_allow_html=True)
+        st.markdown("<div class='trk-flabel'>" + t("Priority", "प्राथमिकता") + "</div>", unsafe_allow_html=True)
         st.markdown(
             "<div class='trk-chips'>"
             + "".join(
@@ -5768,10 +5757,11 @@ def pg_tracking():
                 for v, lb, ic in PF
             )
             + "</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
         pf_choice = st.radio(
-            "pf_radio", label_visibility="collapsed",
+            "pf_radio",
+            label_visibility="collapsed",
             options=[v for v, lb, ic in PF],
             format_func=lambda v: next(ic + " " + lb for fv, lb, ic in PF if fv == v),
             index=next(i for i, (v, lb, ic) in enumerate(PF) if v == st.session_state.trk_pf),
@@ -5782,7 +5772,7 @@ def pg_tracking():
             st.session_state.trk_pf = pf_choice
             st.rerun()
 
-        # ── apply filters (unchanged) ─────────────────────────
+        # ── Apply filters ─────────────────────────────────────────────────
         filtered = all_comps
         if st.session_state.trk_sf != "all":
             filtered = [c for c in filtered if c.get("status", "") == st.session_state.trk_sf]
@@ -5790,29 +5780,28 @@ def pg_tracking():
             filtered = [c for c in filtered if c.get("priority", "") == st.session_state.trk_pf]
         if st.session_state.trk_q:
             term = st.session_state.trk_q.strip().lower()
-            filtered = [c for c in filtered
-                        if term in c.get("complaint_id", "").lower()
-                        or term in c.get("category", "").lower()
-                        or term in c.get("location", "").lower()
-                        or term in c.get("description", "").lower()]
+            filtered = [
+                c for c in filtered
+                if term in c.get("complaint_id", "").lower()
+                or term in c.get("category",     "").lower()
+                or term in c.get("location",     "").lower()
+                or term in c.get("description",  "").lower()
+            ]
 
-        # ── results count + clear (unchanged) ─────────────────
-        # Results summary bar
-        sf_label = next((lb for v, lb, ic in SF if v == st.session_state.trk_sf), "All")
-        pf_label = next((lb for v, lb, ic in PF if v == st.session_state.trk_pf), "All")
+        # ── Results summary ───────────────────────────────────────────────
         st.markdown(
-            '<div style="display:flex;align-items:center;justify-content:space-between;'
-            'flex-wrap:wrap;gap:8px;margin:14px 0 8px;">'
-            '<span style="background:rgba(99,102,241,.09);color:#6366F1;'
-            'border:1.5px solid rgba(99,102,241,.20);border-radius:20px;'
-            'padding:5px 16px;font-size:.78rem;font-weight:800;">'
+            "<div style='display:flex;align-items:center;justify-content:space-between;"
+            "flex-wrap:wrap;gap:8px;margin:14px 0 8px;'>"
+            "<span style='background:rgba(99,102,241,.09);color:#6366F1;"
+            "border:1.5px solid rgba(99,102,241,.20);border-radius:20px;"
+            "padding:5px 16px;font-size:.78rem;font-weight:800;'>"
             + t("Showing", "दिखा रहे हैं") + " <strong>" + str(len(filtered)) + "</strong> "
             + t("of", "में से") + " <strong>" + str(len(all_comps)) + "</strong> "
             + t("complaints", "शिकायतें") + "</span>"
-            '<span style="font-size:.72rem;color:#94A3B8;font-weight:600;">'
+            "<span style='font-size:.72rem;color:#94A3B8;font-weight:600;'>"
             + str(len(all_comps) - len(filtered)) + " " + t("hidden", "छिपे") + "</span>"
             "</div>",
-            unsafe_allow_html=True
+            unsafe_allow_html=True,
         )
 
         any_active = (
@@ -5823,8 +5812,11 @@ def pg_tracking():
         if any_active:
             cl1, cl2, cl3 = st.columns([1, 2, 1])
             with cl2:
-                if st.button(t("✕ Clear All Filters", "✕ सभी फ़िल्टर साफ़ करें"),
-                             key="trk_clear", use_container_width=True):
+                if st.button(
+                    t("✕ Clear All Filters", "✕ सभी फ़िल्टर साफ़ करें"),
+                    key="trk_clear",
+                    use_container_width=True,
+                ):
                     st.session_state.trk_sf = "all"
                     st.session_state.trk_pf = "all"
                     st.session_state.trk_q  = ""
@@ -5832,33 +5824,39 @@ def pg_tracking():
 
         if not filtered:
             st.markdown(
-                '<div class="trk-empty">'
-                '<span class="trk-empty-icon">🔍</span>'
-                '<div class="trk-empty-title">'
-                + t('No complaints match your filters', 'कोई शिकायत मेल नहीं खाती') +
-                '</div>'
-                '<div class="trk-empty-sub">'
-                + t('Try adjusting the filters above.', 'ऊपर फ़िल्टर बदलें।') +
-                '</div></div>',
-                unsafe_allow_html=True
+                "<div class='trk-empty'>"
+                "<span class='trk-empty-icon'>🔍</span>"
+                "<div class='trk-empty-title'>"
+                + t("No complaints match your filters", "कोई शिकायत मेल नहीं खाती") +
+                "</div>"
+                "<div class='trk-empty-sub'>"
+                + t("Try adjusting the filters above.", "ऊपर फ़िल्टर बदलें।") +
+                "</div></div>",
+                unsafe_allow_html=True,
             )
             return
 
-        # ── render cards (unchanged) ──────────────────────────
-        for comp in filtered:
-            render_card(comp, expanded=False)
+        # ── Render cards
+        # FIX: enumerate() provides `idx` for each card.
+        # id_prefix="t2" namespaces Tab-2 keys away from Tab-1.
+        # Even if Tab-1 searched for and rendered complaint #3,
+        # Tab-2 keys are "t2_CMP-0003_2" vs Tab-1's "t1_CMP-0003_0" → no clash.
+        for idx, comp in enumerate(filtered):
+            render_card(comp, expanded=False, idx=idx, id_prefix="t2")
 
     # ════════════════════════════════════════════════════════
-    # BACK (unchanged)
+    # BACK
     # ════════════════════════════════════════════════════════
     st.markdown("<br>", unsafe_allow_html=True)
     bc1, bc2, bc3 = st.columns([1, 2, 1])
     with bc2:
-        if st.button(t("← Back to Dashboard", "← डैशबोर्ड पर वापस"),
-                     key="trk_back", use_container_width=True):
+        if st.button(
+            t("← Back to Dashboard", "← डैशबोर्ड पर वापस"),
+            key="trk_back",
+            use_container_width=True,
+        ):
             st.session_state.screen = "user_dashboard"
             st.rerun()
-
 def _display_complaint_card(complaint, uid, lang):
     """Display a compact complaint card with expandable details"""
     complaint_id = complaint.get("complaint_id", "N/A")
