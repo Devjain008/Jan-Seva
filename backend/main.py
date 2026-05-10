@@ -135,55 +135,22 @@ def seed_data():
         db.close()
 # Replace run_migrations() entirely with this PostgreSQL-safe version:
 
+from sqlalchemy import inspect
+
 def run_safe_migrations():
 
     try:
 
-        db_url = str(engine.url)
+        inspector = inspect(engine)
+
+        columns = [
+            col["name"]
+            for col in inspector.get_columns("complaints")
+        ]
 
         with engine.begin() as conn:
 
-            # ─────────────────────────────────
-            # POSTGRESQL
-            # ─────────────────────────────────
-
-            if "postgresql" in db_url:
-
-                result = conn.execute(text("""
-
-                    SELECT column_name
-
-                    FROM information_schema.columns
-
-                    WHERE table_name = 'complaints'
-
-                """))
-
-                existing_cols = {
-                    row[0]
-                    for row in result.fetchall()
-                }
-
-            # ─────────────────────────────────
-            # SQLITE
-            # ─────────────────────────────────
-
-            else:
-
-                result = conn.execute(
-                    text("PRAGMA table_info(complaints)")
-                )
-
-                existing_cols = {
-                    row[1]
-                    for row in result.fetchall()
-                }
-
-            # ─────────────────────────────────
-            # SAFE FIELDS
-            # ─────────────────────────────────
-
-            fields = [
+            missing_fields = [
 
                 ("assigned_official_id", "INTEGER"),
 
@@ -202,33 +169,27 @@ def run_safe_migrations():
                 ("sla_breached", "BOOLEAN DEFAULT FALSE")
             ]
 
-            # ─────────────────────────────────
-            # ADD ONLY MISSING COLUMNS
-            # ─────────────────────────────────
+            for field, ftype in missing_fields:
 
-            for field, ftype in fields:
-
-                if field not in existing_cols:
+                if field not in columns:
 
                     try:
 
-                        conn.execute(
+                        query = f"""
 
-                            text(
-                                f"""
-                                ALTER TABLE complaints
-                                ADD COLUMN {field} {ftype}
-                                """
-                            )
+                        ALTER TABLE complaints
+                        ADD COLUMN {field} {ftype}
 
-                        )
+                        """
+
+                        conn.execute(text(query))
 
                         print(f"✅ Added column: {field}")
 
                     except Exception as e:
 
                         print(
-                            f"⚠ Could not add {field}: {e}"
+                            f"❌ Failed adding {field}: {e}"
                         )
 
         print("✅ Safe migrations completed")
@@ -250,7 +211,7 @@ async def startup():
             checkfirst=True
         )
 
-        # SAFE LIFETIME MIGRATION
+        # SAFE COLUMN SYNC
         run_safe_migrations()
 
         print("✅ Database initialized safely")
@@ -258,6 +219,8 @@ async def startup():
     except Exception as e:
 
         print(f"❌ Startup error: {e}")
+
+        traceback.print_exc()
 
 @app.get("/")
 def root(): 
