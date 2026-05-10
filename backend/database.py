@@ -33,7 +33,6 @@ if DATABASE_URL:
         connect_args={
             "sslmode": "require"
         }
-
     )
 
     print("✅ Connected to PostgreSQL")
