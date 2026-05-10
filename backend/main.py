@@ -168,30 +168,7 @@ def run_migrations():
                         except Exception:
                             pass
 
-            else:
-                # SQLite
-                result = conn.execute(text("PRAGMA table_info(complaints)"))
-                col_names = {c[1] for c in result.fetchall()}
-
-                sqlite_fields = [
-                    ("assigned_official_id", "INTEGER"),
-                    ("image_url",            "TEXT"),
-                    ("resolution_proof",     "TEXT"),
-                    ("resolution_note",      "TEXT"),
-                    ("sla_deadline",         "TIMESTAMP"),
-                    ("is_overdue",           "BOOLEAN DEFAULT 0"),
-                    ("time_to_resolve_hours","FLOAT"),
-                    ("SLA_breached",         "BOOLEAN DEFAULT 0"),
-                ]
-                for field, ftype in sqlite_fields:
-                    if field not in col_names:
-                        try:
-                            conn.execute(text(
-                                f"ALTER TABLE complaints ADD COLUMN {field} {ftype}"
-                            ))
-                            print(f"Added column: {field}")
-                        except Exception:
-                            pass
+        
 
     except Exception as e:
         print(f"Migration error: {e}")

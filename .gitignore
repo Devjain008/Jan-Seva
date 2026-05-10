@@ -21,6 +21,14 @@ __pycache__/
 .venv
 venv/
 
+# SQLite / Local DB
+*.db
+*.sqlite3
+backend/jansevadb.sqlite
+
+# Temporary uploads
+uploads/
+
 # OS files
 .DS_Store
 Thumbs.db
