@@ -10465,6 +10465,112 @@ def pg_admin_officials():
     font-weight:700 !important;padding:9px 14px !important;
     box-shadow:none !important;
 }}
+/* ─────────────────────────────────────────
+   COMMON ACTION BUTTON STYLE
+───────────────────────────────────────── */
+
+.off-btn-approve,
+.off-btn-reject,
+.off-btn-remove{{
+
+    width:100%!important;
+}}
+
+/* Main button */
+.off-btn-approve .stButton>button,
+.off-btn-reject .stButton>button,
+.off-btn-remove .stButton>button{{
+
+    width:100%!important;
+
+    min-width:120px!important;
+
+    height:42px!important;
+
+    border-radius:12px!important;
+
+    font-size:.82rem!important;
+
+    font-weight:700!important;
+
+    padding:0 14px!important;
+
+    white-space:nowrap!important;
+
+    display:flex!important;
+
+    align-items:center!important;
+
+    justify-content:center!important;
+
+    transition:all .18s ease!important;
+}}
+
+/* APPROVE */
+.off-btn-approve .stButton>button{{
+
+    background:
+        linear-gradient(135deg,#16A34A,#22C55E)!important;
+
+    color:#FFFFFF!important;
+
+    border:none!important;
+
+    box-shadow:
+        0 8px 22px rgba(34,197,94,.24)!important;
+}}
+
+/* REJECT */
+.off-btn-reject .stButton>button{{
+
+    background:#FFFFFF!important;
+
+    color:#DC2626!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.16)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+}}
+
+/* REMOVE */
+.off-btn-remove .stButton>button{{
+
+    background:#FFFFFF!important;
+
+    color:#DC2626!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.16)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+}}
+
+/* Hover */
+.off-btn-approve .stButton>button:hover,
+.off-btn-reject .stButton>button:hover,
+.off-btn-remove .stButton>button:hover{{
+
+    transform:
+        translateY(-2px)!important;
+}}
+
+/* Mobile */
+@media(max-width:768px){{
+
+    .off-btn-approve .stButton>button,
+    .off-btn-reject .stButton>button,
+    .off-btn-remove .stButton>button{{
+
+        min-width:100%!important;
+
+        height:40px!important;
+
+        font-size:.78rem!important;
+    }}
+}}
 .off-btn-reject > button:hover{{
     background:{"#2C1010" if dark else "#FFE4E6"} !important;
     transform:translateY(-1px) !important;
@@ -10568,7 +10674,7 @@ def pg_admin_officials():
                 unsafe_allow_html=True,
             )
 
-            pa1, pa2, pa3 = st.columns([4, 1, 1])
+            pa1, pa2, pa3 = st.columns([3.8, 1.4, 1.4], gap="small")
             with pa2:
                 st.markdown("<div class='off-btn-approve'>", unsafe_allow_html=True)
                 if st.button("✅ Approve", key=f"apv_{oid}", use_container_width=True):
@@ -10642,7 +10748,7 @@ def pg_admin_officials():
                 unsafe_allow_html=True,
             )
 
-            rc1, rc2, rc3 = st.columns([5, 1, 1])
+            rc1, rc2, rc3 = st.columns([4.2, 1.6, 1.6], gap="small")
             with rc3:
                 st.markdown("<div class='off-btn-remove'>", unsafe_allow_html=True)
                 if st.button("🗑 Remove", key=f"rem_{oid}", use_container_width=True):
