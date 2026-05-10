@@ -178,12 +178,76 @@ p,span,div,label,small{{color:var(--c-text);}}
 /* ═══════════════════════════════════════════════════════
    LAYOUT
 ═══════════════════════════════════════════════════════ */
-.main .block-container{{
-    padding:1.75rem 2rem 4rem!important;
-    max-width:1020px!important;
-    margin:0 auto!important;
+.main .block-container {{
+    padding: clamp(1rem, 3vw, 2rem) clamp(0.75rem, 3.5vw, 2rem) clamp(3rem, 6vw, 5rem) !important;
+    max-width: clamp(300px, 90vw, 1100px) !important;   # ← this is the key line
+    margin: 0 auto !important;
+    width: 100% !important;
+}}
+/* ═══════════════════════════════════════════════
+   SIDEBAR COLLAPSED CONTROL — reopen button fix
+═══════════════════════════════════════════════ */
+
+/* When sidebar is OPEN — collapse button inside sidebar */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"] {{
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    top: 16px !important;
+    left: 16px !important;
+    width: 44px !important;
+    height: 44px !important;
+    z-index: 999999 !important;
+    border-radius: 13px !important;
+    background: linear-gradient(135deg, {accent1}, {accent2}) !important;
+    border: 1px solid rgba(255,255,255,0.18) !important;
+    box-shadow: 0 8px 24px {a1_glow} !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    transition: transform 0.14s ease, box-shadow 0.14s ease !important;
 }}
 
+/* Hover */
+[data-testid="stSidebarCollapsedControl"]:hover,
+[data-testid="collapsedControl"]:hover {{
+    transform: scale(1.06) !important;
+    box-shadow: 0 12px 30px {a1_glow} !important;
+}}
+
+/* Icon inside button */
+[data-testid="stSidebarCollapsedControl"] svg,
+[data-testid="collapsedControl"] svg {{
+    fill: #fff !important;
+    color: #fff !important;
+    width: 20px !important;
+    height: 20px !important;
+}}
+
+/* Streamlit sometimes wraps it in a section — force visible */
+section[data-testid="stSidebarCollapsedControl"] {{
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    z-index: 999999 !important;
+    background: transparent !important;
+    width: auto !important;
+    height: auto !important;
+}}
+/* Prevent header from clipping the toggle */
+header[data-testid="stHeader"] {{
+    background: transparent !important;
+    height: 0 !important;
+    overflow: visible !important;    /* ← this is critical */
+    z-index: 99998 !important;
+}}
 /* ═══════════════════════════════════════════════════════
    SIDEBAR
 ═══════════════════════════════════════════════════════ */

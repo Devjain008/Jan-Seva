@@ -20,10 +20,10 @@ from frontend.config import TRANSLATIONS, API_BASE
 st.set_page_config(
     page_title="Jan Seva Portal",
     page_icon="🏛️",
-    layout="wide",
+    layout="centered",        # ← change to "centered" to match localhost
     initial_sidebar_state="expanded",
 )
-import requests as _req
+
 
 # ─────────────────────────────────────────────
 # API HELPER
