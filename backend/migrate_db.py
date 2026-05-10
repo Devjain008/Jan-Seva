@@ -25,7 +25,6 @@ def run_migration():
                     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
                 )
             """))
-            
             # Insert default SLA policies
             default_slas = [
                 ("water", 24, 1.0),
