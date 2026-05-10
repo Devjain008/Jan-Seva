@@ -492,6 +492,56 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     background:transparent!important;
 }}
 /* ═══════════════════════════════════════════════
+   FINAL CLEAR BUTTON FIX
+═══════════════════════════════════════════════ */
+
+/* Wrapper */
+div[data-testid="stButton"].notif-del-btn{{
+
+    background:transparent!important;
+}}
+
+/* Actual button */
+div[data-testid="stButton"].notif-del-btn > button{{
+
+    background:#FFFFFF!important;
+
+    background-image:none!important;
+
+    color:#DC2626!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.18)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+
+    filter:none!important;
+}}
+
+/* Hover */
+div[data-testid="stButton"].notif-del-btn > button:hover{{
+
+    background:#FEF2F2!important;
+
+    background-image:none!important;
+
+    color:#B91C1C!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.28)!important;
+
+    transform:
+        translateY(-2px)!important;
+}}
+
+/* Remove inherited gradients */
+div[data-testid="stButton"].notif-del-btn > button::before,
+div[data-testid="stButton"].notif-del-btn > button::after{{
+
+    display:none!important;
+}}
+/* ═══════════════════════════════════════════════
    ADMIN NOTIFICATION SECTION FIX
 ═══════════════════════════════════════════════ */
 
