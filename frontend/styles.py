@@ -349,6 +349,132 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
 }}
 
 /* ═══════════════════════════════════════════════
+   USER NOTIFICATION SECTION FIX
+═══════════════════════════════════════════════ */
+
+.notif-card,
+.user-notification-card,
+.prem-notif-card{{
+
+    width:100%!important;
+
+    overflow:hidden!important;
+
+    border-radius:16px!important;
+
+    padding:14px 16px!important;
+
+    background:#FFFFFF!important;
+
+    border:1px solid rgba(15,23,42,.08)!important;
+
+    box-shadow:
+        0 4px 14px rgba(15,23,42,.05)!important;
+}}
+
+/* Notification text */
+.notif-msg,
+.notification-message,
+.prem-notif-msg{{
+
+    color:#0F172A!important;
+
+    line-height:1.6!important;
+
+    word-break:break-word!important;
+
+    overflow-wrap:anywhere!important;
+}}
+
+/* Notification actions */
+.notif-actions,
+.notification-actions,
+.prem-notif-actions{{
+
+    display:flex!important;
+
+    flex-wrap:wrap!important;
+
+    align-items:center!important;
+
+    gap:10px!important;
+
+    margin-top:12px!important;
+}}
+
+/* Fix stretched buttons */
+.notif-actions .stButton,
+.notification-actions .stButton,
+.prem-notif-actions .stButton{{
+
+    width:auto!important;
+
+    flex:none!important;
+}}
+
+/* Button style */
+.notif-actions .stButton>button,
+.notification-actions .stButton>button,
+.prem-notif-actions .stButton>button{{
+
+    width:auto!important;
+
+    min-width:fit-content!important;
+
+    max-width:100%!important;
+
+    padding:9px 16px!important;
+
+    min-height:40px!important;
+
+    border-radius:12px!important;
+
+    white-space:nowrap!important;
+}}
+
+/* Clear button fix */
+.notif-actions .stButton>button[kind="secondary"],
+.notification-actions .stButton>button[kind="secondary"],
+.prem-notif-actions .stButton>button[kind="secondary"]{{
+
+    background:#FFFFFF!important;
+
+    color:#0F172A!important;
+
+    border:
+        1px solid rgba(15,23,42,.10)!important;
+
+    box-shadow:none!important;
+}}
+
+/* Mobile responsiveness */
+@media(max-width:768px){{
+
+    .notif-actions,
+    .notification-actions,
+    .prem-notif-actions{{
+
+        flex-direction:column!important;
+
+        align-items:stretch!important;
+    }}
+
+    .notif-actions .stButton,
+    .notification-actions .stButton,
+    .prem-notif-actions .stButton{{
+
+        width:100%!important;
+    }}
+
+    .notif-actions .stButton>button,
+    .notification-actions .stButton>button,
+    .prem-notif-actions .stButton>button{{
+
+        width:100%!important;
+    }}
+}}
+
+/* ═══════════════════════════════════════════════
    ADMIN NOTIFICATION SECTION FIX
 ═══════════════════════════════════════════════ */
 
