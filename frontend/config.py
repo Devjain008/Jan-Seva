@@ -1,4 +1,5 @@
 API_BASE = "https://bfo-backend.onrender.com"
+# frontend/config.py
 
 TRANSLATIONS = {
     "en": {
