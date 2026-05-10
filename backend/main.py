@@ -175,13 +175,24 @@ def run_migrations():
 
 @app.on_event("startup")
 async def startup():
+
     try:
-        Base.metadata.create_all(bind=engine)
-        run_migrations()
-        seed_data()
-        print("✅ Database initialized successfully")
+
+        print("🚀 Starting AI Citizen Grievance System...")
+
+        # SAFE
+        # Creates tables ONLY if missing
+        Base.metadata.create_all(
+            bind=engine,
+            checkfirst=True
+        )
+
+        print("✅ Database connected safely")
+
     except Exception as e:
+
         print(f"❌ Startup error: {e}")
+
         traceback.print_exc()
 
 @app.get("/")
