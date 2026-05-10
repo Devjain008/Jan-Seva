@@ -4758,42 +4758,303 @@ def _render_voice(lang: str):
  
  
 def _render_category(lang: str) -> None:
-    cats: dict[str, tuple[str, str]] = {
-        "water":       ("💧", "Water"        if lang == "en" else "पानी"),
-        "electricity": ("⚡", "Electricity"   if lang == "en" else "बिजली"),
-        "road":        ("🛣️", "Road"          if lang == "en" else "सड़क"),
-        "waste":       ("🗑️", "Waste"         if lang == "en" else "कचरा"),
-        "drainage":    ("🌊", "Drainage"      if lang == "en" else "नाला"),
-        "health":      ("🏥", "Health"        if lang == "en" else "स्वास्थ्य"),
-        "other":       ("📋", "Other"         if lang == "en" else "अन्य"),
-    }
-    _render_sec("📂", "Select Category" if lang == "en" else "श्रेणी चुनें")
- 
-    active    = fc()["category"]
-    keys      = list(cats.keys())
+
+    # ─────────────────────────────────────────────
+    # FETCH DYNAMIC CATEGORIES
+    # ─────────────────────────────────────────────
+
+    try:
+
+        resp = api("get", "/categories")
+
+        dynamic_categories = resp.get(
+            "categories",
+            []
+        )
+
+    except Exception:
+
+        dynamic_categories = []
+
+    # ─────────────────────────────────────────────
+    # FALLBACK DEFAULTS
+    # ─────────────────────────────────────────────
+
+    if not dynamic_categories:
+
+        dynamic_categories = [
+
+            "water",
+            "electricity",
+            "road",
+            "waste",
+            "drainage",
+            "health",
+            "other",
+        ]
+
+    # Remove duplicates
+    dynamic_categories = sorted(
+        list(set(dynamic_categories))
+    )
+
+    # ─────────────────────────────────────────────
+    # AUTO CATEGORY LABEL + ICON
+    # ─────────────────────────────────────────────
+
+    def get_category_display(category):
+
+        category = str(category).lower().strip()
+
+        AUTO_MAP = {
+
+            "water": (
+                "💧",
+                "Water" if lang == "en" else "पानी"
+            ),
+
+            "electricity": (
+                "⚡",
+                "Electricity" if lang == "en" else "बिजली"
+            ),
+
+            "road": (
+                "🛣️",
+                "Road" if lang == "en" else "सड़क"
+            ),
+
+            "waste": (
+                "🗑️",
+                "Waste" if lang == "en" else "कचरा"
+            ),
+
+            "drainage": (
+                "🌊",
+                "Drainage" if lang == "en" else "नाला"
+            ),
+
+            "health": (
+                "🏥",
+                "Health" if lang == "en" else "स्वास्थ्य"
+            ),
+
+            "cyber": (
+                "💻",
+                "Cyber Crime"
+                if lang == "en"
+                else "साइबर अपराध"
+            ),
+
+            "internet": (
+                "🌐",
+                "Internet"
+                if lang == "en"
+                else "इंटरनेट"
+            ),
+
+            "telecom": (
+                "📡",
+                "Telecom"
+                if lang == "en"
+                else "टेलीकॉम"
+            ),
+
+            "transport": (
+                "🚌",
+                "Transport"
+                if lang == "en"
+                else "परिवहन"
+            ),
+
+            "police": (
+                "🚓",
+                "Police"
+                if lang == "en"
+                else "पुलिस"
+            ),
+
+            "fire": (
+                "🔥",
+                "Fire Service"
+                if lang == "en"
+                else "फायर सेवा"
+            ),
+
+            "tourism": (
+                "✈️",
+                "Tourism"
+                if lang == "en"
+                else "पर्यटन"
+            ),
+
+            "bank": (
+                "🏦",
+                "Banking"
+                if lang == "en"
+                else "बैंकिंग"
+            ),
+
+            "finance": (
+                "💰",
+                "Finance"
+                if lang == "en"
+                else "वित्त"
+            ),
+
+            "education": (
+                "🎓",
+                "Education"
+                if lang == "en"
+                else "शिक्षा"
+            ),
+
+            "housing": (
+                "🏠",
+                "Housing"
+                if lang == "en"
+                else "आवास"
+            ),
+        }
+
+        for key, value in AUTO_MAP.items():
+
+            if key in category:
+
+                return value
+
+        return (
+
+            "📌",
+
+            category.replace(
+                "_",
+                " "
+            ).title()
+        )
+
+    # ─────────────────────────────────────────────
+    # SECTION TITLE
+    # ─────────────────────────────────────────────
+
+    _render_sec(
+
+        "📂",
+
+        "Select Category"
+        if lang == "en"
+        else "श्रेणी चुनें"
+    )
+
+    # ─────────────────────────────────────────────
+    # ACTIVE CATEGORY
+    # ─────────────────────────────────────────────
+
+    active = fc()["category"]
+
+    # ─────────────────────────────────────────────
+    # GRID SYSTEM
+    # ─────────────────────────────────────────────
+
     col_count = 4
-    padded    = keys + [None] * ((-len(keys)) % col_count)
-    rows      = [padded[i:i+col_count] for i in range(0, len(padded), col_count)]
- 
+
+    padded = dynamic_categories + [
+
+        None
+
+    ] * ((-len(dynamic_categories)) % col_count)
+
+    rows = [
+
+        padded[i:i + col_count]
+
+        for i in range(
+            0,
+            len(padded),
+            col_count
+        )
+    ]
+
+    # ─────────────────────────────────────────────
+    # RENDER CATEGORY BUTTONS
+    # ─────────────────────────────────────────────
+
     for row in rows:
-        cols = st.columns(col_count, gap="small")
-        for col, k in zip(cols, row):
-            if k is None:
+
+        cols = st.columns(
+            col_count,
+            gap="small"
+        )
+
+        for col, category in zip(cols, row):
+
+            if category is None:
+
                 continue
-            icon, label = cats[k]
-            cls = "fc-cat-cell fc-cat-active" if k == active else "fc-cat-cell"
+
+            icon, label = get_category_display(
+                category
+            )
+
+            cls = (
+
+                "fc-cat-cell fc-cat-active"
+
+                if category == active
+
+                else "fc-cat-cell"
+            )
+
             with col:
-                st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
-                def _make_select(key: str):
-                    def _select(): fc_set(category=key)
+
+                st.markdown(
+
+                    f"<div class='{cls}'>",
+
+                    unsafe_allow_html=True
+                )
+
+                def _make_select(cat_key: str):
+
+                    def _select():
+
+                        fc_set(
+                            category=cat_key
+                        )
+
                     return _select
-                st.button(
-                    f"{icon}\n{label}",
-                    key=f"fc_cat_{k}",
-                    on_click=_make_select(k),
+
+                safe_category = re.sub(
+
+                    r"[^a-zA-Z0-9_]",
+
+                    "_",
+
+                    str(category).lower()
+                )
+
+                btn_text = f"{icon}  {label}"
+
+                clicked = st.button(
+
+                    btn_text,
+
+                    key=f"fc_cat_{safe_category}",
+
                     use_container_width=True,
                 )
-                st.markdown("</div>", unsafe_allow_html=True)
+
+                if clicked:
+
+                    fc_set(
+                        category=category
+                    )
+
+                    st.rerun()
+
+                st.markdown(
+                    "</div>",
+                    unsafe_allow_html=True
+                )
  
  
 def _render_emergency(lang: str) -> None:
@@ -4841,16 +5102,130 @@ def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
         return
  
     def _local(text: str, sel: str) -> tuple[str, str]:
-        tl = text.lower()
-        if   any(w in tl for w in ["water","पानी","tap","leak","pipeline"]): cat = "water"
-        elif any(w in tl for w in ["electricity","बिजली","power","light"]): cat = "electricity"
-        elif any(w in tl for w in ["road","सड़क","pothole","street"]): cat = "road"
-        elif any(w in tl for w in ["garbage","कचरा","waste","dump"]): cat = "waste"
-        elif any(w in tl for w in ["drain","नाला","sewer","flood"]): cat = "drainage"
-        elif any(w in tl for w in ["hospital","स्वास्थ्य","clinic"]): cat = "health"
-        else: cat = sel if sel != "other" else "other"
-        urgent = ["urgent","emergency","critical","fire","injury","collapse","आग","खतरा"]
-        return cat, "high" if (any(w in tl for w in urgent) or is_emg) else "medium"
+
+        tl = str(text).lower().strip()
+
+        # ─────────────────────────────────────────
+        # DYNAMIC CATEGORY DETECTION
+        # ─────────────────────────────────────────
+
+        CATEGORY_KEYWORDS = {
+
+            "water": [
+                "water", "पानी", "tap",
+                "leak", "pipeline", "jal"
+            ],
+
+            "electricity": [
+                "electricity", "बिजली",
+                "power", "light",
+                "transformer", "wire"
+            ],
+
+            "road": [
+                "road", "सड़क",
+                "pothole", "street",
+                "bridge", "traffic"
+            ],
+
+            "waste": [
+                "garbage", "कचरा",
+                "waste", "dump",
+                "dirty", "cleaning"
+            ],
+
+            "drainage": [
+                "drain", "नाला",
+                "sewer", "flood",
+                "drainage"
+            ],
+
+            "health": [
+                "hospital", "स्वास्थ्य",
+                "clinic", "doctor",
+                "ambulance"
+            ],
+
+            # ─────────────────────────
+            # NEW DYNAMIC CATEGORIES
+            # ─────────────────────────
+
+            "cybercrime": [
+                "cyber", "hack",
+                "fraud", "otp",
+                "scam", "online fraud"
+            ],
+
+            "internet": [
+                "internet", "wifi",
+                "network", "broadband"
+            ],
+
+            "telecom": [
+                "telecom", "tower",
+                "signal", "mobile network"
+            ],
+
+            "transport": [
+                "transport", "bus",
+                "metro", "auto",
+                "train"
+            ],
+
+            "police": [
+                "police", "crime",
+                "theft", "attack",
+                "violence"
+            ],
+
+            "fire": [
+                "fire", "आग",
+                "smoke", "burn"
+            ],
+        }
+
+        # Default category
+        cat = sel if sel != "other" else "other"
+
+        # Detect category
+        for category, keywords in CATEGORY_KEYWORDS.items():
+
+            if any(word in tl for word in keywords):
+
+                cat = category
+
+                break
+
+        # ─────────────────────────────────────────
+        # PRIORITY DETECTION
+        # ─────────────────────────────────────────
+
+        urgent_words = [
+
+            "urgent",
+            "emergency",
+            "critical",
+            "fire",
+            "injury",
+            "collapse",
+
+            "आग",
+            "खतरा",
+            "तुरंत",
+            "आपातकाल"
+        ]
+
+        priority = (
+
+            "high"
+
+            if any(word in tl for word in urgent_words)
+            or is_emg
+
+            else "medium"
+        )
+
+        return cat, priority
  
     try:
         from backend.routers.complaints import ai_classify  # type: ignore[import]
@@ -9670,14 +10045,68 @@ li[role="option"][aria-selected="true"] {{
     st.markdown("<div class='dept-sec'>🏢 All Departments</div>", unsafe_allow_html=True)
 
     CAT_META = {
-        "water":       ("#0369A1", "#DBEAFE", "💧"),
-        "electricity": ("#D97706", "#FEF3C7", "⚡"),
-        "road":        ("#7C3AED", "#F3F0FF", "🛣"),
-        "waste":       ("#059669", "#ECFDF5", "♻️"),
-        "drainage":    ("#0284C7", "#E0F2FE", "🌊"),
-        "health":      ("#DC2626", "#FFF1F2", "🏥"),
-        "other":       ("#6B7280", "#F3F4F6", "📋"),
+
+        "water": (
+            "#0369A1",
+            "#DBEAFE",
+            "💧"
+        ),
+
+        "electricity": (
+            "#D97706",
+            "#FEF3C7",
+            "⚡"
+        ),
+
+        "road": (
+            "#7C3AED",
+            "#F3F0FF",
+            "🛣"
+        ),
+
+        "waste": (
+            "#059669",
+            "#ECFDF5",
+            "♻️"
+        ),
+
+        "drainage": (
+            "#0284C7",
+            "#E0F2FE",
+            "🌊"
+        ),
+
+        "health": (
+            "#DC2626",
+            "#FFF1F2",
+            "🏥"
+        ),
+
+        "other": (
+            "#6B7280",
+            "#F3F4F6",
+            "📋"
+        ),
     }
+
+    # ─────────────────────────────────────────────
+    # DYNAMIC CATEGORY STYLE HELPER
+    # ─────────────────────────────────────────────
+
+    def get_category_meta(category):
+
+        category = str(category).lower().strip()
+
+        return CAT_META.get(
+
+            category,
+
+            (
+                "#2563EB",     # default border/accent
+                "#EFF6FF",     # default background
+                "📌"           # default icon
+            )
+        )
 
     for d in depts:
         did      = d.get("id")
@@ -11965,10 +12394,65 @@ div[data-testid="stButton"].sch-del > button:hover{{
                     height=130,
                     placeholder="Detailed description — benefits, eligibility, application process…",
                 )
-                category = st.selectbox(
-                    "Category",
-                    ["housing","water","energy","health","education",
-                     "agriculture","financial","general"],
+                # Fetch categories dynamically
+                cat_resp = api("get", "/categories")
+
+                categories = cat_resp.get(
+                    "categories",
+                    []
+                )
+
+                # Fallback if API fails
+                if not categories:
+
+                    categories = [
+                        "housing",
+                        "water",
+                        "energy",
+                        "health",
+                        "education",
+                        "agriculture",
+                        "financial",
+                        "general",
+                    ]
+
+                # Remove duplicates + sort
+                categories = sorted(
+                    list(set(categories))
+                )
+
+                existing_categories = api(
+                    "get",
+                    "/categories"
+                ).get("categories", [])
+
+                col1, col2 = st.columns(2)
+
+                with col1:
+
+                    selected_category = st.selectbox(
+
+                        "Existing Category",
+
+                        [""] + existing_categories
+                    )
+
+                with col2:
+
+                    custom_category = st.text_input(
+
+                        "New Category",
+
+                        placeholder="cybercrime"
+                    )
+
+                category = (
+
+                    custom_category.strip().lower()
+
+                    if custom_category.strip()
+
+                    else selected_category
                 )
 
             with fc2:
@@ -12143,10 +12627,38 @@ div[data-testid="stButton"].sch-del > button:hover{{
         )
 
         CATEGORY_ICONS = {
-            "health":"🏥","education":"🎓","agriculture":"🌾",
-            "housing":"🏠","financial":"💰","water":"💧",
-            "energy":"⚡","general":"📋",
+
+            "health":      "🏥",
+
+            "education":   "🎓",
+
+            "agriculture": "🌾",
+
+            "housing":     "🏠",
+
+            "financial":   "💰",
+
+            "water":       "💧",
+
+            "energy":      "⚡",
+
+            "general":     "📋",
         }
+
+        # ─────────────────────────────────────────────
+        # SAFE DYNAMIC CATEGORY ICON
+        # ─────────────────────────────────────────────
+
+        def get_category_icon(category):
+
+            category = str(category).lower().strip()
+
+            return CATEGORY_ICONS.get(
+
+                category,
+
+                "📌"   # default icon
+            )
 
         for idx, s in enumerate(filtered):
             sid      = s.get("id","")
@@ -12231,141 +12743,6 @@ div[data-testid="stButton"].sch-del > button:hover{{
 
 def pg_admin_heatmap():
 
-    # ══════════════════════════════════════════════════════════════════════════
-    # DROPDOWN FIX — inject via JS so styles reach Streamlit's portal layer
-    # Normal <style> tags cannot reach portals rendered outside the app root.
-    # We use a <script> to insert rules directly into document.styleSheets[0]
-    # which applies globally including all portal/popover layers.
-    # ══════════════════════════════════════════════════════════════════════════
-    st.markdown("""
-    <style>
-    /* ── Layer 1: standard CSS selectors (catches most cases) ── */
-    [data-baseweb="popover"],
-    [data-baseweb="popover"] *,
-    [data-baseweb="menu"],
-    [data-baseweb="menu"] *,
-    [role="listbox"],
-    [role="listbox"] *,
-    [role="option"],
-    body > div[data-portal="true"],
-    body > div[data-portal="true"] * {
-        background-color: #FFFFFF !important;
-        color: #0F172A !important;
-    }
-    [data-baseweb="popover"] {
-        border-radius: 16px !important;
-        border: 1.5px solid #E2E8F4 !important;
-        box-shadow: 0 12px 40px rgba(15,23,42,0.14) !important;
-        overflow: hidden !important;
-    }
-    [data-baseweb="menu"], [role="listbox"] {
-        background: #FFFFFF !important;
-        padding: 6px !important;
-    }
-    [data-baseweb="option"], [role="option"] {
-        background: #FFFFFF !important;
-        color: #0F172A !important;
-        border-radius: 10px !important;
-        padding: 9px 14px !important;
-        margin: 2px 0 !important;
-        font-size: 0.85rem !important;
-        font-weight: 500 !important;
-        cursor: pointer !important;
-        transition: background .15s !important;
-    }
-    [data-baseweb="option"]:hover, [role="option"]:hover {
-        background: #F1F5F9 !important;
-        color: #6366F1 !important;
-    }
-    [aria-selected="true"][data-baseweb="option"],
-    [aria-selected="true"][role="option"] {
-        background: linear-gradient(135deg,rgba(99,102,241,.10),rgba(139,92,246,.08)) !important;
-        color: #6366F1 !important;
-        font-weight: 700 !important;
-    }
-    /* Selectbox trigger */
-    .stSelectbox > div > div {
-        background: #FFFFFF !important;
-        border: 1.5px solid #E2E8F4 !important;
-        border-radius: 12px !important;
-        color: #0F172A !important;
-    }
-    .stSelectbox > div > div:focus-within {
-        border-color: #6366F1 !important;
-        box-shadow: 0 0 0 3px rgba(99,102,241,.12) !important;
-    }
-    .stSelectbox span,
-    .stSelectbox [data-baseweb="select"] span,
-    .stSelectbox [data-baseweb="select"] div,
-    .stSelectbox [data-baseweb="select"] * {
-        color: #0F172A !important;
-        background: transparent !important;
-    }
-    .stSelectbox svg { fill: #64748B !important; }
-    </style>
-
-    <script>
-    /* Layer 2: JS sheet injection — reaches portals that CSS cannot */
-    (function injectDropdownFix() {
-        var rules = [
-            "[data-baseweb='popover']{background:#FFFFFF!important;border-radius:16px!important;border:1.5px solid #E2E8F4!important;box-shadow:0 12px 40px rgba(15,23,42,.14)!important;overflow:hidden!important;}",
-            "[data-baseweb='popover'] *{background-color:#FFFFFF!important;color:#0F172A!important;}",
-            "[data-baseweb='menu']{background:#FFFFFF!important;padding:6px!important;}",
-            "[data-baseweb='menu'] *{background-color:#FFFFFF!important;color:#0F172A!important;}",
-            "[data-baseweb='option']{background:#FFFFFF!important;color:#0F172A!important;border-radius:10px!important;padding:9px 14px!important;margin:2px 0!important;font-size:.85rem!important;cursor:pointer!important;}",
-            "[data-baseweb='option']:hover{background:#F1F5F9!important;color:#6366F1!important;}",
-            "[aria-selected='true'][data-baseweb='option']{background:rgba(99,102,241,.10)!important;color:#6366F1!important;font-weight:700!important;}",
-            "[role='listbox']{background:#FFFFFF!important;padding:6px!important;}",
-            "[role='listbox'] *{background-color:#FFFFFF!important;color:#0F172A!important;}",
-            "[role='option']{background:#FFFFFF!important;color:#0F172A!important;border-radius:10px!important;padding:9px 14px!important;}",
-            "[role='option']:hover{background:#F1F5F9!important;color:#6366F1!important;}",
-            "body > div[data-portal='true']{background:#FFFFFF!important;}",
-            "body > div[data-portal='true'] *{background-color:#FFFFFF!important;color:#0F172A!important;}"
-        ];
-        function inject() {
-            try {
-                /* Try to find or create a style sheet we can write to */
-                var sheet = null;
-                for (var i = 0; i < document.styleSheets.length; i++) {
-                    try {
-                        if (document.styleSheets[i].cssRules !== null) {
-                            sheet = document.styleSheets[i]; break;
-                        }
-                    } catch(e) {}
-                }
-                if (!sheet) {
-                    var style = document.createElement('style');
-                    document.head.appendChild(style);
-                    sheet = style.sheet;
-                }
-                rules.forEach(function(rule) {
-                    try { sheet.insertRule(rule, sheet.cssRules.length); } catch(e) {}
-                });
-            } catch(e) {}
-        }
-        /* Run immediately and also after short delays to catch late-mounted portals */
-        inject();
-        setTimeout(inject, 300);
-        setTimeout(inject, 800);
-        setTimeout(inject, 1500);
-
-        /* MutationObserver: re-inject whenever a portal div is added to body */
-        var observer = new MutationObserver(function(mutations) {
-            mutations.forEach(function(m) {
-                m.addedNodes.forEach(function(node) {
-                    if (node.nodeType === 1 &&
-                        (node.dataset && node.dataset.portal === 'true' ||
-                         node.querySelector && node.querySelector('[data-baseweb="popover"]'))) {
-                        inject();
-                    }
-                });
-            });
-        });
-        observer.observe(document.body, { childList: true, subtree: false });
-    })();
-    </script>
-    """, unsafe_allow_html=True)
-
     # ── FETCH DATA ────────────────────────────────────────────────────────────
     comps = api("get", "/complaints/all")
     comps = comps if isinstance(comps, list) else []
@@ -12404,15 +12781,20 @@ def pg_admin_heatmap():
     # ── MAP CONTROLS ROW ──────────────────────────────────────────────────────
     st.markdown('<div class="prem-section-header">🗺️ Interactive Map</div>', unsafe_allow_html=True)
 
-    ctrl1, ctrl2, ctrl3 = st.columns([1, 1, 1])
+    ctrl1, ctrl2, ctrl3, ctrl4 = st.columns([1, 1, 1, 1])
     with ctrl1:
-        filter_pri = st.selectbox("🎯 Priority Filter", ["All", "High", "Medium", "Low"], key="hm_pri")
+        filter_pri = st.selectbox("🎯 Priority", ["All", "High", "Medium", "Low"], key="hm_pri")
     with ctrl2:
-        filter_stat = st.selectbox("📋 Status Filter",
+        filter_stat = st.selectbox("📋 Status",
                                    ["All", "Pending", "In Progress", "Resolved", "Rejected"],
                                    key="hm_stat")
     with ctrl3:
-        map_style = st.selectbox("🗺️ Map Style",
+        # Build category list from data
+        all_cats = sorted(set(g[5] for g in geo)) if geo else []
+        cat_options = ["All"] + [c.title() for c in all_cats]
+        filter_cat = st.selectbox("📂 Category", cat_options, key="hm_cat")
+    with ctrl4:
+        map_style = st.selectbox("🎨 Map Style",
                                  ["Standard", "Dark (CartoDB)", "Satellite (Esri)"],
                                  key="hm_style")
 
@@ -12426,6 +12808,8 @@ def pg_admin_heatmap():
         filtered_geo = [g for g in filtered_geo if g[2].lower() == filter_pri.lower()]
     if filter_stat != "All":
         filtered_geo = [g for g in filtered_geo if g[4] == stat_map[filter_stat]]
+    if filter_cat != "All":
+        filtered_geo = [g for g in filtered_geo if g[5].lower() == filter_cat.lower()]
 
     # ── TILE LAYER URL ────────────────────────────────────────────────────────
     tile_urls = {
@@ -12434,46 +12818,41 @@ def pg_admin_heatmap():
         "Satellite (Esri)":   "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
     }
     tile_url  = tile_urls.get(map_style, tile_urls["Standard"])
-    tile_attr = "© OpenStreetMap" if map_style == "Standard" else "© CartoDB" if "CartoDB" in map_style else "© Esri"
+    tile_attr = "OpenStreetMap" if map_style == "Standard" else "CartoDB" if "CartoDB" in map_style else "Esri"
 
     # ── BUILD MARKERS JS ──────────────────────────────────────────────────────
     markers_js = ""
+    heat_points_js = ""
     for lat, lon, pri, cid, stat, cat, loc, is_emg in filtered_geo:
-        # Color & size by priority / emergency
         if is_emg:
-            col, rad, stroke, opacity = "#FF2D2D", 16, "#fff", 0.95
+            col, rad, stroke, opacity, intensity = "#FF2D2D", 14, "#fff", 0.95, 1.0
         elif pri == "high":
-            col, rad, stroke, opacity = "#EF4444", 13, "#fff", 0.90
+            col, rad, stroke, opacity, intensity = "#EF4444", 11, "#fff", 0.90, 0.8
         elif pri == "medium":
-            col, rad, stroke, opacity = "#F59E0B", 10, "#fff", 0.88
+            col, rad, stroke, opacity, intensity = "#F59E0B", 9, "#fff", 0.88, 0.5
         else:
-            col, rad, stroke, opacity = "#10B981", 8,  "#fff", 0.85
+            col, rad, stroke, opacity, intensity = "#10B981", 7, "#fff", 0.85, 0.3
 
         stat_label = stat.replace("_", " ").title()
         cat_label  = cat.title()
         loc_label  = (loc[:35] + "…") if len(loc) > 35 else loc
         emg_tag    = " 🚨 EMERGENCY" if is_emg else ""
         popup_html = (
-            "<div style='font-family:Inter,sans-serif;min-width:180px;'>"
-            "<div style='font-size:.75rem;font-weight:800;color:#6366F1;'>#" + str(cid) + emg_tag + "</div>"
-            "<div style='font-size:.8rem;font-weight:700;margin:4px 0 2px;color:#0F172A;'>" + cat_label + "</div>"
-            "<div style='font-size:.72rem;color:#475569;'>📍 " + loc_label + "</div>"
-            "<div style='display:flex;gap:6px;margin-top:6px;'>"
-            "<span style='background:#EEF2FF;color:#4338CA;border-radius:6px;padding:2px 7px;font-size:.65rem;font-weight:700;'>" + stat_label + "</span>"
-            "<span style='background:#FEF3C7;color:#92400E;border-radius:6px;padding:2px 7px;font-size:.65rem;font-weight:700;'>" + pri.title() + "</span>"
+            "<div style=\\\'font-family:Inter,sans-serif;min-width:200px;padding:4px;\\\'>"
+            "<div style=\\\'font-size:.7rem;font-weight:800;color:#6366F1;margin-bottom:4px;\\\'>#" + str(cid) + emg_tag + "</div>"
+            "<div style=\\\'font-size:.82rem;font-weight:700;color:#0F172A;margin-bottom:2px;\\\'>" + cat_label + "</div>"
+            "<div style=\\\'font-size:.72rem;color:#475569;margin-bottom:6px;\\\'>" + loc_label + "</div>"
+            "<div style=\\\'display:flex;gap:6px;\\\'>"
+            "<span style=\\\'background:#EEF2FF;color:#4338CA;border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:700;\\\'>" + stat_label + "</span>"
+            "<span style=\\\'background:#FEF3C7;color:#92400E;border-radius:6px;padding:2px 8px;font-size:.65rem;font-weight:700;\\\'>" + pri.title() + "</span>"
             "</div></div>"
         )
-        # Escape single quotes for JS
-        popup_html_js = popup_html.replace("'", "\\'")
 
         pulse = ""
         if is_emg:
-            # Pulsing ring for emergency
             pulse = (
                 "L.circleMarker([" + str(lat) + "," + str(lon) + "],"
-                "{radius:24,fillColor:'#FF2D2D',color:'#FF2D2D',weight:1,fillOpacity:.15}).addTo(map);"
-                "L.circleMarker([" + str(lat) + "," + str(lon) + "],"
-                "{radius:18,fillColor:'#FF2D2D',color:'#FF2D2D',weight:1,fillOpacity:.20}).addTo(map);"
+                "{radius:22,fillColor:'#FF2D2D',color:'#FF2D2D',weight:1,fillOpacity:.12,className:'pulse-ring'}).addTo(map);"
             )
 
         markers_js += (
@@ -12481,50 +12860,70 @@ def pg_admin_heatmap():
             + "L.circleMarker([" + str(lat) + "," + str(lon) + "],"
             "{radius:" + str(rad) + ",fillColor:'" + col + "',"
             "color:'" + stroke + "',weight:2,fillOpacity:" + str(opacity) + "})"
-            ".addTo(map).bindPopup('" + popup_html_js + "');"
+            ".addTo(map).bindPopup('" + popup_html + "');"
         )
+        heat_points_js += "[" + str(lat) + "," + str(lon) + "," + str(intensity) + "],"
 
-    # Map center: average of filtered points or default Bhopal
+    # Map center
     if filtered_geo:
         avg_lat = sum(g[0] for g in filtered_geo) / len(filtered_geo)
         avg_lon = sum(g[1] for g in filtered_geo) / len(filtered_geo)
     else:
         avg_lat, avg_lon = 23.2599, 77.4126
 
+    is_dark = map_style == "Dark (CartoDB)"
+    popup_bg = "#1E293B" if is_dark else "#fff"
+    popup_col = "#E2E8F0" if is_dark else "#0F172A"
+
     # ── RENDER MAP ────────────────────────────────────────────────────────────
     map_html = (
         "<link rel='stylesheet' href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'/>"
         "<script src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js'></script>"
+        "<script src='https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js'></script>"
         "<style>"
-        "  #hmap { height:480px;border-radius:20px;overflow:hidden;"
-        "          border:1.5px solid #E2E8F4;box-shadow:0 8px 32px rgba(15,23,42,.10); }"
+        "  * { margin:0; padding:0; box-sizing:border-box; }"
+        "  body { margin:0; padding:0; background:transparent; }"
+        "  #hmap { height:520px; width:100%; border-radius:18px; overflow:hidden;"
+        "          border:1.5px solid #E2E8F4; }"
         "  .leaflet-popup-content-wrapper {"
-        "    border-radius:14px!important;box-shadow:0 8px 28px rgba(15,23,42,.14)!important;"
-        "    border:1px solid #E2E8F4!important;padding:4px!important;"
+        "    border-radius:14px!important; box-shadow:0 8px 28px rgba(15,23,42,.14)!important;"
+        "    border:1px solid #E2E8F4!important; padding:6px!important;"
+        "    background:" + popup_bg + "!important; color:" + popup_col + "!important;"
         "  }"
-        "  .leaflet-popup-tip { background:#fff!important; }"
+        "  .leaflet-popup-tip { background:" + popup_bg + "!important; }"
+        "  .leaflet-popup-content { margin:8px 10px!important; }"
         "  .leaflet-control-zoom a {"
-        "    border-radius:10px!important;font-weight:700!important;"
-        "    color:#6366F1!important;border-color:#E2E8F4!important;"
+        "    border-radius:10px!important; font-weight:700!important;"
+        "    color:#6366F1!important; border-color:#E2E8F4!important;"
+        "    width:34px!important; height:34px!important; line-height:34px!important;"
         "  }"
+        "  .leaflet-control-zoom { border-radius:12px!important; overflow:hidden;"
+        "    border:1.5px solid #E2E8F4!important; box-shadow:0 4px 16px rgba(0,0,0,.08)!important; }"
+        "  @keyframes pulse-anim { 0%{transform:scale(1);opacity:.4} 100%{transform:scale(2.5);opacity:0} }"
+        "  .pulse-ring { animation: pulse-anim 2s ease-out infinite; transform-origin:center; }"
         "</style>"
         "<div id='hmap'></div>"
         "<script>"
-        "var map=L.map('hmap',{zoomControl:true}).setView(["
-        + str(round(avg_lat, 4)) + "," + str(round(avg_lon, 4)) + "],12);"
+        "var map=L.map('hmap',{zoomControl:true,scrollWheelZoom:true}).setView(["
+        + str(round(avg_lat, 6)) + "," + str(round(avg_lon, 6)) + "],12);"
         "L.tileLayer('" + tile_url + "',"
         "{maxZoom:19,attribution:'" + tile_attr + "'}).addTo(map);"
         + markers_js +
+        "var heatData=[" + heat_points_js + "];"
+        "if(heatData.length>0){"
+        "L.heatLayer(heatData,{radius:28,blur:20,maxZoom:15,"
+        "gradient:{0.2:'#22D3EE',0.4:'#10B981',0.6:'#F59E0B',0.8:'#EF4444',1.0:'#DC2626'}}).addTo(map);"
+        "}"
+        "setTimeout(function(){map.invalidateSize();},200);"
         "</script>"
     )
-    st.components.v1.html(map_html, height=504)
+    st.components.v1.html(map_html, height=540)
 
     # ── LEGEND + SUMMARY ROW ──────────────────────────────────────────────────
     st.markdown(
         '<div style="display:flex;align-items:center;justify-content:space-between;'
         'flex-wrap:wrap;gap:12px;margin-top:14px;">'
 
-        # Legend
         '<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">'
         '<span style="font-size:.68rem;font-weight:800;text-transform:uppercase;'
         'letter-spacing:.08em;color:#94A3B8;">Legend</span>'
@@ -12545,9 +12944,13 @@ def pg_admin_heatmap():
         '<div style="display:flex;align-items:center;gap:6px;">'
         '<div style="width:8px;height:8px;border-radius:50%;background:#10B981;"></div>'
         '<span style="font-size:.75rem;font-weight:600;color:#334155;">Low</span></div>'
+
+        '<div style="display:flex;align-items:center;gap:6px;">'
+        '<div style="width:18px;height:8px;border-radius:4px;'
+        'background:linear-gradient(90deg,#22D3EE,#10B981,#F59E0B,#EF4444,#DC2626);"></div>'
+        '<span style="font-size:.75rem;font-weight:600;color:#334155;">Heat Intensity</span></div>'
         '</div>'
 
-        # Showing count badge
         '<span style="background:#EEF2FF;color:#4338CA;border-radius:20px;'
         'padding:5px 16px;font-size:.78rem;font-weight:800;border:1.5px solid #C7D2FE;">'
         '📍 ' + str(len(filtered_geo)) + ' of ' + str(geotagged) + ' geotagged shown</span>'
@@ -12565,30 +12968,118 @@ def pg_admin_heatmap():
             cat_counts[cat] = cat_counts.get(cat, 0) + 1
         top_cats = sorted(cat_counts.items(), key=lambda x: -x[1])
 
-        CAT_ICON  = {"water":"💧","electricity":"⚡","road":"🛣️","waste":"🗑️","drainage":"🌊","health":"🏥","other":"📋"}
-        CAT_COLOR = {"water":"#0EA5E9","electricity":"#EAB308","road":"#6B7280",
-                     "waste":"#22C55E","drainage":"#06B6D4","health":"#EF4444","other":"#6366F1"}
+        CAT_ICON = {
 
-        cols = st.columns(min(len(top_cats), 4))
-        for i, (cat, count) in enumerate(top_cats[:4]):
-            pct   = round(count / len(filtered_geo) * 100)
-            icon  = CAT_ICON.get(cat, "📋")
-            color = CAT_COLOR.get(cat, "#6366F1")
-            with cols[i]:
-                cols[i].markdown(
-                    '<div class="prem-stat-card" style="padding:16px 12px 14px;">'
-                    '<div style="font-size:1.5rem;margin-bottom:6px;">' + icon + '</div>'
-                    '<div class="prem-stat-num" style="font-size:1.6rem;color:' + color + ';">' + str(count) + '</div>'
-                    '<div class="prem-stat-lbl">' + cat.title() + '</div>'
-                    '<div style="margin-top:8px;">'
-                    '<div style="background:#F1F5F9;border-radius:6px;height:5px;overflow:hidden;">'
-                    '<div style="height:5px;border-radius:6px;background:' + color + ';width:' + str(pct) + '%;"></div>'
-                    '</div>'
-                    '<div style="font-size:.65rem;color:#94A3B8;font-weight:600;margin-top:3px;">'
-                    + str(pct) + '% of shown</div>'
-                    '</div></div>',
-                    unsafe_allow_html=True
-                )
+            "water":       "💧",
+
+            "electricity": "⚡",
+
+            "road":        "🛣️",
+
+            "waste":       "🗑️",
+
+            "drainage":    "🌊",
+
+            "health":      "🏥",
+
+            "other":       "📋",
+        }
+
+        # ─────────────────────────────────────────────
+        # SAFE DYNAMIC CATEGORY ICON HELPER
+        # ─────────────────────────────────────────────
+
+        def get_cat_icon(category):
+
+            category = str(category).lower().strip()
+
+            return CAT_ICON.get(
+
+                category,
+
+                "📌"   # default icon
+            )
+        CAT_COLOR = {
+
+            "water":       "#0EA5E9",
+
+            "electricity": "#EAB308",
+
+            "road":        "#6B7280",
+
+            "waste":       "#22C55E",
+
+            "drainage":    "#06B6D4",
+
+            "health":      "#EF4444",
+
+            "other":       "#6366F1",
+        }
+
+        # ─────────────────────────────────────────────
+        # SAFE DYNAMIC CATEGORY COLOR
+        # ─────────────────────────────────────────────
+
+        def get_cat_color(category):
+
+            category = str(category).lower().strip()
+
+            return CAT_COLOR.get(
+
+                category,
+
+                "#2563EB"   # default modern blue
+            )
+
+        num_cols = min(len(top_cats), 4)
+        if num_cols > 0:
+            cols = st.columns(num_cols)
+            for i, (cat, count) in enumerate(top_cats[:4]):
+                pct   = round(count / len(filtered_geo) * 100)
+                icon  = CAT_ICON.get(cat, "📋")
+                color = CAT_COLOR.get(cat, "#6366F1")
+                with cols[i]:
+                    st.markdown(
+                        '<div class="prem-stat-card" style="padding:16px 12px 14px;">'
+                        '<div style="font-size:1.5rem;margin-bottom:6px;">' + icon + '</div>'
+                        '<div class="prem-stat-num" style="font-size:1.6rem;color:' + color + ';">' + str(count) + '</div>'
+                        '<div class="prem-stat-lbl">' + cat.title() + '</div>'
+                        '<div style="margin-top:8px;">'
+                        '<div style="background:#F1F5F9;border-radius:6px;height:5px;overflow:hidden;">'
+                        '<div style="height:5px;border-radius:6px;background:' + color + ';width:' + str(pct) + '%;"></div>'
+                        '</div>'
+                        '<div style="font-size:.65rem;color:#94A3B8;font-weight:600;margin-top:3px;">'
+                        + str(pct) + '% of shown</div>'
+                        '</div></div>',
+                        unsafe_allow_html=True
+                    )
+
+    # ── STATUS BREAKDOWN ──────────────────────────────────────────────────────
+    if filtered_geo:
+        st.markdown('<div class="prem-section-header" style="margin-top:18px;">📋 Status Distribution</div>',
+                    unsafe_allow_html=True)
+        stat_counts = {}
+        for _, _, _, _, stat, _, _, _ in filtered_geo:
+            stat_counts[stat] = stat_counts.get(stat, 0) + 1
+
+        STAT_ICON = {"pending":"⏳","in_progress":"🔄","resolved":"✅","rejected":"❌","closed":"🔒"}
+        STAT_COL  = {"pending":"#F59E0B","in_progress":"#3B82F6","resolved":"#22C55E","rejected":"#EF4444","closed":"#6B7280"}
+
+        num_s = min(len(stat_counts), 5)
+        if num_s > 0:
+            scols = st.columns(num_s)
+            for i, (s, cnt) in enumerate(sorted(stat_counts.items(), key=lambda x: -x[1])[:5]):
+                pct = round(cnt / len(filtered_geo) * 100)
+                with scols[i]:
+                    st.markdown(
+                        '<div class="prem-stat-card" style="padding:14px 10px 12px;">'
+                        '<div style="font-size:1.3rem;margin-bottom:4px;">' + STAT_ICON.get(s,"📋") + '</div>'
+                        '<div class="prem-stat-num" style="font-size:1.4rem;color:' + STAT_COL.get(s,"#6366F1") + ';">' + str(cnt) + '</div>'
+                        '<div class="prem-stat-lbl">' + s.replace("_"," ").title() + '</div>'
+                        '<div style="font-size:.62rem;color:#94A3B8;font-weight:600;margin-top:4px;">' + str(pct) + '%</div>'
+                        '</div>',
+                        unsafe_allow_html=True
+                    )
 
     # ── NO GEO DATA STATE ─────────────────────────────────────────────────────
     if not geo:
@@ -12606,7 +13097,7 @@ def pg_admin_heatmap():
         <div class="prem-empty-state" style="margin-top:16px;">
             <span class="prem-empty-icon">🔍</span>
             <div class="prem-empty-title">No results for current filters</div>
-            <div class="prem-empty-sub">Try changing the priority or status filter above.</div>
+            <div class="prem-empty-sub">Try changing the priority, status, or category filter above.</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -13109,9 +13600,69 @@ def pg_public_transparency():
                 unsafe_allow_html=True,
             )
             CAT_ICONS = {
-                "water":"💧","electricity":"⚡","road":"🛣️","waste":"🗑️",
-                "drainage":"🌊","health":"🏥","other":"📋",
+
+                "water":       "💧",
+
+                "electricity": "⚡",
+
+                "road":        "🛣️",
+
+                "waste":       "🗑️",
+
+                "drainage":    "🌊",
+
+                "health":      "🏥",
+
+                "other":       "📋",
             }
+
+            # ─────────────────────────────────────────────
+            # SAFE CATEGORY ICON HELPER
+            # ─────────────────────────────────────────────
+
+            def get_cat_icon(category):
+
+                category = str(category).lower().strip()
+
+                # Smart auto-matching
+                AUTO_ICONS = {
+
+                    "cyber":     "💻",
+
+                    "internet":  "🌐",
+
+                    "telecom":   "📡",
+
+                    "transport": "🚌",
+
+                    "police":    "🚓",
+
+                    "fire":      "🔥",
+
+                    "tourism":   "✈️",
+
+                    "bank":      "🏦",
+
+                    "finance":   "💰",
+
+                    "education": "🎓",
+
+                    "housing":   "🏠",
+                }
+
+                for key, icon in AUTO_ICONS.items():
+
+                    if key in category:
+
+                        return icon
+
+                # Default safe fallback
+                return CAT_ICONS.get(
+
+                    category,
+
+                    "📌"
+                )
             for cat,cnt in sorted(cats.items(), key=lambda x:-x[1]):
                 pct = int(cnt / mx_cat * 100)
                 icon = CAT_ICONS.get(cat,"📋")
@@ -13889,14 +14440,69 @@ def pg_sla_management():
     """SLA Management Dashboard — premium prem-* design, no HTML inside expanders."""
 
     DEFAULT_SLA = {
+
         "water":       24,
+
         "electricity": 24,
+
         "road":        72,
+
         "waste":       48,
+
         "drainage":    48,
+
         "health":      36,
+
         "other":       72,
     }
+
+    # ─────────────────────────────────────────────
+    # SAFE DYNAMIC SLA HELPER
+    # ─────────────────────────────────────────────
+
+    def get_default_sla(category):
+
+        category = str(category).lower().strip()
+
+        # Smart automatic SLA mapping
+        AUTO_SLA = {
+
+            "cyber":     12,
+
+            "internet":  12,
+
+            "telecom":   18,
+
+            "police":     6,
+
+            "fire":       2,
+
+            "health":    12,
+
+            "transport": 24,
+
+            "bank":      24,
+
+            "finance":   24,
+
+            "education": 48,
+
+            "housing":   72,
+        }
+
+        for key, hrs in AUTO_SLA.items():
+
+            if key in category:
+
+                return hrs
+
+        # Safe fallback
+        return DEFAULT_SLA.get(
+
+            category,
+
+            48
+        )
 
     # ── HERO ──────────────────────────────────────────────────────────────────
     st.markdown("""
@@ -14175,14 +14781,82 @@ def pg_sla_management():
         policies_list = policies if isinstance(policies, list) else []
 
         CAT_ICONS = {
+
             "water":       "💧",
+
             "electricity": "⚡",
+
             "road":        "🛣️",
+
             "waste":       "🗑️",
+
             "drainage":    "🚰",
+
             "health":      "🏥",
+
             "other":       "📋",
         }
+
+        # ─────────────────────────────────────────────
+        # SAFE DYNAMIC CATEGORY ICON
+        # ─────────────────────────────────────────────
+
+        def get_cat_icon(category):
+
+            category = str(category).lower().strip()
+
+            # Smart automatic icon detection
+            AUTO_ICONS = {
+
+                "cyber":     "💻",
+
+                "internet":  "🌐",
+
+                "telecom":   "📡",
+
+                "transport": "🚌",
+
+                "police":    "🚓",
+
+                "fire":      "🔥",
+
+                "tourism":   "✈️",
+
+                "bank":      "🏦",
+
+                "finance":   "💰",
+
+                "education": "🎓",
+
+                "housing":   "🏠",
+
+                "electric":  "⚡",
+
+                "water":     "💧",
+
+                "drain":     "🚰",
+
+                "health":    "🏥",
+
+                "waste":     "🗑️",
+
+                "road":      "🛣️",
+            }
+
+            # Auto match keywords
+            for key, icon in AUTO_ICONS.items():
+
+                if key in category:
+
+                    return icon
+
+            # Exact match fallback
+            return CAT_ICONS.get(
+
+                category,
+
+                "📌"
+            )
 
         for category, default_hours in DEFAULT_SLA.items():
             existing      = next(
