@@ -4703,9 +4703,9 @@ def _render_voice(lang: str):
  
         cap_lbl   = "Voice Captured — you can edit this text below" if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित कर सकते हैं"
         clear_lbl = (
-            "🎙️ If the complaint is wrong, speak again and click here to update"
+            "Update"
             if lang == "en"
-            else "🎙️ अगर शिकायत गलत है तो फिर से बोलें और अपडेट करने के लिए यहाँ क्लिक करें"
+            else "अपडेट करें"
         )
         edit_note = "✅ This text has been filled in the description below — edit freely." if lang == "en" else "✅ यह टेक्स्ट नीचे विवरण में भरा गया है — स्वतंत्र रूप से संपादित करें।"
  
@@ -4726,8 +4726,10 @@ def _render_voice(lang: str):
         st.markdown(pill_html, unsafe_allow_html=True)
  
         # action row: Clear button (left) + info note (right)
+        # action row: Clear button (left) + info note (right)
         ca, cb = st.columns([1, 3])
         with ca:
+            st.caption(clear_note)
             if st.button(clear_lbl, key="fc_voice_clear", use_container_width=True):
                 fc_set(
                     voice_text     = "",
@@ -4735,7 +4737,6 @@ def _render_voice(lang: str):
                     voice_applied  = False,
                     _voice_ingested= False,
                 )
-                # also nuke the textarea widget value so it resets
                 if "_fc_desc" in st.session_state:
                     del st.session_state["_fc_desc"]
                 st.rerun()
@@ -5302,9 +5303,10 @@ def pg_file_complaint() -> None:
     _render_hero(lang)
     _render_steps(lang, step)
     _render_voice(lang)
+    _render_description(lang)
     _render_category(lang)
     _render_emergency(lang)
-    _render_description(lang)
+
  
     desc_now = (st.session_state.get("_fc_desc") or s["description"] or s["voice_text"] or "").strip()
     is_emg   = st.session_state.get("_fc_emergency", s["is_emergency"])

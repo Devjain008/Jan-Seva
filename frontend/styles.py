@@ -163,7 +163,17 @@ html,body,.stApp{{
 p,span,div,label,small{{color:var(--c-text);}}
 
 /* ── HIDE CHROME ── */
-#MainMenu,footer,header,.stDeployButton{{visibility:hidden!important;display:none!important;}}
+/* ── HIDE CHROME — keep header alive for sidebar toggle ── */
+#MainMenu,footer,.stDeployButton{{visibility:hidden!important;display:none!important;}}
+.viewerBadge_container__1QSob{{display:none!important;}}
+
+/* Header must stay in DOM — only make it invisible */
+header[data-testid="stHeader"]{{
+    background:transparent!important;
+    height:0!important;
+    overflow:visible!important;
+    pointer-events:none!important;
+}}
 .viewerBadge_container__1QSob{{display:none!important;}}
 
 /* ── ANIMATED TOP STRIPE ── */
