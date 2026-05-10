@@ -2,21 +2,29 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import JSONResponse
+
 from backend.database import engine, Base, SessionLocal
 from backend import models
 from backend.routers import auth, complaints, admin, schemes
-import hashlib, os
-from sqlalchemy import text
+
+from sqlalchemy import inspect, text
+
+import hashlib
 import traceback
+import os
 
-app = FastAPI(title="AI Citizen Grievance System", version="2.0.0")
+# ─────────────────────────────────────────────
+# FASTAPI APP
+# ─────────────────────────────────────────────
 
+app = FastAPI(
+    title="AI Citizen Grievance System",
+    version="2.0.0"
+)
 
-
-@app.on_event("startup")
-async def startup_event():
-    # your startup code here
-    pass
+# ─────────────────────────────────────────────
+# UPLOAD DIRECTORY
+# ─────────────────────────────────────────────
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -30,63 +38,231 @@ app.mount(
     name="uploads"
 )
 
-# Add global exception handler
+# ─────────────────────────────────────────────
+# CORS
+# ─────────────────────────────────────────────
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"]
+)
+
+# ─────────────────────────────────────────────
+# GLOBAL ERROR HANDLER
+# ─────────────────────────────────────────────
+
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
+
     error_details = traceback.format_exc()
+
     print(f"ERROR: {error_details}")
+
     return JSONResponse(
         status_code=500,
-        content={"success": False, "error": str(exc), "trace": error_details.split('\n')[-3:-1]}
+        content={
+            "success": False,
+            "error": str(exc)
+        }
     )
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_credentials=True,
-                   allow_methods=["*"], allow_headers=["*"])
+# ─────────────────────────────────────────────
+# ROUTERS
+# ─────────────────────────────────────────────
 
-
-
-# Include routers
 app.include_router(auth.router)
 app.include_router(complaints.router)
 app.include_router(admin.router)
 app.include_router(schemes.router)
 
-def seed_data():
-    db = SessionLocal()
+# ─────────────────────────────────────────────
+# SAFE DATABASE MIGRATIONS
+# ─────────────────────────────────────────────
+
+def run_migrations():
+
     try:
-        # Create Admin
-        if not db.query(models.Admin).first():
-            db.add(models.Admin(username="admin",
-                                password_hash=hashlib.sha256("admin123".encode()).hexdigest()))
+
+        inspector = inspect(engine)
+
+        cols = inspector.get_columns("complaints")
+
+        col_names = {c["name"] for c in cols}
+
+        missing_columns = {
+
+            "assigned_official_id": "INTEGER",
+            "image_url": "TEXT",
+            "resolution_proof": "TEXT",
+            "resolution_note": "TEXT",
+
+            "sla_deadline": "TIMESTAMP",
+            "is_overdue": "BOOLEAN DEFAULT FALSE",
+            "time_to_resolve_hours": "FLOAT",
+            "SLA_breached": "BOOLEAN DEFAULT FALSE"
+        }
+
+        with engine.begin() as conn:
+
+            for col, col_type in missing_columns.items():
+
+                if col not in col_names:
+
+                    try:
+
+                        conn.execute(
+                            text(
+                                f'ALTER TABLE complaints ADD COLUMN "{col}" {col_type}'
+                            )
+                        )
+
+                        print(f"✅ Added column: {col}")
+
+                    except Exception as e:
+
+                        print(f"⚠️ Migration skipped for {col}: {e}")
+
+    except Exception as e:
+
+        print(f"❌ Migration error: {e}")
+
+# ─────────────────────────────────────────────
+# SAFE SEED DATA
+# ─────────────────────────────────────────────
+
+def seed_data():
+
+    db = SessionLocal()
+
+    try:
+
+        # ─────────────────────────
+        # ADMIN
+        # ─────────────────────────
+
+        existing_admin = db.query(models.Admin).filter(
+            models.Admin.username == "admin"
+        ).first()
+
+        if not existing_admin:
+
+            admin_user = models.Admin(
+                username="admin",
+                password_hash=hashlib.sha256(
+                    "admin123".encode()
+                ).hexdigest()
+            )
+
+            db.add(admin_user)
+
             db.commit()
+
             print("✅ Admin created")
 
-        # Create Departments if not exist
-        if not db.query(models.Department).first():
-            departments = [
-                {"name":"Water Supply Department","name_hi":"जल आपूर्ति विभाग","dept_id":"WAT-0001","category":"water","location":"Bhopal"},
-                {"name":"Electricity Department","name_hi":"विद्युत विभाग","dept_id":"ELE-0002","category":"electricity","location":"Bhopal"},
-                {"name":"Public Works Department","name_hi":"लोक निर्माण विभाग","dept_id":"PWD-0003","category":"road","location":"Bhopal"},
-                {"name":"Municipal Corporation","name_hi":"नगर निगम","dept_id":"MUN-0004","category":"waste","location":"Bhopal"},
-                {"name":"Drainage Department","name_hi":"जल निकासी विभाग","dept_id":"DRN-0005","category":"drainage","location":"Bhopal"},
-                {"name":"Health Department","name_hi":"स्वास्थ्य विभाग","dept_id":"HLT-0006","category":"health","location":"Bhopal"},
-                {"name":"General Administration","name_hi":"सामान्य प्रशासन","dept_id":"GEN-0007","category":"other","location":"Bhopal"},
-            ]
-            for d in departments:
-                db.add(models.Department(**d))
-            db.commit()
-            print("✅ Departments created")
+        # ─────────────────────────
+        # DEPARTMENTS
+        # ─────────────────────────
 
-        # Create Demo Official with valid department
-        if not db.query(models.Official).filter(models.Official.email == "official@smartcity.com").first():
-            # Get the first department (Water Supply)
-            dept = db.query(models.Department).first()
+        departments = [
+
+            {
+                "name":"Water Supply Department",
+                "name_hi":"जल आपूर्ति विभाग",
+                "dept_id":"WAT-0001",
+                "category":"water",
+                "location":"Bhopal"
+            },
+
+            {
+                "name":"Electricity Department",
+                "name_hi":"विद्युत विभाग",
+                "dept_id":"ELE-0002",
+                "category":"electricity",
+                "location":"Bhopal"
+            },
+
+            {
+                "name":"Public Works Department",
+                "name_hi":"लोक निर्माण विभाग",
+                "dept_id":"PWD-0003",
+                "category":"road",
+                "location":"Bhopal"
+            },
+
+            {
+                "name":"Municipal Corporation",
+                "name_hi":"नगर निगम",
+                "dept_id":"MUN-0004",
+                "category":"waste",
+                "location":"Bhopal"
+            },
+
+            {
+                "name":"Drainage Department",
+                "name_hi":"जल निकासी विभाग",
+                "dept_id":"DRN-0005",
+                "category":"drainage",
+                "location":"Bhopal"
+            },
+
+            {
+                "name":"Health Department",
+                "name_hi":"स्वास्थ्य विभाग",
+                "dept_id":"HLT-0006",
+                "category":"health",
+                "location":"Bhopal"
+            },
+
+            {
+                "name":"General Administration",
+                "name_hi":"सामान्य प्रशासन",
+                "dept_id":"GEN-0007",
+                "category":"other",
+                "location":"Bhopal"
+            }
+
+        ]
+
+        for d in departments:
+
+            existing = db.query(models.Department).filter(
+                models.Department.dept_id == d["dept_id"]
+            ).first()
+
+            if not existing:
+
+                db.add(models.Department(**d))
+
+        db.commit()
+
+        print("✅ Departments verified")
+
+        # ─────────────────────────
+        # DEMO OFFICIAL
+        # ─────────────────────────
+
+        existing_official = db.query(models.Official).filter(
+            models.Official.email == "official@smartcity.com"
+        ).first()
+
+        if not existing_official:
+
+            dept = db.query(models.Department).filter(
+                models.Department.dept_id == "WAT-0001"
+            ).first()
+
             if dept:
-                demo_official = models.Official(
+
+                official = models.Official(
                     name="Demo Official",
                     email="official@smartcity.com",
-                    password_hash=hashlib.sha256("official123".encode()).hexdigest(),
-                    department_id=dept.id,  # This is the key - set department_id
+                    password_hash=hashlib.sha256(
+                        "official123".encode()
+                    ).hexdigest(),
+                    department_id=dept.id,
                     dept_code=dept.dept_id,
                     is_approved=True,
                     total_assigned=5,
@@ -94,109 +270,168 @@ def seed_data():
                     avg_rating=4.5,
                     rating_count=2
                 )
-                db.add(demo_official)
-                db.commit()
-                print(f"✅ Demo Official created with department_id: {dept.id}")
-            else:
-                print("⚠️ No department found to assign to official")
 
-        # Create Demo User
-        if not db.query(models.User).first():
-            demo_user = models.User(
+                db.add(official)
+
+                db.commit()
+
+                print("✅ Demo Official created")
+
+        # ─────────────────────────
+        # DEMO USER
+        # ─────────────────────────
+
+        existing_user = db.query(models.User).filter(
+            models.User.phone == "9876543210"
+        ).first()
+
+        if not existing_user:
+
+            user = models.User(
                 name="Demo User",
                 phone="9876543210",
-                address="Demo Address, City Center",
+                address="Demo Address",
                 language="en"
             )
-            db.add(demo_user)
+
+            db.add(user)
+
             db.commit()
+
             print("✅ Demo User created")
 
-        # Create Schemes if not exist
-        if not db.query(models.Scheme).first():
-            schemes = [
-                {"title":"PM Awas Yojana","title_hi":"प्रधानमंत्री आवास योजना",
-                 "description":"Housing for all: financial assistance to build homes for eligible beneficiaries.",
-                 "description_hi":"सभी के लिए आवास: पात्र लाभार्थियों को घर बनाने के लिए वित्तीय सहायता।",
-                 "category":"housing","image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/120px-Emblem_of_India.svg.png"},
-                {"title":"Jal Jeevan Mission","title_hi":"जल जीवन मिशन",
-                 "description":"Safe tap water to every rural household by 2024.",
-                 "description_hi":"2024 तक हर ग्रामीण घर में नल से शुद्ध पेयजल।",
-                 "category":"water","image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/120px-Emblem_of_India.svg.png"},
-                {"title":"Ujjwala Yojana","title_hi":"उज्ज्वला योजना",
-                 "description":"Free LPG connections to BPL women to eliminate indoor pollution.",
-                 "description_hi":"BPL महिलाओं को मुफ्त LPG कनेक्शन।",
-                 "category":"energy","image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/120px-Emblem_of_India.svg.png"},
-            ]
-            for s in schemes:
+        # ─────────────────────────
+        # SCHEMES
+        # ─────────────────────────
+
+        schemes_data = [
+
+            {
+                "title":"PM Awas Yojana",
+                "title_hi":"प्रधानमंत्री आवास योजना",
+                "description":"Housing assistance scheme.",
+                "description_hi":"आवास सहायता योजना।",
+                "category":"housing",
+                "image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/120px-Emblem_of_India.svg.png"
+            },
+
+            {
+                "title":"Jal Jeevan Mission",
+                "title_hi":"जल जीवन मिशन",
+                "description":"Safe drinking water scheme.",
+                "description_hi":"सुरक्षित पेयजल योजना।",
+                "category":"water",
+                "image_url":"https://upload.wikimedia.org/wikipedia/commons/thumb/5/55/Emblem_of_India.svg/120px-Emblem_of_India.svg.png"
+            }
+
+        ]
+
+        for s in schemes_data:
+
+            existing = db.query(models.Scheme).filter(
+                models.Scheme.title == s["title"]
+            ).first()
+
+            if not existing:
+
                 db.add(models.Scheme(**s))
-            db.commit()
-            print("✅ Schemes created")
-            
+
+        db.commit()
+
+        print("✅ Schemes verified")
+
     except Exception as e:
-        print(f"Error seeding data: {e}")
-        import traceback
+
+        print(f"❌ Seed Error: {e}")
+
         traceback.print_exc()
+
     finally:
+
         db.close()
 
-def run_migrations():
-    try:
-        with engine.begin() as conn:
-            # Get existing columns
-            result = conn.execute(text("PRAGMA table_info(complaints)"))
-            cols = result.fetchall()
-            col_names = {c[1] for c in cols}
-            
-            # Add missing columns
-            missing_fields = ["assigned_official_id", "image_url", "resolution_proof", "resolution_note"]
-            for field in missing_fields:
-                if field not in col_names:
-                    try:
-                        conn.execute(text(f"ALTER TABLE complaints ADD COLUMN {field}"))
-                        print(f"Added column: {field}")
-                    except:
-                        pass
-            
-            # Add SLA columns if missing
-            sla_fields = ["sla_deadline", "is_overdue", "time_to_resolve_hours", "SLA_breached"]
-            for field in sla_fields:
-                if field not in col_names:
-                    field_type = "TIMESTAMP" if field == "sla_deadline" else "BOOLEAN DEFAULT 0" if field in ["is_overdue", "SLA_breached"] else "FLOAT"
-                    try:
-                        conn.execute(text(f"ALTER TABLE complaints ADD COLUMN {field} {field_type}"))
-                        print(f"Added column: {field}")
-                    except:
-                        pass
-    except Exception as e:
-        print(f"Migration error: {e}")
+# ─────────────────────────────────────────────
+# STARTUP EVENT
+# ─────────────────────────────────────────────
 
 @app.on_event("startup")
 async def startup():
+
     try:
+
         Base.metadata.create_all(bind=engine)
+
         run_migrations()
-        seed_data()
-        print("✅ Database initialized successfully")
+
+        db = SessionLocal()
+
+        try:
+
+            has_admin = db.query(models.Admin).first()
+
+            if not has_admin:
+
+                print("🌱 First-time setup running...")
+
+                seed_data()
+
+            else:
+
+                print("✅ Existing database detected")
+
+        finally:
+
+            db.close()
+
+        print("✅ Startup completed safely")
+
     except Exception as e:
+
         print(f"❌ Startup error: {e}")
+
         traceback.print_exc()
 
+# ─────────────────────────────────────────────
+# ROOT
+# ─────────────────────────────────────────────
+
 @app.get("/")
-def root(): 
-    return {"message": "AI Citizen Grievance System API v2", "status": "running"}
+def root():
+
+    return {
+        "message": "AI Citizen Grievance System API v2",
+        "status": "running"
+    }
+
+# ─────────────────────────────────────────────
+# HEALTH
+# ─────────────────────────────────────────────
 
 @app.get("/health")
-def health(): 
-    return {"status": "healthy"}
+def health():
+
+    return {
+        "status": "healthy"
+    }
+
+# ─────────────────────────────────────────────
+# ROUTES LIST
+# ─────────────────────────────────────────────
 
 @app.get("/routes")
 def list_routes():
+
     routes = []
+
     for route in app.routes:
+
         if hasattr(route, "path") and hasattr(route, "methods"):
+
             routes.append({
                 "path": route.path,
-                "methods": list(route.methods) if route.methods else []
+                "methods": list(route.methods)
             })
-    return {"routes": routes}
+
+    return {
+        "routes": routes
+    }
