@@ -197,66 +197,136 @@ header[data-testid="stHeader"]{{
 /* ═══════════════════════════════════════════════
    SIDEBAR COLLAPSED CONTROL — reopen button fix
 ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+SIDEBAR TOGGLE BUTTON — FIXED
+═══════════════════════════════════════════════ */
 
-/* When sidebar is OPEN — collapse button inside sidebar */
+/* Sidebar toggle button */
 [data-testid="stSidebarCollapsedControl"],
 [data-testid="collapsedControl"] {{
-    display: flex !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    position: fixed !important;
-    top: 16px !important;
-    left: 16px !important;
-    width: 44px !important;
-    height: 44px !important;
-    z-index: 999999 !important;
-    border-radius: 13px !important;
-    background: linear-gradient(135deg, {accent1}, {accent2}) !important;
-    border: 1px solid rgba(255,255,255,0.18) !important;
-    box-shadow: 0 8px 24px {a1_glow} !important;
-    align-items: center !important;
-    justify-content: center !important;
-    cursor: pointer !important;
-    transition: transform 0.14s ease, box-shadow 0.14s ease !important;
+display: flex !important;
+visibility: visible !important;
+opacity: 1 !important;
+
+pointer-events: auto !important;
+
+position: fixed !important;
+
+top: 16px !important;
+left: 16px !important;
+
+width: 44px !important;
+height: 44px !important;
+
+z-index: 999999 !important;
+
+align-items: center !important;
+justify-content: center !important;
+
+border-radius: 14px !important;
+
+background: #FFFFFF !important;
+
+border: 1px solid rgba(15,23,42,.08) !important;
+
+box-shadow:
+    0 10px 26px rgba(15,23,42,.12) !important;
+
+cursor: pointer !important;
+
+transition:
+    all .18s ease !important;
+
+
 }}
 
 /* Hover */
 [data-testid="stSidebarCollapsedControl"]:hover,
 [data-testid="collapsedControl"]:hover {{
-    transform: scale(1.06) !important;
-    box-shadow: 0 12px 30px {a1_glow} !important;
+
+transform: scale(1.05) !important;
+
+background: #F8FAFC !important;
+
+box-shadow:
+    0 14px 32px rgba(15,23,42,.18) !important;
+
+
 }}
 
-/* Icon inside button */
+/* Arrow icon */
 [data-testid="stSidebarCollapsedControl"] svg,
 [data-testid="collapsedControl"] svg {{
-    fill: #fff !important;
-    color: #fff !important;
-    width: 20px !important;
-    height: 20px !important;
+fill: #000000 !important;
+
+color: #000000 !important;
+
+stroke: #000000 !important;
+
+width: 20px !important;
+
+height: 20px !important;
+
+opacity: 1 !important;
+
 }}
 
-/* Streamlit sometimes wraps it in a section — force visible */
-section[data-testid="stSidebarCollapsedControl"] {{
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    z-index: 999999 !important;
-    background: transparent !important;
-    width: auto !important;
-    height: auto !important;
-}}
-/* Prevent header from clipping the toggle */
+/* Prevent clipping */
 header[data-testid="stHeader"] {{
-    background: transparent !important;
-    height: 0 !important;
-    overflow: visible !important;    /* ← this is critical */
-    z-index: 99998 !important;
+background: transparent !important;
+
+height: 0 !important;
+
+overflow: visible !important;
+
+z-index: 99998 !important;
+}}
+/* ═══════════════════════════════════════════════
+   COMPLAINT CARD BORDER + WHITE THEME FIX
+═══════════════════════════════════════════════ */
+
+.cc-wrap,
+.cc-bl,
+.cc-card,
+.cc-top,
+.cc-meta-box{{
+
+    background:#FFFFFF!important;
+
+    border:1px solid rgba(15,23,42,.08)!important;
+
+    box-shadow:
+        0 4px 14px rgba(15,23,42,.05)!important;
+}}
+
+/* Chips */
+.cc-chip{{
+
+    background:#FFFFFF!important;
+
+    border:1px solid rgba(15,23,42,.08)!important;
+
+    color:#0F172A!important;
+}}
+
+/* Meta items */
+.cc-meta-item{{
+
+    color:#334155!important;
+}}
+
+/* Description */
+.cc-description,
+.cc-desc{{
+
+    color:#334155!important;
+}}
+
+/* Category */
+.cc-category,
+.cc-title{{
+
+    color:#0F172A!important;
 }}
 /* ═══════════════════════════════════════════════════════
    SIDEBAR
