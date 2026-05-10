@@ -11,13 +11,6 @@ import traceback
 
 app = FastAPI(title="AI Citizen Grievance System", version="2.0.0")
 
-
-
-@app.on_event("startup")
-async def startup_event():
-    # your startup code here
-    pass
-
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 UPLOAD_DIR = os.path.join(BASE_DIR, "../uploads")
@@ -139,35 +132,66 @@ def seed_data():
         traceback.print_exc()
     finally:
         db.close()
+# Replace run_migrations() entirely with this PostgreSQL-safe version:
 
 def run_migrations():
     try:
+        db_url = str(engine.url)
         with engine.begin() as conn:
-            # Get existing columns
-            result = conn.execute(text("PRAGMA table_info(complaints)"))
-            cols = result.fetchall()
-            col_names = {c[1] for c in cols}
-            
-            # Add missing columns
-            missing_fields = ["assigned_official_id", "image_url", "resolution_proof", "resolution_note"]
-            for field in missing_fields:
-                if field not in col_names:
-                    try:
-                        conn.execute(text(f"ALTER TABLE complaints ADD COLUMN {field}"))
-                        print(f"Added column: {field}")
-                    except:
-                        pass
-            
-            # Add SLA columns if missing
-            sla_fields = ["sla_deadline", "is_overdue", "time_to_resolve_hours", "SLA_breached"]
-            for field in sla_fields:
-                if field not in col_names:
-                    field_type = "TIMESTAMP" if field == "sla_deadline" else "BOOLEAN DEFAULT 0" if field in ["is_overdue", "SLA_breached"] else "FLOAT"
-                    try:
-                        conn.execute(text(f"ALTER TABLE complaints ADD COLUMN {field} {field_type}"))
-                        print(f"Added column: {field}")
-                    except:
-                        pass
+
+            if "postgresql" in db_url:
+                # PostgreSQL — use information_schema
+                result = conn.execute(text("""
+                    SELECT column_name FROM information_schema.columns
+                    WHERE table_name = 'complaints'
+                """))
+                col_names = {row[0] for row in result.fetchall()}
+
+                pg_fields = [
+                    ("assigned_official_id", "INTEGER"),
+                    ("image_url",            "TEXT"),
+                    ("resolution_proof",     "TEXT"),
+                    ("resolution_note",      "TEXT"),
+                    ("sla_deadline",         "TIMESTAMP"),
+                    ("is_overdue",           "BOOLEAN DEFAULT FALSE"),
+                    ("time_to_resolve_hours","FLOAT"),
+                    ("SLA_breached",         "BOOLEAN DEFAULT FALSE"),
+                ]
+                for field, ftype in pg_fields:
+                    if field not in col_names:
+                        try:
+                            conn.execute(text(
+                                f"ALTER TABLE complaints ADD COLUMN {field} {ftype}"
+                            ))
+                            print(f"Added column: {field}")
+                        except Exception:
+                            pass
+
+            else:
+                # SQLite
+                result = conn.execute(text("PRAGMA table_info(complaints)"))
+                col_names = {c[1] for c in result.fetchall()}
+
+                sqlite_fields = [
+                    ("assigned_official_id", "INTEGER"),
+                    ("image_url",            "TEXT"),
+                    ("resolution_proof",     "TEXT"),
+                    ("resolution_note",      "TEXT"),
+                    ("sla_deadline",         "TIMESTAMP"),
+                    ("is_overdue",           "BOOLEAN DEFAULT 0"),
+                    ("time_to_resolve_hours","FLOAT"),
+                    ("SLA_breached",         "BOOLEAN DEFAULT 0"),
+                ]
+                for field, ftype in sqlite_fields:
+                    if field not in col_names:
+                        try:
+                            conn.execute(text(
+                                f"ALTER TABLE complaints ADD COLUMN {field} {ftype}"
+                            ))
+                            print(f"Added column: {field}")
+                        except Exception:
+                            pass
+
     except Exception as e:
         print(f"Migration error: {e}")
 
