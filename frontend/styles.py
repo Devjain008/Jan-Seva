@@ -442,6 +442,56 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     }}
 }}
 /* ═══════════════════════════════════════════════
+   CLEAR BUTTON FINAL FIX
+═══════════════════════════════════════════════ */
+
+.notif-del-btn .stButton>button{{
+
+    background:#FFFFFF!important;
+
+    background-image:none!important;
+
+    color:#DC2626!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.18)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+
+    filter:none!important;
+}}
+
+/* Hover */
+.notif-del-btn .stButton>button:hover{{
+
+    background:#FEF2F2!important;
+
+    background-image:none!important;
+
+    color:#B91C1C!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.24)!important;
+
+    transform:
+        translateY(-2px)!important;
+}}
+
+/* Remove dark mode override */
+.notif-del-btn button[kind="secondary"]{{
+
+    background:#FFFFFF!important;
+
+    color:#DC2626!important;
+}}
+
+/* Remove Streamlit dark background */
+.notif-del-btn .stButton{{
+
+    background:transparent!important;
+}}
+/* ═══════════════════════════════════════════════
    ADMIN NOTIFICATION SECTION FIX
 ═══════════════════════════════════════════════ */
 
