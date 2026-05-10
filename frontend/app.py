@@ -4700,15 +4700,21 @@ def _render_voice(lang: str):
         _GRN_T  = "#4ADE80" if dark else "#166534"
         _TXT    = "#EFF2FF" if dark else "#0B1428"
         _A1     = "#6366F1"
- 
+
         cap_lbl   = "Voice Captured — you can edit this text below" if lang == "en" else "आवाज़ कैप्चर — नीचे संपादित कर सकते हैं"
+        
+        clear_note = (                                           # ← inside if vt:
+            "🎙️ If the complaint is wrong, speak again"
+            if lang == "en"
+            else "🎙️ अगर शिकायत गलत है तो फिर से बोलें"
+        )
         clear_lbl = (
             "Update"
             if lang == "en"
             else "अपडेट करें"
         )
         edit_note = "✅ This text has been filled in the description below — edit freely." if lang == "en" else "✅ यह टेक्स्ट नीचे विवरण में भरा गया है — स्वतंत्र रूप से संपादित करें।"
- 
+
         # pill showing full captured text
         safe_vt = _html_mod.escape(vt)
         pill_html = (
@@ -4724,18 +4730,17 @@ def _render_voice(lang: str):
             "</div>"
         )
         st.markdown(pill_html, unsafe_allow_html=True)
- 
-        # action row: Clear button (left) + info note (right)
-        # action row: Clear button (left) + info note (right)
+
+        # action row
         ca, cb = st.columns([1, 3])
         with ca:
-            st.caption(clear_note)
+            st.caption(clear_note)                               # ← inside if vt: → with ca:
             if st.button(clear_lbl, key="fc_voice_clear", use_container_width=True):
                 fc_set(
-                    voice_text     = "",
-                    description    = "",
-                    voice_applied  = False,
-                    _voice_ingested= False,
+                    voice_text      = "",
+                    description     = "",
+                    voice_applied   = False,
+                    _voice_ingested = False,
                 )
                 if "_fc_desc" in st.session_state:
                     del st.session_state["_fc_desc"]
@@ -4746,9 +4751,7 @@ def _render_voice(lang: str):
                 "padding:6px 4px;line-height:1.5;'>" + edit_note + "</div>",
                 unsafe_allow_html=True,
             )
- 
-        # PRE-SEED textarea widget — runs BEFORE st.text_area() below so the
-        # widget picks up the voice text on the SAME render cycle it arrived.
+
         if "_fc_desc" not in st.session_state or st.session_state.get("_fc_desc") == "":
             st.session_state["_fc_desc"] = vt
  
@@ -4884,91 +4887,37 @@ def _render_ai_preview(lang: str, desc: str, is_emg: bool) -> None:
  
 def _render_location(lang: str, dark: bool) -> None:
     _render_sec("📍", "Location" if lang == "en" else "स्थान")
- 
+
     col_gps, col_loc = st.columns([1, 3])
     with col_gps:
         auto_lbl = "Auto-detect" if lang == "en" else "स्थान पता करें"
         st.components.v1.html(_gps_iframe_html(auto_lbl), height=88)
- 
+
     with col_loc:
         def _on_loc():
-            # Manual edit → clear structured GPS fields, keep raw text
             fc_set(
                 location_name = st.session_state["_fc_location"],
                 _gps_ingested = False,
                 loc_area="", loc_city="", loc_district="",
                 loc_state="", loc_pincode="",
             )
- 
+
         st.text_input(
             "",
             value            = fc()["location_name"],
-            placeholder      = ("Area, colony or nearby landmark"
-                                 if lang == "en" else "क्षेत्र, कॉलोनी या लैंडमार्क"),
+            placeholder      = ("Enter your location"
+                                 if lang == "en" else "अपना स्थान दर्ज करें"),
             key              = "_fc_location",
             label_visibility = "collapsed",
             on_change        = _on_loc,
         )
- 
-    # ── Structured location detail card (only when GPS was used) ─────────────
+
+    # ── Map only — card removed ───────────────────────────────────────────────
     state = fc()
-    if state["_gps_ingested"] and (state["loc_area"] or state["loc_city"] or state["loc_state"]):
-        CARD  = "#0D1220" if dark else "#FFFFFF"
-        BOR   = "#1E2A3D" if dark else "#E2E8F4"
-        TXT   = "#EFF2FF" if dark else "#0B1428"
-        SUB   = "#7C8FAC" if dark else "#64748B"
-        GRN   = "#10B981"
-        GRN_BG  = "#071A10" if dark else "#F0FDF4"
-        GRN_BD  = "#166534" if dark else "#86EFAC"
-        GRN_T   = "#4ADE80" if dark else "#166534"
- 
-        # Build rows for each non-empty field
-        def _row(label: str, value: str, icon: str) -> str:
-            if not value:
-                return ""
-            return (
-                f"<div style='display:flex;align-items:center;gap:10px;"
-                f"padding:6px 0;border-bottom:1px solid {BOR};'>"
-                f"<span style='font-size:.88rem;flex-shrink:0;'>{icon}</span>"
-                f"<div style='flex:1;'>"
-                f"<div style='font-size:.55rem;font-weight:700;text-transform:uppercase;"
-                f"letter-spacing:.08em;color:{SUB};margin-bottom:1px;'>{label}</div>"
-                f"<div style='font-size:.82rem;font-weight:600;color:{TXT};'>{value}</div>"
-                f"</div></div>"
-            )
- 
-        rows_html = (
-            _row("Area / Neighbourhood", state["loc_area"],    "🏘️") +
-            _row("City / Town",          state["loc_city"],    "🏙️") +
-            _row("District",             state["loc_district"],"🗺️") +
-            _row("State",                state["loc_state"],   "📍") +
-            _row("PIN Code",             state["loc_pincode"], "📮")
-        )
- 
-        # Coords footer
-        lat_s = f"{state['lat']:.6f}"
-        lon_s = f"{state['lon']:.6f}"
- 
-        card_html = (
-            f"<div style='background:{GRN_BG};border:1.5px solid {GRN_BD};"
-            f"border-left:4px solid {GRN};border-radius:14px;"
-            f"padding:12px 16px;margin-bottom:10px;'>"
-            f"<div style='font-size:.56rem;font-weight:800;text-transform:uppercase;"
-            f"letter-spacing:.09em;color:{GRN_T};margin-bottom:8px;"
-            f"display:flex;align-items:center;gap:7px;'>"
-            f"✅ GPS Location Detected</div>"
-            f"{rows_html}"
-            f"<div style='font-size:.60rem;color:{SUB};margin-top:8px;"
-            f"font-family:monospace;'>🌐 {lat_s}, {lon_s}</div>"
-            f"</div>"
-        )
-        st.markdown(card_html, unsafe_allow_html=True)
- 
-    # ── Map — only re-renders when coords change ──────────────────────────────
     lat, lon = state["lat"], state["lon"]
     if lat != state["_map_lat"] or lon != state["_map_lon"]:
         fc_set(_map_lat=lat, _map_lon=lon)
- 
+
     st.components.v1.html(
         _map_html(
             lat      = state["_map_lat"],
