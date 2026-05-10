@@ -135,65 +135,129 @@ def seed_data():
         db.close()
 # Replace run_migrations() entirely with this PostgreSQL-safe version:
 
-def run_migrations():
+def run_safe_migrations():
+
     try:
+
         db_url = str(engine.url)
+
         with engine.begin() as conn:
 
+            # ─────────────────────────────────
+            # POSTGRESQL
+            # ─────────────────────────────────
+
             if "postgresql" in db_url:
-                # PostgreSQL — use information_schema
+
                 result = conn.execute(text("""
-                    SELECT column_name FROM information_schema.columns
+
+                    SELECT column_name
+
+                    FROM information_schema.columns
+
                     WHERE table_name = 'complaints'
+
                 """))
-                col_names = {row[0] for row in result.fetchall()}
 
-                pg_fields = [
-                    ("assigned_official_id", "INTEGER"),
-                    ("image_url",            "TEXT"),
-                    ("resolution_proof",     "TEXT"),
-                    ("resolution_note",      "TEXT"),
-                    ("sla_deadline",         "TIMESTAMP"),
-                    ("is_overdue",           "BOOLEAN DEFAULT FALSE"),
-                    ("time_to_resolve_hours","FLOAT"),
-                    ("SLA_breached",         "BOOLEAN DEFAULT FALSE"),
-                ]
-                for field, ftype in pg_fields:
-                    if field not in col_names:
-                        try:
-                            conn.execute(text(
-                                f"ALTER TABLE complaints ADD COLUMN {field} {ftype}"
-                            ))
-                            print(f"Added column: {field}")
-                        except Exception:
-                            pass
+                existing_cols = {
+                    row[0]
+                    for row in result.fetchall()
+                }
 
-        
+            # ─────────────────────────────────
+            # SQLITE
+            # ─────────────────────────────────
+
+            else:
+
+                result = conn.execute(
+                    text("PRAGMA table_info(complaints)")
+                )
+
+                existing_cols = {
+                    row[1]
+                    for row in result.fetchall()
+                }
+
+            # ─────────────────────────────────
+            # SAFE FIELDS
+            # ─────────────────────────────────
+
+            fields = [
+
+                ("assigned_official_id", "INTEGER"),
+
+                ("image_url", "TEXT"),
+
+                ("resolution_proof", "TEXT"),
+
+                ("resolution_note", "TEXT"),
+
+                ("sla_deadline", "TIMESTAMP"),
+
+                ("is_overdue", "BOOLEAN DEFAULT FALSE"),
+
+                ("time_to_resolve_hours", "FLOAT"),
+
+                ("sla_breached", "BOOLEAN DEFAULT FALSE")
+            ]
+
+            # ─────────────────────────────────
+            # ADD ONLY MISSING COLUMNS
+            # ─────────────────────────────────
+
+            for field, ftype in fields:
+
+                if field not in existing_cols:
+
+                    try:
+
+                        conn.execute(
+
+                            text(
+                                f"""
+                                ALTER TABLE complaints
+                                ADD COLUMN {field} {ftype}
+                                """
+                            )
+
+                        )
+
+                        print(f"✅ Added column: {field}")
+
+                    except Exception as e:
+
+                        print(
+                            f"⚠ Could not add {field}: {e}"
+                        )
+
+        print("✅ Safe migrations completed")
 
     except Exception as e:
-        print(f"Migration error: {e}")
+
+        print(f"❌ Migration error: {e}")
 
 @app.on_event("startup")
 async def startup():
 
     try:
 
-        print("🚀 Starting AI Citizen Grievance System...")
+        print("🚀 Starting application...")
 
         # SAFE
-        # Creates tables ONLY if missing
         Base.metadata.create_all(
             bind=engine,
             checkfirst=True
         )
 
-        print("✅ Database connected safely")
+        # SAFE LIFETIME MIGRATION
+        run_safe_migrations()
+
+        print("✅ Database initialized safely")
 
     except Exception as e:
 
         print(f"❌ Startup error: {e}")
-
-        traceback.print_exc()
 
 @app.get("/")
 def root(): 
