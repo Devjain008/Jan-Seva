@@ -195,91 +195,91 @@ header[data-testid="stHeader"]{{
     width: 100% !important;
 }}
 /* ═══════════════════════════════════════════════
-   SIDEBAR COLLAPSED CONTROL — reopen button fix
-═══════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════
-SIDEBAR TOGGLE BUTTON — FIXED
+   SIDEBAR TOGGLE — ALWAYS VISIBLE + BLACK ICON
 ═══════════════════════════════════════════════ */
 
-/* Sidebar toggle button */
-[data-testid="stSidebarCollapsedControl"],
-[data-testid="collapsedControl"] {{
-display: flex !important;
-visibility: visible !important;
-opacity: 1 !important;
+/* Toggle button */
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"]{{
 
-pointer-events: auto !important;
+    position:fixed!important;
 
-position: fixed !important;
+    top:14px!important;
+    left:14px!important;
 
-top: 16px !important;
-left: 16px !important;
+    width:44px!important;
+    height:44px!important;
 
-width: 44px !important;
-height: 44px !important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
 
-z-index: 999999 !important;
+    visibility:visible!important;
+    opacity:1!important;
 
-align-items: center !important;
-justify-content: center !important;
+    z-index:999999!important;
 
-border-radius: 14px !important;
+    border-radius:14px!important;
 
-background: #FFFFFF !important;
+    background:#FFFFFF!important;
 
-border: 1px solid rgba(15,23,42,.08) !important;
+    border:1px solid rgba(15,23,42,.10)!important;
 
-box-shadow:
-    0 10px 26px rgba(15,23,42,.12) !important;
+    box-shadow:
+        0 8px 24px rgba(15,23,42,.12)!important;
 
-cursor: pointer !important;
-
-transition:
-    all .18s ease !important;
-
-
+    transition:
+        all .18s ease!important;
 }}
 
 /* Hover */
-[data-testid="stSidebarCollapsedControl"]:hover,
-[data-testid="collapsedControl"]:hover {{
+[data-testid="collapsedControl"]:hover,
+[data-testid="stSidebarCollapsedControl"]:hover{{
 
-transform: scale(1.05) !important;
+    background:#F8FAFC!important;
 
-background: #F8FAFC !important;
+    transform:scale(1.04)!important;
 
-box-shadow:
-    0 14px 32px rgba(15,23,42,.18) !important;
-
-
+    box-shadow:
+        0 12px 28px rgba(15,23,42,.16)!important;
 }}
 
-/* Arrow icon */
-[data-testid="stSidebarCollapsedControl"] svg,
-[data-testid="collapsedControl"] svg {{
-fill: #000000 !important;
+/* BLACK DOUBLE ARROW ICON */
+[data-testid="collapsedControl"] svg,
+[data-testid="stSidebarCollapsedControl"] svg{{
 
-color: #000000 !important;
+    fill:#000000!important;
 
-stroke: #000000 !important;
+    color:#000000!important;
 
-width: 20px !important;
+    stroke:#000000!important;
 
-height: 20px !important;
+    opacity:1!important;
 
-opacity: 1 !important;
-
+    width:20px!important;
+    height:20px!important;
 }}
 
-/* Prevent clipping */
-header[data-testid="stHeader"] {{
-background: transparent !important;
+/* Prevent header clipping */
+header[data-testid="stHeader"]{{
 
-height: 0 !important;
+    background:transparent!important;
 
-overflow: visible !important;
+    height:0!important;
 
-z-index: 99998 !important;
+    overflow:visible!important;
+
+    z-index:99998!important;
+}}
+
+/* Remove ghost white box */
+button[kind="header"]{{
+
+    background:transparent!important;
+
+    border:none!important;
+
+    box-shadow:none!important;
 }}
 /* ═══════════════════════════════════════════════
    COMPLAINT CARD BORDER + WHITE THEME FIX
