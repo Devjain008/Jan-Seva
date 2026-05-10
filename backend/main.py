@@ -425,7 +425,6 @@ def health():
         "database": "ok"      if db_ok else "unreachable",
     }
 
-
 @app.get("/routes")
 def list_routes():
     return {
