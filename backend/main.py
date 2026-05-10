@@ -336,28 +336,36 @@ async def lifespan(app: FastAPI):
     log.info("🚀 Starting Jan Seva Portal API…")
 
     # 1. Verify DB is reachable before doing anything else
-    if not db_ping():
-        log.error(
-            "❌ Cannot reach database at startup. "
-            "Check DATABASE_URL in Render environment variables."
-        )
-        # Don't crash — let the app start and return 503 from health check
-    else:
-        log.info("✅ Database connection verified")
+    try:
 
-        # 2. Create tables (safe — CREATE TABLE IF NOT EXISTS)
-        try:
-            Base.metadata.create_all(bind=engine, checkfirst=True)
-            log.info("✅ Tables created / verified")
-        except Exception as exc:
-            log.error("❌ create_all failed: %s", exc)
+        if db_ping():
 
-        # 3. Add any missing columns (safe — ALTER TABLE ADD COLUMN only)
-        run_safe_migrations()
+            log.info("✅ Database connection verified")
 
-        # 4. Seed demo data (safe — each seed checks existence first)
-        seed_data()
+        else:
 
+            log.warning(
+                "⚠ Database ping failed — continuing startup"
+            )
+
+    except Exception as e:
+
+        log.warning(
+            "⚠ DB ping error: %s",
+            e        )
+        # 2. Create tables
+    try:
+        Base.metadata.create_all(bind=engine, checkfirst=True)
+        log.info("✅ Tables created / verified")
+    except Exception as exc:
+        log.error("❌ create_all failed: %s", exc)
+
+    # 3. Add columns
+    run_safe_migrations()
+
+    # 4. Seed data
+    seed_data()
+       
     log.info("✅ Startup complete — API is ready")
     yield
     # ── SHUTDOWN ─────────────────────────────────────────────────────────────
