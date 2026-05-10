@@ -9323,10 +9323,158 @@ li[role="option"][aria-selected="true"] {{
     border:1px solid {_BOR};border-radius:20px;
     padding:2px 9px;font-size:0.68rem;font-weight:600;color:{_SUB};
 }}
+/* ═══════════════════════════════════════════════
+   COMPLAINT ACTION BUTTON FIX
+═══════════════════════════════════════════════ */
+
+.dept-action-row{{
+
+    display:flex!important;
+
+    flex-wrap:wrap!important;
+
+    gap:12px!important;
+
+    align-items:center!important;
+
+    margin-top:14px!important;
+}}
+
+/* Prevent hidden/stretched buttons */
+.dept-action-row .stButton{{
+
+    width:auto!important;
+
+    display:inline-flex!important;
+
+    flex:none!important;
+
+    visibility:visible!important;
+
+    opacity:1!important;
+}}
+
+/* Prevent Streamlit columns stretching */
+.dept-action-row .stColumn{{
+
+    width:auto!important;
+
+    flex:none!important;
+}}
+
+/* Main button style */
+.dept-action-row .stButton>button{{
+
+    width:auto!important;
+
+    min-width:130px!important;
+
+    max-width:100%!important;
+
+    height:44px!important;
+
+    padding:0 18px!important;
+
+    border-radius:14px!important;
+
+    display:inline-flex!important;
+
+    align-items:center!important;
+
+    justify-content:center!important;
+
+    white-space:nowrap!important;
+
+    font-weight:700!important;
+
+    font-size:.92rem!important;
+
+    border:none!important;
+
+    transition:all .18s ease!important;
+}}
+
+/* Resolve button */
+.resolve-btn .stButton>button{{
+
+    background:
+        linear-gradient(135deg,#10B981,#059669)!important;
+
+    color:#FFFFFF!important;
+
+    box-shadow:
+        0 8px 22px rgba(16,185,129,.22)!important;
+}}
+
+/* Reject button */
+.reject-btn .stButton>button{{
+
+    background:
+        linear-gradient(135deg,#EF4444,#DC2626)!important;
+
+    color:#FFFFFF!important;
+
+    box-shadow:
+        0 8px 22px rgba(239,68,68,.22)!important;
+}}
+
+/* Progress button */
+.progress-btn .stButton>button{{
+
+    background:
+        linear-gradient(135deg,#6366F1,#8B5CF6)!important;
+
+    color:#FFFFFF!important;
+
+    box-shadow:
+        0 8px 22px rgba(99,102,241,.24)!important;
+}}
+
+/* Hover */
+.dept-action-row .stButton>button:hover{{
+
+    transform:
+        translateY(-2px)!important;
+
+    filter:
+        brightness(1.04)!important;
+}}
+
+/* Disabled */
+.stButton>button:disabled{{
+
+    opacity:.55!important;
+
+    cursor:not-allowed!important;
+
+    filter:grayscale(.08)!important;
+}}
+
+/* Mobile */
+@media(max-width:768px){{
+
+    .dept-action-row{{
+
+        flex-direction:column!important;
+
+        align-items:stretch!important;
+    }}
+
+    .dept-action-row .stButton{{
+
+        width:100%!important;
+    }}
+
+    .dept-action-row .stButton>button{{
+
+        width:100%!important;
+    }}
+}}
 .dept-card-code{{
     font-family:'Courier New',monospace;font-size:1.1rem;
     font-weight:800;line-height:1;margin-bottom:3px;
 }}
+
 .dept-card-code-lbl{{
     font-size:0.60rem;font-weight:600;text-transform:uppercase;
     letter-spacing:0.08em;color:{_SUB};opacity:0.7;
