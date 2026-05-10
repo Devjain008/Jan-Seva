@@ -348,42 +348,126 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     transform:translateX(3px)!important;
 }}
 
-/* ═══════════════════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════
+   BUTTONS — RESPONSIVE + AUTO WIDTH
+═══════════════════════════════════════════════ */
+
+.stButton{{
+
+    width:auto!important;
+
+    display:inline-block!important;
+}}
+
+/* Main button */
 .stButton>button{{
-    background:linear-gradient(135deg,{accent1},{accent2})!important;
-    color:#fff!important;border:none!important;
-    border-radius:var(--r-md)!important;
-    padding:10px 20px!important;          /* comfortable tap target */
-    font-weight:600!important;
-    font-size:var(--fs-base)!important;   /* 14px — readable on mobile too */
-    font-family:'DM Sans','Noto Sans Devanagari',sans-serif!important;
-    width:100%!important;
-    letter-spacing:-0.01em!important;
+
+    background:
+        linear-gradient(135deg,{accent1},{accent2})!important;
+
+    color:#FFFFFF!important;
+
+    border:none!important;
+
+    border-radius:14px!important;
+
+    padding:10px 18px!important;
+
+    min-height:44px!important;
+
+    width:auto!important;
+
+    min-width:fit-content!important;
+
+    max-width:100%!important;
+
+    display:inline-flex!important;
+
+    align-items:center!important;
+
+    justify-content:center!important;
+
+    gap:8px!important;
+
+    font-weight:700!important;
+
+    font-size:var(--fs-base)!important;
+
+    font-family:
+        'DM Sans',
+        'Noto Sans Devanagari',
+        sans-serif!important;
+
+    line-height:1.2!important;
+
+    white-space:nowrap!important;
+
     cursor:pointer!important;
-    line-height:1.4!important;
-    transition:transform var(--t-base),box-shadow var(--t-base),filter var(--t-fast)!important;
-    box-shadow:0 2px 8px {a1_glow}!important;
-    position:relative!important;overflow:hidden!important;
+
+    transition:
+        all .18s ease!important;
+
+    box-shadow:
+        0 4px 14px {a1_glow}!important;
+
+    position:relative!important;
+
+    overflow:hidden!important;
 }}
-.stButton>button::before{{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 100%);
-    pointer-events:none;border-radius:inherit;
-}}
+
+/* Hover */
 .stButton>button:hover{{
-    transform:translateY(-2px) scale(1.006)!important;
-    box-shadow:0 6px 20px {a1_glow}!important;
-    filter:brightness(1.05)!important;
+
+    transform:
+        translateY(-2px)!important;
+
+    box-shadow:
+        0 8px 24px {a1_glow}!important;
+
+    filter:brightness(1.04)!important;
 }}
+
+/* Active */
 .stButton>button:active{{
-    transform:translateY(0) scale(0.998)!important;
-    filter:brightness(0.97)!important;
+
+    transform:
+        scale(.98)!important;
 }}
-.stButton>button:focus-visible{{
-    outline:none!important;
-    box-shadow:0 0 0 3px {bg},0 0 0 5px {accent1}!important;
+
+/* Clear button fix */
+.stButton>button[kind="secondary"]{{
+
+    background:#FFFFFF!important;
+
+    color:#0F172A!important;
+
+    border:
+        1px solid rgba(15,23,42,.10)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.06)!important;
+}}
+
+/* Secondary hover */
+.stButton>button[kind="secondary"]:hover{{
+
+    background:#F8FAFC!important;
+
+    color:#000000!important;
+}}
+
+/* Mobile */
+@media(max-width:768px){{
+
+    .stButton>button{{
+
+        padding:10px 16px!important;
+
+        font-size:.82rem!important;
+
+        min-height:42px!important;
+    }}
 }}
 
 /* ═══════════════════════════════════════════════════════
