@@ -1,4 +1,29 @@
+# Database - ignore sqlite in root, but this is handled by persistent disk/postgres now
 *.sqlite
+
+# Data directory (Render persistent disk)
 /data
-uploads/
-**pycache**/
+
+# Uploads (use cloud storage or persistent disk)
+uploads/complaints/
+uploads/proofs/
+uploads/schemes/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.env
+.env.local
+.venv
+venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
