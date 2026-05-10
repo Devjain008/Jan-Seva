@@ -348,6 +348,121 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     transform:translateX(3px)!important;
 }}
 
+/* ═══════════════════════════════════════════════
+   ADMIN NOTIFICATION SECTION FIX
+═══════════════════════════════════════════════ */
+
+.prem-notif-card,
+.notification-card,
+.admin-notification-card{{
+
+    width:100%!important;
+
+    overflow:hidden!important;
+
+    border-radius:16px!important;
+
+    padding:14px 16px!important;
+
+    background:var(--c-card)!important;
+
+    border:1px solid var(--c-border)!important;
+
+    box-shadow:
+        0 4px 14px rgba(15,23,42,.05)!important;
+}}
+
+/* Notification content */
+.prem-notif-msg,
+.notification-message{{
+
+    word-break:break-word!important;
+
+    overflow-wrap:anywhere!important;
+
+    line-height:1.6!important;
+
+    color:var(--c-text)!important;
+}}
+
+/* Notification actions/buttons */
+.notification-actions,
+.prem-notif-actions{{
+
+    display:flex!important;
+
+    flex-wrap:wrap!important;
+
+    gap:10px!important;
+
+    align-items:center!important;
+
+    margin-top:12px!important;
+}}
+
+/* Fix notification buttons only */
+.notification-actions .stButton,
+.prem-notif-actions .stButton{{
+
+    width:auto!important;
+
+    flex:none!important;
+}}
+
+.notification-actions .stButton>button,
+.prem-notif-actions .stButton>button{{
+
+    width:auto!important;
+
+    min-width:fit-content!important;
+
+    padding:9px 16px!important;
+
+    min-height:40px!important;
+
+    border-radius:12px!important;
+
+    white-space:nowrap!important;
+}}
+
+/* Clear/secondary button fix */
+.notification-actions .stButton>button[kind="secondary"],
+.prem-notif-actions .stButton>button[kind="secondary"]{{
+
+    background:#FFFFFF!important;
+
+    color:#0F172A!important;
+
+    border:
+        1px solid rgba(15,23,42,.10)!important;
+
+    box-shadow:none!important;
+}}
+
+/* Mobile */
+@media(max-width:768px){{
+
+    .notification-actions,
+    .prem-notif-actions{{
+
+        flex-direction:column!important;
+
+        align-items:stretch!important;
+    }}
+
+    .notification-actions .stButton,
+    .prem-notif-actions .stButton{{
+
+        width:100%!important;
+    }}
+
+    .notification-actions .stButton>button,
+    .prem-notif-actions .stButton>button{{
+
+        width:100%!important;
+    }}
+}}
+
 /* ═══════════════════════════════════════════════════════
    BUTTONS
 ═══════════════════════════════════════════════════════ */
