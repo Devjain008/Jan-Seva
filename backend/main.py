@@ -1,38 +1,13 @@
-"""
-main.py — Production-safe FastAPI entry point for Jan Seva Portal.
-
-FIXES vs original:
-──────────────────
-1. DATA LOSS FIX: seed_data() now checks existence BEFORE inserting.
-   Each entity is individually guarded so a partial failure on one
-   never corrupts others. All seeds wrapped in individual try/except
-   with explicit rollback.
-
-2. SUBMIT BUG FIX: run_safe_migrations() failures are now surfaced
-   clearly. The complaint submit was failing because ALTER TABLE was
-   silently failing, leaving required columns missing.
-   Fixed by checking each column individually and logging clearly.
-
-3. UPLOADS FIX: UPLOAD_DIR now uses /tmp/uploads on Render (ephemeral
-   is expected for images — for permanent storage, use Cloudflare R2
-   or AWS S3). The path is configurable via UPLOAD_DIR env var.
-
-4. STARTUP ORDER: create_all → migrations → seed. Each step is
-   independently wrapped so one failure doesn't block the others.
-
-5. REMOVED: @app.on_event("startup") deprecated warning — uses
-   lifespan context manager instead (FastAPI best practice).
-"""
 
 from __future__ import annotations
-
+from sqlalchemy.orm import Session
+from backend.database import get_db
 import hashlib
 import logging
 import os
 import traceback
 from contextlib import asynccontextmanager
-
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -370,24 +345,8 @@ async def lifespan(app: FastAPI):
     yield
     # ── SHUTDOWN ─────────────────────────────────────────────────────────────
     log.info("Shutting down Jan Seva Portal API")
-@app.get("/categories")
-def get_categories(db: Session = Depends(get_db)):
 
-    rows = db.query(models.Department.category).distinct().all()
 
-    categories = [
-
-        r[0]
-
-        for r in rows
-
-        if r[0]
-    ]
-
-    return {
-        "success": True,
-        "categories": categories
-    }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # APP
@@ -461,4 +420,23 @@ def list_routes():
             for route in app.routes
             if hasattr(route, "path") and hasattr(route, "methods")
         ]
+    }
+
+@app.get("/categories")
+def get_categories(db: Session = Depends(get_db)):
+
+    rows = db.query(models.Department.category).distinct().all()
+
+    categories = [
+
+        r[0]
+
+        for r in rows
+
+        if r[0]
+    ]
+
+    return {
+        "success": True,
+        "categories": categories
     }
