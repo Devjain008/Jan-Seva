@@ -349,73 +349,52 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
 }}
 
 /* ═══════════════════════════════════════════════
-   NOTIFICATION BUTTON FIX
+   NOTIFICATION BUTTONS — FIXED UI
 ═══════════════════════════════════════════════ */
 
-.notif-actions,
-.notification-actions{{
+.notif-actions{{
+
+    width:100%!important;
+
+    margin-top:10px!important;
+}}
+
+/* Streamlit columns */
+.notif-actions .stColumn{{
 
     display:flex!important;
 
-    flex-wrap:wrap!important;
-
     align-items:center!important;
-
-    gap:12px!important;
 }}
 
-/* Prevent stretched columns */
-.notif-actions .stColumn,
-.notification-actions .stColumn{{
+/* Button wrapper */
+.notif-actions .stButton{{
 
-    width:auto!important;
-
-    flex:none!important;
+    width:100%!important;
 }}
 
-/* Individual button wrapper */
-.notif-actions .stButton,
-.notification-actions .stButton{{
+/* MAIN BUTTON */
+.notif-actions .stButton>button{{
 
-    width:auto!important;
+    width:100%!important;
 
-    display:inline-flex!important;
-}}
+    height:42px!important;
 
-/* MAIN BUTTON STYLE */
-.notif-actions .stButton>button,
-.notification-actions .stButton>button{{
+    border-radius:12px!important;
 
-    width:auto!important;
-
-    min-width:120px!important;
-
-    height:44px!important;
-
-    padding:0 18px!important;
-
-    border-radius:14px!important;
-
-    display:inline-flex!important;
-
-    align-items:center!important;
-
-    justify-content:center!important;
-
-    white-space:nowrap!important;
-
-    font-size:.92rem!important;
+    font-size:.82rem!important;
 
     font-weight:700!important;
 
-    border:none!important;
+    white-space:nowrap!important;
 
     transition:all .18s ease!important;
+
+    border:none!important;
 }}
 
-/* PRIMARY BUTTON */
-.notif-actions .stButton:first-child>button,
-.notification-actions .stButton:first-child>button{{
+/* READ BUTTON */
+.notif-read-btn .stButton>button{{
 
     background:
         linear-gradient(135deg,#6366F1,#8B5CF6)!important;
@@ -423,52 +402,43 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     color:#FFFFFF!important;
 
     box-shadow:
-        0 8px 24px rgba(99,102,241,.28)!important;
+        0 8px 22px rgba(99,102,241,.24)!important;
 }}
 
-/* SECOND BUTTON FIX */
-.notif-actions .stButton:nth-child(2)>button,
-.notification-actions .stButton:nth-child(2)>button{{
+/* CLEAR BUTTON */
+.notif-del-btn .stButton>button{{
 
     background:#FFFFFF!important;
 
-    color:#0F172A!important;
+    color:#DC2626!important;
 
     border:
-        1px solid rgba(15,23,42,.10)!important;
+        1px solid rgba(220,38,38,.18)!important;
 
     box-shadow:
-        0 4px 14px rgba(15,23,42,.06)!important;
+        0 4px 12px rgba(15,23,42,.05)!important;
 }}
 
 /* Hover */
-.notif-actions .stButton>button:hover,
-.notification-actions .stButton>button:hover{{
+.notif-actions .stButton>button:hover{{
 
-    transform:translateY(-2px)!important;
+    transform:
+        translateY(-2px)!important;
 }}
 
 /* Mobile */
 @media(max-width:768px){{
 
-    .notif-actions,
-    .notification-actions{{
-
-        flex-direction:column!important;
-
-        align-items:stretch!important;
-    }}
-
-    .notif-actions .stButton,
-    .notification-actions .stButton{{
+    .notif-actions .stColumn{{
 
         width:100%!important;
     }}
 
-    .notif-actions .stButton>button,
-    .notification-actions .stButton>button{{
+    .notif-actions .stButton>button{{
 
-        width:100%!important;
+        height:40px!important;
+
+        font-size:.78rem!important;
     }}
 }}
 /* ═══════════════════════════════════════════════

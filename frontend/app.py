@@ -6431,32 +6431,90 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
         st.markdown(card_html, unsafe_allow_html=True)
 
         # Action buttons — native Streamlit, outside any HTML block
-        if show_read_btn or True:  # always show delete
-            b_cols = st.columns([1, 1, 6])
-            btn_col = 0
-            if show_read_btn and is_unrd:
-                with b_cols[btn_col]:
-                    st.markdown("<div class='notif-read-btn'>", unsafe_allow_html=True)
-                    if st.button(t("✓ Read","✓ पढ़ा"),
-                                 key=f"notif_read_{nid}",
-                                 use_container_width=True):
-                        resp = api("put", f"/schemes/notifications/{nid}/read")
-                        if resp.get("success"):
-                            st.rerun()
-                    st.markdown("</div>", unsafe_allow_html=True)
-                btn_col += 1
-            with b_cols[btn_col]:
-                st.markdown("<div class='notif-del-btn'>", unsafe_allow_html=True)
-                if st.button("🗑",
-                             key=f"notif_del_{nid}",
-                             use_container_width=True,
-                             help=t("Delete","हटाएं")):
-                    resp = api("delete", f"/schemes/notifications/{nid}")
-                    if resp.get("success"):
-                        st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
+        if show_read_btn or True:
 
-        st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+            st.markdown(
+                "<div class='notif-actions'>",
+                unsafe_allow_html=True
+            )
+
+            btn_cols = st.columns(
+                [1.2, 1.2, 5],
+                gap="small"
+            )
+
+            btn_index = 0
+
+            # READ BUTTON
+            if show_read_btn and is_unrd:
+
+                with btn_cols[btn_index]:
+
+                    st.markdown(
+                        "<div class='notif-read-btn'>",
+                        unsafe_allow_html=True
+                    )
+
+                    if st.button(
+                        t("✓ Read","✓ पढ़ा"),
+                        key=f"notif_read_{nid}",
+                        use_container_width=True
+                    ):
+
+                        resp = api(
+                            "put",
+                            f"/schemes/notifications/{nid}/read"
+                        )
+
+                        if resp.get("success"):
+
+                            st.rerun()
+
+                    st.markdown(
+                        "</div>",
+                        unsafe_allow_html=True
+                    )
+
+                btn_index += 1
+
+            # CLEAR BUTTON
+            with btn_cols[btn_index]:
+
+                st.markdown(
+                    "<div class='notif-del-btn'>",
+                    unsafe_allow_html=True
+                )
+
+                if st.button(
+                    "🗑 Clear",
+                    key=f"notif_del_{nid}",
+                    use_container_width=True,
+                    help=t("Delete","हटाएं")
+                ):
+
+                    resp = api(
+                        "delete",
+                        f"/schemes/notifications/{nid}"
+                    )
+
+                    if resp.get("success"):
+
+                        st.rerun()
+
+                st.markdown(
+                    "</div>",
+                    unsafe_allow_html=True
+                )
+
+            st.markdown(
+                "</div>",
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            "<div style='height:4px'></div>",
+            unsafe_allow_html=True
+        )
 
     # ── UNREAD SECTION ────────────────────────────────────────────────────────
     if unread:
