@@ -407,9 +407,16 @@ def get_all_complaints(db: Session = Depends(get_db)):
             "location": c.location,
             "status": c.status,
             "priority": c.priority,
+            "latitude": c.latitude,
+            "longitude": c.longitude,
+            "is_emergency": c.is_emergency or False,
             "user_name": user.name if user else "Unknown",
+            "user_phone": user.phone if user else "",
             "department": dept.name if dept else "Unassigned",
-            "created_at": c.created_at.strftime("%d %b %Y, %I:%M %p") if c.created_at else None
+            "image_path": c.image_path,
+            "created_at": c.created_at.strftime("%d %b %Y, %I:%M %p") if c.created_at else None,
+            "sla_deadline": c.sla_deadline.strftime("%d %b %Y, %I:%M %p") if c.sla_deadline else None,
+            "is_overdue": c.is_overdue or False,
         })
     return result
 

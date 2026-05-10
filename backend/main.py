@@ -370,7 +370,24 @@ async def lifespan(app: FastAPI):
     yield
     # ── SHUTDOWN ─────────────────────────────────────────────────────────────
     log.info("Shutting down Jan Seva Portal API")
+@app.get("/categories")
+def get_categories(db: Session = Depends(get_db)):
 
+    rows = db.query(models.Department.category).distinct().all()
+
+    categories = [
+
+        r[0]
+
+        for r in rows
+
+        if r[0]
+    ]
+
+    return {
+        "success": True,
+        "categories": categories
+    }
 
 # ─────────────────────────────────────────────────────────────────────────────
 # APP
