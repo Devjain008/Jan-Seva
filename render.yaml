@@ -1,21 +1,30 @@
 services:
-
+  # Backend API
   - type: web
     name: bfo-backend
-    env: python
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: bfo-db
+          property: connectionString
+      - key: PYTHONUNBUFFERED
+        value: "1"
 
-    buildCommand: |
-      pip install -r requirements.txt
-
-    startCommand: |
-      uvicorn backend.main:app --host 0.0.0.0 --port 10000
-
+  # Frontend Streamlit
   - type: web
-    name: bfo-frontend
-    env: python
+    name: bfo-frontendss
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: streamlit run frontend/app.py --server.port $PORT --server.address 0.0.0.0
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
 
-    buildCommand: |
-      pip install -r requirements.txt
-
-    startCommand: |
-      streamlit run frontend/app.py --server.port 10000 --server.address 0.0.0.0
+databases:
+  - name: bfo-db
+    databaseName: janseva
+    user: janseva_user
+    plan: free
