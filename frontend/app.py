@@ -181,282 +181,380 @@ def stars_html(avg, count=0):
 # SIDEBAR
 # ═════════════════════════════════════════════════════════════════════════════
 def render_sidebar():
-    role = st.session_state.role
-    
-    # Hide sidebar completely when not logged in
-    if not role:
-        st.markdown("""
-        <style>
-        section[data-testid="stSidebar"] { display: none !important; }
-        [data-testid="collapsedControl"],
-        [data-testid="stSidebarCollapsedControl"] { display: none !important; }
-        </style>
-        """, unsafe_allow_html=True)
-        return
-
-    # ═══════════════════════════════════════════════════════════════════════
-    # MODERN SIDEBAR STYLING — Clean, Minimal, Professional
-    # ═══════════════════════════════════════════════════════════════════════
+    # ── Hide Streamlit defaults & Modern Sidebar Styling ─────────────────────
     st.markdown("""
     <style>
-    /* Hide default Streamlit sidebar elements */
+    /* ═══════════════════════════════════════════════════════════
+       HIDE DEFAULT STREAMLIT ELEMENTS
+    ═══════════════════════════════════════════════════════════ */
     section[data-testid="stSidebar"] nav,
     div[data-testid="stSidebarNav"],
     ul[data-testid="stSidebarNavItems"],
     button[data-testid="baseButton-header"] { display: none !important; }
 
-    /* Sidebar container */
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR COLLAPSE/EXPAND BUTTON
+    ═══════════════════════════════════════════════════════════ */
+    button[data-testid="stSidebarCollapseButton"],
+    [data-testid="collapsedControl"],
+    button[data-testid="baseButton-headerNoPadding"] {
+        background: #ffffff !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        width: 30px !important;
+        height: 30px !important;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.06) !important;
+        transition: all 0.2s ease !important;
+        z-index: 999999 !important;
+    }
+    button[data-testid="stSidebarCollapseButton"]:hover,
+    [data-testid="collapsedControl"]:hover {
+        background: #F9FAFB !important;
+        border-color: #6366F1 !important;
+        transform: scale(1.05) !important;
+    }
+    button[data-testid="stSidebarCollapseButton"] svg,
+    [data-testid="collapsedControl"] svg,
+    button[data-testid="baseButton-headerNoPadding"] svg {
+        color: #6366F1 !important;
+        fill: #6366F1 !important;
+        width: 16px !important;
+        height: 16px !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR SHELL — Clean modern look
+    ═══════════════════════════════════════════════════════════ */
     section[data-testid="stSidebar"] {
-        background: var(--c-card, #FFFFFF) !important;
-        border-right: 1px solid var(--c-border, #E2E8F0) !important;
+        background: #FCFCFD !important;
+        border-right: 1px solid #EEF0F4 !important;
         box-shadow: none !important;
     }
-    
     section[data-testid="stSidebar"] > div:first-child {
         padding: 0 !important;
     }
 
-    /* Nav buttons */
+    /* Custom scrollbar */
+    section[data-testid="stSidebar"] ::-webkit-scrollbar { width: 4px !important; }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-track { background: transparent !important; }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {
+        background: #D1D5DB !important;
+        border-radius: 10px !important;
+    }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover { background: #6366F1 !important; }
+
+    /* ═══════════════════════════════════════════════════════════
+       NAV BUTTONS — Clean modern app style
+    ═══════════════════════════════════════════════════════════ */
     section[data-testid="stSidebar"] .stButton > button {
         background: transparent !important;
-        border: none !important;
+        border: 1px solid transparent !important;
         box-shadow: none !important;
-        border-radius: 10px !important;
-        padding: 10px 14px !important;
-        font-size: 14px !important;
+        border-radius: 8px !important;
+        padding: 9px 12px !important;
+        font-size: 0.875rem !important;
         font-weight: 500 !important;
-        color: var(--c-sub, #64748B) !important;
+        color: #4B5563 !important;
         text-align: left !important;
         justify-content: flex-start !important;
         width: 100% !important;
         transition: all 0.15s ease !important;
+        letter-spacing: -0.005em !important;
+        line-height: 1.2 !important;
+        min-height: 36px !important;
     }
-    
     section[data-testid="stSidebar"] .stButton > button:hover {
-        background: var(--c-hover, #F1F5F9) !important;
-        color: var(--c-text, #0F172A) !important;
+        background: #F3F4F6 !important;
+        color: #111827 !important;
+        border-color: transparent !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button:focus {
+        box-shadow: none !important;
+        outline: none !important;
     }
 
-    /* Active nav state */
+    /* ── ACTIVE nav button ── */
     section[data-testid="stSidebar"] .sb-active .stButton > button {
-        background: var(--c-a1-soft, rgba(14,165,233,0.08)) !important;
-        color: var(--c-a1, #0EA5E9) !important;
+        background: #EEF2FF !important;
+        color: #4338CA !important;
         font-weight: 600 !important;
+        border: 1px solid #E0E7FF !important;
+    }
+    section[data-testid="stSidebar"] .sb-active .stButton > button:hover {
+        background: #E0E7FF !important;
     }
 
-    /* Utility button */
+    /* ── UTILITY (language) button ── */
     section[data-testid="stSidebar"] .sb-util .stButton > button {
-        background: var(--c-card2, #F1F5F9) !important;
-        border: 1px solid var(--c-border, #E2E8F0) !important;
-        border-radius: 10px !important;
-        color: var(--c-sub, #64748B) !important;
-        font-size: 13px !important;
+        background: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        color: #4B5563 !important;
+        font-size: 0.8rem !important;
         font-weight: 500 !important;
+        padding: 8px 12px !important;
         justify-content: center !important;
         text-align: center !important;
     }
-    
     section[data-testid="stSidebar"] .sb-util .stButton > button:hover {
-        background: var(--c-hover, #F1F5F9) !important;
-        color: var(--c-text, #0F172A) !important;
+        background: #F9FAFB !important;
+        border-color: #6366F1 !important;
+        color: #4338CA !important;
     }
 
-    /* Logout button */
+    /* ── LOGOUT button ── */
     section[data-testid="stSidebar"] .sb-logout .stButton > button {
-        background: transparent !important;
-        border: 1px solid #FCA5A5 !important;
-        border-radius: 10px !important;
-        color: #EF4444 !important;
+        background: #FFFFFF !important;
+        border: 1px solid #FEE2E2 !important;
+        border-radius: 8px !important;
+        color: #DC2626 !important;
         font-weight: 600 !important;
+        font-size: 0.85rem !important;
         justify-content: center !important;
         text-align: center !important;
-        font-size: 13px !important;
+        padding: 9px 12px !important;
     }
-    
     section[data-testid="stSidebar"] .sb-logout .stButton > button:hover {
         background: #FEF2F2 !important;
-        border-color: #F87171 !important;
-        color: #DC2626 !important;
+        border-color: #FCA5A5 !important;
+        color: #B91C1C !important;
     }
 
-    /* Expander styling */
+    /* ── LOGIN buttons ── */
+    section[data-testid="stSidebar"] .sb-login .stButton > button {
+        background: #FFFFFF !important;
+        border: 1px solid #E5E7EB !important;
+        border-radius: 8px !important;
+        color: #374151 !important;
+        font-weight: 600 !important;
+        justify-content: center !important;
+        text-align: center !important;
+        padding: 10px !important;
+        font-size: 0.82rem !important;
+    }
+    section[data-testid="stSidebar"] .sb-login .stButton > button:hover {
+        background: #EEF2FF !important;
+        border-color: #6366F1 !important;
+        color: #4338CA !important;
+    }
+
+    /* ── Expander styling ── */
     section[data-testid="stSidebar"] .streamlit-expanderHeader,
     section[data-testid="stSidebar"] details summary {
         background: transparent !important;
         border: none !important;
-        font-size: 11px !important;
-        font-weight: 600 !important;
+        font-size: 0.68rem !important;
+        font-weight: 700 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.06em !important;
-        color: var(--c-sub, #64748B) !important;
-        padding: 6px 14px !important;
+        letter-spacing: 0.08em !important;
+        color: #9CA3AF !important;
+        padding: 8px 12px !important;
+        border-radius: 6px !important;
+        transition: color 0.15s ease !important;
     }
-    
+    section[data-testid="stSidebar"] .streamlit-expanderHeader:hover,
+    section[data-testid="stSidebar"] details summary:hover {
+        color: #6366F1 !important;
+        background: #F9FAFB !important;
+    }
     section[data-testid="stSidebar"] .streamlit-expanderContent {
         background: transparent !important;
         border: none !important;
-        padding: 0 !important;
+        padding: 2px 0 6px !important;
     }
 
-    /* Section label */
+    /* ── Section label ── */
     .sb-section-label {
-        font-size: 11px;
-        font-weight: 600;
+        font-size: 0.68rem;
+        font-weight: 700;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: var(--c-sub, #64748B);
-        padding: 16px 18px 8px;
+        color: #9CA3AF;
+        padding: 14px 16px 6px;
     }
 
-    /* Logo block */
+    /* ═══════════════════════════════════════════════════════════
+       LOGO BLOCK — Clean header
+    ═══════════════════════════════════════════════════════════ */
     .sb-logo {
-        padding: 20px 16px 16px;
+        padding: 18px 16px 14px;
         display: flex;
         align-items: center;
-        gap: 12px;
-        border-bottom: 1px solid var(--c-border, #E2E8F0);
+        gap: 10px;
+        border-bottom: 1px solid #EEF0F4;
     }
-    
     .sb-logo-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
-        background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
+        width: 36px;
+        height: 36px;
+        border-radius: 9px;
+        background: linear-gradient(135deg, #6366F1, #8B5CF6);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.25rem;
+        font-size: 1.1rem;
         flex-shrink: 0;
-        box-shadow: 0 4px 12px rgba(14,165,233,0.25);
+        box-shadow: 0 2px 8px rgba(99,102,241,0.25);
     }
-    
     .sb-logo-text { flex: 1; min-width: 0; }
-    
     .sb-logo-title {
-        font-size: 15px;
+        font-family: 'Inter','DM Sans',sans-serif;
+        font-size: 0.92rem;
         font-weight: 700;
-        color: var(--c-text, #0F172A);
-        letter-spacing: -0.02em;
-        line-height: 1.3;
+        color: #111827;
+        letter-spacing: -0.015em;
+        line-height: 1.2;
     }
-    
     .sb-logo-sub {
-        font-size: 11px;
-        color: var(--c-sub, #64748B);
-        margin-top: 2px;
+        font-size: 0.7rem;
+        color: #9CA3AF;
+        margin-top: 1px;
         font-weight: 500;
     }
 
-    /* Profile card */
+    /* ═══════════════════════════════════════════════════════════
+       PROFILE CARD — Clean & minimal
+    ═══════════════════════════════════════════════════════════ */
     .sb-profile {
-        margin: 16px 12px 8px;
-        padding: 12px;
-        background: var(--c-card2, #F1F5F9);
-        border: 1px solid var(--c-border, #E2E8F0);
-        border-radius: 12px;
-        transition: all 0.2s ease;
+        margin: 12px 12px 4px;
+        padding: 10px 12px;
+        background: #FFFFFF;
+        border: 1px solid #EEF0F4;
+        border-radius: 10px;
+        transition: all 0.15s ease;
     }
-    
     .sb-profile:hover {
-        background: var(--c-hover, #F1F5F9);
+        border-color: #E0E7FF;
+        background: #FAFBFF;
     }
-    
     .sb-profile-inner {
         display: flex;
         align-items: center;
         gap: 10px;
     }
-    
     .sb-profile-avatar {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
-        background: linear-gradient(135deg, #0EA5E9, #06B6D4);
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366F1, #8B5CF6);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 14px;
+        font-size: 0.82rem;
         flex-shrink: 0;
         color: #fff;
         font-weight: 700;
+        letter-spacing: -0.02em;
     }
-    
-    .sb-profile-avatar.admin {
-        background: linear-gradient(135deg, #F59E0B, #EF4444);
-    }
-    
-    .sb-profile-avatar.official {
-        background: linear-gradient(135deg, #10B981, #059669);
-    }
-    
+    .sb-profile-text { flex: 1; min-width: 0; }
     .sb-profile-name {
-        font-size: 13px;
+        font-size: 0.82rem;
         font-weight: 600;
-        color: var(--c-text, #0F172A);
+        color: #111827;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        line-height: 1.3;
+        letter-spacing: -0.01em;
+        line-height: 1.2;
     }
-    
     .sb-profile-sub {
-        font-size: 11px;
-        color: var(--c-sub, #64748B);
+        font-size: 0.7rem;
+        color: #6B7280;
         margin-top: 2px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: 500;
     }
-    
-    .sb-profile-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: #10B981;
-        flex-shrink: 0;
-        box-shadow: 0 0 0 2px var(--c-card, #FFF);
+    .sb-profile-badge {
+        display: inline-block;
+        background: #EEF2FF;
+        color: #4338CA;
+        font-size: 0.6rem;
+        font-weight: 700;
+        padding: 2px 7px;
+        border-radius: 4px;
+        text-transform: uppercase;
+        letter-spacing: .04em;
+        margin-top: 4px;
+    }
+    .sb-profile-badge.official { background: #ECFDF5; color: #059669; }
+    .sb-profile-badge.admin    { background: #FEF3C7; color: #B45309; }
+
+    /* ── Nav item wrapper ── */
+    .sb-nav-item { padding: 1px 8px; }
+
+    /* ── Notification badge inside button ── */
+    .sb-notif-dot {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #EF4444;
+        color: #fff;
+        font-size: 0.65rem;
+        font-weight: 700;
+        min-width: 18px;
+        height: 18px;
+        padding: 0 5px;
+        border-radius: 9px;
+        margin-left: 6px;
     }
 
-    /* Nav item wrapper */
-    .sb-nav-item { padding: 2px 10px; }
-
-    /* Divider */
+    /* ── Divider ── */
     .sb-divider {
         height: 1px;
-        background: var(--c-border, #E2E8F0);
-        margin: 12px 16px;
+        background: #EEF0F4;
+        margin: 10px 12px;
     }
 
-    /* Footer */
+    /* ── Welcome card (logged-out) ── */
+    .sb-welcome {
+        margin: 8px 12px 12px;
+        padding: 14px;
+        background: linear-gradient(135deg, #FAFBFF 0%, #F5F7FF 100%);
+        border: 1px solid #EEF2FF;
+        border-radius: 10px;
+        font-size: 0.78rem;
+        color: #4B5563;
+        line-height: 1.5;
+        text-align: center;
+    }
+    .sb-welcome-icon {
+        font-size: 1.5rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+    .sb-welcome-text {
+        font-weight: 600;
+        color: #4338CA;
+        font-size: 0.82rem;
+    }
+
+    /* ── Footer ── */
     .sb-footer {
-        padding: 16px;
-        font-size: 11px;
-        color: var(--c-sub, #64748B);
+        padding: 12px 16px 16px;
+        font-size: 0.65rem;
+        color: #9CA3AF;
         text-align: center;
         line-height: 1.6;
+        border-top: 1px solid #EEF0F4;
+        margin-top: 8px;
         font-weight: 500;
     }
-    
-    .sb-footer strong {
-        color: var(--c-a1, #0EA5E9);
-        font-weight: 600;
-    }
+    .sb-footer strong { color: #6366F1; font-weight: 700; }
 
+    /* Responsive */
     @media (max-width: 768px) {
-        section[data-testid="stSidebar"] {
-            min-width: 260px !important;
-            max-width: 280px !important;
-        }
+        section[data-testid="stSidebar"] { min-width: 250px !important; max-width: 270px !important; }
     }
     </style>
     """, unsafe_allow_html=True)
 
+    role = st.session_state.role
     lang = st.session_state.language
 
     def _(key): return t(key)
 
-    # ── Unread notifications ────────────────────────────────────────────────
+    # ── Unread count ─────────────────────────────────────────────────────────
     unread_count = 0
     if role == "user":
         uid = (st.session_state.user or {}).get("user_id")
@@ -467,7 +565,7 @@ def render_sidebar():
 
     with st.sidebar:
 
-        # ── Logo ────────────────────────────────────────────────────────────
+        # ── Logo ─────────────────────────────────────────────────────────────
         st.markdown("""
         <div class="sb-logo">
             <div class="sb-logo-icon">🏛️</div>
@@ -478,39 +576,39 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        # ── Profile card ────────────────────────────────────────────────────
+        # ── Profile card ─────────────────────────────────────────────────────
         if role == "user":
-            u = st.session_state.user or {}
-            name = u.get("name", "Citizen")
+            u     = st.session_state.user or {}
+            name  = u.get("name", "Citizen")
             phone = u.get("phone", "")
             inits = "".join(p[0].upper() for p in name.split()[:2]) or "U"
             st.markdown(f"""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
                     <div class="sb-profile-avatar">{inits}</div>
-                    <div style="flex:1;min-width:0;">
+                    <div class="sb-profile-text">
                         <div class="sb-profile-name">{name}</div>
                         <div class="sb-profile-sub">📞 {phone}</div>
+                        <span class="sb-profile-badge">Citizen</span>
                     </div>
-                    <div class="sb-profile-dot" title="Online"></div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
         elif role == "official":
-            o = st.session_state.official or {}
-            name = o.get("name", "Official")
-            dept = o.get("department", "Department")
+            o     = st.session_state.official or {}
+            name  = o.get("name", "Official")
+            dept  = o.get("department", "Department")
             inits = "".join(p[0].upper() for p in name.split()[:2]) or "O"
             st.markdown(f"""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar official">{inits}</div>
-                    <div style="flex:1;min-width:0;">
+                    <div class="sb-profile-avatar">{inits}</div>
+                    <div class="sb-profile-text">
                         <div class="sb-profile-name">{name}</div>
                         <div class="sb-profile-sub">🏢 {dept}</div>
+                        <span class="sb-profile-badge official">Official</span>
                     </div>
-                    <div class="sb-profile-dot"></div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -519,20 +617,23 @@ def render_sidebar():
             st.markdown("""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar admin">👑</div>
-                    <div style="flex:1;min-width:0;">
+                    <div class="sb-profile-avatar">👑</div>
+                    <div class="sb-profile-text">
                         <div class="sb-profile-name">System Admin</div>
-                        <div class="sb-profile-sub">Administrator</div>
+                        <div class="sb-profile-sub">Full Access</div>
+                        <span class="sb-profile-badge admin">Admin</span>
                     </div>
-                    <div class="sb-profile-dot"></div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-        # ── Helper: render one nav button ───────────────────────────────────
-        def _nav_btn(icon: str, label: str, screen: str, badge: str = ""):
+        # ── Helper: render one nav button ────────────────────────────────────
+        def _nav_btn(icon: str, label: str, screen: str, badge_count: int = 0):
             is_active = st.session_state.screen == screen
-            full_label = f"{icon}   {label}" + (f"     {badge}" if badge else "")
+            # Build label with proper spacing
+            full_label = f"{icon}   {label}"
+            if badge_count > 0:
+                full_label += f"   • {badge_count}"
             wrap_cls = "sb-active" if is_active else ""
             st.markdown(f'<div class="sb-nav-item {wrap_cls}">', unsafe_allow_html=True)
             if st.button(full_label, key=f"sb_{screen}", use_container_width=True):
@@ -546,14 +647,12 @@ def render_sidebar():
         if role == "user":
             st.markdown('<div class="sb-section-label">Menu</div>', unsafe_allow_html=True)
 
-            _nav_btn("🏠", _("dashboard"),      "user_dashboard")
+            _nav_btn("🏠", _("dashboard"),       "user_dashboard")
             _nav_btn("📢", _("file_complaint"),  "file_complaint")
             _nav_btn("🔍", _("track_complaint"), "tracking")
             _nav_btn("📜", _("govt_schemes"),    "schemes")
             _nav_btn("🤖", _("ai_assistant"),    "assistant")
-
-            notif_badge = f"🔴 {unread_count}" if unread_count else ""
-            _nav_btn("🔔", _("notifications"), "notifications", badge=notif_badge)
+            _nav_btn("🔔", _("notifications"),   "notifications", badge_count=unread_count)
 
         # ════════════════════════════════════════════════════════════════════
         # OFFICIAL NAV
@@ -577,16 +676,16 @@ def render_sidebar():
                         _nav_btn(icon, label, screen)
 
             _admin_group("Overview", [
-                ("📊", _("dashboard"),       "admin_dashboard"),
-                ("🏢", _("departments"),     "admin_departments"),
-                ("👥", _("officials"),       "admin_officials"),
-                ("📢", _("all_complaints"),  "admin_complaints"),
+                ("📊", _("dashboard"),      "admin_dashboard"),
+                ("🏢", _("departments"),    "admin_departments"),
+                ("👥", _("officials"),      "admin_officials"),
+                ("📢", _("all_complaints"), "admin_complaints"),
             ], expanded=True)
 
             _admin_group("Performance", [
-                ("🏆", _("leaderboard"),  "admin_leaderboard"),
-                ("🔮", "Predictive AI",   "predictive_analytics"),
-                ("⏱️", "SLA Tracking",    "sla_management"),
+                ("🏆", _("leaderboard"), "admin_leaderboard"),
+                ("🔮", "Predictive AI",  "predictive_analytics"),
+                ("⏱️", "SLA Tracking",   "sla_management"),
             ])
 
             _admin_group("City Analytics", [
@@ -603,27 +702,55 @@ def render_sidebar():
             ])
 
         # ════════════════════════════════════════════════════════════════════
-        # BOTTOM CONTROLS (only shown when logged in - sidebar hidden otherwise)
+        # LOGGED-OUT STATE
+        # ════════════════════════════════════════════════════════════════════
+        else:
+            st.markdown('<div class="sb-section-label">Get Started</div>', unsafe_allow_html=True)
+            st.markdown("""
+            <div class="sb-welcome">
+                <span class="sb-welcome-icon">👋</span>
+                <div class="sb-welcome-text">Welcome!</div>
+                <div style="font-size:0.72rem;margin-top:3px;">Sign in to access the portal</div>
+            </div>
+            """, unsafe_allow_html=True)
+
+            c1, c2 = st.columns(2)
+            with c1:
+                st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
+                if st.button("👤 Citizen", key="login_citizen", use_container_width=True):
+                    st.session_state.screen = "user_login"; st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+            with c2:
+                st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
+                if st.button("🏢 Official", key="login_official", use_container_width=True):
+                    st.session_state.screen = "official_login"; st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
+            if st.button("👑 Admin", key="login_admin", use_container_width=True):
+                st.session_state.screen = "admin_login"; st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        # ════════════════════════════════════════════════════════════════════
+        # BOTTOM CONTROLS  (language + logout)
         # ════════════════════════════════════════════════════════════════════
         st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
 
-        # Settings section label
-        st.markdown('<div class="sb-section-label">Preferences</div>', unsafe_allow_html=True)
-
         # Language toggle
-        lang_label = "🌐  हिंदी में देखें" if lang == "en" else "🌐  View in English"
+        lang_label = "🌐  हिंदी" if lang == "en" else "🌐  English"
         st.markdown('<div class="sb-util" style="padding:0 12px;">', unsafe_allow_html=True)
         if st.button(lang_label, key="sb_lang", use_container_width=True):
             st.session_state.language = "hi" if lang == "en" else "en"
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # Logout (always shown since sidebar is hidden when not logged in)
-        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-        st.markdown('<div class="sb-logout" style="padding:0 12px;">', unsafe_allow_html=True)
-        if st.button("Sign Out", key="sb_logout", use_container_width=True):
-            logout()
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Logout
+        if role:
+            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+            st.markdown('<div class="sb-logout" style="padding:0 12px;">', unsafe_allow_html=True)
+            if st.button("🔓  Sign Out", key="sb_logout", use_container_width=True):
+                logout()
+            st.markdown("</div>", unsafe_allow_html=True)
 
         # Footer
         st.markdown("""
