@@ -30,18 +30,6 @@ def get_css(dark_mode=False):
         blue_bg     = "#04091A";  blue_bd   = "#1E40AF";  blue_text   = "#93C5FD"
         glass_bg    = "rgba(255,255,255,0.04)"
         glass_bd    = "rgba(255,255,255,0.08)"
-        # dark-mode aware toggle button
-        toggle_bg       = "#0D1220"
-        toggle_bg_hover = "#16213A"
-        toggle_border   = "rgba(255,255,255,0.10)"
-        toggle_icon     = "#EFF2FF"
-        # neutral surface for "white" cards that should adapt
-        surface_white   = card_bg
-        surface_white_h = hover_bg
-        danger_text     = "#FCA5A5"
-        danger_text_h   = "#FECACA"
-        danger_bg_h     = "#2A0808"
-        danger_border   = "rgba(252,165,165,0.25)"
     else:
         bg          = "#F2F5FC"
         card_bg     = "#FFFFFF"
@@ -72,16 +60,6 @@ def get_css(dark_mode=False):
         blue_bg     = "#EFF6FF";  blue_bd   = "#BFDBFE";  blue_text   = "#1E40AF"
         glass_bg    = "rgba(255,255,255,0.70)"
         glass_bd    = "rgba(255,255,255,0.90)"
-        toggle_bg       = "#FFFFFF"
-        toggle_bg_hover = "#F8FAFC"
-        toggle_border   = "rgba(15,23,42,0.10)"
-        toggle_icon     = "#0F172A"
-        surface_white   = "#FFFFFF"
-        surface_white_h = "#FEF2F2"
-        danger_text     = "#DC2626"
-        danger_text_h   = "#B91C1C"
-        danger_bg_h     = "#FEF2F2"
-        danger_border   = "rgba(220,38,38,0.18)"
 
     dark_overrides = ""
     if dark_mode:
@@ -112,35 +90,66 @@ div[data-baseweb="option"][aria-selected="true"] *,li[role="option"][aria-select
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap');
 
 /* ═══════════════════════════════════════════════════════
-   CSS VARIABLES
+   CSS VARIABLES — single source of truth for every component
 ═══════════════════════════════════════════════════════ */
 :root {{
-    --c-bg:{bg}; --c-card:{card_bg}; --c-card2:{card_bg2};
-    --c-text:{text}; --c-sub:{subtext}; --c-border:{border};
-    --c-input:{input_bg}; --c-hover:{hover_bg};
-    --c-a1:{accent1}; --c-a2:{accent2}; --c-a3:{accent3};
-    --c-a1-glow:{a1_glow}; --c-a1-soft:{a1_soft}; --c-a2-soft:{a2_soft};
-    --c-surface:{surface_white}; --c-surface-h:{surface_white_h};
-    --c-danger:{danger_text}; --c-danger-h:{danger_text_h};
-    --c-danger-bg-h:{danger_bg_h}; --c-danger-border:{danger_border};
-    --sh-sm:{shadow_sm}; --sh-md:{shadow_md}; --sh-lg:{shadow_lg};
-    --r-xs:8px; --r-sm:10px; --r-md:14px; --r-lg:18px; --r-xl:24px; --r-2xl:28px;
-    --fs-2xs:0.625rem; --fs-xs:0.6875rem; --fs-sm:0.75rem;
-    --fs-base:0.875rem; --fs-md:0.9375rem; --fs-lg:1.0625rem;
-    --fs-xl:1.25rem; --fs-2xl:1.5rem; --fs-3xl:1.75rem; --fs-4xl:2.25rem;
-    --sp-1:4px; --sp-2:8px; --sp-3:12px; --sp-4:16px;
-    --sp-5:20px; --sp-6:24px; --sp-8:32px;
-    --icon-sm:1.0rem; --icon-md:1.25rem; --icon-lg:1.5rem;
-    --icon-xl:1.75rem; --icon-2xl:2.25rem;
-    --t-fast:0.15s cubic-bezier(0.4,0,0.2,1);
-    --t-base:0.22s cubic-bezier(0.4,0,0.2,1);
-    --t-slow:0.35s cubic-bezier(0.4,0,0.2,1);
+    /* colours */
+    --c-bg:        {bg};
+    --c-card:      {card_bg};
+    --c-card2:     {card_bg2};
+    --c-text:      {text};
+    --c-sub:       {subtext};
+    --c-border:    {border};
+    --c-input:     {input_bg};
+    --c-hover:     {hover_bg};
+    --c-a1:        {accent1};
+    --c-a2:        {accent2};
+    --c-a3:        {accent3};
+    --c-a1-glow:   {a1_glow};
+    --c-a1-soft:   {a1_soft};
+    --c-a2-soft:   {a2_soft};
+    /* shadows */
+    --sh-sm:       {shadow_sm};
+    --sh-md:       {shadow_md};
+    --sh-lg:       {shadow_lg};
+    /* radii — consistent everywhere */
+    --r-xs:  8px;
+    --r-sm:  10px;
+    --r-md:  14px;
+    --r-lg:  18px;
+    --r-xl:  24px;
+    --r-2xl: 28px;
+    /* typography scale */
+    --fs-2xs: 0.625rem;   /* 10px */
+    --fs-xs:  0.6875rem;  /* 11px */
+    --fs-sm:  0.75rem;    /* 12px */
+    --fs-base:0.875rem;   /* 14px */
+    --fs-md:  0.9375rem;  /* 15px */
+    --fs-lg:  1.0625rem;  /* 17px */
+    --fs-xl:  1.25rem;    /* 20px */
+    --fs-2xl: 1.5rem;     /* 24px */
+    --fs-3xl: 1.75rem;    /* 28px */
+    --fs-4xl: 2.25rem;    /* 36px */
+    /* spacing */
+    --sp-1: 4px;  --sp-2: 8px;   --sp-3: 12px;
+    --sp-4: 16px; --sp-5: 20px;  --sp-6: 24px;
+    --sp-8: 32px;
+    /* icon sizes */
+    --icon-sm:  1.0rem;
+    --icon-md:  1.25rem;
+    --icon-lg:  1.5rem;
+    --icon-xl:  1.75rem;
+    --icon-2xl: 2.25rem;
+    /* transitions */
+    --t-fast: 0.15s cubic-bezier(0.4,0,0.2,1);
+    --t-base: 0.22s cubic-bezier(0.4,0,0.2,1);
+    --t-slow: 0.35s cubic-bezier(0.4,0,0.2,1);
 }}
 
 /* ═══════════════════════════════════════════════════════
    RESET & BASE
 ═══════════════════════════════════════════════════════ */
-*,*::before,*::after{{box-sizing:border-box;}}
+*,*::before,*::after{{box-sizing:border-box;margin:0;padding:0;}}
 html,body,.stApp{{
     background-color:var(--c-bg)!important;
     color:var(--c-text)!important;
@@ -151,20 +160,23 @@ html,body,.stApp{{
     -moz-osx-font-smoothing:grayscale;
     letter-spacing:-0.01em;
 }}
+p,span,div,label,small{{color:var(--c-text);}}
 
-/* HIDE CHROME — but keep header alive for sidebar toggle */
-#MainMenu,footer,.stDeployButton,.viewerBadge_container__1QSob{{
-    visibility:hidden!important;display:none!important;
-}}
+/* ── HIDE CHROME ── */
+/* ── HIDE CHROME — keep header alive for sidebar toggle ── */
+#MainMenu,footer,.stDeployButton{{visibility:hidden!important;display:none!important;}}
+.viewerBadge_container__1QSob{{display:none!important;}}
+
+/* Header must stay in DOM — only make it invisible */
 header[data-testid="stHeader"]{{
     background:transparent!important;
     height:0!important;
     overflow:visible!important;
     pointer-events:none!important;
-    z-index:99998!important;
 }}
+.viewerBadge_container__1QSob{{display:none!important;}}
 
-/* ANIMATED TOP STRIPE */
+/* ── ANIMATED TOP STRIPE ── */
 .stApp::before{{
     content:'';display:block;position:fixed;top:0;left:0;right:0;height:2px;
     background:linear-gradient(90deg,{accent1},{accent2},{accent3},{accent1});
@@ -174,53 +186,148 @@ header[data-testid="stHeader"]{{
 }}
 
 /* ═══════════════════════════════════════════════════════
-   LAYOUT  (FIXED: removed stray python comment in CSS!)
+   LAYOUT
 ═══════════════════════════════════════════════════════ */
-.main .block-container{{
-    padding:clamp(1rem,3vw,2rem) clamp(0.75rem,3.5vw,2rem) clamp(3rem,6vw,5rem)!important;
-    max-width:clamp(300px,90vw,1100px)!important;
-    margin:0 auto!important;
-    width:100%!important;
+.main .block-container {{
+    padding: clamp(1rem, 3vw, 2rem) clamp(0.75rem, 3.5vw, 2rem) clamp(3rem, 6vw, 5rem) !important;
+    max-width: clamp(300px, 90vw, 1100px) !important;   # ← this is the key line
+    margin: 0 auto !important;
+    width: 100% !important;
 }}
+/* ═══════════════════════════════════════════════
+   SIDEBAR TOGGLE — ALWAYS VISIBLE + BLACK ICON
+═══════════════════════════════════════════════ */
 
-/* ═══════════════════════════════════════════════════════
-   SIDEBAR TOGGLE — theme aware
-═══════════════════════════════════════════════════════ */
+/* Toggle button */
 [data-testid="collapsedControl"],
 [data-testid="stSidebarCollapsedControl"]{{
+
     position:fixed!important;
-    top:14px!important;left:14px!important;
-    width:44px!important;height:44px!important;
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    visibility:visible!important;opacity:1!important;
-    z-index:999999!important;
-    pointer-events:auto!important;
-    border-radius:14px!important;
-    background:{toggle_bg}!important;
-    border:1px solid {toggle_border}!important;
-    box-shadow:0 8px 24px rgba(15,23,42,.12)!important;
-    transition:all .18s ease!important;
-}}
-[data-testid="collapsedControl"]:hover,
-[data-testid="stSidebarCollapsedControl"]:hover{{
-    background:{toggle_bg_hover}!important;
-    transform:scale(1.04)!important;
-    box-shadow:0 12px 28px rgba(15,23,42,.16)!important;
-}}
-[data-testid="collapsedControl"] svg,
-[data-testid="stSidebarCollapsedControl"] svg{{
-    fill:{toggle_icon}!important;
-    color:{toggle_icon}!important;
-    stroke:{toggle_icon}!important;
+
+    top:14px!important;
+    left:14px!important;
+
+    width:44px!important;
+    height:44px!important;
+
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+
+    visibility:visible!important;
     opacity:1!important;
-    width:20px!important;height:20px!important;
-}}
-button[kind="header"]{{
-    background:transparent!important;
-    border:none!important;
-    box-shadow:none!important;
+
+    z-index:999999!important;
+
+    border-radius:14px!important;
+
+    background:#FFFFFF!important;
+
+    border:1px solid rgba(15,23,42,.10)!important;
+
+    box-shadow:
+        0 8px 24px rgba(15,23,42,.12)!important;
+
+    transition:
+        all .18s ease!important;
 }}
 
+/* Hover */
+[data-testid="collapsedControl"]:hover,
+[data-testid="stSidebarCollapsedControl"]:hover{{
+
+    background:#F8FAFC!important;
+
+    transform:scale(1.04)!important;
+
+    box-shadow:
+        0 12px 28px rgba(15,23,42,.16)!important;
+}}
+
+/* BLACK DOUBLE ARROW ICON */
+[data-testid="collapsedControl"] svg,
+[data-testid="stSidebarCollapsedControl"] svg{{
+
+    fill:#000000!important;
+
+    color:#000000!important;
+
+    stroke:#000000!important;
+
+    opacity:1!important;
+
+    width:20px!important;
+    height:20px!important;
+}}
+
+/* Prevent header clipping */
+header[data-testid="stHeader"]{{
+
+    background:transparent!important;
+
+    height:0!important;
+
+    overflow:visible!important;
+
+    z-index:99998!important;
+}}
+
+/* Remove ghost white box */
+button[kind="header"]{{
+
+    background:transparent!important;
+
+    border:none!important;
+
+    box-shadow:none!important;
+}}
+/* ═══════════════════════════════════════════════
+   COMPLAINT CARD BORDER + WHITE THEME FIX
+═══════════════════════════════════════════════ */
+
+.cc-wrap,
+.cc-bl,
+.cc-card,
+.cc-top,
+.cc-meta-box{{
+
+    background:#FFFFFF!important;
+
+    border:1px solid rgba(15,23,42,.08)!important;
+
+    box-shadow:
+        0 4px 14px rgba(15,23,42,.05)!important;
+}}
+
+/* Chips */
+.cc-chip{{
+
+    background:#FFFFFF!important;
+
+    border:1px solid rgba(15,23,42,.08)!important;
+
+    color:#0F172A!important;
+}}
+
+/* Meta items */
+.cc-meta-item{{
+
+    color:#334155!important;
+}}
+
+/* Description */
+.cc-description,
+.cc-desc{{
+
+    color:#334155!important;
+}}
+
+/* Category */
+.cc-category,
+.cc-title{{
+
+    color:#0F172A!important;
+}}
 /* ═══════════════════════════════════════════════════════
    SIDEBAR
 ═══════════════════════════════════════════════════════ */
@@ -241,6 +348,314 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     transform:translateX(3px)!important;
 }}
 
+/* ═══════════════════════════════════════════════
+   NOTIFICATION BUTTONS — FIXED UI
+═══════════════════════════════════════════════ */
+
+.notif-actions{{
+
+    width:100%!important;
+
+    margin-top:10px!important;
+}}
+
+/* Streamlit columns */
+.notif-actions .stColumn{{
+
+    display:flex!important;
+
+    align-items:center!important;
+}}
+
+/* Button wrapper */
+.notif-actions .stButton{{
+
+    width:100%!important;
+}}
+
+/* MAIN BUTTON */
+.notif-actions .stButton>button{{
+
+    width:100%!important;
+
+    height:42px!important;
+
+    border-radius:12px!important;
+
+    font-size:.82rem!important;
+
+    font-weight:700!important;
+
+    white-space:nowrap!important;
+
+    transition:all .18s ease!important;
+
+    border:none!important;
+}}
+
+/* READ BUTTON */
+.notif-read-btn .stButton>button{{
+
+    background:
+        linear-gradient(135deg,#6366F1,#8B5CF6)!important;
+
+    color:#FFFFFF!important;
+
+    box-shadow:
+        0 8px 22px rgba(99,102,241,.24)!important;
+}}
+
+/* CLEAR BUTTON */
+.notif-del-btn .stButton>button{{
+
+    background:#FFFFFF!important;
+
+    color:#DC2626!important;
+
+    border:
+        1px solid rgba(220,38,38,.18)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+}}
+
+/* Hover */
+.notif-actions .stButton>button:hover{{
+
+    transform:
+        translateY(-2px)!important;
+}}
+
+/* Mobile */
+@media(max-width:768px){{
+
+    .notif-actions .stColumn{{
+
+        width:100%!important;
+    }}
+
+    .notif-actions .stButton>button{{
+
+        height:40px!important;
+
+        font-size:.78rem!important;
+    }}
+}}
+/* ═══════════════════════════════════════════════
+   CLEAR BUTTON FINAL FIX
+═══════════════════════════════════════════════ */
+
+.notif-del-btn .stButton>button{{
+
+    background:#FFFFFF!important;
+
+    background-image:none!important;
+
+    color:#DC2626!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.18)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+
+    filter:none!important;
+}}
+
+/* Hover */
+.notif-del-btn .stButton>button:hover{{
+
+    background:#FEF2F2!important;
+
+    background-image:none!important;
+
+    color:#B91C1C!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.24)!important;
+
+    transform:
+        translateY(-2px)!important;
+}}
+
+/* Remove dark mode override */
+.notif-del-btn button[kind="secondary"]{{
+
+    background:#FFFFFF!important;
+
+    color:#DC2626!important;
+}}
+
+/* Remove Streamlit dark background */
+.notif-del-btn .stButton{{
+
+    background:transparent!important;
+}}
+/* ═══════════════════════════════════════════════
+   FINAL CLEAR BUTTON FIX
+═══════════════════════════════════════════════ */
+
+/* Wrapper */
+div[data-testid="stButton"].notif-del-btn{{
+
+    background:transparent!important;
+}}
+
+/* Actual button */
+div[data-testid="stButton"].notif-del-btn > button{{
+
+    background:#FFFFFF!important;
+
+    background-image:none!important;
+
+    color:#DC2626!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.18)!important;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,.05)!important;
+
+    filter:none!important;
+}}
+
+/* Hover */
+div[data-testid="stButton"].notif-del-btn > button:hover{{
+
+    background:#FEF2F2!important;
+
+    background-image:none!important;
+
+    color:#B91C1C!important;
+
+    border:
+        1.5px solid rgba(220,38,38,.28)!important;
+
+    transform:
+        translateY(-2px)!important;
+}}
+
+/* Remove inherited gradients */
+div[data-testid="stButton"].notif-del-btn > button::before,
+div[data-testid="stButton"].notif-del-btn > button::after{{
+
+    display:none!important;
+}}
+/* ═══════════════════════════════════════════════
+   ADMIN NOTIFICATION SECTION FIX
+═══════════════════════════════════════════════ */
+
+.prem-notif-card,
+.notification-card,
+.admin-notification-card{{
+
+    width:100%!important;
+
+    overflow:hidden!important;
+
+    border-radius:16px!important;
+
+    padding:14px 16px!important;
+
+    background:var(--c-card)!important;
+
+    border:1px solid var(--c-border)!important;
+
+    box-shadow:
+        0 4px 14px rgba(15,23,42,.05)!important;
+}}
+
+/* Notification content */
+.prem-notif-msg,
+.notification-message{{
+
+    word-break:break-word!important;
+
+    overflow-wrap:anywhere!important;
+
+    line-height:1.6!important;
+
+    color:var(--c-text)!important;
+}}
+
+/* Notification actions/buttons */
+.notification-actions,
+.prem-notif-actions{{
+
+    display:flex!important;
+
+    flex-wrap:wrap!important;
+
+    gap:10px!important;
+
+    align-items:center!important;
+
+    margin-top:12px!important;
+}}
+
+/* Fix notification buttons only */
+.notification-actions .stButton,
+.prem-notif-actions .stButton{{
+
+    width:auto!important;
+
+    flex:none!important;
+}}
+
+.notification-actions .stButton>button,
+.prem-notif-actions .stButton>button{{
+
+    width:auto!important;
+
+    min-width:fit-content!important;
+
+    padding:9px 16px!important;
+
+    min-height:40px!important;
+
+    border-radius:12px!important;
+
+    white-space:nowrap!important;
+}}
+
+/* Clear/secondary button fix */
+.notification-actions .stButton>button[kind="secondary"],
+.prem-notif-actions .stButton>button[kind="secondary"]{{
+
+    background:#FFFFFF!important;
+
+    color:#0F172A!important;
+
+    border:
+        1px solid rgba(15,23,42,.10)!important;
+
+    box-shadow:none!important;
+}}
+
+/* Mobile */
+@media(max-width:768px){{
+
+    .notification-actions,
+    .prem-notif-actions{{
+
+        flex-direction:column!important;
+
+        align-items:stretch!important;
+    }}
+
+    .notification-actions .stButton,
+    .prem-notif-actions .stButton{{
+
+        width:100%!important;
+    }}
+
+    .notification-actions .stButton>button,
+    .prem-notif-actions .stButton>button{{
+
+        width:100%!important;
+    }}
+}}
+
 /* ═══════════════════════════════════════════════════════
    BUTTONS
 ═══════════════════════════════════════════════════════ */
@@ -248,9 +663,9 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     background:linear-gradient(135deg,{accent1},{accent2})!important;
     color:#fff!important;border:none!important;
     border-radius:var(--r-md)!important;
-    padding:10px 20px!important;
+    padding:10px 20px!important;          /* comfortable tap target */
     font-weight:600!important;
-    font-size:var(--fs-base)!important;
+    font-size:var(--fs-base)!important;   /* 14px — readable on mobile too */
     font-family:'DM Sans','Noto Sans Devanagari',sans-serif!important;
     width:100%!important;
     letter-spacing:-0.01em!important;
@@ -279,24 +694,8 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     box-shadow:0 0 0 3px {bg},0 0 0 5px {accent1}!important;
 }}
 
-/* SECONDARY BUTTONS (Streamlit kind="secondary") — neutral surface */
-.stButton>button[kind="secondary"]{{
-    background:var(--c-surface)!important;
-    background-image:none!important;
-    color:var(--c-text)!important;
-    border:1.5px solid var(--c-border)!important;
-    box-shadow:var(--sh-sm)!important;
-}}
-.stButton>button[kind="secondary"]:hover{{
-    background:var(--c-hover)!important;
-    border-color:{accent1}!important;
-    color:var(--c-text)!important;
-    filter:none!important;
-}}
-.stButton>button[kind="secondary"]::before{{display:none!important;}}
-
 /* ═══════════════════════════════════════════════════════
-   INPUTS
+   INPUTS  — unified font-size & padding
 ═══════════════════════════════════════════════════════ */
 .stTextInput>div>div>input,
 .stTextArea>div>div>textarea,
@@ -306,7 +705,7 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     border-radius:var(--r-md)!important;
     color:var(--c-text)!important;
     font-family:'DM Sans','Noto Sans Devanagari',sans-serif!important;
-    font-size:var(--fs-base)!important;
+    font-size:var(--fs-base)!important;   /* 14px everywhere */
     padding:10px 14px!important;
     transition:border-color var(--t-fast),box-shadow var(--t-fast)!important;
 }}
@@ -317,21 +716,21 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
     outline:none!important;
     background:var(--c-card)!important;
 }}
-.stTextInput input::placeholder,
-.stTextArea textarea::placeholder{{
+.stTextInput input::placeholder,.stTextArea textarea::placeholder{{
     color:var(--c-sub)!important;opacity:0.65!important;
 }}
 .stTextInput input,.stTextArea textarea{{caret-color:{accent1}!important;}}
-
+/* field labels */
 label,.stTextInput label,.stTextArea label,.stSelectbox label{{
     color:var(--c-sub)!important;
     font-weight:600!important;
-    font-size:var(--fs-xs)!important;
+    font-size:var(--fs-xs)!important;   /* 11px — compact label */
     text-transform:uppercase!important;
     letter-spacing:0.07em!important;
     margin-bottom:5px!important;
 }}
-.stMarkdown,.stMarkdown p,.stMarkdown span{{color:var(--c-text);}}
+.stMarkdown,.stMarkdown p,.stMarkdown span{{color:var(--c-text)!important;}}
+/* radio label fix */
 .stRadio label{{text-transform:none!important;letter-spacing:0!important;font-size:var(--fs-base)!important;}}
 .stRadio [data-testid="stMarkdownContainer"] p{{color:var(--c-text)!important;}}
 
@@ -345,7 +744,7 @@ label,.stTextInput label,.stTextArea label,.stSelectbox label{{
 }}
 .stTabs [data-baseweb="tab"]{{
     border-radius:var(--r-sm)!important;font-weight:600!important;
-    font-size:var(--fs-sm)!important;
+    font-size:var(--fs-sm)!important;    /* 12px tab text */
     color:var(--c-sub)!important;padding:8px 18px!important;
     border:none!important;transition:all var(--t-fast)!important;
 }}
@@ -362,7 +761,7 @@ label,.stTextInput label,.stTextArea label,.stSelectbox label{{
     background:var(--c-card)!important;border-radius:var(--r-md)!important;
     font-weight:600!important;color:var(--c-text)!important;
     border:1.5px solid var(--c-border)!important;
-    padding:12px 16px!important;
+    padding:12px 16px!important;         /* tighter than before */
     font-size:var(--fs-base)!important;
     transition:border-color var(--t-fast),box-shadow var(--t-fast)!important;
 }}
@@ -378,7 +777,7 @@ label,.stTextInput label,.stTextArea label,.stSelectbox label{{
 }}
 
 /* ═══════════════════════════════════════════════════════
-   SELECT DROPDOWN
+   SELECT BOX DROPDOWN
 ═══════════════════════════════════════════════════════ */
 .stSelectbox div[data-baseweb="select"]>div{{
     background:var(--c-input)!important;border-color:var(--c-border)!important;
@@ -392,6 +791,10 @@ ul[data-testid="stWidgetDropdownList"]{{
     background:var(--c-card)!important;border:1.5px solid var(--c-border)!important;
     border-radius:var(--r-lg)!important;box-shadow:var(--sh-md)!important;
     overflow:hidden!important;
+}}
+div[data-baseweb="popover"] *,div[data-baseweb="menu"] *,
+ul[data-testid="stWidgetDropdownList"] *{{
+    color:var(--c-text)!important;background-color:transparent!important;
 }}
 div[data-baseweb="option"]{{
     background:transparent!important;border-radius:var(--r-sm)!important;
@@ -408,7 +811,7 @@ li[role="option"][aria-selected="true"]{{
 }}
 
 /* ═══════════════════════════════════════════════════════
-   PROGRESS BAR
+   PROGRESS BAR (native)
 ═══════════════════════════════════════════════════════ */
 .stProgress>div>div{{
     background:linear-gradient(90deg,{accent1},{accent2})!important;
@@ -419,7 +822,7 @@ li[role="option"][aria-selected="true"]{{
 }}
 
 /* ═══════════════════════════════════════════════════════
-   ALERTS
+   ALERTS  — token-based, dark-mode safe
 ═══════════════════════════════════════════════════════ */
 .stSuccess{{background:{green_bg}!important;border:1px solid {green_bd}!important;border-radius:var(--r-md)!important;color:{green_text}!important;}}
 .stInfo   {{background:{blue_bg}!important; border:1px solid {blue_bd}!important; border-radius:var(--r-md)!important;color:{blue_text}!important;}}
@@ -430,7 +833,7 @@ li[role="option"][aria-selected="true"]{{
    MISC
 ═══════════════════════════════════════════════════════ */
 hr{{border:none;height:1px;background:linear-gradient(90deg,transparent,{border},transparent);margin:2rem 0!important;}}
-::-webkit-scrollbar{{width:6px;height:6px;}}
+::-webkit-scrollbar{{width:4px;height:4px;}}
 ::-webkit-scrollbar-track{{background:transparent;}}
 ::-webkit-scrollbar-thumb{{background:var(--c-border);border-radius:99px;}}
 ::-webkit-scrollbar-thumb:hover{{background:var(--c-sub);}}
@@ -440,120 +843,12 @@ div[data-testid="stDataFrame"] *,table,th,td{{
 }}
 
 /* ═══════════════════════════════════════════════════════
-   COMPLAINT CARD (.cc-*)  — theme aware
+   ██  CUSTOM COMPONENTS
+   All sizes/spacing use CSS variables — edit :root to
+   change everything at once.
 ═══════════════════════════════════════════════════════ */
-.cc-wrap,.cc-bl,.cc-card,.cc-top,.cc-meta-box{{
-    background:var(--c-card)!important;
-    border:1px solid var(--c-border)!important;
-    box-shadow:var(--sh-sm)!important;
-}}
-.cc-chip{{
-    background:var(--c-card2)!important;
-    border:1px solid var(--c-border)!important;
-    color:var(--c-text)!important;
-}}
-.cc-meta-item,.cc-description,.cc-desc{{color:var(--c-sub)!important;}}
-.cc-category,.cc-title{{color:var(--c-text)!important;}}
 
-/* ═══════════════════════════════════════════════════════
-   NOTIFICATION ACTIONS  (consolidated — single source)
-═══════════════════════════════════════════════════════ */
-.notif-actions{{width:100%!important;margin-top:10px!important;}}
-.notif-actions .stColumn{{display:flex!important;align-items:center!important;}}
-.notif-actions .stButton{{width:100%!important;}}
-.notif-actions .stButton>button{{
-    width:100%!important;
-    height:42px!important;
-    border-radius:12px!important;
-    font-size:.82rem!important;
-    font-weight:700!important;
-    white-space:nowrap!important;
-    transition:all .18s ease!important;
-}}
-.notif-actions .stButton>button:hover{{transform:translateY(-2px)!important;}}
-
-/* READ button — gradient (default) */
-.notif-read-btn .stButton>button,
-div[data-testid="stButton"].notif-read-btn>button{{
-    background:linear-gradient(135deg,{accent1},{accent2})!important;
-    color:#fff!important;border:none!important;
-    box-shadow:0 8px 22px {a1_glow}!important;
-}}
-
-/* CLEAR button — neutral surface, theme aware */
-.notif-del-btn .stButton>button,
-div[data-testid="stButton"].notif-del-btn>button{{
-    background:var(--c-surface)!important;
-    background-image:none!important;
-    color:var(--c-danger)!important;
-    border:1.5px solid var(--c-danger-border)!important;
-    box-shadow:var(--sh-sm)!important;
-    filter:none!important;
-}}
-.notif-del-btn .stButton>button::before,
-div[data-testid="stButton"].notif-del-btn>button::before{{display:none!important;}}
-.notif-del-btn .stButton>button:hover,
-div[data-testid="stButton"].notif-del-btn>button:hover{{
-    background:var(--c-danger-bg-h)!important;
-    color:var(--c-danger-h)!important;
-    border-color:var(--c-danger)!important;
-    transform:translateY(-2px)!important;
-    filter:none!important;
-}}
-
-@media(max-width:768px){{
-    .notif-actions .stColumn{{width:100%!important;}}
-    .notif-actions .stButton>button{{height:40px!important;font-size:.78rem!important;}}
-}}
-
-/* ═══════════════════════════════════════════════════════
-   ADMIN NOTIFICATION SECTION
-═══════════════════════════════════════════════════════ */
-.prem-notif-card,.notification-card,.admin-notification-card{{
-    width:100%!important;overflow:hidden!important;
-    border-radius:16px!important;padding:14px 16px!important;
-    background:var(--c-card)!important;
-    border:1px solid var(--c-border)!important;
-    box-shadow:var(--sh-sm)!important;
-}}
-.prem-notif-msg,.notification-message{{
-    word-break:break-word!important;
-    overflow-wrap:anywhere!important;
-    line-height:1.6!important;color:var(--c-text)!important;
-}}
-.notification-actions,.prem-notif-actions{{
-    display:flex!important;flex-wrap:wrap!important;
-    gap:10px!important;align-items:center!important;margin-top:12px!important;
-}}
-.notification-actions .stButton,.prem-notif-actions .stButton{{
-    width:auto!important;flex:none!important;
-}}
-.notification-actions .stButton>button,
-.prem-notif-actions .stButton>button{{
-    width:auto!important;min-width:fit-content!important;
-    padding:9px 16px!important;min-height:40px!important;
-    border-radius:12px!important;white-space:nowrap!important;
-}}
-.notification-actions .stButton>button[kind="secondary"],
-.prem-notif-actions .stButton>button[kind="secondary"]{{
-    background:var(--c-surface)!important;
-    color:var(--c-text)!important;
-    border:1px solid var(--c-border)!important;
-    box-shadow:none!important;
-}}
-@media(max-width:768px){{
-    .notification-actions,.prem-notif-actions{{
-        flex-direction:column!important;align-items:stretch!important;
-    }}
-    .notification-actions .stButton,
-    .prem-notif-actions .stButton,
-    .notification-actions .stButton>button,
-    .prem-notif-actions .stButton>button{{width:100%!important;}}
-}}
-
-/* ═══════════════════════════════════════════════════════
-   HERO BANNER (.prem-hero)
-═══════════════════════════════════════════════════════ */
+/* ── HERO BANNER ── */
 .prem-hero{{
     background:linear-gradient(135deg,{hero_from} 0%,{hero_mid} 50%,{hero_to} 100%);
     border-radius:var(--r-xl);
@@ -577,12 +872,14 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .prem-hero-title{{
     font-family:'Bricolage Grotesque','DM Sans',sans-serif;
-    font-size:var(--fs-3xl);font-weight:800;line-height:1.2;
-    margin-bottom:var(--sp-1);position:relative;z-index:1;
-    color:#fff;letter-spacing:-0.03em;
+    font-size:var(--fs-3xl);         /* 28px */
+    font-weight:800;line-height:1.2;
+    margin-bottom:var(--sp-1);
+    position:relative;z-index:1;color:#fff;letter-spacing:-0.03em;
 }}
 .prem-hero-sub{{
-    font-size:var(--fs-base);margin:0 0 var(--sp-1);
+    font-size:var(--fs-base);        /* 14px */
+    margin:0 0 var(--sp-1);
     opacity:0.80;position:relative;z-index:1;
     color:rgba(255,255,255,0.88);font-weight:400;
 }}
@@ -600,7 +897,8 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-hero-stats{{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(110px,1fr));
-    gap:var(--sp-2);margin-top:var(--sp-5);
+    gap:var(--sp-2);
+    margin-top:var(--sp-5);
     position:relative;z-index:1;
 }}
 .prem-hstat{{
@@ -615,22 +913,21 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-hstat:hover{{background:rgba(255,255,255,0.18);transform:translateY(-2px);}}
 .prem-hstat-num{{
     font-family:'Bricolage Grotesque','DM Sans',sans-serif;
-    font-size:var(--fs-4xl);font-weight:800;line-height:1;
+    font-size:var(--fs-4xl);         /* 36px — large number */
+    font-weight:800;line-height:1;
     margin-bottom:var(--sp-1);color:#fff;letter-spacing:-0.03em;
 }}
 .prem-hstat-lbl{{
-    font-size:var(--fs-2xs);font-weight:600;
-    text-transform:uppercase;letter-spacing:0.08em;
-    color:rgba(255,255,255,0.60);
+    font-size:var(--fs-2xs);         /* 10px — tight label */
+    font-weight:600;text-transform:uppercase;
+    letter-spacing:0.08em;color:rgba(255,255,255,0.60);
 }}
 .prem-hstat.h-blue  .prem-hstat-num{{color:#BAC8FF;}}
 .prem-hstat.h-amber .prem-hstat-num{{color:#FDE68A;}}
 .prem-hstat.h-green .prem-hstat-num{{color:#6EE7B7;}}
 .prem-hstat.h-red   .prem-hstat-num{{color:#FCA5A5;}}
 
-/* ═══════════════════════════════════════════════════════
-   CARDS / STATS / ACTION (prem-*)
-═══════════════════════════════════════════════════════ */
+/* ── CARD ── */
 .prem-card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-6);margin:var(--sp-2) 0;
@@ -640,6 +937,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .prem-card:hover{{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:{accent1}44;}}
 
+/* ── STAT CARD ── */
 .prem-stat-card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-6) var(--sp-4) var(--sp-4);
@@ -660,16 +958,18 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-stat-card:hover{{transform:translateY(-4px);box-shadow:var(--sh-md);}}
 .prem-stat-num{{
     font-family:'Bricolage Grotesque','DM Sans',sans-serif;
-    font-size:var(--fs-4xl);font-weight:800;line-height:1.1;
-    color:var(--c-text);letter-spacing:-0.04em;
-    position:relative;z-index:1;
+    font-size:var(--fs-4xl);         /* 36px */
+    font-weight:800;line-height:1.1;color:var(--c-text);
+    letter-spacing:-0.04em;position:relative;z-index:1;
 }}
 .prem-stat-lbl{{
-    font-size:var(--fs-xs);color:var(--c-sub);font-weight:600;
+    font-size:var(--fs-xs);          /* 11px */
+    color:var(--c-sub);font-weight:600;
     text-transform:uppercase;letter-spacing:0.07em;
     margin-top:var(--sp-2);position:relative;z-index:1;
 }}
 
+/* ── ACTION CARD ── */
 .prem-action-card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-6) var(--sp-4) var(--sp-5);
@@ -688,23 +988,25 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-action-card:hover::before{{transform:scaleX(1);}}
 .prem-action-card:hover .prem-action-icon{{transform:scale(1.10);}}
 .prem-action-icon{{
-    width:52px;height:52px;
+    width:52px;height:52px;              /* consistent icon container */
     border-radius:var(--r-md);
     display:flex;align-items:center;justify-content:center;
-    font-size:var(--icon-xl);
+    font-size:var(--icon-xl);            /* 1.75rem icon */
     margin:0 auto var(--sp-3);
     transition:transform var(--t-fast);
 }}
 .prem-action-label{{
-    font-size:var(--fs-sm);font-weight:700;
-    color:var(--c-text);line-height:1.35;letter-spacing:-0.01em;
+    font-size:var(--fs-sm);             /* 12px label */
+    font-weight:700;color:var(--c-text);line-height:1.35;
+    letter-spacing:-0.01em;
 }}
 
-/* SECTION HEADER */
+/* ── SECTION HEADER ── */
 .prem-section-header{{
-    font-size:var(--fs-xs);font-weight:700;
-    text-transform:uppercase;letter-spacing:0.10em;
-    color:var(--c-sub);margin:var(--sp-8) 0 var(--sp-3);
+    font-size:var(--fs-xs);             /* 11px */
+    font-weight:700;text-transform:uppercase;
+    letter-spacing:0.10em;color:var(--c-sub);
+    margin:var(--sp-8) 0 var(--sp-3);
     display:flex;align-items:center;gap:10px;
 }}
 .prem-section-header::before{{
@@ -717,10 +1019,11 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     background:linear-gradient(to right,{border}80,transparent);
 }}
 
-/* COMPLAINT ITEM */
+/* ── COMPLAINT ITEM ── */
 .prem-complaint-item{{
     background:var(--c-card);border-radius:var(--r-lg);
-    padding:var(--sp-4) var(--sp-6);margin:var(--sp-2) 0;
+    padding:var(--sp-4) var(--sp-6);
+    margin:var(--sp-2) 0;
     border:1.5px solid var(--c-border);
     border-left:4px solid {accent1};
     box-shadow:var(--sh-sm);
@@ -731,28 +1034,28 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     border-left-color:{accent2};box-shadow:var(--sh-md);
 }}
 .prem-complaint-id{{
-    font-size:var(--fs-xs);color:{accent1};
-    font-weight:700;letter-spacing:0.05em;
+    font-size:var(--fs-xs);            /* 11px mono */
+    color:{accent1};font-weight:700;letter-spacing:0.05em;
     font-family:'DM Mono','Courier New',monospace;
     background:{a1_soft};padding:3px 10px;border-radius:7px;
     display:inline-block;margin-bottom:var(--sp-2);
     border:1px solid {accent1}22;
 }}
 .prem-complaint-title{{
-    font-size:var(--fs-md);font-weight:700;
-    margin:var(--sp-1) 0;color:var(--c-text);
-    line-height:1.4;letter-spacing:-0.01em;
+    font-size:var(--fs-md);            /* 15px */
+    font-weight:700;margin:var(--sp-1) 0;
+    color:var(--c-text);line-height:1.4;letter-spacing:-0.01em;
 }}
 .prem-complaint-desc{{
-    font-size:var(--fs-base);color:var(--c-sub);
-    line-height:1.65;margin:var(--sp-1) 0 var(--sp-3);
+    font-size:var(--fs-base);          /* 14px */
+    color:var(--c-sub);line-height:1.65;margin:var(--sp-1) 0 var(--sp-3);
 }}
 .prem-complaint-meta{{
-    font-size:var(--fs-xs);color:var(--c-sub);
-    display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center;
+    font-size:var(--fs-xs);            /* 11px */
+    color:var(--c-sub);display:flex;gap:var(--sp-3);flex-wrap:wrap;align-items:center;
 }}
 
-/* TAG / BADGE */
+/* ── BADGE / TAG ── */
 .prem-tag{{
     background:{tag_bg};color:{tag_col};border-radius:7px;
     padding:3px 10px;font-size:var(--fs-xs);font-weight:700;
@@ -760,28 +1063,29 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .prem-badge{{
     border-radius:7px;padding:3px 9px;
-    font-size:var(--fs-2xs);font-weight:700;
-    display:inline-block;letter-spacing:0.04em;text-transform:uppercase;
+    font-size:var(--fs-2xs);           /* 10px — compact badge */
+    font-weight:700;display:inline-block;
+    letter-spacing:0.04em;text-transform:uppercase;
 }}
-.prem-badge-high    {{background:{red_bg};  color:{red_text};  border:1px solid {red_bd};}}
+.prem-badge-high    {{background:{red_bg};  color:{red_text};  border:1px solid {red_bd};  }}
 .prem-badge-medium  {{background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};}}
 .prem-badge-low     {{background:{green_bg};color:{green_text};border:1px solid {green_bd};}}
 .prem-badge-pending {{background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};}}
-.prem-badge-progress{{background:{blue_bg}; color:{blue_text}; border:1px solid {blue_bd};}}
+.prem-badge-progress{{background:{blue_bg}; color:{blue_text}; border:1px solid {blue_bd}; }}
 .prem-badge-resolved{{background:{green_bg};color:{green_text};border:1px solid {green_bd};}}
-.prem-badge-closed  {{background:{card_bg2};color:{subtext};   border:1px solid {border};}}
-.prem-badge-rejected{{background:{red_bg};  color:{red_text};  border:1px solid {red_bd};}}
+.prem-badge-closed  {{background:{card_bg2};color:{subtext};   border:1px solid {border};  }}
+.prem-badge-rejected{{background:{red_bg};  color:{red_text};  border:1px solid {red_bd};  }}
 .prem-badge-emergency{{
     background:linear-gradient(135deg,#EF4444,#DC2626);color:#fff;border:none;
     box-shadow:0 0 0 3px rgba(239,68,68,0.20);
     animation:prem-pulse-emergency 2.5s ease infinite;
 }}
 
-/* NOTIFICATION CARD */
+/* ── NOTIFICATION CARD ── */
 .prem-notif-card{{
     background:var(--c-card);border-radius:var(--r-md);
-    padding:var(--sp-3) var(--sp-5);margin:var(--sp-2) 0;
-    border:1.5px solid var(--c-border);
+    padding:var(--sp-3) var(--sp-5);
+    margin:var(--sp-2) 0;border:1.5px solid var(--c-border);
     display:flex;gap:var(--sp-3);align-items:flex-start;
     box-shadow:var(--sh-sm);
     transition:transform var(--t-fast),box-shadow var(--t-base);
@@ -801,7 +1105,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-notif-msg  {{font-size:var(--fs-sm);color:var(--c-sub);line-height:1.55;}}
 .prem-notif-time {{font-size:var(--fs-xs);color:var(--c-sub);margin-top:5px;font-family:'DM Mono',monospace;}}
 
-/* NOTIFICATION BAR */
+/* ── NOTIFICATION BAR (inline) ── */
 .prem-notif-bar{{
     background:{amber_bg};border:1.5px solid {amber_bd};
     border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
@@ -814,9 +1118,9 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-notif-bar-text{{font-size:var(--fs-sm);color:{amber_text};font-weight:600;flex:1;}}
 .prem-notif-bar-badge{{background:{amber_text};color:#fff;border-radius:99px;padding:2px 9px;font-size:var(--fs-2xs);font-weight:700;}}
 
-/* TIMELINE (prem) */
+/* ── TIMELINE ── */
 .prem-timeline{{padding:4px 0;}}
-.prem-tl-item{{display:flex;gap:var(--sp-3);align-items:flex-start;margin-bottom:4px;}}
+.prem-tl-item {{display:flex;gap:var(--sp-3);align-items:flex-start;margin-bottom:4px;}}
 .prem-tl-dot{{
     width:22px;height:22px;border-radius:50%;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
@@ -827,13 +1131,13 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-tl-dot.done  {{background:{accent1};color:#fff;box-shadow:0 0 0 4px {a1_soft};}}
 .prem-tl-dot.active{{background:{accent2};color:#fff;box-shadow:0 0 0 4px {a2_soft};animation:prem-pulse-ring 2.5s ease infinite;}}
 .prem-tl-dot.idle  {{background:{card_bg2};color:{subtext};border:2px solid {border};}}
-.prem-tl-info{{flex:1;padding:2px 0;}}
+.prem-tl-info {{flex:1;padding:2px 0;}}
 .prem-tl-label{{font-size:var(--fs-sm);font-weight:600;color:var(--c-text);letter-spacing:-0.01em;}}
 .prem-tl-time {{font-size:var(--fs-xs);color:var(--c-sub);margin-top:2px;font-family:'DM Mono',monospace;}}
-.prem-tl-line{{width:2px;height:14px;background:var(--c-border);margin-left:10px;border-radius:99px;}}
+.prem-tl-line {{width:2px;height:14px;background:var(--c-border);margin-left:10px;border-radius:99px;}}
 .prem-tl-line.done{{background:linear-gradient(to bottom,{accent1}88,{border});}}
 
-/* SLA BAR */
+/* ── SLA BAR ── */
 .prem-sla-bar{{
     background:var(--c-card2);border:1.5px solid var(--c-border);
     border-radius:var(--r-md);padding:10px 14px;
@@ -844,7 +1148,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-sla-bar strong{{color:var(--c-text);font-weight:700;}}
 .prem-sla-bar.overdue strong{{color:{red_text};}}
 
-/* FEEDBACK / RATING / SCHEME / LEADERBOARD */
+/* ── FEEDBACK CARD ── */
 .prem-feedback-card{{
     background:var(--c-card);border:1.5px solid {green_bd};
     border-radius:var(--r-lg);padding:var(--sp-6);margin-bottom:var(--sp-3);
@@ -862,12 +1166,14 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-fb-sub  {{font-size:var(--fs-xs);color:var(--c-sub);margin-top:2px;}}
 .prem-fb-desc {{font-size:var(--fs-sm);color:var(--c-sub);line-height:1.65;margin-bottom:var(--sp-4);}}
 
+/* ── RATING CARD ── */
 .prem-rating-card{{
     background:var(--c-card);border:1.5px solid {blue_bd};
     border-radius:var(--r-lg);padding:var(--sp-6);margin-bottom:var(--sp-3);
     box-shadow:0 0 0 4px {blue_bg};
 }}
 
+/* ── SCHEME CARD ── */
 .prem-scheme-card{{
     background:var(--c-card);border-radius:var(--r-lg);overflow:hidden;
     border:1.5px solid var(--c-border);margin-bottom:var(--sp-4);
@@ -875,10 +1181,11 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     transition:transform var(--t-base),box-shadow var(--t-base),border-color var(--t-fast);
 }}
 .prem-scheme-card:hover{{transform:translateY(-3px);box-shadow:var(--sh-md);border-color:{accent1}44;}}
-.prem-scheme-body{{padding:var(--sp-5) var(--sp-6);}}
+.prem-scheme-body {{padding:var(--sp-5) var(--sp-6);}}
 .prem-scheme-title{{font-size:var(--fs-md);font-weight:700;margin-bottom:var(--sp-2);color:var(--c-text);letter-spacing:-0.01em;}}
 .prem-scheme-desc {{font-size:var(--fs-sm);color:var(--c-sub);line-height:1.68;}}
 
+/* ── LEADERBOARD CARD ── */
 .prem-lb-card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-4) var(--sp-6);margin:var(--sp-2) 0;
@@ -911,7 +1218,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-lb-stat-lbl{{font-size:var(--fs-2xs);text-transform:uppercase;letter-spacing:0.07em;color:var(--c-sub);}}
 .prem-lb-stat-val{{font-weight:700;font-size:var(--fs-base);color:var(--c-text);letter-spacing:-0.02em;}}
 
-/* CUSTOM PROGRESS BAR */
+/* ── CUSTOM PROGRESS BAR ── */
 .prem-prog-wrap{{background:var(--c-border);border-radius:99px;height:20px;overflow:hidden;position:relative;}}
 .prem-prog-fill{{
     height:100%;border-radius:99px;
@@ -927,7 +1234,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .prem-prog-text{{font-size:var(--fs-xs);font-weight:700;color:#fff;position:relative;z-index:1;text-shadow:0 0 6px rgba(0,0,0,0.30);}}
 
-/* TOP PERFORMER */
+/* ── TOP PERFORMER ── */
 .prem-performer-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(176px,1fr));gap:var(--sp-3);margin:var(--sp-4) 0;}}
 .prem-performer-card{{
     background:var(--c-card);border-radius:var(--r-lg);
@@ -955,7 +1262,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-performer-stars{{font-size:var(--fs-sm);color:#F59E0B;margin-bottom:5px;}}
 .prem-performer-stats{{font-size:var(--fs-xs);color:var(--c-sub);}}
 
-/* EMPTY STATE */
+/* ── EMPTY STATE ── */
 .prem-empty-state{{
     text-align:center;padding:4rem 2rem;
     background:var(--c-card);border-radius:var(--r-xl);
@@ -970,13 +1277,13 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-empty-title{{font-family:'Bricolage Grotesque','DM Sans',sans-serif;font-size:var(--fs-lg);font-weight:700;color:var(--c-text);margin-bottom:var(--sp-2);letter-spacing:-0.02em;position:relative;z-index:1;}}
 .prem-empty-sub  {{font-size:var(--fs-sm);color:var(--c-sub);margin-bottom:var(--sp-6);line-height:1.65;position:relative;z-index:1;}}
 
-/* WELCOME */
+/* ── WELCOME SCREEN ── */
 .prem-welcome{{text-align:center;padding:60px 20px 36px;}}
 .prem-welcome-logo {{font-size:5rem;display:block;margin-bottom:var(--sp-4);animation:prem-float 4s ease-in-out infinite;}}
 .prem-welcome-title{{font-family:'Bricolage Grotesque','DM Sans',sans-serif;font-size:var(--fs-3xl);font-weight:800;margin-bottom:var(--sp-3);color:var(--c-text);letter-spacing:-0.04em;}}
 .prem-welcome-sub  {{font-size:var(--fs-md);color:var(--c-sub);margin-bottom:var(--sp-8);line-height:1.75;max-width:460px;margin-left:auto;margin-right:auto;}}
 
-/* CHAT HEADER */
+/* ── CHAT HEADER ── */
 .prem-chat-header{{
     background:linear-gradient(135deg,{accent1},{accent2});
     padding:var(--sp-4) var(--sp-6);color:#fff;
@@ -986,7 +1293,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     box-shadow:0 4px 20px {a1_glow};letter-spacing:-0.01em;
 }}
 
-/* TIP BAR */
+/* ── TIP BAR ── */
 .prem-tip-bar{{
     background:var(--c-card);border:1.5px solid var(--c-border);
     border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
@@ -999,19 +1306,19 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .prem-tip-text{{font-size:var(--fs-sm);color:var(--c-sub);flex:1;line-height:1.58;}}
 .prem-tip-text strong{{color:var(--c-text);font-weight:700;}}
 
-/* HEATMAP LEGEND */
+/* ── HEATMAP LEGEND ── */
 .prem-heatmap-legend{{display:flex;gap:var(--sp-4);flex-wrap:wrap;margin-top:var(--sp-4);font-size:var(--fs-sm);font-weight:600;color:var(--c-sub);}}
 .prem-legend-item{{display:flex;align-items:center;gap:6px;}}
 .prem-legend-dot {{width:10px;height:10px;border-radius:50%;flex-shrink:0;}}
 
-/* GLASS */
+/* ── GLASS SURFACE ── */
 .prem-glass{{
     background:{glass_bg}!important;backdrop-filter:blur(20px)!important;
     -webkit-backdrop-filter:blur(20px)!important;
     border:1px solid {glass_bd}!important;border-radius:var(--r-lg)!important;
 }}
 
-/* DIVIDER */
+/* ── DIVIDER ── */
 .prem-divider{{
     display:flex;align-items:center;gap:var(--sp-3);
     margin:var(--sp-5) 0;color:var(--c-sub);
@@ -1020,7 +1327,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .prem-divider::before,.prem-divider::after{{content:'';flex:1;height:1px;background:var(--c-border);}}
 
-/* CHIP */
+/* ── INLINE CHIP ── */
 .prem-chip{{
     display:inline-flex;align-items:center;gap:5px;
     background:{a1_soft};border:1px solid {accent1}22;
@@ -1029,7 +1336,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     font-family:'DM Mono',monospace;
 }}
 
-/* FILTER CHIPS */
+/* ── FILTER CHIPS ── */
 .prem-filter-chips{{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin:var(--sp-1) 0 var(--sp-2);}}
 .prem-filter-chip{{
     padding:6px 14px;border-radius:30px;
@@ -1044,7 +1351,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .prem-filter-chip:hover:not(.active){{background:var(--c-hover);border-color:{accent1}55;}}
 
-/* FORM CARD */
+/* ── FORM SECTION CARD ── */
 .prem-form-card{{
     background:var(--c-card);border:1.5px solid var(--c-border);
     border-radius:var(--r-xl);padding:var(--sp-6);margin-bottom:var(--sp-4);
@@ -1060,9 +1367,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     background:linear-gradient(180deg,{accent1},{accent2});border-radius:99px;
 }}
 
-/* ═══════════════════════════════════════════════════════
-   OFFICIAL COMPLAINT CARD (.complaint-card)
-═══════════════════════════════════════════════════════ */
+/* ── COMPLAINT CARD (official drill — light-mode aware) ── */
 .complaint-card{{
     background:var(--c-card);border-radius:var(--r-xl);
     margin-bottom:1rem;border:1px solid var(--c-border);
@@ -1070,7 +1375,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 }}
 .complaint-card:hover{{
     transform:translateX(5px);border-color:{accent1};
-    box-shadow:var(--sh-md);
+    box-shadow:0 8px 20px -12px rgba(0,0,0,0.20);
 }}
 .complaint-priority-high  {{border-left:4px solid #EF4444;}}
 .complaint-priority-medium{{border-left:4px solid #F59E0B;}}
@@ -1098,8 +1403,13 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .action-buttons{{display:flex;gap:var(--sp-2);flex-wrap:wrap;margin-top:var(--sp-2);}}
 
 /* ═══════════════════════════════════════════════════════
-   UNPREFIXED COMPONENTS
+   ██  UNPREFIXED COMPONENT CLASSES
+   These classes are used directly in pages (dashboard,
+   login, complaint, tracking, schemes) and map to
+   the prem-* design system tokens above.
 ═══════════════════════════════════════════════════════ */
+
+/* ── HERO BANNER (.hero) ── */
 .hero{{
     background:linear-gradient(135deg,{hero_from} 0%,{hero_mid} 50%,{hero_to} 100%);
     border-radius:var(--r-xl);
@@ -1108,6 +1418,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     position:relative;overflow:hidden;
     box-shadow:var(--sh-lg);
     border:1px solid rgba(255,255,255,0.10);
+    animation:prem-fade-up 0.32s ease both;
 }}
 .hero::before{{
     content:'';position:absolute;top:-100px;right:-80px;
@@ -1129,26 +1440,30 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
     position:relative;z-index:1;color:#fff;letter-spacing:-0.03em;
 }}
 .hero p{{
-    font-size:var(--fs-base);margin:0;opacity:0.85;
-    position:relative;z-index:1;
+    font-size:var(--fs-base);
+    margin:0;opacity:0.85;position:relative;z-index:1;
     color:rgba(255,255,255,0.88);font-weight:400;
 }}
 
+/* ── CARD (.card) ── */
 .card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-6);margin:var(--sp-2) 0;
     border:1.5px solid var(--c-border);box-shadow:var(--sh-sm);
     transition:transform var(--t-base),box-shadow var(--t-base),border-color var(--t-fast);
     position:relative;overflow:hidden;
+    animation:prem-fade-up 0.28s ease both;
 }}
 .card:hover{{transform:translateY(-2px);box-shadow:var(--sh-md);border-color:{accent1}44;}}
 
+/* ── STAT CARD (.stat-card) ── */
 .stat-card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-6) var(--sp-4) var(--sp-4);
     text-align:center;border:1.5px solid var(--c-border);
     box-shadow:var(--sh-sm);position:relative;overflow:hidden;
     transition:transform var(--t-base),box-shadow var(--t-base);
+    animation:prem-scale-in 0.28s ease both;
 }}
 .stat-card::before{{
     content:'';position:absolute;top:0;left:0;right:0;height:3px;
@@ -1163,17 +1478,21 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 .stat-card:hover{{transform:translateY(-4px);box-shadow:var(--sh-md);}}
 .stat-number{{
     font-family:'Bricolage Grotesque','DM Sans',sans-serif;
-    font-size:var(--fs-4xl);font-weight:800;line-height:1.1;
-    color:var(--c-text);letter-spacing:-0.04em;position:relative;z-index:1;
+    font-size:var(--fs-4xl);
+    font-weight:800;line-height:1.1;color:var(--c-text);
+    letter-spacing:-0.04em;position:relative;z-index:1;
 }}
 .stat-label{{
-    font-size:var(--fs-xs);color:var(--c-sub);font-weight:600;
+    font-size:var(--fs-xs);
+    color:var(--c-sub);font-weight:600;
     text-transform:uppercase;letter-spacing:0.07em;
     margin-top:var(--sp-2);position:relative;z-index:1;
 }}
 
+/* ── SECTION HEADER (.section-header standalone) ── */
 div.section-header:not(.prem-section-header){{
-    font-size:var(--fs-xs);font-weight:700;text-transform:uppercase;
+    font-size:var(--fs-xs);
+    font-weight:700;text-transform:uppercase;
     letter-spacing:0.10em;color:var(--c-sub);
     margin:var(--sp-8) 0 var(--sp-3);
     display:flex;align-items:center;gap:10px;
@@ -1188,6 +1507,7 @@ div.section-header:not(.prem-section-header)::after{{
     background:linear-gradient(to right,{border}80,transparent);
 }}
 
+/* ── ACTION CARD (.action-card) ── */
 .action-card{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-6) var(--sp-4) var(--sp-5);
@@ -1206,43 +1526,50 @@ div.section-header:not(.prem-section-header)::after{{
 .action-card:hover::before{{transform:scaleX(1);}}
 .action-card:hover .action-icon{{transform:scale(1.12);}}
 .action-icon{{
-    width:52px;height:52px;border-radius:var(--r-md);
+    width:52px;height:52px;
+    border-radius:var(--r-md);
     display:flex;align-items:center;justify-content:center;
-    font-size:var(--icon-xl);margin:0 auto var(--sp-3);
+    font-size:var(--icon-xl);
+    margin:0 auto var(--sp-3);
     background:{a1_soft};border:1.5px solid {accent1}22;
     transition:transform var(--t-fast);
 }}
 .action-label{{
-    font-size:var(--fs-sm);font-weight:700;
-    color:var(--c-text);line-height:1.35;letter-spacing:-0.01em;
+    font-size:var(--fs-sm);
+    font-weight:700;color:var(--c-text);line-height:1.35;
+    letter-spacing:-0.01em;
 }}
 
+/* ── COMPLAINT ITEM (.complaint-item) ── */
 .complaint-item{{
     background:var(--c-card);border-radius:var(--r-lg);
-    padding:var(--sp-4) var(--sp-6);margin:var(--sp-2) 0;
+    padding:var(--sp-4) var(--sp-6);
+    margin:var(--sp-2) 0;
     border:1.5px solid var(--c-border);
     border-left:4px solid {accent1};
     box-shadow:var(--sh-sm);
     transition:transform var(--t-fast),border-color var(--t-fast),box-shadow var(--t-base);
+    animation:prem-fade-up 0.28s ease both;
 }}
 .complaint-item:hover{{
     transform:translateX(5px);
     border-left-color:{accent2};box-shadow:var(--sh-md);
 }}
 .complaint-id{{
-    font-size:var(--fs-xs);color:{accent1};
-    font-weight:700;letter-spacing:0.05em;
+    font-size:var(--fs-xs);
+    color:{accent1};font-weight:700;letter-spacing:0.05em;
     font-family:'DM Mono','Courier New',monospace;
     background:{a1_soft};padding:3px 10px;border-radius:7px;
     display:inline-block;margin-bottom:var(--sp-2);
     border:1px solid {accent1}22;
 }}
 .complaint-title{{
-    font-size:var(--fs-md);font-weight:700;
-    margin:var(--sp-1) 0;color:var(--c-text);
-    line-height:1.4;letter-spacing:-0.01em;
+    font-size:var(--fs-md);
+    font-weight:700;margin:var(--sp-1) 0;
+    color:var(--c-text);line-height:1.4;letter-spacing:-0.01em;
 }}
 
+/* ── NOTIFICATION CARD (.notif-card) ── */
 .notif-card{{
     background:var(--c-card);border-radius:var(--r-md);
     padding:var(--sp-3) var(--sp-5);
@@ -1251,6 +1578,7 @@ div.section-header:not(.prem-section-header)::after{{
     box-shadow:var(--sh-sm);
     transition:transform var(--t-fast),box-shadow var(--t-base);
     position:relative;overflow:hidden;
+    animation:prem-fade-up 0.28s ease both;
 }}
 .notif-card::before{{
     content:'';position:absolute;top:0;left:0;bottom:0;width:0;
@@ -1266,6 +1594,7 @@ div.section-header:not(.prem-section-header)::after{{
 .notif-msg  {{font-size:var(--fs-sm);color:var(--c-sub);line-height:1.55;}}
 .notif-time {{font-size:var(--fs-xs);color:var(--c-sub);margin-top:5px;font-family:'DM Mono',monospace;}}
 
+/* ── NOTIFICATION INLINE (.notif-inline) ── */
 .notif-inline{{
     background:{amber_bg};border:1.5px solid {amber_bd};
     border-radius:var(--r-md);padding:var(--sp-3) var(--sp-4);
@@ -1276,7 +1605,11 @@ div.section-header:not(.prem-section-header)::after{{
 }}
 .notif-inline:hover{{box-shadow:var(--sh-sm);transform:translateY(-1px);}}
 
-.welcome-screen{{text-align:center;padding:60px 20px 36px;}}
+/* ── WELCOME SCREEN (.welcome-screen) ── */
+.welcome-screen{{
+    text-align:center;padding:60px 20px 36px;
+    animation:prem-fade-up 0.4s ease both;
+}}
 .welcome-logo{{
     font-size:5rem;display:block;margin-bottom:var(--sp-4);
     animation:prem-float 4s ease-in-out infinite;
@@ -1296,10 +1629,12 @@ div.section-header:not(.prem-section-header)::after{{
     max-width:460px;margin-left:auto;margin-right:auto;
 }}
 
+/* ── TIMELINE (.timeline-item) ── */
 .timeline-item{{
     display:flex;gap:var(--sp-4);align-items:flex-start;
     margin-bottom:var(--sp-4);position:relative;
     padding-left:var(--sp-2);
+    animation:prem-fade-up 0.28s ease both;
 }}
 .timeline-dot{{
     width:14px;height:14px;border-radius:50%;flex-shrink:0;
@@ -1329,6 +1664,7 @@ div.section-header:not(.prem-section-header)::after{{
     font-family:'DM Mono',monospace;
 }}
 
+/* ── SCHEME TAG (.scheme-tag) ── */
 .scheme-tag{{
     display:inline-block;
     background:{tag_bg};color:{tag_col};border-radius:7px;
@@ -1336,6 +1672,7 @@ div.section-header:not(.prem-section-header)::after{{
     letter-spacing:0.01em;border:1px solid {tag_col}22;
 }}
 
+/* ── OFFICIAL COMPLAINT (.official-complaint) ── */
 .official-complaint{{
     background:var(--c-card);border-radius:var(--r-md);
     padding:var(--sp-4);margin:var(--sp-2) 0;
@@ -1347,6 +1684,7 @@ div.section-header:not(.prem-section-header)::after{{
 .official-complaint.medium {{border-left:4px solid {amber_text};}}
 .official-complaint.low    {{border-left:4px solid {green_text};}}
 
+/* ── SIDEBAR ACTIVE (.sidebar-active) ── */
 .sidebar-active{{
     background:linear-gradient(90deg,{a1_soft},transparent);
     border-left:3px solid {accent1};
@@ -1355,25 +1693,50 @@ div.section-header:not(.prem-section-header)::after{{
     transition:all var(--t-fast);
 }}
 
-.badge-high,.badge-medium,.badge-low{{
+/* ── BADGE UNPREFIXED (.badge-high, .badge-medium, .badge-low) ── */
+.badge-high{{
     display:inline-flex;align-items:center;gap:4px;
     border-radius:7px;padding:3px 10px;
     font-size:var(--fs-2xs);font-weight:700;
     letter-spacing:0.04em;text-transform:uppercase;
+    background:{red_bg};color:{red_text};border:1px solid {red_bd};
 }}
-.badge-high  {{background:{red_bg};  color:{red_text};  border:1px solid {red_bd};}}
-.badge-medium{{background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};}}
-.badge-low   {{background:{green_bg};color:{green_text};border:1px solid {green_bd};}}
+.badge-medium{{
+    display:inline-flex;align-items:center;gap:4px;
+    border-radius:7px;padding:3px 10px;
+    font-size:var(--fs-2xs);font-weight:700;
+    letter-spacing:0.04em;text-transform:uppercase;
+    background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};
+}}
+.badge-low{{
+    display:inline-flex;align-items:center;gap:4px;
+    border-radius:7px;padding:3px 10px;
+    font-size:var(--fs-2xs);font-weight:700;
+    letter-spacing:0.04em;text-transform:uppercase;
+    background:{green_bg};color:{green_text};border:1px solid {green_bd};
+}}
 
-.status-pending,.status-inprogress,.status-resolved{{
+/* ── STATUS BADGES ── */
+.status-pending{{
     display:inline-flex;align-items:center;gap:4px;
     border-radius:30px;padding:3px 12px;
     font-size:var(--fs-xs);font-weight:700;
+    background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};
 }}
-.status-pending   {{background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};}}
-.status-inprogress{{background:{blue_bg}; color:{blue_text}; border:1px solid {blue_bd};}}
-.status-resolved  {{background:{green_bg};color:{green_text};border:1px solid {green_bd};}}
+.status-inprogress{{
+    display:inline-flex;align-items:center;gap:4px;
+    border-radius:30px;padding:3px 12px;
+    font-size:var(--fs-xs);font-weight:700;
+    background:{blue_bg};color:{blue_text};border:1px solid {blue_bd};
+}}
+.status-resolved{{
+    display:inline-flex;align-items:center;gap:4px;
+    border-radius:30px;padding:3px 12px;
+    font-size:var(--fs-xs);font-weight:700;
+    background:{green_bg};color:{green_text};border:1px solid {green_bd};
+}}
 
+/* ── GENERIC BADGE ── */
 .badge{{
     display:inline-flex;align-items:center;gap:4px;
     border-radius:30px;padding:3px 12px;
@@ -1381,18 +1744,19 @@ div.section-header:not(.prem-section-header)::after{{
     background:var(--c-card2);color:var(--c-sub);
     border:1px solid var(--c-border);
 }}
-.badge-pending    {{background:{amber_bg};color:{amber_text};border-color:{amber_bd};}}
-.badge-in-progress{{background:{blue_bg}; color:{blue_text}; border-color:{blue_bd};}}
-.badge-resolved   {{background:{green_bg};color:{green_text};border-color:{green_bd};}}
-.badge-rejected   {{background:{red_bg};  color:{red_text};  border-color:{red_bd};}}
+.badge-pending   {{background:{amber_bg};color:{amber_text};border-color:{amber_bd};}}
+.badge-in-progress{{background:{blue_bg};color:{blue_text};border-color:{blue_bd};}}
+.badge-resolved  {{background:{green_bg};color:{green_text};border-color:{green_bd};}}
+.badge-rejected  {{background:{red_bg};color:{red_text};border-color:{red_bd};}}
 
+/* ── STARS (.stars) ── */
 .stars{{
     font-size:var(--fs-lg);letter-spacing:2px;color:#F59E0B;
     display:inline-block;margin:var(--sp-1) 0;
     filter:drop-shadow(0 1px 3px rgba(245,158,11,0.3));
 }}
 
-/* STREAMLIT METRIC */
+/* ── STREAMLIT METRIC CARDS — premium style ── */
 div[data-testid="stMetric"]{{
     background:var(--c-card);border-radius:var(--r-lg);
     padding:var(--sp-4) var(--sp-5);
@@ -1414,7 +1778,7 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"]{{
     letter-spacing:-0.03em!important;color:var(--c-text)!important;
 }}
 
-/* FILE UPLOADER */
+/* ── FILE UPLOADER — premium ── */
 .stFileUploader{{
     border-radius:var(--r-lg)!important;
     border:2px dashed var(--c-border)!important;
@@ -1426,14 +1790,14 @@ div[data-testid="stMetric"] [data-testid="stMetricValue"]{{
     background:{a1_soft}!important;
 }}
 
-/* TOAST */
+/* ── TOAST / SNACKBAR — premium ── */
 div[data-testid="stToast"]{{
     background:var(--c-card)!important;border-radius:var(--r-lg)!important;
     border:1.5px solid var(--c-border)!important;
     box-shadow:var(--sh-lg)!important;color:var(--c-text)!important;
 }}
 
-/* SLIDER */
+/* ── SLIDER — premium ── */
 .stSlider [data-baseweb="slider"] [role="slider"]{{
     background:linear-gradient(135deg,{accent1},{accent2})!important;
     box-shadow:0 2px 8px {a1_glow}!important;
@@ -1441,6 +1805,27 @@ div[data-testid="stToast"]{{
 }}
 .stSlider [data-baseweb="slider"] div[class*="Track"]{{
     background:var(--c-border)!important;
+}}
+
+/* ── RESPONSIVE ADDITIONS FOR NEW CLASSES ── */
+@media(max-width:768px){{
+    .hero{{padding:var(--sp-5) var(--sp-4) var(--sp-4);border-radius:var(--r-lg);}}
+    .hero h1{{font-size:var(--fs-2xl);}}
+    .hero::before,.hero::after{{display:none;}}
+    .stat-card{{border-radius:var(--r-md);padding:var(--sp-4) var(--sp-3) var(--sp-3);}}
+    .stat-number{{font-size:var(--fs-2xl);}}
+    .action-card{{padding:var(--sp-5) var(--sp-3) var(--sp-4);border-radius:var(--r-md);}}
+    .action-icon{{width:46px;height:46px;font-size:var(--icon-lg);}}
+    .action-label{{font-size:var(--fs-xs);}}
+    .complaint-item,.notif-card,.card{{border-radius:var(--r-md);}}
+    .welcome-title{{font-size:var(--fs-2xl);}}
+    .welcome-screen{{padding:40px 16px 24px;}}
+    .timeline-item{{gap:var(--sp-3);}}
+}}
+@media(max-width:480px){{
+    .hero h1{{font-size:var(--fs-xl);}}
+    .stat-card{{padding:var(--sp-3) var(--sp-2) var(--sp-2);}}
+    .stat-number{{font-size:var(--fs-xl);}}
 }}
 
 /* ═══════════════════════════════════════════════════════
@@ -1463,50 +1848,48 @@ div[data-testid="stToast"]{{
 @keyframes prem-gradient-move{{0%,100%{{background-position:0% 50%;}}50%{{background-position:100% 50%;}}}}
 @keyframes prem-float{{0%,100%{{transform:translateY(0);}}50%{{transform:translateY(-8px);}}}}
 
-/* Animate hero/welcome only — NOT every card (avoids flicker on rerun) */
-.prem-hero,.hero,.prem-welcome,.welcome-screen{{animation:prem-fade-up 0.32s ease both;}}
+.prem-card,.prem-complaint-item,.prem-notif-card,
+.prem-scheme-card,.prem-lb-card,.prem-hero{{animation:prem-fade-up 0.28s ease both;}}
+.prem-stat-card{{animation:prem-scale-in 0.28s ease both;}}
 
 /* ═══════════════════════════════════════════════════════
-   RESPONSIVE
+   RESPONSIVE — MOBILE
 ═══════════════════════════════════════════════════════ */
 @media(max-width:768px){{
     .main .block-container{{padding:1rem 0.875rem 2.5rem!important;max-width:100%!important;}}
-    .prem-hero,.hero{{padding:var(--sp-5) var(--sp-4) var(--sp-4);border-radius:var(--r-lg);}}
-    .prem-hero-title,.hero h1{{font-size:var(--fs-2xl);}}
+    .prem-hero{{padding:var(--sp-5) var(--sp-4) var(--sp-4);border-radius:var(--r-lg);}}
+    .prem-hero-title{{font-size:var(--fs-2xl);}}
     .prem-hero-avatar{{display:none;}}
-    .prem-hero::before,.prem-hero::after,.hero::before,.hero::after{{display:none;}}
     .prem-hero-stats{{grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:var(--sp-2);}}
     .prem-hstat-num{{font-size:var(--fs-3xl);}}
-    .prem-action-card,.action-card{{padding:var(--sp-5) var(--sp-3) var(--sp-4);border-radius:var(--r-md);}}
-    .prem-action-icon,.action-icon{{width:46px;height:46px;font-size:var(--icon-lg);}}
-    .prem-action-label,.action-label{{font-size:var(--fs-xs);}}
-    .prem-stat-card,.stat-card{{border-radius:var(--r-md);padding:var(--sp-4) var(--sp-3) var(--sp-3);}}
-    .prem-stat-num,.stat-number{{font-size:var(--fs-2xl);}}
-    .prem-card,.card,.prem-complaint-item,.complaint-item,
-    .prem-notif-card,.notif-card{{border-radius:var(--r-md);}}
+    .prem-action-card{{padding:var(--sp-5) var(--sp-3) var(--sp-4);border-radius:var(--r-md);}}
+    .prem-action-icon{{width:46px;height:46px;font-size:var(--icon-lg);}}
+    .prem-action-label{{font-size:var(--fs-xs);}}
+    .prem-stat-card{{border-radius:var(--r-md);padding:var(--sp-4) var(--sp-3) var(--sp-3);}}
+    .prem-stat-num{{font-size:var(--fs-2xl);}}
+    .prem-card,.prem-complaint-item,.prem-notif-card{{border-radius:var(--r-md);}}
     .prem-lb-card{{flex-direction:column;text-align:center;}}
     .prem-lb-stats{{justify-content:center;}}
     .prem-lb-rank{{min-width:auto;}}
     .prem-performer-grid{{grid-template-columns:1fr 1fr;gap:var(--sp-2);}}
     .stButton>button{{padding:10px 14px!important;font-size:var(--fs-sm)!important;}}
     .prem-section-header{{font-size:var(--fs-2xs);}}
-    .prem-welcome-title,.welcome-title{{font-size:var(--fs-2xl);}}
-    .prem-welcome,.welcome-screen{{padding:40px 16px 24px;}}
+    .prem-welcome-title{{font-size:var(--fs-2xl);}}
+    .prem-welcome{{padding:40px 16px 24px;}}
     .prem-filter-chips{{gap:var(--sp-1);}}
     .prem-filter-chip{{padding:5px 10px;font-size:var(--fs-2xs);}}
-    .timeline-item{{gap:var(--sp-3);}}
 }}
 @media(max-width:480px){{
     .prem-hero-stats{{grid-template-columns:repeat(2,1fr);}}
     .prem-performer-grid{{grid-template-columns:1fr;}}
     .prem-complaint-meta{{gap:var(--sp-2);}}
     .prem-lb-stats{{gap:var(--sp-3);}}
-    .prem-hero-title,.hero h1{{font-size:var(--fs-xl);}}
-    .prem-stat-card,.stat-card{{padding:var(--sp-3) var(--sp-2) var(--sp-2);}}
-    .prem-stat-num,.stat-number{{font-size:var(--fs-xl);}}
 }}
 
-/* DARK MODE WIDGET OVERRIDES */
+/* ═══════════════════════════════════════════════════════
+   DARK MODE WIDGET OVERRIDES
+═══════════════════════════════════════════════════════ */
 {dark_overrides}
+
 </style>
 """
