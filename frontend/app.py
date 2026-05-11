@@ -7761,36 +7761,193 @@ def pg_official_dashboard():
     # ------------------- FETCH COMPLAINTS -------------------
     # Assume dept_id is defined earlier (e.g., from session state or function param)
     comps = []
-    try:
-        with st.spinner("Loading complaints..."):
-            resp = api("get", f"/complaints/department/{dept_id}?status_filter=all")
-            if isinstance(resp, list):
-                comps = resp
-            else:
-                st.warning(f"Unexpected API response format: {type(resp)}")
-    except Exception as e:
-        st.warning(f"Could not load complaints: {e}")
 
-    # Now display the complaints (if any)
+    try:
+
+        with st.spinner("Loading complaints..."):
+
+            resp = api(
+
+                "get",
+
+                f"/complaints/department/{dept_id}?status_filter=all"
+            )
+
+            if isinstance(resp, list):
+
+                comps = resp
+
+            else:
+
+                st.warning(
+                    f"Unexpected API response format: {type(resp)}"
+                )
+
+    except Exception as e:
+
+        st.warning(
+            f"Could not load complaints: {e}"
+        )
+
+    # ─────────────────────────────────────────────
+    # DISPLAY COMPLAINTS
+    # ─────────────────────────────────────────────
+
     if comps:
+
         for complaint in comps:
-            is_emergency = complaint.get("is_emergency", False)
+
+            is_emergency = complaint.get(
+                "is_emergency",
+                False
+            )
+
             expander_label = (
+
                 f"{complaint.get('id', '')}  ·  "
+
                 f"{complaint.get('category', '').title()}  ·  "
+
                 f"{complaint.get('department', complaint.get('user_name', ''))}"
             )
+
             if is_emergency:
-                expander_label = f"🚨 {expander_label} - EMERGENCY"
+
+                expander_label = (
+
+                    f"🚨 {expander_label} - EMERGENCY"
+                )
+
                 border_color = "#dc2626"
+
             else:
-                border_color = "#e5e7eb"   # provide a default
-            # Now use expander_label and border_color (e.g., in st.expander)
+
+                border_color = "#e5e7eb"
+
+            # ─────────────────────────────────────────────
+            # COMPLAINT CARD
+            # ─────────────────────────────────────────────
+
+            with st.expander(
+                expander_label,
+                expanded=False
+            ):
+
+                st.markdown(
+
+                    f"""
+                    <div style="
+                        border:1px solid {border_color};
+                        border-radius:16px;
+                        padding:16px;
+                        margin-bottom:12px;
+                        background:var(--c-card);
+                    ">
+                    """,
+
+                    unsafe_allow_html=True
+                )
+
+                # Complaint text
+                st.write(
+
+                    complaint.get(
+                        "text",
+                        "No complaint text"
+                    )
+                )
+
+                # Status
+                st.markdown(
+
+                    f"""
+                    <b>Status:</b>
+                    {complaint.get('status', 'pending')}
+                    """,
+
+                    unsafe_allow_html=True
+                )
+
+                # Priority
+                st.markdown(
+
+                    f"""
+                    <b>Priority:</b>
+                    {complaint.get('priority', 'medium')}
+                    """,
+
+                    unsafe_allow_html=True
+                )
+
+                # ─────────────────────────────────────────────
+                # IMAGE PREVIEW
+                # ─────────────────────────────────────────────
+
+                if complaint.get("image_path"):
+
+                    img_url = (
+
+                        f"{API_BASE}"
+
+                        f"{complaint['image_path']}"
+                    )
+
+                    st.image(
+
+                        img_url,
+
+                        width=300,
+
+                        caption="Attached Image"
+                    )
+
+                st.markdown(
+                    "</div>",
+                    unsafe_allow_html=True
+                )
+
     else:
+
         st.info("No complaints found.")
-    if complaint.get("image_path"):
-        img_url = f"{API_BASE}{complaint['image_path']}"
-        st.image(img_url, width=300, caption="Attached Image")
+
+    # ─────────────────────────────────────────────
+    # STATISTICS
+    # ─────────────────────────────────────────────
+
+    total = len(comps)
+
+    pending = sum(
+        1
+        for c in comps
+        if c.get("status") == "pending"
+    )
+
+    in_progress = sum(
+        1
+        for c in comps
+        if c.get("status") == "in_progress"
+    )
+
+    resolved = sum(
+        1
+        for c in comps
+        if c.get("status") in (
+            "resolved",
+            "closed"
+        )
+    )
+
+    resolution_rate = round(
+
+        resolved / max(total, 1) * 100,
+
+        1
+    )
+
+    resolution_rate = min(
+        resolution_rate,
+        100
+    )
     # ------------------- STATISTICS -------------------
     total = len(comps)
     pending = sum(1 for c in comps if c.get("status") == "pending")
