@@ -1594,7 +1594,7 @@ import streamlit as st
 # IMPROVED & MODERN CSS WITH RESPONSIVE BUTTONS
 # ═══════════════════════════════════════════════════════════════════════════════
 
-def _login_css_improved(dark=False, accent="#6366F1", accent2="#8B5CF6"):
+def _login_css(dark=False, accent="#6366F1", accent2="#8B5CF6"):
     """Enhanced CSS with better button UX and responsive design"""
     
     if dark:
