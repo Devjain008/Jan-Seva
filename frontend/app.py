@@ -5271,7 +5271,7 @@ def _render_location(lang: str, dark: bool) -> None:
     with col_loc:
         def _on_loc():
             fc_set(
-                location_name = st.session_state["_fc_location"],
+                location_name = st.session_state.get("_fc_location", ""),
                 _gps_ingested = False,
                 loc_area="", loc_city="", loc_district="",
                 loc_state="", loc_pincode="",
