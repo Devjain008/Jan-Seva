@@ -1885,6 +1885,67 @@ div[data-testid="stToast"]{{
     .prem-complaint-meta{{gap:var(--sp-2);}}
     .prem-lb-stats{{gap:var(--sp-3);}}
 }}
+/* ═══════════════════════════════════════
+   APPROVED OFFICIAL REMOVE BUTTON
+═══════════════════════════════════════ */
+
+.dd-remove-wrap{{
+
+    display:flex!important;
+
+    justify-content:flex-end!important;
+
+    align-items:center!important;
+
+    width:100%!important;
+}}
+
+.dd-remove-wrap .stButton{{
+
+    width:54px!important;
+
+    flex:none!important;
+}}
+
+.dd-remove-wrap .stButton > button{{
+
+    width:54px!important;
+
+    min-width:54px!important;
+
+    height:46px!important;
+
+    border-radius:14px!important;
+
+    border:none!important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #EF4444,
+            #DC2626
+        )!important;
+
+    color:#FFFFFF!important;
+
+    font-size:18px!important;
+
+    font-weight:700!important;
+
+    box-shadow:
+        0 10px 24px rgba(239,68,68,.24)!important;
+
+    transition:all .18s ease!important;
+}}
+
+.dd-remove-wrap .stButton > button:hover{{
+
+    transform:
+        translateY(-2px)!important;
+
+    filter:
+        brightness(1.04)!important;
+}}
 
 /* ═══════════════════════════════════════════════════════
    DARK MODE WIDGET OVERRIDES

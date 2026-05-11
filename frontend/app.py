@@ -7754,7 +7754,7 @@ def pg_official_dashboard():
         st.warning("⚠️ No department assigned. Contact admin.")
         with st.expander("📋 My Profile"):
             st.write(f"**Name:** {name}\n**Email:** {email}\n**Status:** Approved")
-        if st.button("🔄 Refresh", use_container_width=True):
+        if st.button("🔄 Refresh", use_container_width=True):   
             st.rerun()
         return
 
@@ -10901,8 +10901,53 @@ div[data-testid="stButton"].dd-remove > button{{
                     unsafe_allow_html=True,
                 )
                 rc1, rc2, rc3 = st.columns([5, 1, 1])
+
                 with rc3:
-                    pass
+
+                    st.markdown(
+                        "<div class='dd-remove-wrap'>",
+                        unsafe_allow_html=True
+                    )
+
+                    if st.button(
+
+                        "🗑️",
+
+                        key=f"remove_official_{oid}",
+
+                        use_container_width=True,
+
+                        help="Remove Official"
+                    ):
+
+                        resp = api(
+
+                            "delete",
+
+                            f"/admin/officials/{oid}"
+                        )
+
+                        if resp.get("success"):
+
+                            st.success(
+                                "✅ Official removed successfully"
+                            )
+
+                            st.rerun()
+
+                        else:
+
+                            st.error(
+                                resp.get(
+                                    "detail",
+                                    "Failed to remove official"
+                                )
+                            )
+
+                    st.markdown(
+                        "</div>",
+                        unsafe_allow_html=True
+                    )
  
     # ── TAB 2 — Complaints ────────────────────────────────────────
     with tab2:
