@@ -177,9 +177,6 @@ def stars_html(avg, count=0):
         f'<span style="font-size:.78rem;opacity:.7;"> {avg:.1f}{ct}</span>'
     )
 
-# ═════════════════════════════════════════════════════════════════════════════
-# SIDEBAR
-# ═════════════════════════════════════════════════════════════════════════════
 def render_sidebar():
     import streamlit as st
 
@@ -228,12 +225,7 @@ def render_sidebar():
         border-right: 1px solid {BORDER} !important;
         box-shadow: none !important;
     }}
-    .sb-active button {{
-        background: #EEF2FF !important;
-        color: #4F46E5 !important;
-        border: 1px solid #C7D2FE !important;
-        font-weight: 600 !important;
-    }}
+
     section[data-testid="stSidebar"] > div {{
         background: {BG};
         padding-top: 0.5rem;
@@ -593,28 +585,10 @@ def render_sidebar():
                 ("⚙️ Settings", "settings"),
             ]
 
-        current_screen = st.session_state.get("screen")
-
         for label, screen in menu_items:
-
-            active = current_screen == screen
-
-            if active:
-                st.markdown(
-                    '<div class="sb-active">',
-                    unsafe_allow_html=True
-                )
-
             if st.button(label, key=f"sb_{screen}"):
-
                 st.session_state.screen = screen
                 st.rerun()
-
-            if active:
-                st.markdown(
-                    '</div>',
-                    unsafe_allow_html=True
-                )
 
         st.markdown("""
         <div class="sb-section">Account</div>
