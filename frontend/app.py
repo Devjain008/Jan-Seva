@@ -5392,18 +5392,41 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
     state = fc()
     if state["phase"] == "error":
         st.markdown("<div class='fc-err'>⚠️ " + state["error_msg"] + "</div>", unsafe_allow_html=True)
- 
+
     lbl = "🚀  Submit Complaint" if lang == "en" else "🚀  शिकायत जमा करें"
+    
+    # Prevent double submission
+    already_submitting = state["phase"] == "submitting"
+    
     st.markdown("<div class='fc-submit-col'>", unsafe_allow_html=True)
-    clicked = st.button(lbl, use_container_width=True, key="fc_sub",
-                        disabled=(state["phase"] == "submitting"))
+    clicked = st.button(
+        lbl,
+        use_container_width=True,
+        key="fc_sub",
+        disabled=already_submitting,
+    )
     st.markdown("</div>", unsafe_allow_html=True)
+    
+    # Show spinner while submitting
+    if already_submitting:
+        st.markdown(
+            "<div style='text-align:center;padding:10px;font-size:.85rem;"
+            "color:#6366F1;font-weight:600;'>⏳ Submitting your complaint…</div>",
+            unsafe_allow_html=True,
+        )
+        return False
+
     if not clicked:
         return False
- 
+
+    # Guard: ignore if token already set (prevents double fire on rerun)
+    if state.get("submit_token"):
+        return False
+
     desc = (st.session_state.get("_fc_desc") or state["description"] or state["voice_text"] or "").strip()
     loc  = (st.session_state.get("_fc_location") or state["location_name"] or "").strip()
-    err  = ""
+    
+    err = ""
     if not desc:
         err = "Please describe the issue." if lang == "en" else "कृपया समस्या का विवरण दें।"
     elif not loc:
@@ -5413,7 +5436,7 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
     if err:
         st.markdown("<div class='fc-err'>❗ " + err + "</div>", unsafe_allow_html=True)
         return False
- 
+
     img_bytes, img_name = None, ""
     if uploaded_file is not None:
         try:
@@ -5421,7 +5444,7 @@ def _render_submit(lang: str, uid, uploaded_file) -> bool:
             img_name  = uploaded_file.name
         except Exception:
             pass
- 
+
     fc_set(
         phase         = "submitting",
         description   = desc,
