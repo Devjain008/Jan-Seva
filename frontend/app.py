@@ -1590,8 +1590,13 @@ import streamlit as st
 # ═══════════════════════════════════════════════════════════════════════════════
 # CSS ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-def _login_css(dark=False, accent="#6366F1", accent2="#8B5CF6"):
-    # ── Token palette ──────────────────────────────────────────────────────────
+# ═══════════════════════════════════════════════════════════════════════════════
+# IMPROVED & MODERN CSS WITH RESPONSIVE BUTTONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _login_css_improved(dark=False, accent="#6366F1", accent2="#8B5CF6"):
+    """Enhanced CSS with better button UX and responsive design"""
+    
     if dark:
         PAGE_BG   = "#05070F"
         CARD_BG   = "rgba(13,18,36,0.72)"
@@ -1606,6 +1611,7 @@ def _login_css(dark=False, accent="#6366F1", accent2="#8B5CF6"):
         ORB3      = "rgba(14,165,233,0.10)"
         SHADOW    = "0 32px 80px rgba(0,0,0,0.65),0 8px 24px rgba(0,0,0,0.40)"
         BTN_SH    = f"0 4px 24px {accent}55"
+        BTN_BG_H  = f"rgba({int(accent[1:3],16)},{int(accent[3:5],16)},{int(accent[5:7],16)},0.15)"
         green_bg  = "rgba(6,40,18,0.80)";  green_bd  = "#166534"; green_txt = "#4ADE80"
         amber_bg  = "rgba(40,24,0,0.80)";  amber_bd  = "#92400E"; amber_txt = "#FCD34D"
         blue_bg   = "rgba(4,9,40,0.80)";   blue_bd   = "#1E40AF"; blue_txt  = "#93C5FD"
@@ -1624,12 +1630,11 @@ def _login_css(dark=False, accent="#6366F1", accent2="#8B5CF6"):
         ORB3      = "rgba(14,165,233,0.07)"
         SHADOW    = "0 24px 64px rgba(11,20,40,0.14),0 4px 16px rgba(11,20,40,0.08)"
         BTN_SH    = f"0 4px 20px {accent}40"
+        BTN_BG_H  = f"rgba({int(accent[1:3],16)},{int(accent[3:5],16)},{int(accent[5:7],16)},0.08)"
         green_bg  = "rgba(240,253,244,0.90)"; green_bd  = "#86EFAC"; green_txt = "#166534"
         amber_bg  = "rgba(255,251,235,0.90)"; amber_bd  = "#FDE68A"; amber_txt = "#92400E"
         blue_bg   = "rgba(239,246,255,0.90)"; blue_bd   = "#BFDBFE"; blue_txt  = "#1E40AF"
         red_bg    = "rgba(254,242,242,0.90)"; red_bd    = "#FECACA"; red_txt   = "#991B1B"
-
-    A1_SOFT = f"color-mix(in srgb, {accent} 12%, transparent)"
 
     return f"""
 <style>
@@ -1648,6 +1653,7 @@ html, body, .stApp {{
     -webkit-font-smoothing:antialiased;
     color:{TXT}!important;
 }}
+
 .main .block-container {{
     padding:2rem 1.25rem 4rem!important;
     max-width:480px!important;
@@ -1781,6 +1787,166 @@ html, body, .stApp {{
 }}
 
 /* ══════════════════════════════════════════════════════════════
+   IMPROVED BUTTONS - PRIMARY GRADIENT
+══════════════════════════════════════════════════════════════ */
+.stButton > button {{
+    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
+    color:#fff!important;
+    border:none!important;
+    border-radius:14px!important;
+    padding:12px 18px!important;
+    font-family:'Outfit',sans-serif!important;
+    font-size:0.875rem!important;
+    font-weight:700!important;
+    letter-spacing:0.01em!important;
+    width:100%!important;
+    cursor:pointer!important;
+    position:relative!important;
+    overflow:hidden!important;
+    transition:all 0.24s cubic-bezier(0.34,1.56,0.64,1)!important;
+    box-shadow:{BTN_SH}!important;
+    min-height:44px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:6px!important;
+}}
+
+.stButton > button::before {{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,0.2) 0%,transparent 100%);
+    pointer-events:none;
+    border-radius:inherit;
+}}
+
+.stButton > button::after {{
+    content:'';
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.2) 0%, transparent 70%);
+    opacity:0;
+    transition:opacity 0.4s ease;
+    pointer-events:none;
+    border-radius:inherit;
+}}
+
+.stButton > button:hover {{
+    transform:translateY(-3px) scale(1.02)!important;
+    box-shadow:0 12px 40px {accent}66,0 0 20px {accent}33!important;
+    filter:brightness(1.08)!important;
+}}
+
+.stButton > button:active {{
+    transform:translateY(-1px) scale(0.98)!important;
+    filter:brightness(0.95)!important;
+}}
+
+.stButton > button:focus {{
+    outline:none!important;
+    box-shadow:0 0 0 4px {accent}22,{BTN_SH}!important;
+}}
+
+/* ── Secondary button (Back, Cancel) ── */
+.lp-back .stButton > button {{
+    background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))!important;
+    color:{TXT}!important;
+    border:1.5px solid {CARD_BD}!important;
+    box-shadow:0 4px 12px rgba(0,0,0,0.08)!important;
+    font-weight:600!important;
+    backdrop-filter:blur(12px)!important;
+    -webkit-backdrop-filter:blur(12px)!important;
+}}
+
+.lp-back .stButton > button:hover {{
+    background:linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))!important;
+    color:{TXT}!important;
+    transform:translateY(-2px)!important;
+    box-shadow:0 8px 24px rgba(0,0,0,0.12),0 0 0 1px {accent}22!important;
+    border-color:{accent}44!important;
+    filter:none!important;
+}}
+
+/* ── Tab-idle style ── */
+.lp-tab-idle .stButton > button {{
+    background:transparent!important;
+    color:{SUB}!important;
+    border:1.5px solid transparent!important;
+    box-shadow:none!important;
+    font-weight:600!important;
+    font-size:0.84rem!important;
+    border-radius:12px!important;
+    padding:10px 16px!important;
+    filter:none!important;
+    transform:none!important;
+    transition:all 0.20s ease!important;
+}}
+
+.lp-tab-idle .stButton > button:hover {{
+    background:{HOV}!important;
+    color:{TXT}!important;
+    transform:none!important;
+    box-shadow:none!important;
+    filter:none!important;
+    border-color:{accent}44!important;
+}}
+
+/* ── Tab-active style ── */
+.lp-tab-active .stButton > button {{
+    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
+    color:#fff!important;
+    border:none!important;
+    box-shadow:0 6px 20px {accent}50!important;
+    font-size:0.84rem!important;
+    font-weight:700!important;
+    border-radius:12px!important;
+    padding:10px 16px!important;
+    transform:none!important;
+    filter:none!important;
+}}
+
+.lp-tab-active .stButton > button:hover {{
+    box-shadow:0 8px 28px {accent}66!important;
+    transform:translateY(-2px)!important;
+}}
+
+/* ══════════════════════════════════════════════════════════════
+   FORM SUBMIT BUTTON
+══════════════════════════════════════════════════════════════ */
+[data-testid="stFormSubmitButton"] > button {{
+    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
+    color:#fff!important;
+    border:none!important;
+    border-radius:14px!important;
+    padding:12px 20px!important;
+    font-family:'Outfit',sans-serif!important;
+    font-size:0.875rem!important;
+    font-weight:700!important;
+    width:100%!important;
+    cursor:pointer!important;
+    position:relative!important;
+    overflow:hidden!important;
+    transition:all 0.24s cubic-bezier(0.34,1.56,0.64,1)!important;
+    box-shadow:{BTN_SH}!important;
+    margin-top:6px!important;
+    min-height:44px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+}}
+
+[data-testid="stFormSubmitButton"] > button:hover {{
+    transform:translateY(-3px) scale(1.02)!important;
+    box-shadow:0 12px 40px {accent}66,0 0 20px {accent}33!important;
+    filter:brightness(1.08)!important;
+}}
+
+[data-testid="stFormSubmitButton"] > button:active {{
+    transform:translateY(-1px) scale(0.98)!important;
+}}
+
+/* ══════════════════════════════════════════════════════════════
    INPUTS  — fully overridden
 ══════════════════════════════════════════════════════════════ */
 .stTextInput > div > div > input,
@@ -1797,18 +1963,24 @@ html, body, .stApp {{
     backdrop-filter:blur(8px)!important;
     -webkit-backdrop-filter:blur(8px)!important;
     box-shadow:none!important;
+    min-height:42px!important;
 }}
+
 .stTextInput > div > div > input:focus,
 .stTextArea  > div > div > textarea:focus {{
     border-color:{accent}!important;
-    box-shadow:0 0 0 3px {accent}28,0 0 16px {accent}18!important;
+    box-shadow:0 0 0 4px {accent}28,0 0 16px {accent}18!important;
     background:{CARD_BG}!important;
     outline:none!important;
 }}
+
 .stTextInput > div > div > input::placeholder,
 .stTextArea  > div > div > textarea::placeholder {{
-    color:{SUB}!important;opacity:0.55!important;font-weight:300!important;
+    color:{SUB}!important;
+    opacity:0.55!important;
+    font-weight:300!important;
 }}
+
 /* field labels */
 .stTextInput label, .stTextArea label {{
     color:{SUB}!important;
@@ -1821,132 +1993,18 @@ html, body, .stApp {{
 }}
 
 /* ══════════════════════════════════════════════════════════════
-   BUTTONS — primary gradient
-══════════════════════════════════════════════════════════════ */
-.stButton > button {{
-    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
-    color:#fff!important;border:none!important;
-    border-radius:14px!important;
-    padding:13px 20px!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.875rem!important;
-    font-weight:700!important;
-    letter-spacing:0.01em!important;
-    width:100%!important;
-    cursor:pointer!important;
-    position:relative!important;overflow:hidden!important;
-    transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1),
-               box-shadow 0.18s ease,filter 0.12s!important;
-    box-shadow:{BTN_SH}!important;
-}}
-.stButton > button::before {{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,rgba(255,255,255,0.16) 0%,transparent 100%);
-    pointer-events:none;border-radius:inherit;
-}}
-.stButton > button::after {{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(90deg,transparent 0%,rgba(255,255,255,0.12) 50%,transparent 100%);
-    transform:translateX(-100%);
-    transition:transform 0.45s ease;
-    pointer-events:none;border-radius:inherit;
-}}
-.stButton > button:hover {{
-    transform:translateY(-2px) scale(1.01)!important;
-    box-shadow:0 8px 32px {accent}55!important;
-    filter:brightness(1.06)!important;
-}}
-.stButton > button:hover::after {{ transform:translateX(100%); }}
-.stButton > button:active {{
-    transform:translateY(0) scale(0.99)!important;
-    filter:brightness(0.97)!important;
-}}
-
-/* ── Back / secondary button style ── */
-.lp-back .stButton > button {{
-    background:rgba(255,255,255,0.07)!important;
-    color:{SUB}!important;
-    border:1px solid {CARD_BD}!important;
-    box-shadow:none!important;
-    font-weight:500!important;
-    backdrop-filter:blur(8px)!important;
-    -webkit-backdrop-filter:blur(8px)!important;
-}}
-.lp-back .stButton > button:hover {{
-    background:{HOV}!important;
-    color:{TXT}!important;
-    transform:none!important;
-    box-shadow:none!important;
-    filter:none!important;
-    border-color:{accent}44!important;
-}}
-
-/* ── Tab-idle style ── */
-.lp-tab-idle .stButton > button {{
-    background:transparent!important;
-    color:{SUB}!important;
-    border:none!important;
-    box-shadow:none!important;
-    font-weight:500!important;
-    font-size:0.84rem!important;
-    border-radius:12px!important;
-    padding:10px 16px!important;
-    filter:none!important;
-    transform:none!important;
-}}
-.lp-tab-idle .stButton > button:hover {{
-    background:{HOV}!important;
-    color:{TXT}!important;
-    transform:none!important;
-    box-shadow:none!important;
-    filter:none!important;
-}}
-/* ── Tab-active style ── */
-.lp-tab-active .stButton > button {{
-    background:linear-gradient(135deg,{accent},{accent2})!important;
-    color:#fff!important;
-    border:none!important;
-    box-shadow:0 4px 16px {accent}44!important;
-    font-size:0.84rem!important;
-    font-weight:700!important;
-    border-radius:12px!important;
-    padding:10px 16px!important;
-    transform:none!important;
-    filter:none!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   FORM SUBMIT BUTTON
-══════════════════════════════════════════════════════════════ */
-[data-testid="stFormSubmitButton"] > button {{
-    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
-    color:#fff!important;border:none!important;
-    border-radius:14px!important;
-    padding:13px 20px!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.875rem!important;font-weight:700!important;
-    width:100%!important;cursor:pointer!important;
-    position:relative!important;overflow:hidden!important;
-    transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1),box-shadow 0.18s!important;
-    box-shadow:{BTN_SH}!important;
-    margin-top:6px!important;
-}}
-[data-testid="stFormSubmitButton"] > button:hover {{
-    transform:translateY(-2px) scale(1.01)!important;
-    box-shadow:0 8px 32px {accent}55!important;
-    filter:brightness(1.06)!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
    CUSTOM TAB BAR
 ══════════════════════════════════════════════════════════════ */
 .lp-tabs {{
-    display:flex;gap:4px;
+    display:flex;
+    gap:4px;
     background:{CARD_BG};
     border:1px solid {CARD_BD};
-    border-radius:18px;padding:5px;
+    border-radius:18px;
+    padding:5px;
     margin-bottom:16px;
-    backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
     box-shadow:0 4px 16px rgba(0,0,0,0.12);
 }}
 
@@ -1954,106 +2012,194 @@ html, body, .stApp {{
    STEP INDICATOR
 ══════════════════════════════════════════════════════════════ */
 .lp-step-wrap {{
-    display:flex;align-items:center;margin-bottom:20px;
+    display:flex;
+    align-items:center;
+    margin-bottom:20px;
 }}
+
 .lp-step-col {{
-    display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:4px;
+    flex:0 0 auto;
 }}
+
 .lp-step-dot {{
-    width:36px;height:36px;border-radius:50%;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:0.80rem;
-    transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1);
+    width:36px;
+    height:36px;
+    border-radius:50%;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:800;
+    font-size:0.80rem;
+    transition:all 0.28s cubic-bezier(0.34,1.56,0.64,1);
 }}
+
 .lp-step-dot.active {{
     background:linear-gradient(135deg,{accent},{accent2});
     color:#fff;
-    box-shadow:0 4px 16px {accent}44,0 0 0 4px {accent}18;
+    box-shadow:0 6px 20px {accent}50,0 0 0 4px {accent}18;
 }}
+
 .lp-step-dot.done {{
-    background:{accent};color:#fff;
+    background:{accent};
+    color:#fff;
     box-shadow:0 2px 8px {accent}33;
 }}
+
 .lp-step-dot.idle {{
-    background:{INP_BG};color:{SUB};
+    background:{INP_BG};
+    color:{SUB};
     border:1.5px solid {INP_BD};
 }}
+
 .lp-step-lbl {{
-    font-size:0.62rem;font-weight:700;text-transform:uppercase;
+    font-size:0.62rem;
+    font-weight:700;
+    text-transform:uppercase;
     letter-spacing:0.09em;
 }}
+
 .lp-step-lbl.active {{ color:{accent}; }}
 .lp-step-lbl.idle   {{ color:{SUB}; }}
+
 .lp-step-line {{
-    flex:1;height:2px;
+    flex:1;
+    height:2px;
     background:linear-gradient(90deg,{accent}44,{INP_BD});
-    margin:0 10px 20px;border-radius:2px;
+    margin:0 10px 20px;
+    border-radius:2px;
 }}
 
 /* ══════════════════════════════════════════════════════════════
    BANNERS
 ══════════════════════════════════════════════════════════════ */
 .lp-otp-box {{
-    background:{green_bg};border:1px solid {green_bd}44;
-    border-radius:16px;padding:16px 18px;margin:12px 0;
-    display:flex;align-items:center;gap:14px;
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    background:{green_bg};
+    border:1px solid {green_bd}44;
+    border-radius:16px;
+    padding:16px 18px;
+    margin:12px 0;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
     animation:lp-slide-in 0.28s ease both;
 }}
+
 .lp-otp-icon {{ font-size:1.4rem;flex-shrink:0; }}
+
 .lp-otp-label {{
-    font-size:0.70rem;color:{green_txt};font-weight:700;
-    text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px;
+    font-size:0.70rem;
+    color:{green_txt};
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    margin-bottom:4px;
 }}
+
 .lp-otp-code {{
     font-family:'DM Mono','Courier New',monospace;
-    font-size:1.8rem;font-weight:500;color:{green_txt};
-    letter-spacing:8px;display:block;line-height:1;
+    font-size:1.8rem;
+    font-weight:500;
+    color:{green_txt};
+    letter-spacing:8px;
+    display:block;
+    line-height:1;
 }}
 
 .lp-phone-badge {{
-    background:{blue_bg};border:1px solid {blue_bd}44;
-    border-radius:10px;padding:9px 14px;font-size:0.78rem;
-    color:{blue_txt};font-weight:500;margin-bottom:14px;
-    display:flex;align-items:center;gap:7px;
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    background:{blue_bg};
+    border:1px solid {blue_bd}44;
+    border-radius:10px;
+    padding:9px 14px;
+    font-size:0.78rem;
+    color:{blue_txt};
+    font-weight:500;
+    margin-bottom:14px;
+    display:flex;
+    align-items:center;
+    gap:7px;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
 }}
 
 .lp-demo-hint {{
-    background:{amber_bg};border:1px solid {amber_bd}44;
-    border-radius:14px;padding:13px 16px;margin:10px 0 0;
-    font-size:0.76rem;line-height:1.65;
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    background:{amber_bg};
+    border:1px solid {amber_bd}44;
+    border-radius:14px;
+    padding:13px 16px;
+    margin:10px 0 0;
+    font-size:0.76rem;
+    line-height:1.65;
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
 }}
-.lp-demo-row {{ color:{amber_txt};margin-bottom:3px; }}
-.lp-demo-row strong {{ font-weight:700; }}
+
+.lp-demo-row {{ 
+    color:{amber_txt};
+    margin-bottom:3px; 
+}}
+
+.lp-demo-row strong {{ 
+    font-weight:700; 
+}}
 
 .lp-verified {{
-    background:{green_bg};border:1px solid {green_bd}44;
-    border-radius:12px;padding:11px 15px;
-    font-size:0.80rem;color:{green_txt};font-weight:600;margin:10px 0;
-    display:flex;align-items:center;gap:8px;
+    background:{green_bg};
+    border:1px solid {green_bd}44;
+    border-radius:12px;
+    padding:11px 15px;
+    font-size:0.80rem;
+    color:{green_txt};
+    font-weight:600;
+    margin:10px 0;
+    display:flex;
+    align-items:center;
+    gap:8px;
     animation:lp-slide-in 0.28s ease both;
 }}
+
 .lp-warn {{
-    background:{amber_bg};border:1px solid {amber_bd}44;
-    border-radius:12px;padding:11px 15px;
-    font-size:0.78rem;color:{amber_txt};font-weight:500;margin:10px 0;
+    background:{amber_bg};
+    border:1px solid {amber_bd}44;
+    border-radius:12px;
+    padding:11px 15px;
+    font-size:0.78rem;
+    color:{amber_txt};
+    font-weight:500;
+    margin:10px 0;
 }}
+
 .lp-info {{
-    background:{blue_bg};border:1px solid {blue_bd}44;
-    border-radius:12px;padding:12px 15px;
-    font-size:0.80rem;color:{blue_txt};font-weight:500;margin:10px 0;
-    display:flex;align-items:flex-start;gap:8px;line-height:1.6;
+    background:{blue_bg};
+    border:1px solid {blue_bd}44;
+    border-radius:12px;
+    padding:12px 15px;
+    font-size:0.80rem;
+    color:{blue_txt};
+    font-weight:500;
+    margin:10px 0;
+    display:flex;
+    align-items:flex-start;
+    gap:8px;
+    line-height:1.6;
 }}
 
 /* ══════════════════════════════════════════════════════════════
    NATIVE STREAMLIT ALERTS — restyle
 ══════════════════════════════════════════════════════════════ */
 .stAlert {{
-    border-radius:14px!important;backdrop-filter:blur(8px)!important;
-    -webkit-backdrop-filter:blur(8px)!important;border-width:1px!important;
-    font-family:'Outfit',sans-serif!important;font-size:0.84rem!important;
+    border-radius:14px!important;
+    backdrop-filter:blur(8px)!important;
+    -webkit-backdrop-filter:blur(8px)!important;
+    border-width:1px!important;
+    font-family:'Outfit',sans-serif!important;
+    font-size:0.84rem!important;
 }}
 
 /* ══════════════════════════════════════════════════════════════
@@ -2069,20 +2215,25 @@ html, body, .stApp {{
     -webkit-backdrop-filter:blur(20px)!important;
     box-shadow:0 4px 16px rgba(0,0,0,0.10)!important;
 }}
+
 .stTabs [data-baseweb="tab"] {{
     border-radius:12px!important;
     font-family:'Outfit',sans-serif!important;
-    font-size:0.84rem!important;font-weight:600!important;
+    font-size:0.84rem!important;
+    font-weight:600!important;
     color:{SUB}!important;
     padding:10px 18px!important;
     border:none!important;
-    transition:all 0.18s!important;
+    transition:all 0.20s ease!important;
+    min-height:40px!important;
 }}
+
 .stTabs [aria-selected="true"] {{
     background:linear-gradient(135deg,{accent},{accent2})!important;
     color:#fff!important;
     box-shadow:0 4px 16px {accent}40!important;
 }}
+
 .stTabs [data-baseweb="tab-panel"] {{
     background:transparent!important;
     padding:18px 0 0!important;
@@ -2095,32 +2246,179 @@ html, body, .stApp {{
     from{{ opacity:0; transform:translateY(20px); }}
     to  {{ opacity:1; transform:translateY(0); }}
 }}
+
 @keyframes lp-slide-in {{
     from{{ opacity:0; transform:translateX(-8px); }}
     to  {{ opacity:1; transform:translateX(0); }}
 }}
+
 .lp-card, .lp-hero {{
     animation:lp-fade-up 0.38s cubic-bezier(0.22,1,0.36,1) both;
 }}
 
 /* ══════════════════════════════════════════════════════════════
-   MOBILE
+   MOBILE RESPONSIVE DESIGN
 ══════════════════════════════════════════════════════════════ */
-@media(max-width:600px){{
-    .main .block-container{{padding:1.25rem 0.9rem 3rem!important;}}
-    .lp-hero{{padding:1.8rem 1.2rem 1.6rem;border-radius:22px;}}
-    .lp-hero-title{{font-size:1.45rem;}}
-    .lp-card{{padding:22px 18px 18px;border-radius:20px;}}
-    .lp-otp-code{{font-size:1.5rem;letter-spacing:5px;}}
+@media(max-width:768px) {{
+    .main .block-container {{
+        padding:1.5rem 1rem 3rem!important;
+        max-width:100%!important;
+    }}
+    
+    .lp-hero {{
+        padding:2rem 1.5rem 1.8rem;
+        border-radius:22px;
+        margin-bottom:1rem;
+    }}
+    
+    .lp-hero-icon {{
+        font-size:2.5rem;
+        margin-bottom:10px;
+    }}
+    
+    .lp-hero-title {{
+        font-size:1.45rem;
+        margin-bottom:4px;
+    }}
+    
+    .lp-hero-sub {{
+        font-size:0.80rem;
+    }}
+    
+    .lp-card {{
+        padding:22px 18px 18px;
+        border-radius:20px;
+        margin-bottom:8px;
+    }}
+    
+    .stButton > button {{
+        padding:11px 16px!important;
+        font-size:0.82rem!important;
+        min-height:42px!important;
+    }}
+    
+    [data-testid="stFormSubmitButton"] > button {{
+        padding:11px 16px!important;
+        font-size:0.82rem!important;
+        min-height:42px!important;
+    }}
+    
+    .lp-otp-code {{
+        font-size:1.5rem;
+        letter-spacing:5px;
+    }}
+    
+    .lp-tabs {{
+        gap:3px;
+        padding:4px;
+    }}
+    
+    .lp-step-wrap {{
+        margin-bottom:16px;
+    }}
+    
+    .lp-step-dot {{
+        width:32px;
+        height:32px;
+        font-size:0.75rem;
+    }}
+    
+    .stTabs [data-baseweb="tab"] {{
+        padding:8px 14px!important;
+        font-size:0.78rem!important;
+    }}
+}}
+
+@media(max-width:480px) {{
+    .main .block-container {{
+        padding:1.2rem 0.9rem 2.5rem!important;
+    }}
+    
+    .lp-hero {{
+        padding:1.6rem 1.2rem 1.4rem;
+        border-radius:18px;
+        margin-bottom:0.8rem;
+    }}
+    
+    .lp-hero-icon {{
+        font-size:2rem;
+        margin-bottom:8px;
+    }}
+    
+    .lp-hero-title {{
+        font-size:1.25rem;
+    }}
+    
+    .lp-hero-sub {{
+        font-size:0.75rem;
+    }}
+    
+    .lp-card {{
+        padding:18px 14px 14px;
+        border-radius:16px;
+    }}
+    
+    .stButton > button {{
+        padding:10px 14px!important;
+        font-size:0.78rem!important;
+        min-height:40px!important;
+    }}
+    
+    [data-testid="stFormSubmitButton"] > button {{
+        padding:10px 14px!important;
+        font-size:0.78rem!important;
+    }}
+    
+    .lp-card-label {{
+        font-size:0.65rem;
+        margin-bottom:14px;
+    }}
+    
+    .lp-tabs {{
+        gap:2px;
+        padding:3px;
+        border-radius:14px;
+    }}
+    
+    .lp-step-dot {{
+        width:28px;
+        height:28px;
+        font-size:0.70rem;
+    }}
+    
+    .lp-step-lbl {{
+        font-size:0.58rem;
+    }}
+}}
+
+/* ══════════════════════════════════════════════════════════════
+   ACCESSIBILITY
+══════════════════════════════════════════════════════════════ */
+.stButton > button:disabled {{
+    opacity:0.5!important;
+    cursor:not-allowed!important;
+    transform:none!important;
+}}
+
+.stButton > button:focus-visible {{
+    outline:2px solid {accent}!important;
+    outline-offset:2px!important;
 }}
 
 /* ══════════════════════════════════════════════════════════════
    MISC
 ══════════════════════════════════════════════════════════════ */
-p,span,div,label,small {{ color:{TXT}; }}
+p, span, div, label, small {{ color:{TXT}; }}
 .stMarkdown p {{ color:{TXT}!important; }}
-::-webkit-scrollbar {{ width:4px; }}
-::-webkit-scrollbar-thumb {{ background:{accent}44;border-radius:99px; }}
+
+::-webkit-scrollbar {{ width:6px; }}
+::-webkit-scrollbar-track {{ background:transparent; }}
+::-webkit-scrollbar-thumb {{ 
+    background:{accent}44;
+    border-radius:99px;
+    transition:background 0.2s ease;
+}}
+::-webkit-scrollbar-thumb:hover {{ background:{accent}66; }}
 </style>
 
 <!-- floating orbs -->
@@ -2130,8 +2428,6 @@ p,span,div,label,small {{ color:{TXT}; }}
   <div class='lp-orb lp-orb-3'></div>
 </div>
 """
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
 # CITIZEN LOGIN
 # ═══════════════════════════════════════════════════════════════════════════════
