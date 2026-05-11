@@ -11228,16 +11228,20 @@ def pg_admin_officials():
     transform:translateY(-1px)!important;
 }}
 .off-btn-remove .stButton>button{{
-    background:{"rgba(220,38,38,0.08)" if dark else "#FFF1F2"}!important;
+    background:{"rgba(220,38,38,0.10)" if dark else "#FFF1F2"}!important;
     color:{"#F87171" if dark else "#BE123C"}!important;
-    border:1.5px solid {"rgba(220,38,38,0.20)" if dark else "#FECDD3"}!important;
-    border-radius:10px!important;font-size:0.78rem!important;
-    font-weight:700!important;height:36px!important;
+    border:1.5px solid {"rgba(220,38,38,0.25)" if dark else "#FECDD3"}!important;
+    border-radius:12px!important;font-size:1.1rem!important;
+    font-weight:700!important;height:40px!important;width:40px!important;
+    min-width:40px!important;max-width:40px!important;
+    padding:0!important;display:inline-flex!important;
+    align-items:center!important;justify-content:center!important;
     box-shadow:none!important;transition:all 0.18s!important;
 }}
 .off-btn-remove .stButton>button:hover{{
-    background:{"rgba(220,38,38,0.16)" if dark else "#FFE4E6"}!important;
-    transform:translateY(-1px)!important;
+    background:{"rgba(220,38,38,0.22)" if dark else "#FFE4E6"}!important;
+    transform:translateY(-2px)!important;
+    box-shadow:0 4px 12px rgba(239,68,68,0.20)!important;
 }}
 
 @media(max-width:600px){{
@@ -11390,15 +11394,14 @@ def pg_admin_officials():
                 f"<div class='off-stat-pill-lbl'>{rating_cnt} reviews</div></div>"
                 f"</div>"
                 # Resolution progress bar
-                f"<div style='background:{_BOR};border-radius:99px;height:6px;margin-bottom:14px;overflow:hidden;'>"
+                f"<div style='background:{_BOR};border-radius:99px;height:6px;margin-bottom:4px;overflow:hidden;'>"
                 f"<div style='width:{min(res_rate,100)}%;height:100%;border-radius:99px;"
-                f"background:{bar_color};'></div></div>"
-                f"<div class='off-card-divider'></div>",
+                f"background:{bar_color};'></div></div>",
                 unsafe_allow_html=True,
             )
 
-            # Remove button (icon only) inside card
-            rc1, rc2 = st.columns([6, 0.8])
+            # Remove button (icon only) — inside card
+            rc1, rc2 = st.columns([8, 1])
             with rc2:
                 st.markdown("<div class='off-btn-remove'>", unsafe_allow_html=True)
                 if st.button("🗑️", key=f"rem_{oid}", use_container_width=True, help="Remove official"):
