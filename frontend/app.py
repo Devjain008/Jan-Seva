@@ -10666,412 +10666,303 @@ def pg_city_health_score():
 # ════════════════════════════════════════════════════════════════
 # DEPT DRILL
 # ════════════════════════════════════════════════════════════════
+import streamlit as st
+
 def _dept_drill():
-
-    dark = st.session_state.get("dark_mode", False)
-
-    st.markdown(
-        get_css(dark_mode=dark),
-        unsafe_allow_html=True
-    )
-
+    dark  = st.session_state.get("dark_mode", False)
+    # st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True) # Un-comment if used
+    
     _CARD = "#10161F" if dark else "#FFFFFF"
     _BOR  = "#1E2A3D" if dark else "#E2E8F4"
     _TXT  = "#F0F4FF" if dark else "#0F172A"
     _SUB  = "#8896B0" if dark else "#64748B"
-
+    _A1   = "#6366F1"
+    _A2   = "#8B5CF6"
+    
     meta_pill_bg = "#1A2236" if dark else "#F1F5F9"
-
+    
     st.markdown(f"""
 <style>
-
-/* ═══════════════════════════════════════
-   OFFICIAL CARD FIX
-═══════════════════════════════════════ */
-
+/* ── drill hero ── */
+.dd-hero{{
+    background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e3a5f 100%);
+    border-radius:22px;padding:1.75rem 2rem;margin-bottom:1.75rem;
+    position:relative;overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,0.25);
+}}
+.dd-hero::before{{
+    content:'';position:absolute;top:-60px;right:-60px;
+    width:200px;height:200px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 70%);
+    pointer-events:none;
+}}
+.dd-hero-title{{
+    font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;
+    color:#fff;margin-bottom:5px;position:relative;z-index:1;
+}}
+.dd-hero-code{{
+    font-family:'Courier New',monospace;font-size:0.82rem;
+    color:rgba(255,255,255,0.65);position:relative;z-index:1;
+}}
+ 
+/* ── section header ── */
+.dd-sec{{
+    font-size:0.70rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.10em;color:{_SUB};margin:18px 0 10px;
+    display:flex;align-items:center;gap:10px;
+}}
+.dd-sec::before{{
+    content:'';width:4px;height:16px;
+    background:linear-gradient(180deg,{_A1},{_A2});
+    border-radius:3px;flex-shrink:0;
+}}
+.dd-sec::after{{
+    content:'';flex:1;height:1px;
+    background:linear-gradient(to right,{_BOR},transparent);
+}}
+ 
+/* ── official cards ── */
 .dd-off-card{{
-    background:{_CARD};
-    border:1px solid {_BOR};
-    border-left:4px solid;
-    border-radius:18px;
-    padding:18px;
-    margin-bottom:14px;
-    overflow:hidden;
-    position:relative;
+    background:{_CARD};border:1px solid {_BOR};border-left:4px solid;
+    border-radius:14px;padding:14px 16px;margin-bottom:8px;
+    /* Added bottom padding to create an internal slot for the buttons */
+    padding-bottom: 50px; 
+    transition:transform 0.18s;
 }}
-
-.dd-off-name{{
-    font-size:.95rem;
-    font-weight:800;
-    color:{_TXT};
-    margin-bottom:8px;
-}}
-
+.dd-off-card:hover{{transform:translateX(3px);}}
+.dd-off-name{{font-size:0.90rem;font-weight:800;color:{_TXT};margin-bottom:5px;}}
 .dd-off-meta{{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    align-items:center;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    font-size:0.72rem;color:{_SUB};
 }}
-
 .dd-meta-tag{{
-    background:{meta_pill_bg};
-    border:1px solid {_BOR};
-    border-radius:20px;
-    padding:4px 10px;
-    font-size:.70rem;
-    font-weight:600;
-    color:{_SUB};
+    background:{meta_pill_bg};border:1px solid {_BOR};
+    border-radius:20px;padding:2px 9px;font-size:0.68rem;font-weight:600;color:{_SUB};
+}}
+ 
+/* ── stat chips on official cards ── */
+.dd-stat-row{{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}}
+.dd-stat{{border-radius:10px;padding:6px 12px;border:1px solid;text-align:center;}}
+.dd-stat-num{{font-size:0.82rem;font-weight:800;line-height:1;margin-bottom:1px;}}
+.dd-stat-lbl{{font-size:0.58rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.05em;opacity:0.70;}}
+.dd-stat.res{{
+    background:{"rgba(74,222,128,0.10)" if dark else "#F0FDF4"};
+    border-color:{"rgba(74,222,128,0.22)" if dark else "#BBF7D0"};
+}}
+.dd-stat.res .dd-stat-num{{color:{"#4ADE80" if dark else "#15803D"};}}
+.dd-stat.rat{{
+    background:{"rgba(251,146,60,0.10)" if dark else "#FFF7ED"};
+    border-color:{"rgba(251,146,60,0.22)" if dark else "#FED7AA"};
+}}
+.dd-stat.rat .dd-stat-num{{color:{"#FB923C" if dark else "#C2410C"};}}
+ 
+/* ══════════════════════════════════════════════════════════════ */
+/* ── MAGIC IN-CARD BUTTON ALIGNMENT ── */
+/* ══════════════════════════════════════════════════════════════ */
+
+/* Pull the adjacent Streamlit columns UP into the card's bottom padding */
+div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] {{
+    margin-top: -60px; 
+    margin-bottom: 20px;
+    padding-right: 16px;
+    position: relative;
+    z-index: 10;
+    pointer-events: none; /* Prevents invisible column area from blocking text clicks */
 }}
 
-/* ═══════════════════════════════════════
-   ACTION BUTTON ROW
-═══════════════════════════════════════ */
-
-.dd-action-row{{
-    display:flex!important;
-    justify-content:flex-end!important;
-    align-items:center!important;
-    gap:14px!important;
-    margin-top:18px!important;
-    width:100%!important;
-    flex-wrap:wrap!important;
+/* Re-enable clicks strictly on the buttons */
+div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] div[data-testid="stButton"] {{
+    pointer-events: auto; 
 }}
 
-.dd-action-row .stButton{{
-    width:100%!important;
+/* Universal premium icon styling */
+div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] button {{
+    border-radius: 10px !important;
+    height: 38px !important;
+    padding: 0 !important;
+    font-size: 1.1rem;
+    transition: transform 0.1s ease;
+}}
+div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] button:active {{
+    transform: scale(0.95);
 }}
 
-.dd-action-row .stButton > button{{
-    width:100%!important;
-    min-width:150px!important;
-    height:46px!important;
-    border-radius:14px!important;
-    border:none!important;
-    font-weight:700!important;
-    transition:all .18s ease!important;
+/* Column 2: Approve Button (✅) */
+div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] div[data-testid="column"]:nth-child(2) button {{
+    background: linear-gradient(135deg,#15803D,#22C55E) !important;
+    color: #fff !important;
+    border: none !important;
+    box-shadow: 0 4px 10px rgba(34,197,94,0.28) !important;
 }}
 
-/* Approve */
-.dd-approve .stButton > button{{
-    background:
-        linear-gradient(
-            135deg,
-            #6366F1,
-            #8B5CF6
-        )!important;
-
-    color:#FFFFFF!important;
+/* Column 3: Reject / Remove Button (❌ / 🗑️) */
+div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] div[data-testid="column"]:nth-child(3) button {{
+    background: {"#1C0808" if dark else "#FFF1F2"} !important;
+    color: {"#F87171" if dark else "#BE123C"} !important;
+    border: 1.5px solid {"#7F1D1D" if dark else "#FECDD3"} !important;
+    box-shadow: none !important;
 }}
-
-/* Reject */
-.dd-reject .stButton > button{{
-    background:
-        linear-gradient(
-            135deg,
-            #EF4444,
-            #DC2626
-        )!important;
-
-    color:#FFFFFF!important;
-}}
-
-/* Remove */
-.dd-remove-wrap .stButton > button{{
-    width:54px!important;
-    min-width:54px!important;
-    height:46px!important;
-    border-radius:14px!important;
-    border:none!important;
-    background:
-        linear-gradient(
-            135deg,
-            #EF4444,
-            #DC2626
-        )!important;
-    color:#FFFFFF!important;
-    font-size:18px!important;
-    font-weight:700!important;
-}}
-
-/* Hover */
-.dd-action-row .stButton > button:hover,
-.dd-remove-wrap .stButton > button:hover{{
-    transform:translateY(-2px)!important;
-    opacity:.96!important;
-}}
-
 </style>
 """, unsafe_allow_html=True)
-
+ 
     did = st.session_state.viewing_dept_id
-
-    tab1, tab2, tab3 = st.tabs(
-        ["👥 Officials", "📢 Complaints", "🏆 Leaderboard"]
+    dnm = st.session_state.viewing_dept_name
+    dcd = st.session_state.viewing_dept_code
+ 
+    # ── back button ───────────────────────────────────────────────
+    bc1, bc2, bc3 = st.columns([1, 2, 1])
+    with bc2:
+        if st.button("← Back to Departments", key="dd_back", use_container_width=True):
+            st.session_state.viewing_dept_id = None
+            st.rerun()
+ 
+    # ── hero ──────────────────────────────────────────────────────
+    st.markdown(
+        f"<div class='dd-hero'>"
+        f"<div class='dd-hero-title'>🏢 {dnm}</div>"
+        f"<div class='dd-hero-code'>"
+        f"Dept Code: <strong>{dcd}</strong> · Share with officials to join"
+        f"</div>"
+        f"</div>",
+        unsafe_allow_html=True,
     )
-
-    # ═══════════════════════════════════════
-    # TAB 1 — OFFICIALS
-    # ═══════════════════════════════════════
-
+ 
+    # ── tabs ──────────────────────────────────────────────────────
+    def _stars(avg, cnt):
+        try:
+            v = max(0.0, min(5.0, float(avg or 0)))
+        except (TypeError, ValueError):
+            v = 0.0
+        if not cnt:
+            return "☆☆☆☆☆", "No ratings"
+        f_ = int(v)
+        h_ = 1 if (v - f_) >= 0.5 else 0
+        e_ = 5 - f_ - h_
+        s  = "★" * f_ + ("⯨" if h_ else "") + "☆" * e_
+        return s, f"{v:.1f} ({cnt})"
+ 
+    tab1, tab2, tab3 = st.tabs(["👥 Officials", "📢 Complaints", "🏆 Leaderboard"])
+ 
+    # ── TAB 1 — Officials ─────────────────────────────────────────
     with tab1:
-
-        officials = api(
-            "get",
-            f"/admin/departments/{did}/officials"
-        )
-
-        officials = officials if isinstance(
-            officials,
-            list
-        ) else []
-
-        pending_o = [
-
-            o for o in officials
-
-            if not o.get("is_approved")
-        ]
-
-        approved_o = [
-
-            o for o in officials
-
-            if o.get("is_approved")
-        ]
-
-        # ───────────────────────────────────
-        # PENDING
-        # ───────────────────────────────────
-
+        # NOTE: Ensure `api()` function is defined/imported in your scope
+        officials  = api("get", f"/admin/departments/{did}/officials")
+        officials  = officials if isinstance(officials, list) else []
+        pending_o  = [o for o in officials if not o.get("is_approved")]
+        approved_o = [o for o in officials if     o.get("is_approved")]
+ 
+        # PENDING OFFICIALS
         st.markdown(
-            f"<div class='dd-sec'>⏳ Pending Approval ({len(pending_o)})</div>",
-            unsafe_allow_html=True
+            f"<div class='dd-sec'>⏳ Pending Approval"
+            f"{' (' + str(len(pending_o)) + ')' if pending_o else ''}"
+            f"</div>",
+            unsafe_allow_html=True,
         )
-
         if not pending_o:
-
-            st.info(
-                "No pending officials."
-            )
-
+            st.info("No pending officials in this department.")
         else:
-
             for o in pending_o:
-
                 oid = o.get("id")
-
-                st.markdown(
-
-                    f"""
-                    <div class='dd-off-card'
-                         style='border-left-color:#D97706;'>
-
-                        <div class='dd-off-name'>
-                            👤 {o.get('name','—')}
-                        </div>
-
-                        <div class='dd-off-meta'>
-
-                            <span class='dd-meta-tag'>
-                                📧 {o.get('email','—')}
-                            </span>
-
-                            <span class='dd-meta-tag'>
-                                🏢 {o.get('department','Department')}
-                            </span>
-
-                        </div>
-
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
+                joined_tag = (
+                    f"<span class='dd-meta-tag'>📅 {o['joined']}</span>"
+                    if o.get("joined") else ""
                 )
-
+                
+                # Card HTML Render
                 st.markdown(
-                    "<div class='dd-action-row'>",
-                    unsafe_allow_html=True
+                    f"<div class='dd-off-card' style='border-left-color:#D97706;'>"
+                    f"<div class='dd-off-name'>👤 {o.get('name','—')}</div>"
+                    f"<div class='dd-off-meta'>"
+                    f"<span class='dd-meta-tag'>📧 {o.get('email','—')}</span>"
+                    f"{joined_tag}"
+                    f"</div></div>",
+                    unsafe_allow_html=True,
                 )
-
-                pa1, pa2 = st.columns(2)
-
-                with pa1:
-
-                    st.markdown(
-                        "<div class='dd-approve'>",
-                        unsafe_allow_html=True
-                    )
-
-                    if st.button(
-
-                        "✅ Approve",
-
-                        key=f"approve_{oid}",
-
-                        use_container_width=True
-                    ):
-
-                        api(
-                            "put",
-                            f"/admin/officials/{oid}/approve"
-                        )
-
-                        st.rerun()
-
-                    st.markdown(
-                        "</div>",
-                        unsafe_allow_html=True
-                    )
-
+                
+                # Render Buttons immediately after (CSS shifts this up INTO the card)
+                pa1, pa2, pa3 = st.columns([7.5, 1, 1])
                 with pa2:
-
-                    st.markdown(
-                        "<div class='dd-reject'>",
-                        unsafe_allow_html=True
-                    )
-
-                    if st.button(
-
-                        "❌ Reject",
-
-                        key=f"reject_{oid}",
-
-                        use_container_width=True
-                    ):
-
-                        api(
-                            "put",
-                            f"/admin/officials/{oid}/reject"
-                        )
-
+                    if st.button("✅", key=f"da_{oid}", use_container_width=True, help="Approve"):
+                        api("put", f"/admin/officials/{oid}/approve")
                         st.rerun()
-
-                    st.markdown(
-                        "</div>",
-                        unsafe_allow_html=True
-                    )
-
-                st.markdown(
-                    "</div>",
-                    unsafe_allow_html=True
-                )
-
-        # ───────────────────────────────────
-        # APPROVED
-        # ───────────────────────────────────
-
+                with pa3:
+                    if st.button("❌", key=f"dr_{oid}", use_container_width=True, help="Reject"):
+                        api("put", f"/admin/officials/{oid}/reject")
+                        st.rerun()
+ 
+        # APPROVED OFFICIALS
         st.markdown(
-            f"<div class='dd-sec'>✅ Approved ({len(approved_o)})</div>",
-            unsafe_allow_html=True
+            f"<div class='dd-sec'>✅ Approved"
+            f"{' (' + str(len(approved_o)) + ')' if approved_o else ''}"
+            f"</div>",
+            unsafe_allow_html=True,
         )
-
         if not approved_o:
-
-            st.info(
-                "No approved officials."
-            )
-
+            st.info("No approved officials yet.")
         else:
-
             for o in approved_o:
-
-                oid = o.get("id")
-
-                st.markdown(
-
-                    f"""
-                    <div class='dd-off-card'
-                         style='border-left-color:#22C55E;'>
-
-                        <div class='dd-off-name'>
-                            👤 {o.get('name','—')}
-                        </div>
-
-                        <div class='dd-off-meta'>
-
-                            <span class='dd-meta-tag'>
-                                📧 {o.get('email','—')}
-                            </span>
-
-                            <span class='dd-meta-tag'>
-                                ⭐ Approved Official
-                            </span>
-
-                        </div>
-
-                    </div>
-                    """,
-
-                    unsafe_allow_html=True
+                oid      = o.get("id")
+                resolved = max(0, int(o.get("total_resolved", 0) or 0))
+                assigned = max(1, int(o.get("total_assigned", 1) or 1))
+                res_rate = min(100, round(resolved / assigned * 100, 1))
+                s_str, s_lbl = _stars(o.get("avg_rating", 0), o.get("rating_count", 0))
+ 
+                joined_tag = (
+                    f"<span class='dd-meta-tag'>📅 {o['joined']}</span>"
+                    if o.get("joined") else ""
                 )
-
-                r1, r2 = st.columns([6, 1])
-
-                with r2:
-
-                    st.markdown(
-                        "<div class='dd-remove-wrap'>",
-                        unsafe_allow_html=True
-                    )
-
-                    if st.button(
-
-                        "🗑️",
-
-                        key=f"remove_{oid}",
-
-                        use_container_width=True
-                    ):
-
-                        api(
-                            "delete",
-                            f"/admin/officials/{oid}"
-                        )
-
-                        st.rerun()
-
-                    st.markdown(
-                        "</div>",
-                        unsafe_allow_html=True
-                    )
-
-    # ═══════════════════════════════════════
-    # TAB 2 — COMPLAINTS
-    # ═══════════════════════════════════════
-
+ 
+                # Card HTML Render
+                st.markdown(
+                    f"<div class='dd-off-card' style='border-left-color:#22C55E;'>"
+                    f"<div class='dd-off-name'>👤 {o.get('name','—')}</div>"
+                    f"<div class='dd-off-meta'>"
+                    f"<span class='dd-meta-tag'>📧 {o.get('email','—')}</span>"
+                    f"{joined_tag}"
+                    f"</div>"
+                    f"<div class='dd-stat-row'>"
+                    f"<div class='dd-stat res'>"
+                    f"<div class='dd-stat-num'>{res_rate}%</div>"
+                    f"<div class='dd-stat-lbl'>Res. Rate</div>"
+                    f"</div>"
+                    f"<div class='dd-stat res'>"
+                    f"<div class='dd-stat-num'>{resolved}</div>"
+                    f"<div class='dd-stat-lbl'>Resolved</div>"
+                    f"</div>"
+                    f"<div class='dd-stat rat'>"
+                    f"<div class='dd-stat-num' style='color:#F59E0B;'>{s_str}</div>"
+                    f"<div class='dd-stat-lbl'>{s_lbl}</div>"
+                    f"</div>"
+                    f"</div>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+                
+                # Render Remove Button immediately after (CSS shifts this up INTO the card)
+                rc1, rc2, rc3 = st.columns([7.5, 1, 1])
+                with rc3:
+                    if st.button("🗑️", key=f"remove_official_{oid}", use_container_width=True, help="Remove Official"):
+                        resp = api("delete", f"/admin/officials/{oid}")
+                        if resp.get("success"):
+                            st.success("✅ Official removed successfully")
+                            st.rerun()
+                        else:
+                            st.error(resp.get("detail", "Failed to remove official"))
+ 
+    # ── TAB 2 — Complaints ────────────────────────────────────────
     with tab2:
-
-        comps = api(
-            "get",
-            f"/admin/departments/{did}/complaints"
-        )
-
-        comps = comps if isinstance(
-            comps,
-            list
-        ) else []
-
+        comps = api("get", f"/admin/departments/{did}/complaints")
+        comps = comps if isinstance(comps, list) else []
         if not comps:
-
-            st.info(
-                "No complaints yet."
-            )
-
+            st.info("No complaints for this department yet.")
         else:
-
-            _complaint_list(
-                comps,
-                "dd",
-                None
-            )
-
-    # ═══════════════════════════════════════
-    # TAB 3 — LEADERBOARD
-    # ═══════════════════════════════════════
-
+            # Assumes _complaint_list is defined globally
+            _complaint_list(comps, "dd", None) 
+ 
+    # ── TAB 3 — Leaderboard ───────────────────────────────────────
     with tab3:
-
+        # Assumes _dept_leaderboard is defined globally
         _dept_leaderboard(did)
  
  
