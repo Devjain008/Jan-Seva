@@ -11313,16 +11313,16 @@ def pg_admin_officials():
                 unsafe_allow_html=True,
             )
 
-            # Buttons inside card
-            ba1, ba2, ba3 = st.columns([3, 1.2, 1.2])
-            with ba2:
+            # Approve / Reject buttons inside card
+            ba1, ba2 = st.columns(2)
+            with ba1:
                 st.markdown("<div class='off-btn-approve'>", unsafe_allow_html=True)
                 if st.button("✅ Approve", key=f"apv_{oid}", use_container_width=True):
                     api("put", f"/admin/officials/{oid}/approve")
                     st.success("✅ Approved!")
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
-            with ba3:
+            with ba2:
                 st.markdown("<div class='off-btn-reject'>", unsafe_allow_html=True)
                 if st.button("❌ Reject", key=f"rej_{oid}", use_container_width=True):
                     api("put", f"/admin/officials/{oid}/reject")
@@ -11397,11 +11397,11 @@ def pg_admin_officials():
                 unsafe_allow_html=True,
             )
 
-            # Remove button inside card
-            rc1, rc2 = st.columns([5, 1.4])
+            # Remove button (icon only) inside card
+            rc1, rc2 = st.columns([6, 0.8])
             with rc2:
                 st.markdown("<div class='off-btn-remove'>", unsafe_allow_html=True)
-                if st.button("🗑 Remove", key=f"rem_{oid}", use_container_width=True):
+                if st.button("🗑️", key=f"rem_{oid}", use_container_width=True, help="Remove official"):
                     api("put", f"/admin/officials/{oid}/reject")
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
