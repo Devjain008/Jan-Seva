@@ -9512,39 +9512,145 @@ def pg_admin_dashboard():
         st.info("Not enough data to show city snapshot.")
 
     # ════════════════════════════════════════════════════════
-    # OFFICIAL WORKLOAD
+    # OFFICIAL WORKLOAD (sorted, searchable, paginated)
     # ════════════════════════════════════════════════════════
     officials = api("get", "/admin/officials/all")
     if isinstance(officials, list) and officials:
         st.markdown("<div class='adm-sec'>👥 Official Workload</div>", unsafe_allow_html=True)
-        for off in officials[:10]:
-            assigned = off.get("total_assigned", 0)
-            resolved = off.get("total_resolved", 0)
-            pending  = max(0, assigned - resolved)
-            util_pct = max(0, min(100, int((pending / max(assigned, 1)) * 100)))
-            bar_color = (
-                "#EF4444,#DC2626" if util_pct >= 75
-                else "#F59E0B,#D97706" if util_pct >= 40
-                else "#22C55E,#10B981"
-            )
+
+        # ── Sort by workload (total_assigned) descending ──
+        officials_sorted = sorted(
+            officials,
+            key=lambda o: o.get("total_assigned", 0),
+            reverse=True,
+        )
+
+        # ── Search bar (by email / gmail) ──
+        st.markdown(
+            f"<div style='margin-bottom:12px;'>"
+            f"<div style='font-size:0.72rem;font-weight:700;text-transform:uppercase;"
+            f"letter-spacing:0.08em;color:{_SUB};margin-bottom:6px;'>🔍 Search Official by Email</div>"
+            f"</div>",
+            unsafe_allow_html=True,
+        )
+        if "adm_wl_search" not in st.session_state:
+            st.session_state.adm_wl_search = ""
+        wl_search = st.text_input(
+            label="Search officials by email",
+            label_visibility="collapsed",
+            placeholder="🔍 Search by email / gmail...",
+            value=st.session_state.adm_wl_search,
+            key="adm_wl_search_input",
+        )
+        if wl_search != st.session_state.adm_wl_search:
+            st.session_state.adm_wl_search = wl_search
+            st.session_state.adm_wl_page = 1
+            st.rerun()
+
+        # ── Apply search filter ──
+        if st.session_state.adm_wl_search.strip():
+            search_term = st.session_state.adm_wl_search.strip().lower()
+            officials_filtered = [
+                o for o in officials_sorted
+                if search_term in (o.get("email", "") or "").lower()
+                or search_term in (o.get("name", "") or "").lower()
+            ]
+        else:
+            officials_filtered = officials_sorted
+
+        # ── Pagination (10 per page) ──
+        PAGE_SIZE = 10
+        total_officials = len(officials_filtered)
+        total_pages = max(1, (total_officials + PAGE_SIZE - 1) // PAGE_SIZE)
+
+        if "adm_wl_page" not in st.session_state:
+            st.session_state.adm_wl_page = 1
+        current_page = max(1, min(st.session_state.adm_wl_page, total_pages))
+
+        start_idx = (current_page - 1) * PAGE_SIZE
+        end_idx = min(start_idx + PAGE_SIZE, total_officials)
+        page_officials = officials_filtered[start_idx:end_idx]
+
+        # ── Results count ──
+        st.markdown(
+            f"<div style='display:flex;align-items:center;justify-content:space-between;"
+            f"flex-wrap:wrap;gap:8px;margin:8px 0 12px;'>"
+            f"<span style='background:rgba(99,102,241,0.10);color:{_A1};border:1.5px solid rgba(99,102,241,0.22);"
+            f"border-radius:20px;padding:5px 16px;font-size:0.76rem;font-weight:800;'>"
+            f"Showing <strong>{start_idx+1}–{end_idx}</strong> of <strong>{total_officials}</strong> officials</span>"
+            f"<span style='font-size:0.72rem;color:{_SUB};font-weight:600;'>"
+            f"📊 Sorted by workload (highest first)</span></div>",
+            unsafe_allow_html=True,
+        )
+
+        if not page_officials:
             st.markdown(
-                f"<div class='adm-wl-card'>"
-                f"<div class='adm-wl-head'>"
-                f"<div class='adm-wl-name'>👤 {off.get('name','—')}</div>"
-                f"<div class='adm-wl-stats'>"
-                f"<span class='adm-wl-pill assigned'>📋 {assigned} assigned</span>"
-                f"<span class='adm-wl-pill pending'>⏳ {pending} pending</span>"
-                f"<span class='adm-wl-pill resolved'>✅ {resolved} resolved</span>"
-                f"</div></div>"
-                f"<div class='adm-prog-track'>"
-                f"<div class='adm-prog-fill' style='width:{util_pct}%;"
-                f"background:linear-gradient(90deg,{bar_color});'></div>"
-                f"</div>"
-                f"<div style='font-size:0.65rem;color:{_SUB};margin-top:4px;text-align:right;'>"
-                f"Utilisation {util_pct}%</div>"
-                f"</div>",
+                f"<div style='text-align:center;padding:2rem;background:{_CARD};"
+                f"border:1.5px dashed {_BOR};border-radius:18px;margin:1rem 0;'>"
+                f"<span style='font-size:2.5rem;display:block;margin-bottom:10px;'>🔍</span>"
+                f"<div style='font-size:0.92rem;font-weight:700;color:{_TXT};margin-bottom:6px;'>"
+                f"No officials found</div>"
+                f"<div style='font-size:0.78rem;color:{_SUB};'>Try a different search term.</div></div>",
                 unsafe_allow_html=True,
             )
+        else:
+            for off in page_officials:
+                assigned = off.get("total_assigned", 0)
+                resolved = off.get("total_resolved", 0)
+                pending  = max(0, assigned - resolved)
+                util_pct = max(0, min(100, int((pending / max(assigned, 1)) * 100)))
+                bar_color = (
+                    "#EF4444,#DC2626" if util_pct >= 75
+                    else "#F59E0B,#D97706" if util_pct >= 40
+                    else "#22C55E,#10B981"
+                )
+                email_display = off.get("email", "—")
+                st.markdown(
+                    f"<div class='adm-wl-card'>"
+                    f"<div class='adm-wl-head'>"
+                    f"<div class='adm-wl-name'>👤 {off.get('name','—')}"
+                    f"<span style='font-size:0.68rem;color:{_SUB};margin-left:8px;"
+                    f"font-weight:500;'>✉️ {email_display}</span></div>"
+                    f"<div class='adm-wl-stats'>"
+                    f"<span class='adm-wl-pill assigned'>📋 {assigned} assigned</span>"
+                    f"<span class='adm-wl-pill pending'>⏳ {pending} pending</span>"
+                    f"<span class='adm-wl-pill resolved'>✅ {resolved} resolved</span>"
+                    f"</div></div>"
+                    f"<div class='adm-prog-track'>"
+                    f"<div class='adm-prog-fill' style='width:{util_pct}%;"
+                    f"background:linear-gradient(90deg,{bar_color});'></div>"
+                    f"</div>"
+                    f"<div style='font-size:0.65rem;color:{_SUB};margin-top:4px;text-align:right;'>"
+                    f"Utilisation {util_pct}%</div>"
+                    f"</div>",
+                    unsafe_allow_html=True,
+                )
+
+        # ── Pagination controls ──
+        if total_pages > 1:
+            st.markdown(
+                f"<div style='display:flex;align-items:center;justify-content:center;"
+                f"gap:6px;margin:16px 0 8px;font-size:0.78rem;color:{_SUB};font-weight:600;'>"
+                f"Page {current_page} of {total_pages}</div>",
+                unsafe_allow_html=True,
+            )
+            pg_col1, pg_col2, pg_col3 = st.columns([1, 1, 1])
+            with pg_col1:
+                if current_page > 1:
+                    if st.button("⬅️ Previous 10", key="adm_wl_prev", use_container_width=True):
+                        st.session_state.adm_wl_page = current_page - 1
+                        st.rerun()
+            with pg_col2:
+                st.markdown(
+                    f"<div style='text-align:center;font-size:0.75rem;color:{_A1};"
+                    f"font-weight:800;padding:8px 0;'>{current_page} / {total_pages}</div>",
+                    unsafe_allow_html=True,
+                )
+            with pg_col3:
+                if current_page < total_pages:
+                    if st.button("Next 10 ➡️", key="adm_wl_next", use_container_width=True):
+                        st.session_state.adm_wl_page = current_page + 1
+                        st.rerun()
 
     # ════════════════════════════════════════════════════════
     # PUBLIC SATISFACTION SCORE
