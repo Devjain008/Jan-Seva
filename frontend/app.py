@@ -10679,7 +10679,7 @@ def _dept_drill():
     _A1   = "#6366F1"
     _A2   = "#8B5CF6"
     
-    meta_pill_bg = "#1A2236" if dark else "#F1F5F9"
+    pill_bg = "#1A2236" if dark else "#F8FAFC"
     
     st.markdown(f"""
 <style>
@@ -10689,12 +10689,6 @@ def _dept_drill():
     border-radius:22px;padding:1.75rem 2rem;margin-bottom:1.75rem;
     position:relative;overflow:hidden;
     box-shadow:0 20px 60px rgba(0,0,0,0.25);
-}}
-.dd-hero::before{{
-    content:'';position:absolute;top:-60px;right:-60px;
-    width:200px;height:200px;border-radius:50%;
-    background:radial-gradient(circle,rgba(255,255,255,0.07) 0%,transparent 70%);
-    pointer-events:none;
 }}
 .dd-hero-title{{
     font-family:'Sora',sans-serif;font-size:1.6rem;font-weight:800;
@@ -10707,8 +10701,8 @@ def _dept_drill():
  
 /* ── section header ── */
 .dd-sec{{
-    font-size:0.70rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.10em;color:{_SUB};margin:18px 0 10px;
+    font-size:0.75rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.10em;color:{_SUB};margin:24px 0 12px;
     display:flex;align-items:center;gap:10px;
 }}
 .dd-sec::before{{
@@ -10720,89 +10714,72 @@ def _dept_drill():
     content:'';flex:1;height:1px;
     background:linear-gradient(to right,{_BOR},transparent);
 }}
- 
-/* ── official cards ── */
-.dd-off-card{{
-    background:{_CARD};border:1px solid {_BOR};border-left:4px solid;
-    border-radius:14px;padding:14px 16px;margin-bottom:8px;
-    /* Added bottom padding to create an internal slot for the buttons */
-    padding-bottom: 50px; 
-    transition:transform 0.18s;
-}}
-.dd-off-card:hover{{transform:translateX(3px);}}
-.dd-off-name{{font-size:0.90rem;font-weight:800;color:{_TXT};margin-bottom:5px;}}
-.dd-off-meta{{
-    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
-    font-size:0.72rem;color:{_SUB};
-}}
-.dd-meta-tag{{
-    background:{meta_pill_bg};border:1px solid {_BOR};
-    border-radius:20px;padding:2px 9px;font-size:0.68rem;font-weight:600;color:{_SUB};
-}}
- 
-/* ── stat chips on official cards ── */
-.dd-stat-row{{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}}
-.dd-stat{{border-radius:10px;padding:6px 12px;border:1px solid;text-align:center;}}
-.dd-stat-num{{font-size:0.82rem;font-weight:800;line-height:1;margin-bottom:1px;}}
-.dd-stat-lbl{{font-size:0.58rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.05em;opacity:0.70;}}
-.dd-stat.res{{
-    background:{"rgba(74,222,128,0.10)" if dark else "#F0FDF4"};
-    border-color:{"rgba(74,222,128,0.22)" if dark else "#BBF7D0"};
-}}
-.dd-stat.res .dd-stat-num{{color:{"#4ADE80" if dark else "#15803D"};}}
-.dd-stat.rat{{
-    background:{"rgba(251,146,60,0.10)" if dark else "#FFF7ED"};
-    border-color:{"rgba(251,146,60,0.22)" if dark else "#FED7AA"};
-}}
-.dd-stat.rat .dd-stat-num{{color:{"#FB923C" if dark else "#C2410C"};}}
- 
+
 /* ══════════════════════════════════════════════════════════════ */
-/* ── MAGIC IN-CARD BUTTON ALIGNMENT ── */
+/* NATIVE STREAMLIT CARD CONVERSION */
 /* ══════════════════════════════════════════════════════════════ */
 
-/* Pull the adjacent Streamlit columns UP into the card's bottom padding */
-div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] {{
-    margin-top: -60px; 
-    margin-bottom: 20px;
-    padding-right: 16px;
-    position: relative;
-    z-index: 10;
-    pointer-events: none; /* Prevents invisible column area from blocking text clicks */
+/* Turn the Streamlit Row into a Card */
+div[data-testid="stHorizontalBlock"]:has(.row-marker) {{
+    background: {_CARD};
+    border: 1px solid {_BOR};
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+    transition: transform 0.2s;
+}}
+div[data-testid="stHorizontalBlock"]:has(.row-marker):hover {{
+    transform: translateY(-2px);
+    border-color: {_A1}50;
 }}
 
-/* Re-enable clicks strictly on the buttons */
-div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] div[data-testid="stButton"] {{
-    pointer-events: auto; 
+/* Dynamic Left Borders */
+div[data-testid="stHorizontalBlock"]:has(.marker-pending) {{ border-left: 5px solid #F59E0B; }}
+div[data-testid="stHorizontalBlock"]:has(.marker-approved) {{ border-left: 5px solid #10B981; }}
+
+/* Vertically center everything inside the columns */
+div[data-testid="stHorizontalBlock"]:has(.row-marker) > div[data-testid="column"] {{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }}
 
-/* Universal premium icon styling */
-div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] button {{
-    border-radius: 10px !important;
-    height: 38px !important;
+/* Premium Icon-Only Buttons */
+div[data-testid="stHorizontalBlock"]:has(.row-marker) button {{
+    height: 44px !important;
+    width: 44px !important;
     padding: 0 !important;
-    font-size: 1.1rem;
-    transition: transform 0.1s ease;
-}}
-div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] button:active {{
-    transform: scale(0.95);
-}}
-
-/* Column 2: Approve Button (✅) */
-div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] div[data-testid="column"]:nth-child(2) button {{
-    background: linear-gradient(135deg,#15803D,#22C55E) !important;
-    color: #fff !important;
-    border: none !important;
-    box-shadow: 0 4px 10px rgba(34,197,94,0.28) !important;
+    border-radius: 12px !important;
+    font-size: 1.2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
 }}
 
-/* Column 3: Reject / Remove Button (❌ / 🗑️) */
-div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="element-container"] div[data-testid="column"]:nth-child(3) button {{
-    background: {"#1C0808" if dark else "#FFF1F2"} !important;
-    color: {"#F87171" if dark else "#BE123C"} !important;
-    border: 1.5px solid {"#7F1D1D" if dark else "#FECDD3"} !important;
-    box-shadow: none !important;
+/* Approve Button (Green) */
+div[data-testid="stHorizontalBlock"]:has(.marker-pending) div[data-testid="column"]:nth-child(2) button {{
+    background: rgba(16, 185, 129, 0.1) !important;
+    border: 1px solid rgba(16, 185, 129, 0.3) !important;
+    color: #10B981 !important;
 }}
+div[data-testid="stHorizontalBlock"]:has(.marker-pending) div[data-testid="column"]:nth-child(2) button:hover {{
+    background: #10B981 !important; color: #FFF !important;
+}}
+
+/* Reject/Remove Button (Red) */
+div[data-testid="stHorizontalBlock"]:has(.row-marker) div[data-testid="column"]:last-child button {{
+    background: rgba(239, 68, 68, 0.1) !important;
+    border: 1px solid rgba(239, 68, 68, 0.3) !important;
+    color: #EF4444 !important;
+}}
+div[data-testid="stHorizontalBlock"]:has(.row-marker) div[data-testid="column"]:last-child button:hover {{
+    background: #EF4444 !important; color: #FFF !important;
+}}
+
+/* Fix streamlit markdown spacing */
+div[data-testid="stHorizontalBlock"]:has(.row-marker) .stMarkdown {{ margin-bottom: 0 !important; }}
 </style>
 """, unsafe_allow_html=True)
  
@@ -10821,83 +10798,63 @@ div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="elemen
     st.markdown(
         f"<div class='dd-hero'>"
         f"<div class='dd-hero-title'>🏢 {dnm}</div>"
-        f"<div class='dd-hero-code'>"
-        f"Dept Code: <strong>{dcd}</strong> · Share with officials to join"
-        f"</div>"
+        f"<div class='dd-hero-code'>Dept Code: <strong>{dcd}</strong> · Share with officials to join</div>"
         f"</div>",
         unsafe_allow_html=True,
     )
  
     # ── tabs ──────────────────────────────────────────────────────
     def _stars(avg, cnt):
-        try:
-            v = max(0.0, min(5.0, float(avg or 0)))
-        except (TypeError, ValueError):
-            v = 0.0
-        if not cnt:
-            return "☆☆☆☆☆", "No ratings"
+        try: v = max(0.0, min(5.0, float(avg or 0)))
+        except: v = 0.0
+        if not cnt: return "☆☆☆☆☆", "No ratings"
         f_ = int(v)
         h_ = 1 if (v - f_) >= 0.5 else 0
-        e_ = 5 - f_ - h_
-        s  = "★" * f_ + ("⯨" if h_ else "") + "☆" * e_
+        s  = "★" * f_ + ("⯨" if h_ else "") + "☆" * (5 - f_ - h_)
         return s, f"{v:.1f} ({cnt})"
  
     tab1, tab2, tab3 = st.tabs(["👥 Officials", "📢 Complaints", "🏆 Leaderboard"])
  
     # ── TAB 1 — Officials ─────────────────────────────────────────
     with tab1:
-        # NOTE: Ensure `api()` function is defined/imported in your scope
         officials  = api("get", f"/admin/departments/{did}/officials")
         officials  = officials if isinstance(officials, list) else []
         pending_o  = [o for o in officials if not o.get("is_approved")]
         approved_o = [o for o in officials if     o.get("is_approved")]
  
-        # PENDING OFFICIALS
-        st.markdown(
-            f"<div class='dd-sec'>⏳ Pending Approval"
-            f"{' (' + str(len(pending_o)) + ')' if pending_o else ''}"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
+        # ── PENDING OFFICIALS ──
+        st.markdown(f"<div class='dd-sec'>⏳ Pending Approval ({len(pending_o)})</div>", unsafe_allow_html=True)
         if not pending_o:
             st.info("No pending officials in this department.")
         else:
             for o in pending_o:
                 oid = o.get("id")
-                joined_tag = (
-                    f"<span class='dd-meta-tag'>📅 {o['joined']}</span>"
-                    if o.get("joined") else ""
-                )
+                joined_tag = f"<span style='background:{pill_bg}; padding:4px 10px; border-radius:20px; border:1px solid {_BOR};'>📅 {o['joined']}</span>" if o.get("joined") else ""
                 
-                # Card HTML Render
-                st.markdown(
-                    f"<div class='dd-off-card' style='border-left-color:#D97706;'>"
-                    f"<div class='dd-off-name'>👤 {o.get('name','—')}</div>"
-                    f"<div class='dd-off-meta'>"
-                    f"<span class='dd-meta-tag'>📧 {o.get('email','—')}</span>"
-                    f"{joined_tag}"
-                    f"</div></div>",
-                    unsafe_allow_html=True,
-                )
+                # Native Streamlit row (This IS the card now)
+                c_info, c_app, c_rej = st.columns([6, 1, 1])
                 
-                # Render Buttons immediately after (CSS shifts this up INTO the card)
-                pa1, pa2, pa3 = st.columns([7.5, 1, 1])
-                with pa2:
-                    if st.button("✅", key=f"da_{oid}", use_container_width=True, help="Approve"):
+                with c_info:
+                    st.markdown(f"""
+                        <div class='row-marker marker-pending'></div>
+                        <div style='font-size:1rem; font-weight:800; color:{_TXT}; margin-bottom:6px;'>👤 {o.get('name','—')}</div>
+                        <div style='display:flex; gap:8px; flex-wrap:wrap; font-size:0.75rem; color:{_SUB}; font-weight:600;'>
+                            <span style='background:{pill_bg}; padding:4px 10px; border-radius:20px; border:1px solid {_BOR};'>📧 {o.get('email','—')}</span>
+                            {joined_tag}
+                        </div>
+                    """, unsafe_allow_html=True)
+                
+                with c_app:
+                    if st.button("✅", key=f"da_{oid}", help="Approve Official"):
                         api("put", f"/admin/officials/{oid}/approve")
                         st.rerun()
-                with pa3:
-                    if st.button("❌", key=f"dr_{oid}", use_container_width=True, help="Reject"):
+                with c_rej:
+                    if st.button("❌", key=f"dr_{oid}", help="Reject Official"):
                         api("put", f"/admin/officials/{oid}/reject")
                         st.rerun()
  
-        # APPROVED OFFICIALS
-        st.markdown(
-            f"<div class='dd-sec'>✅ Approved"
-            f"{' (' + str(len(approved_o)) + ')' if approved_o else ''}"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
+        # ── APPROVED OFFICIALS ──
+        st.markdown(f"<div class='dd-sec'>✅ Approved ({len(approved_o)})</div>", unsafe_allow_html=True)
         if not approved_o:
             st.info("No approved officials yet.")
         else:
@@ -10907,42 +10864,37 @@ div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="elemen
                 assigned = max(1, int(o.get("total_assigned", 1) or 1))
                 res_rate = min(100, round(resolved / assigned * 100, 1))
                 s_str, s_lbl = _stars(o.get("avg_rating", 0), o.get("rating_count", 0))
+                joined_tag = f"<span style='background:{pill_bg}; padding:4px 10px; border-radius:20px; border:1px solid {_BOR};'>📅 {o['joined']}</span>" if o.get("joined") else ""
  
-                joined_tag = (
-                    f"<span class='dd-meta-tag'>📅 {o['joined']}</span>"
-                    if o.get("joined") else ""
-                )
- 
-                # Card HTML Render
-                st.markdown(
-                    f"<div class='dd-off-card' style='border-left-color:#22C55E;'>"
-                    f"<div class='dd-off-name'>👤 {o.get('name','—')}</div>"
-                    f"<div class='dd-off-meta'>"
-                    f"<span class='dd-meta-tag'>📧 {o.get('email','—')}</span>"
-                    f"{joined_tag}"
-                    f"</div>"
-                    f"<div class='dd-stat-row'>"
-                    f"<div class='dd-stat res'>"
-                    f"<div class='dd-stat-num'>{res_rate}%</div>"
-                    f"<div class='dd-stat-lbl'>Res. Rate</div>"
-                    f"</div>"
-                    f"<div class='dd-stat res'>"
-                    f"<div class='dd-stat-num'>{resolved}</div>"
-                    f"<div class='dd-stat-lbl'>Resolved</div>"
-                    f"</div>"
-                    f"<div class='dd-stat rat'>"
-                    f"<div class='dd-stat-num' style='color:#F59E0B;'>{s_str}</div>"
-                    f"<div class='dd-stat-lbl'>{s_lbl}</div>"
-                    f"</div>"
-                    f"</div>"
-                    f"</div>",
-                    unsafe_allow_html=True,
-                )
+                # Native Streamlit row (This IS the card now)
+                c_info, c_rem = st.columns([7, 1])
                 
-                # Render Remove Button immediately after (CSS shifts this up INTO the card)
-                rc1, rc2, rc3 = st.columns([7.5, 1, 1])
-                with rc3:
-                    if st.button("🗑️", key=f"remove_official_{oid}", use_container_width=True, help="Remove Official"):
+                with c_info:
+                    st.markdown(f"""
+                        <div class='row-marker marker-approved'></div>
+                        <div style='font-size:1rem; font-weight:800; color:{_TXT}; margin-bottom:6px;'>👤 {o.get('name','—')}</div>
+                        <div style='display:flex; gap:8px; flex-wrap:wrap; font-size:0.75rem; color:{_SUB}; font-weight:600; margin-bottom:10px;'>
+                            <span style='background:{pill_bg}; padding:4px 10px; border-radius:20px; border:1px solid {_BOR};'>📧 {o.get('email','—')}</span>
+                            {joined_tag}
+                        </div>
+                        <div style='display:flex; gap:12px; flex-wrap:wrap;'>
+                            <div style='background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:6px 12px; border-radius:10px; text-align:center;'>
+                                <div style='font-size:0.85rem; font-weight:800; color:#10B981;'>{res_rate}%</div>
+                                <div style='font-size:0.6rem; font-weight:700; color:{_SUB}; text-transform:uppercase;'>Res. Rate</div>
+                            </div>
+                            <div style='background:rgba(16,185,129,0.1); border:1px solid rgba(16,185,129,0.2); padding:6px 12px; border-radius:10px; text-align:center;'>
+                                <div style='font-size:0.85rem; font-weight:800; color:#10B981;'>{resolved}</div>
+                                <div style='font-size:0.6rem; font-weight:700; color:{_SUB}; text-transform:uppercase;'>Resolved</div>
+                            </div>
+                            <div style='background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.2); padding:6px 12px; border-radius:10px; text-align:center;'>
+                                <div style='font-size:0.85rem; font-weight:800; color:#F59E0B;'>{s_str}</div>
+                                <div style='font-size:0.6rem; font-weight:700; color:{_SUB}; text-transform:uppercase;'>{s_lbl}</div>
+                            </div>
+                        </div>
+                    """, unsafe_allow_html=True)
+                
+                with c_rem:
+                    if st.button("🗑️", key=f"remove_{oid}", help="Remove Official"):
                         resp = api("delete", f"/admin/officials/{oid}")
                         if resp.get("success"):
                             st.success("✅ Official removed successfully")
@@ -10950,19 +10902,13 @@ div[data-testid="element-container"]:has(.dd-off-card) + div[data-testid="elemen
                         else:
                             st.error(resp.get("detail", "Failed to remove official"))
  
-    # ── TAB 2 — Complaints ────────────────────────────────────────
+    # ── TAB 2 & 3 ──────────────────────────────────────────────
     with tab2:
         comps = api("get", f"/admin/departments/{did}/complaints")
-        comps = comps if isinstance(comps, list) else []
-        if not comps:
-            st.info("No complaints for this department yet.")
-        else:
-            # Assumes _complaint_list is defined globally
-            _complaint_list(comps, "dd", None) 
+        if not (comps := comps if isinstance(comps, list) else []): st.info("No complaints for this department yet.")
+        else: _complaint_list(comps, "dd", None)
  
-    # ── TAB 3 — Leaderboard ───────────────────────────────────────
     with tab3:
-        # Assumes _dept_leaderboard is defined globally
         _dept_leaderboard(did)
  
  
