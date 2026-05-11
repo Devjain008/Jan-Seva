@@ -182,106 +182,226 @@ def stars_html(avg, count=0):
 # ═════════════════════════════════════════════════════════════════════════════
 def render_sidebar():
 
-    # ── Hide Streamlit auto-nav ──────────────────────────────────────────────
+    # ── Hide Streamlit auto-nav & Modern Sidebar Styling ─────────────────────
     st.markdown("""
     <style>
+    /* ═══════════════════════════════════════════════════════════
+       HIDE DEFAULT STREAMLIT ELEMENTS
+    ═══════════════════════════════════════════════════════════ */
     section[data-testid="stSidebar"] nav { display:none !important; }
     div[data-testid="stSidebarNav"]      { display:none !important; }
     ul[data-testid="stSidebarNavItems"]  { display:none !important; }
     button[data-testid="baseButton-header"] { display:none !important; }
 
     /* ═══════════════════════════════════════════════════════════
-       SIDEBAR SHELL
+       SIDEBAR TOGGLE BUTTON (Collapse/Expand Arrow) - FIXED
+    ═══════════════════════════════════════════════════════════ */
+    /* Collapse button when sidebar is OPEN */
+    button[data-testid="stSidebarCollapseButton"],
+    button[kind="header"],
+    [data-testid="collapsedControl"],
+    button[data-testid="baseButton-headerNoPadding"] {
+        background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+        border-radius: 50% !important;
+        width: 32px !important;
+        height: 32px !important;
+        box-shadow: 0 4px 12px rgba(99,102,241,0.35) !important;
+        border: 2px solid #FFFFFF !important;
+        transition: all 0.25s ease !important;
+        z-index: 999999 !important;
+    }
+    button[data-testid="stSidebarCollapseButton"]:hover,
+    button[kind="header"]:hover,
+    [data-testid="collapsedControl"]:hover {
+        transform: scale(1.08) !important;
+        box-shadow: 0 6px 18px rgba(99,102,241,0.50) !important;
+    }
+    /* Make the arrow icon WHITE */
+    button[data-testid="stSidebarCollapseButton"] svg,
+    button[kind="header"] svg,
+    [data-testid="collapsedControl"] svg,
+    button[data-testid="baseButton-headerNoPadding"] svg {
+        color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+        width: 18px !important;
+        height: 18px !important;
+    }
+    button[data-testid="stSidebarCollapseButton"] svg path,
+    button[kind="header"] svg path,
+    [data-testid="collapsedControl"] svg path {
+        fill: #FFFFFF !important;
+        stroke: #FFFFFF !important;
+    }
+
+    /* Expand button when sidebar is CLOSED */
+    [data-testid="stSidebarCollapsedControl"] button,
+    div[data-testid="stSidebarCollapsedControl"] {
+        background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 14px rgba(99,102,241,0.40) !important;
+    }
+    [data-testid="stSidebarCollapsedControl"] svg {
+        color: #FFFFFF !important;
+        fill: #FFFFFF !important;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       SIDEBAR SHELL — Modern glass-morphism look
     ═══════════════════════════════════════════════════════════ */
     section[data-testid="stSidebar"] {
-        background : #FFFFFF !important;
-        border-right: 1px solid #E2E8F4 !important;
+        background: linear-gradient(180deg, #FFFFFF 0%, #FAFBFF 100%) !important;
+        border-right: 1px solid #E8ECF7 !important;
+        box-shadow: 4px 0 24px rgba(99, 102, 241, 0.04) !important;
     }
     section[data-testid="stSidebar"] > div:first-child {
         padding: 0 !important;
     }
 
+    /* Custom scrollbar */
+    section[data-testid="stSidebar"] ::-webkit-scrollbar {
+        width: 6px !important;
+    }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-track {
+        background: transparent !important;
+    }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {
+        background: linear-gradient(180deg, #C7D2FE, #A5B4FC) !important;
+        border-radius: 10px !important;
+    }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover {
+        background: #6366F1 !important;
+    }
+
     /* ═══════════════════════════════════════════════════════════
-       ALL SIDEBAR BUTTONS — base reset
+       NAV BUTTONS — Modern minimal design
     ═══════════════════════════════════════════════════════════ */
     section[data-testid="stSidebar"] .stButton > button {
         background    : transparent !important;
         border        : none !important;
         box-shadow    : none !important;
-        border-radius : 12px !important;
-        padding       : 10px 14px !important;
-        font-size     : 0.84rem !important;
+        border-radius : 10px !important;
+        padding       : 11px 14px !important;
+        font-size     : 0.86rem !important;
         font-weight   : 600 !important;
-        color         : #475569 !important;
+        color         : #4B5563 !important;
         text-align    : left !important;
         justify-content: flex-start !important;
         width         : 100% !important;
-        transition    : background 0.15s ease, color 0.15s ease !important;
+        transition    : all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
         letter-spacing: -0.01em !important;
+        position      : relative !important;
     }
     section[data-testid="stSidebar"] .stButton > button:hover {
-        background : #F1F5F9 !important;
+        background : linear-gradient(90deg, #F1F5F9 0%, #F8FAFC 100%) !important;
         color      : #1E293B !important;
-        transform  : none !important;
+        transform  : translateX(2px) !important;
         filter     : none !important;
     }
+    section[data-testid="stSidebar"] .stButton > button:active {
+        transform: translateX(2px) scale(0.98) !important;
+    }
 
-    /* ── ACTIVE nav button ── */
+    /* ── ACTIVE nav button — Premium feel ── */
     section[data-testid="stSidebar"] .sb-active .stButton > button {
         background : linear-gradient(90deg,
-                        rgba(99,102,241,0.10) 0%,
-                        rgba(99,102,241,0.04) 100%) !important;
+                        rgba(99,102,241,0.12) 0%,
+                        rgba(139,92,246,0.06) 100%) !important;
         color      : #4338CA !important;
         font-weight: 700 !important;
         border-left: 3px solid #6366F1 !important;
-        border-radius: 0 12px 12px 0 !important;
+        border-radius: 0 10px 10px 0 !important;
         padding-left: 11px !important;
+        box-shadow: inset 0 1px 0 rgba(99,102,241,0.08) !important;
+    }
+    section[data-testid="stSidebar"] .sb-active .stButton > button::after {
+        content: '';
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #6366F1;
+        box-shadow: 0 0 8px rgba(99,102,241,0.6);
     }
 
     /* ── UTILITY buttons (lang toggle) — pill style ── */
     section[data-testid="stSidebar"] .sb-util .stButton > button {
-        background    : #F8FAFC !important;
+        background    : linear-gradient(135deg, #F8FAFC 0%, #F1F5F9 100%) !important;
         border        : 1.5px solid #E2E8F4 !important;
         border-radius : 30px !important;
         color         : #475569 !important;
-        font-size     : 0.75rem !important;
+        font-size     : 0.78rem !important;
         font-weight   : 600 !important;
-        padding       : 8px 6px !important;
+        padding       : 9px 12px !important;
         justify-content: center !important;
         text-align    : center !important;
     }
     section[data-testid="stSidebar"] .sb-util .stButton > button:hover {
-        background  : #EEF2FF !important;
+        background  : linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%) !important;
         border-color: #6366F1 !important;
         color       : #4338CA !important;
+        transform   : translateY(-1px) !important;
+        box-shadow  : 0 4px 12px rgba(99,102,241,0.15) !important;
     }
 
     /* ── LOGOUT button ── */
     section[data-testid="stSidebar"] .sb-logout .stButton > button {
-        background    : #FEF2F2 !important;
+        background    : linear-gradient(135deg, #FEF2F2 0%, #FEE2E2 100%) !important;
         border        : 1.5px solid #FECACA !important;
         border-radius : 12px !important;
         color         : #DC2626 !important;
         font-weight   : 700 !important;
         justify-content: center !important;
         text-align    : center !important;
+        padding       : 11px 14px !important;
     }
     section[data-testid="stSidebar"] .sb-logout .stButton > button:hover {
-        background : #FEE2E2 !important;
+        background : linear-gradient(135deg, #FEE2E2 0%, #FECACA 100%) !important;
         color      : #B91C1C !important;
+        transform  : translateY(-1px) !important;
+        box-shadow : 0 4px 12px rgba(220,38,38,0.18) !important;
     }
 
-    /* ── expander in sidebar ── */
-    section[data-testid="stSidebar"] .streamlit-expanderHeader {
+    /* ── LOGIN action buttons ── */
+    section[data-testid="stSidebar"] .sb-login .stButton > button {
+        background    : linear-gradient(135deg, #FFFFFF 0%, #F8FAFC 100%) !important;
+        border        : 1.5px solid #E2E8F4 !important;
+        border-radius : 12px !important;
+        color         : #475569 !important;
+        font-weight   : 700 !important;
+        justify-content: center !important;
+        text-align    : center !important;
+        padding       : 10px !important;
+        font-size     : 0.80rem !important;
+    }
+    section[data-testid="stSidebar"] .sb-login .stButton > button:hover {
+        background  : linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%) !important;
+        border-color: #6366F1 !important;
+        color       : #4338CA !important;
+        transform   : translateY(-2px) !important;
+        box-shadow  : 0 6px 16px rgba(99,102,241,0.18) !important;
+    }
+
+    /* ── Expander in sidebar ── */
+    section[data-testid="stSidebar"] .streamlit-expanderHeader,
+    section[data-testid="stSidebar"] details summary {
         background    : transparent !important;
         border        : none !important;
-        font-size     : 0.72rem !important;
+        font-size     : 0.70rem !important;
         font-weight   : 800 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.09em !important;
+        letter-spacing: 0.10em !important;
         color         : #94A3B8 !important;
-        padding       : 8px 16px !important;
+        padding       : 10px 16px !important;
         border-radius : 0 !important;
+        transition    : color 0.2s ease !important;
+    }
+    section[data-testid="stSidebar"] .streamlit-expanderHeader:hover,
+    section[data-testid="stSidebar"] details summary:hover {
+        color: #6366F1 !important;
     }
     section[data-testid="stSidebar"] .streamlit-expanderContent {
         background : transparent !important;
@@ -289,79 +409,134 @@ def render_sidebar():
         padding    : 0 0 4px !important;
     }
 
-    /* ── section label ── */
+    /* ── Section label ── */
     .sb-section-label {
         font-size     : 0.68rem;
         font-weight   : 800;
         text-transform: uppercase;
-        letter-spacing: 0.10em;
+        letter-spacing: 0.12em;
         color         : #94A3B8;
-        padding       : 14px 16px 6px;
+        padding       : 16px 16px 8px;
         display       : flex;
         align-items   : center;
-        gap           : 8px;
+        gap           : 10px;
     }
     .sb-section-label::after {
         content   : '';
         flex      : 1;
         height    : 1px;
-        background: #E2E8F4;
+        background: linear-gradient(90deg, #E2E8F4 0%, transparent 100%);
     }
 
-    /* ── logo block ── */
+    /* ═══════════════════════════════════════════════════════════
+       LOGO BLOCK — Eye-catching header
+    ═══════════════════════════════════════════════════════════ */
     .sb-logo {
-        padding         : 22px 16px 16px;
+        padding         : 24px 16px 18px;
         display         : flex;
         align-items     : center;
         gap             : 12px;
         border-bottom   : 1px solid #F1F5F9;
         margin-bottom   : 4px;
+        position        : relative;
+    }
+    .sb-logo::before {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 60px;
+        height: 2px;
+        background: linear-gradient(90deg, #6366F1, #8B5CF6);
+        border-radius: 2px;
     }
     .sb-logo-icon {
-        width           : 42px;
-        height          : 42px;
-        border-radius   : 12px;
-        background      : linear-gradient(135deg,#6366F1,#8B5CF6);
+        width           : 44px;
+        height          : 44px;
+        border-radius   : 13px;
+        background      : linear-gradient(135deg, #6366F1, #8B5CF6);
         display         : flex;
         align-items     : center;
         justify-content : center;
-        font-size       : 1.35rem;
+        font-size       : 1.4rem;
         flex-shrink     : 0;
-        box-shadow      : 0 4px 14px rgba(99,102,241,0.30);
+        box-shadow      : 0 6px 18px rgba(99,102,241,0.35),
+                          inset 0 1px 0 rgba(255,255,255,0.2);
+        position        : relative;
+        overflow        : hidden;
+    }
+    .sb-logo-icon::after {
+        content: '';
+        position: absolute;
+        top: 0; left: -100%;
+        width: 100%; height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shine 3s infinite;
+    }
+    @keyframes shine {
+        0% { left: -100%; }
+        50%, 100% { left: 100%; }
     }
     .sb-logo-text { flex: 1; min-width: 0; }
     .sb-logo-title {
         font-family  : 'Bricolage Grotesque','DM Sans',sans-serif;
-        font-size    : 0.92rem;
+        font-size    : 0.96rem;
         font-weight  : 800;
-        color        : #1E293B;
+        background   : linear-gradient(135deg, #1E293B 0%, #4338CA 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         letter-spacing: -0.02em;
         white-space  : nowrap;
     }
     .sb-logo-sub {
-        font-size  : 0.62rem;
+        font-size  : 0.64rem;
         color      : #94A3B8;
-        margin-top : 1px;
+        margin-top : 2px;
+        font-weight: 500;
     }
 
-    /* ── profile card ── */
+    /* ═══════════════════════════════════════════════════════════
+       PROFILE CARD — Premium look
+    ═══════════════════════════════════════════════════════════ */
     .sb-profile {
-        margin      : 8px 12px 4px;
-        padding     : 12px 14px;
-        background  : linear-gradient(135deg,rgba(99,102,241,0.06) 0%,rgba(139,92,246,0.04) 100%);
-        border      : 1px solid rgba(99,102,241,0.12);
+        margin      : 12px 12px 6px;
+        padding     : 13px 14px;
+        background  : linear-gradient(135deg,
+                        rgba(99,102,241,0.08) 0%,
+                        rgba(139,92,246,0.05) 100%);
+        border      : 1px solid rgba(99,102,241,0.15);
         border-radius: 14px;
+        position    : relative;
+        overflow    : hidden;
+        transition  : all 0.25s ease;
+    }
+    .sb-profile:hover {
+        border-color: rgba(99,102,241,0.30);
+        box-shadow  : 0 6px 18px rgba(99,102,241,0.10);
+        transform   : translateY(-1px);
+    }
+    .sb-profile::before {
+        content: '';
+        position: absolute;
+        top: 0; right: 0;
+        width: 80px; height: 80px;
+        background: radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%);
+        border-radius: 50%;
     }
     .sb-profile-inner {
         display    : flex;
         align-items: center;
-        gap        : 10px;
+        gap        : 11px;
+        position   : relative;
+        z-index    : 1;
     }
     .sb-profile-avatar {
-        width           : 38px;
-        height          : 38px;
+        width           : 40px;
+        height          : 40px;
         border-radius   : 50%;
-        background      : linear-gradient(135deg,#6366F1,#8B5CF6);
+        background      : linear-gradient(135deg, #6366F1, #8B5CF6);
         display         : flex;
         align-items     : center;
         justify-content : center;
@@ -369,22 +544,27 @@ def render_sidebar():
         flex-shrink     : 0;
         color           : #fff;
         font-weight     : 700;
+        box-shadow      : 0 4px 12px rgba(99,102,241,0.30),
+                          inset 0 1px 0 rgba(255,255,255,0.25);
+        border          : 2px solid #FFFFFF;
     }
     .sb-profile-name {
-        font-size  : 0.84rem;
+        font-size  : 0.85rem;
         font-weight: 700;
         color      : #1E293B;
         white-space: nowrap;
         overflow   : hidden;
         text-overflow: ellipsis;
+        letter-spacing: -0.01em;
     }
     .sb-profile-sub {
-        font-size  : 0.66rem;
+        font-size  : 0.68rem;
         color      : #64748B;
         margin-top : 2px;
         white-space: nowrap;
         overflow   : hidden;
         text-overflow: ellipsis;
+        font-weight: 500;
     }
     .sb-profile-badge {
         margin-left : auto;
@@ -392,31 +572,88 @@ def render_sidebar():
         background  : #EEF2FF;
         color       : #6366F1;
         font-size   : 0.60rem;
-        font-weight : 700;
-        padding     : 3px 8px;
+        font-weight : 800;
+        padding     : 4px 9px;
         border-radius: 20px;
         border      : 1px solid #C7D2FE;
         text-transform: uppercase;
-        letter-spacing: .04em;
+        letter-spacing: .05em;
+        box-shadow  : 0 2px 6px rgba(99,102,241,0.10);
     }
 
-    /* ── nav item wrapper ── */
-    .sb-nav-item { padding: 1px 8px; }
+    /* ── Nav item wrapper ── */
+    .sb-nav-item {
+        padding: 2px 8px;
+    }
 
-    /* ── divider ── */
+    /* ── Divider ── */
     .sb-divider {
         height     : 1px;
-        background : #F1F5F9;
-        margin     : 10px 16px;
+        background : linear-gradient(90deg, transparent, #E2E8F4, transparent);
+        margin     : 12px 16px;
     }
 
-    /* ── footer ── */
+    /* ── Welcome card (logged-out) ── */
+    .sb-welcome {
+        margin      : 8px 12px 14px;
+        padding     : 14px 16px;
+        background  : linear-gradient(135deg, #F8FAFF 0%, #EEF2FF 100%);
+        border      : 1px solid #E0E7FF;
+        border-radius: 14px;
+        font-size   : 0.80rem;
+        color       : #475569;
+        line-height : 1.55;
+        text-align  : center;
+        position    : relative;
+        overflow    : hidden;
+    }
+    .sb-welcome-icon {
+        font-size: 1.8rem;
+        display: block;
+        margin-bottom: 6px;
+    }
+    .sb-welcome-text {
+        font-weight: 600;
+        color: #4338CA;
+    }
+
+    /* ── Footer ── */
     .sb-footer {
-        padding    : 10px 16px 16px;
-        font-size  : 0.62rem;
-        color      : #CBD5E1;
+        padding    : 14px 16px 18px;
+        font-size  : 0.64rem;
+        color      : #94A3B8;
         text-align : center;
-        line-height: 1.6;
+        line-height: 1.7;
+        border-top : 1px solid #F1F5F9;
+        margin-top : 12px;
+        font-weight: 500;
+    }
+    .sb-footer strong {
+        color: #6366F1;
+        font-weight: 700;
+    }
+
+    /* ═══════════════════════════════════════════════════════════
+       RESPONSIVE DESIGN
+    ═══════════════════════════════════════════════════════════ */
+    @media (max-width: 768px) {
+        section[data-testid="stSidebar"] {
+            min-width: 260px !important;
+            max-width: 280px !important;
+        }
+        .sb-logo { padding: 18px 14px 14px; }
+        .sb-logo-title { font-size: 0.88rem; }
+        .sb-profile { margin: 8px 10px 4px; padding: 11px 12px; }
+        .sb-profile-avatar { width: 36px; height: 36px; font-size: 1rem; }
+        section[data-testid="stSidebar"] .stButton > button {
+            padding: 10px 12px !important;
+            font-size: 0.82rem !important;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .sb-logo-sub { display: none; }
+        .sb-profile-badge { font-size: 0.55rem; padding: 3px 7px; }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -453,7 +690,7 @@ def render_sidebar():
             u     = st.session_state.user or {}
             name  = u.get("name", "Citizen")
             phone = u.get("phone", "")
-            inits = "".join(p[0].upper() for p in name.split()[:2])
+            inits = "".join(p[0].upper() for p in name.split()[:2]) or "U"
             st.markdown(f"""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
@@ -471,7 +708,7 @@ def render_sidebar():
             o    = st.session_state.official or {}
             name = o.get("name", "Official")
             dept = o.get("department", "Department")
-            inits = "".join(p[0].upper() for p in name.split()[:2])
+            inits = "".join(p[0].upper() for p in name.split()[:2]) or "O"
             st.markdown(f"""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
@@ -480,7 +717,7 @@ def render_sidebar():
                         <div class="sb-profile-name">{name}</div>
                         <div class="sb-profile-sub">🏢 {dept}</div>
                     </div>
-                    <div class="sb-profile-badge">Official</div>
+                    <div class="sb-profile-badge" style="background:#ECFDF5;color:#059669;border-color:#A7F3D0;">Official</div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
@@ -503,7 +740,7 @@ def render_sidebar():
         # ── Helper: render one nav button ────────────────────────────────────
         def _nav_btn(icon: str, label: str, screen: str, badge: str = ""):
             is_active = st.session_state.screen == screen
-            full_label = f"{icon}  {label}" + (f"  ·  {badge}" if badge else "")
+            full_label = f"{icon}  {label}" + (f"   {badge}" if badge else "")
             wrap_cls   = "sb-active" if is_active else ""
             st.markdown(f'<div class="sb-nav-item {wrap_cls}">', unsafe_allow_html=True)
             if st.button(full_label, key=f"sb_{screen}", use_container_width=True):
@@ -583,26 +820,26 @@ def render_sidebar():
             st.markdown('<div class="sb-section-label">Get Started</div>',
                         unsafe_allow_html=True)
             st.markdown("""
-            <div style="margin:6px 12px 12px;padding:12px 14px;
-                background:#F8FAFF;border:1px solid #E2E8F4;border-radius:12px;
-                font-size:0.78rem;color:#64748B;line-height:1.5;">
-                👋 Welcome! Please log in to access the portal.
+            <div class="sb-welcome">
+                <span class="sb-welcome-icon">👋</span>
+                <span class="sb-welcome-text">Welcome!</span><br>
+                <span style="font-size:0.74rem;">Please log in to access the portal.</span>
             </div>
             """, unsafe_allow_html=True)
 
             c1, c2 = st.columns(2)
             with c1:
-                st.markdown('<div class="sb-nav-item">', unsafe_allow_html=True)
+                st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
                 if st.button("👤 Citizen",  key="login_citizen",  use_container_width=True):
                     st.session_state.screen = "user_login"; st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
             with c2:
-                st.markdown('<div class="sb-nav-item">', unsafe_allow_html=True)
+                st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
                 if st.button("🏢 Official", key="login_official", use_container_width=True):
                     st.session_state.screen = "official_login"; st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown('<div class="sb-nav-item">', unsafe_allow_html=True)
+            st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
             if st.button("👑 Admin", key="login_admin", use_container_width=True):
                 st.session_state.screen = "admin_login"; st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
@@ -613,8 +850,8 @@ def render_sidebar():
         st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
 
         # Language toggle — single pill button
-        lang_label = "🇮🇳 हिंदी" if lang == "en" else "🇬🇧 English"
-        st.markdown('<div class="sb-util">', unsafe_allow_html=True)
+        lang_label = "🌐  हिंदी में देखें" if lang == "en" else "🌐  View in English"
+        st.markdown('<div class="sb-util" style="padding:0 12px;">', unsafe_allow_html=True)
         if st.button(lang_label, key="sb_lang", use_container_width=True):
             st.session_state.language = "hi" if lang == "en" else "en"
             st.rerun()
@@ -622,8 +859,8 @@ def render_sidebar():
 
         # Logout
         if role:
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="sb-logout">', unsafe_allow_html=True)
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            st.markdown('<div class="sb-logout" style="padding:0 12px;">', unsafe_allow_html=True)
             if st.button("🔓  Logout", key="sb_logout", use_container_width=True):
                 logout()
             st.markdown("</div>", unsafe_allow_html=True)
@@ -631,7 +868,8 @@ def render_sidebar():
         # Footer
         st.markdown("""
         <div class="sb-footer">
-            Jan Seva Portal v2.0 &nbsp;·&nbsp; Made in 🇮🇳<br>
+            <strong>Jan Seva Portal v2.0</strong><br>
+            Made with ❤️ in 🇮🇳<br>
             © 2024 Government of India
         </div>
         """, unsafe_allow_html=True)
@@ -1206,16 +1444,6 @@ def pg_language():
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # ============================================================
-    # TESTIMONIALS
-    # ============================================================
-   
-    
-    # ============================================================
-    # FAQ SECTION
-    # ============================================================
-
     
     # ============================================================
     # CONTACT & SUPPORT
