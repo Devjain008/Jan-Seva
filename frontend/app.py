@@ -1761,18 +1761,6 @@ def pg_language():
     """, height=0)
 
 
-"""
-PREMIUM LOGIN PAGES — Stripe / Linear / Vercel aesthetic
-Light theme only. Drop-in replacement for:
-  - _login_css()
-  - pg_login_type()
-  - pg_user_login()
-  - pg_official_login()
-  - pg_admin_login()
-
-All Streamlit session_state logic and auth flows are IDENTICAL.
-Only CSS and visual structure changed.
-"""
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  SINGLE LOGIN CSS ENGINE  — light theme only, modern SaaS polish
