@@ -20,8 +20,8 @@ from frontend.config import TRANSLATIONS, API_BASE
 st.set_page_config(
     page_title="Jan Seva Portal",
     page_icon="🏛️",
-    layout="centered",        # ← change to "centered" to match localhost
-    initial_sidebar_state="expanded",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
 
@@ -181,355 +181,268 @@ def stars_html(avg, count=0):
 # SIDEBAR
 # ═════════════════════════════════════════════════════════════════════════════
 def render_sidebar():
+    role = st.session_state.role
+    
+    # Hide sidebar completely when not logged in
+    if not role:
+        st.markdown("""
+        <style>
+        section[data-testid="stSidebar"] { display: none !important; }
+        [data-testid="collapsedControl"],
+        [data-testid="stSidebarCollapsedControl"] { display: none !important; }
+        </style>
+        """, unsafe_allow_html=True)
+        return
 
     # ═══════════════════════════════════════════════════════════════════════
-    # MODERN SIDEBAR STYLING — App-like, Clean, Professional
+    # MODERN SIDEBAR STYLING — Clean, Minimal, Professional
     # ═══════════════════════════════════════════════════════════════════════
     st.markdown("""
     <style>
-    /* ───────────────────────────────────────────────────────────
-       HIDE DEFAULT STREAMLIT ELEMENTS
-    ─────────────────────────────────────────────────────────── */
+    /* Hide default Streamlit sidebar elements */
     section[data-testid="stSidebar"] nav,
     div[data-testid="stSidebarNav"],
     ul[data-testid="stSidebarNavItems"],
     button[data-testid="baseButton-header"] { display: none !important; }
 
-    /* ───────────────────────────────────────────────────────────
-       SIDEBAR COLLAPSE / EXPAND TOGGLE
-    ─────────────────────────────────────────────────────────── */
-    button[data-testid="stSidebarCollapseButton"],
-    [data-testid="collapsedControl"],
-    button[data-testid="baseButton-headerNoPadding"] {
-        background: #6366F1 !important;
-        border-radius: 8px !important;
-        width: 30px !important;
-        height: 30px !important;
-        border: none !important;
-        box-shadow: 0 2px 8px rgba(99,102,241,0.30) !important;
-        transition: all 0.2s ease !important;
-    }
-    button[data-testid="stSidebarCollapseButton"]:hover,
-    [data-testid="collapsedControl"]:hover {
-        background: #4F46E5 !important;
-        transform: scale(1.05) !important;
-    }
-    button[data-testid="stSidebarCollapseButton"] svg,
-    [data-testid="collapsedControl"] svg {
-        color: #FFF !important;
-        fill: #FFF !important;
-        width: 16px !important;
-        height: 16px !important;
-    }
-
-    /* ───────────────────────────────────────────────────────────
-       SIDEBAR SHELL — Clean white app look
-    ─────────────────────────────────────────────────────────── */
+    /* Sidebar container */
     section[data-testid="stSidebar"] {
-        background: #FFFFFF !important;
-        border-right: 1px solid #EEF0F4 !important;
+        background: var(--c-card, #FFFFFF) !important;
+        border-right: 1px solid var(--c-border, #E2E8F0) !important;
         box-shadow: none !important;
     }
+    
     section[data-testid="stSidebar"] > div:first-child {
         padding: 0 !important;
     }
 
-    /* Scrollbar */
-    section[data-testid="stSidebar"] ::-webkit-scrollbar { width: 4px !important; }
-    section[data-testid="stSidebar"] ::-webkit-scrollbar-track { background: transparent !important; }
-    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {
-        background: #D1D5DB !important; border-radius: 10px !important;
-    }
-    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover { background: #9CA3AF !important; }
-
-    /* ───────────────────────────────────────────────────────────
-       NAV BUTTONS — Clean app-style rows
-    ─────────────────────────────────────────────────────────── */
+    /* Nav buttons */
     section[data-testid="stSidebar"] .stButton > button {
         background: transparent !important;
         border: none !important;
         box-shadow: none !important;
-        border-radius: 8px !important;
-        padding: 9px 12px !important;
-        font-size: 0.875rem !important;
+        border-radius: 10px !important;
+        padding: 10px 14px !important;
+        font-size: 14px !important;
         font-weight: 500 !important;
-        color: #4B5563 !important;
+        color: var(--c-sub, #64748B) !important;
         text-align: left !important;
         justify-content: flex-start !important;
         width: 100% !important;
         transition: all 0.15s ease !important;
-        letter-spacing: -0.01em !important;
-        min-height: 36px !important;
-        line-height: 1.3 !important;
     }
+    
     section[data-testid="stSidebar"] .stButton > button:hover {
-        background: #F4F5F7 !important;
-        color: #111827 !important;
-    }
-    section[data-testid="stSidebar"] .stButton > button:active {
-        background: #E5E7EB !important;
+        background: var(--c-hover, #F1F5F9) !important;
+        color: var(--c-text, #0F172A) !important;
     }
 
-    /* ── ACTIVE state ── */
+    /* Active nav state */
     section[data-testid="stSidebar"] .sb-active .stButton > button {
-        background: #EEF2FF !important;
-        color: #4338CA !important;
+        background: var(--c-a1-soft, rgba(14,165,233,0.08)) !important;
+        color: var(--c-a1, #0EA5E9) !important;
         font-weight: 600 !important;
     }
-    section[data-testid="stSidebar"] .sb-active .stButton > button:hover {
-        background: #E0E7FF !important;
-    }
 
-    /* ── Utility button (language) ── */
+    /* Utility button */
     section[data-testid="stSidebar"] .sb-util .stButton > button {
-        background: #F9FAFB !important;
-        border: 1px solid #E5E7EB !important;
-        border-radius: 8px !important;
-        color: #4B5563 !important;
-        font-size: 0.8rem !important;
+        background: var(--c-card2, #F1F5F9) !important;
+        border: 1px solid var(--c-border, #E2E8F0) !important;
+        border-radius: 10px !important;
+        color: var(--c-sub, #64748B) !important;
+        font-size: 13px !important;
         font-weight: 500 !important;
         justify-content: center !important;
         text-align: center !important;
     }
+    
     section[data-testid="stSidebar"] .sb-util .stButton > button:hover {
-        background: #F3F4F6 !important;
-        border-color: #D1D5DB !important;
-        color: #111827 !important;
+        background: var(--c-hover, #F1F5F9) !important;
+        color: var(--c-text, #0F172A) !important;
     }
 
-    /* ── Logout button ── */
+    /* Logout button */
     section[data-testid="stSidebar"] .sb-logout .stButton > button {
-        background: #FFFFFF !important;
-        border: 1px solid #FECACA !important;
-        border-radius: 8px !important;
-        color: #DC2626 !important;
+        background: transparent !important;
+        border: 1px solid #FCA5A5 !important;
+        border-radius: 10px !important;
+        color: #EF4444 !important;
         font-weight: 600 !important;
         justify-content: center !important;
         text-align: center !important;
-        font-size: 0.83rem !important;
+        font-size: 13px !important;
     }
+    
     section[data-testid="stSidebar"] .sb-logout .stButton > button:hover {
         background: #FEF2F2 !important;
-        border-color: #FCA5A5 !important;
-        color: #B91C1C !important;
+        border-color: #F87171 !important;
+        color: #DC2626 !important;
     }
 
-    /* ── Login buttons ── */
-    section[data-testid="stSidebar"] .sb-login .stButton > button {
-        background: #FFFFFF !important;
-        border: 1px solid #E5E7EB !important;
-        border-radius: 8px !important;
-        color: #374151 !important;
-        font-weight: 600 !important;
-        justify-content: center !important;
-        text-align: center !important;
-        font-size: 0.83rem !important;
-        padding: 10px !important;
-    }
-    section[data-testid="stSidebar"] .sb-login .stButton > button:hover {
-        background: #6366F1 !important;
-        border-color: #6366F1 !important;
-        color: #FFFFFF !important;
-    }
-    section[data-testid="stSidebar"] .sb-login-primary .stButton > button {
-        background: #6366F1 !important;
-        border: 1px solid #6366F1 !important;
-        color: #FFFFFF !important;
-    }
-    section[data-testid="stSidebar"] .sb-login-primary .stButton > button:hover {
-        background: #4F46E5 !important;
-        border-color: #4F46E5 !important;
-    }
-
-    /* ── Expander ── */
+    /* Expander styling */
     section[data-testid="stSidebar"] .streamlit-expanderHeader,
     section[data-testid="stSidebar"] details summary {
         background: transparent !important;
         border: none !important;
-        font-size: 0.7rem !important;
+        font-size: 11px !important;
         font-weight: 600 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.06em !important;
-        color: #9CA3AF !important;
+        color: var(--c-sub, #64748B) !important;
         padding: 6px 14px !important;
     }
-    section[data-testid="stSidebar"] .streamlit-expanderHeader:hover,
-    section[data-testid="stSidebar"] details summary:hover {
-        color: #6366F1 !important;
-    }
+    
     section[data-testid="stSidebar"] .streamlit-expanderContent {
         background: transparent !important;
         border: none !important;
         padding: 0 !important;
     }
 
-    /* ── Section label ── */
+    /* Section label */
     .sb-section-label {
-        font-size: 0.68rem;
+        font-size: 11px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
-        color: #9CA3AF;
-        padding: 14px 18px 6px;
+        color: var(--c-sub, #64748B);
+        padding: 16px 18px 8px;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       LOGO BLOCK — Clean & Modern
-    ═══════════════════════════════════════════════════════════ */
+    /* Logo block */
     .sb-logo {
-        padding: 18px 16px 14px;
+        padding: 20px 16px 16px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        border-bottom: 1px solid #F3F4F6;
+        gap: 12px;
+        border-bottom: 1px solid var(--c-border, #E2E8F0);
     }
+    
     .sb-logo-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 9px;
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 1.25rem;
         flex-shrink: 0;
-        box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+        box-shadow: 0 4px 12px rgba(14,165,233,0.25);
     }
+    
     .sb-logo-text { flex: 1; min-width: 0; }
+    
     .sb-logo-title {
-        font-size: 0.95rem;
+        font-size: 15px;
         font-weight: 700;
-        color: #111827;
+        color: var(--c-text, #0F172A);
         letter-spacing: -0.02em;
-        line-height: 1.2;
+        line-height: 1.3;
     }
+    
     .sb-logo-sub {
-        font-size: 0.68rem;
-        color: #9CA3AF;
-        margin-top: 1px;
+        font-size: 11px;
+        color: var(--c-sub, #64748B);
+        margin-top: 2px;
         font-weight: 500;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       PROFILE CARD — Clean app-style
-    ═══════════════════════════════════════════════════════════ */
+    /* Profile card */
     .sb-profile {
-        margin: 12px 12px 4px;
-        padding: 10px 12px;
-        background: #F9FAFB;
-        border: 1px solid #F3F4F6;
-        border-radius: 10px;
+        margin: 16px 12px 8px;
+        padding: 12px;
+        background: var(--c-card2, #F1F5F9);
+        border: 1px solid var(--c-border, #E2E8F0);
+        border-radius: 12px;
         transition: all 0.2s ease;
     }
+    
     .sb-profile:hover {
-        background: #F3F4F6;
-        border-color: #E5E7EB;
+        background: var(--c-hover, #F1F5F9);
     }
+    
     .sb-profile-inner {
         display: flex;
         align-items: center;
         gap: 10px;
     }
+    
     .sb-profile-avatar {
-        width: 34px;
-        height: 34px;
+        width: 36px;
+        height: 36px;
         border-radius: 8px;
-        background: linear-gradient(135deg, #6366F1, #8B5CF6);
+        background: linear-gradient(135deg, #0EA5E9, #06B6D4);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.85rem;
+        font-size: 14px;
         flex-shrink: 0;
         color: #fff;
         font-weight: 700;
-        letter-spacing: -0.02em;
     }
+    
     .sb-profile-avatar.admin {
         background: linear-gradient(135deg, #F59E0B, #EF4444);
     }
+    
     .sb-profile-avatar.official {
         background: linear-gradient(135deg, #10B981, #059669);
     }
+    
     .sb-profile-name {
-        font-size: 0.83rem;
+        font-size: 13px;
         font-weight: 600;
-        color: #111827;
+        color: var(--c-text, #0F172A);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        letter-spacing: -0.01em;
-        line-height: 1.25;
+        line-height: 1.3;
     }
+    
     .sb-profile-sub {
-        font-size: 0.7rem;
-        color: #6B7280;
-        margin-top: 1px;
+        font-size: 11px;
+        color: var(--c-sub, #64748B);
+        margin-top: 2px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         font-weight: 500;
     }
+    
     .sb-profile-dot {
         width: 8px;
         height: 8px;
         border-radius: 50%;
         background: #10B981;
         flex-shrink: 0;
-        box-shadow: 0 0 0 2px #FFF, 0 0 0 3px rgba(16,185,129,0.3);
+        box-shadow: 0 0 0 2px var(--c-card, #FFF);
     }
 
-    /* ── Nav item wrapper ── */
-    .sb-nav-item { padding: 1px 8px; }
+    /* Nav item wrapper */
+    .sb-nav-item { padding: 2px 10px; }
 
-    /* ── Divider ── */
+    /* Divider */
     .sb-divider {
         height: 1px;
-        background: #F3F4F6;
-        margin: 10px 14px;
+        background: var(--c-border, #E2E8F0);
+        margin: 12px 16px;
     }
 
-    /* ── Welcome card (logged-out) ── */
-    .sb-welcome {
-        margin: 8px 12px 16px;
-        padding: 16px 14px;
-        background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%);
-        border: 1px solid #E0E7FF;
-        border-radius: 10px;
-        text-align: center;
-    }
-    .sb-welcome-icon {
-        font-size: 1.6rem;
-        display: block;
-        margin-bottom: 4px;
-    }
-    .sb-welcome-title {
-        font-weight: 700;
-        color: #4338CA;
-        font-size: 0.88rem;
-        letter-spacing: -0.01em;
-    }
-    .sb-welcome-text {
-        font-size: 0.72rem;
-        color: #6B7280;
-        margin-top: 4px;
-        line-height: 1.5;
-    }
-
-    /* ── Footer ── */
+    /* Footer */
     .sb-footer {
-        padding: 12px 16px 16px;
-        font-size: 0.65rem;
-        color: #9CA3AF;
+        padding: 16px;
+        font-size: 11px;
+        color: var(--c-sub, #64748B);
         text-align: center;
         line-height: 1.6;
         font-weight: 500;
     }
+    
     .sb-footer strong {
-        color: #6366F1;
+        color: var(--c-a1, #0EA5E9);
         font-weight: 600;
     }
 
-    /* ── Responsive ── */
     @media (max-width: 768px) {
         section[data-testid="stSidebar"] {
             min-width: 260px !important;
@@ -539,7 +452,6 @@ def render_sidebar():
     </style>
     """, unsafe_allow_html=True)
 
-    role = st.session_state.role
     lang = st.session_state.language
 
     def _(key): return t(key)
@@ -691,38 +603,7 @@ def render_sidebar():
             ])
 
         # ════════════════════════════════════════════════════════════════════
-        # LOGGED-OUT STATE
-        # ════════════════════════════════════════════════════════════════════
-        else:
-            st.markdown("""
-            <div class="sb-welcome">
-                <span class="sb-welcome-icon">👋</span>
-                <div class="sb-welcome-title">Welcome Back</div>
-                <div class="sb-welcome-text">Sign in to access your dashboard and services</div>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div class="sb-section-label">Sign In As</div>', unsafe_allow_html=True)
-
-            # Primary: Citizen login (most common)
-            st.markdown('<div class="sb-nav-item sb-login sb-login-primary">', unsafe_allow_html=True)
-            if st.button("👤  Citizen Login", key="login_citizen", use_container_width=True):
-                st.session_state.screen = "user_login"; st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            # Secondary options
-            st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
-            if st.button("🏢  Official Login", key="login_official", use_container_width=True):
-                st.session_state.screen = "official_login"; st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
-            if st.button("👑  Admin Login", key="login_admin", use_container_width=True):
-                st.session_state.screen = "admin_login"; st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        # ════════════════════════════════════════════════════════════════════
-        # BOTTOM CONTROLS
+        # BOTTOM CONTROLS (only shown when logged in - sidebar hidden otherwise)
         # ════════════════════════════════════════════════════════════════════
         st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
 
@@ -737,13 +618,12 @@ def render_sidebar():
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # Logout
-        if role:
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="sb-logout" style="padding:0 12px;">', unsafe_allow_html=True)
-            if st.button("🔓  Sign Out", key="sb_logout", use_container_width=True):
-                logout()
-            st.markdown("</div>", unsafe_allow_html=True)
+        # Logout (always shown since sidebar is hidden when not logged in)
+        st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+        st.markdown('<div class="sb-logout" style="padding:0 12px;">', unsafe_allow_html=True)
+        if st.button("Sign Out", key="sb_logout", use_container_width=True):
+            logout()
+        st.markdown("</div>", unsafe_allow_html=True)
 
         # Footer
         st.markdown("""
@@ -850,9 +730,9 @@ def pg_language():
     }
     
     .hero-section {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 30px;
-        padding: 2rem;
+        background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 50%, #10B981 100%);
+        border-radius: 24px;
+        padding: 2.5rem 2rem;
         text-align: center;
         margin-bottom: 2rem;
         position: relative;
@@ -911,9 +791,9 @@ def pg_language():
     }
     
     .section-title {
-        font-size: 1.6rem;
+        font-size: 1.5rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
@@ -944,9 +824,9 @@ def pg_language():
     }
     
     .lang-card:hover {
-        transform: translateY(-8px);
-        border-color: #667eea;
-        box-shadow: 0 20px 25px -12px rgba(102, 126, 234, 0.3);
+        transform: translateY(-4px);
+        border-color: #0EA5E9;
+        box-shadow: 0 16px 30px -10px rgba(14, 165, 233, 0.25);
     }
     
     .lang-flag {
@@ -990,7 +870,7 @@ def pg_language():
         left: 0;
         width: 4px;
         height: 100%;
-        background: linear-gradient(135deg, #667eea, #764ba2);
+        background: linear-gradient(135deg, #0EA5E9, #06B6D4);
     }
     
     .guide-card:hover {
@@ -1005,11 +885,11 @@ def pg_language():
     
     .guide-number {
         display: inline-block;
-        background: #667eea;
+        background: #0EA5E9;
         color: white;
         font-size: 0.7rem;
         font-weight: 600;
-        padding: 0.2rem 0.6rem;
+        padding: 0.25rem 0.75rem;
         border-radius: 20px;
         margin-bottom: 0.5rem;
     }
@@ -1120,7 +1000,7 @@ def pg_language():
     .stat-number {
         font-size: 1.5rem;
         font-weight: 800;
-        color: #667eea;
+        color: #0EA5E9;
     }
     
     .stat-label {
@@ -1365,12 +1245,12 @@ def pg_login_type():
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
 
-    _CARD = "#10161F" if dark else "#FFFFFF"
-    _BOR  = "#1E2A3D" if dark else "#E2E8F4"
-    _TXT  = "#F0F4FF" if dark else "#0F172A"
-    _SUB  = "#8896B0" if dark else "#64748B"
-    _A1   = "#6366F1"
-    _A2   = "#8B5CF6"
+    _CARD = "#12121A" if dark else "#FFFFFF"
+    _BOR  = "#1E293B" if dark else "#E2E8F0"
+    _TXT  = "#F8FAFC" if dark else "#0F172A"
+    _SUB  = "#94A3B8" if dark else "#64748B"
+    _A1   = "#0EA5E9"
+    _A2   = "#06B6D4"
 
     st.markdown(f"""
 <style>
@@ -1389,10 +1269,10 @@ def pg_login_type():
 }}
 .lt-role-card::before{{content:'';position:absolute;top:0;left:0;right:0;
     height:4px;border-radius:22px 22px 0 0;}}
-.lt-role-card.citizen::before{{background:linear-gradient(90deg,#6366F1,#8B5CF6);}}
-.lt-role-card.official::before{{background:linear-gradient(90deg,#0EA5E9,#6366F1);}}
+.lt-role-card.citizen::before{{background:linear-gradient(90deg,#0EA5E9,#06B6D4);}}
+.lt-role-card.official::before{{background:linear-gradient(90deg,#10B981,#059669);}}
 .lt-role-card.admin::before{{background:linear-gradient(90deg,#F59E0B,#EF4444);}}
-.lt-role-card:hover{{transform:translateY(-4px);box-shadow:0 16px 40px rgba(99,102,241,0.14);}}
+.lt-role-card:hover{{transform:translateY(-4px);box-shadow:0 16px 40px rgba(14,165,233,0.15);}}
 .lt-role-icon{{font-size:3rem;display:block;margin-bottom:12px;}}
 .lt-role-title{{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:800;
     color:{_TXT};margin-bottom:5px;}}
@@ -1535,7 +1415,7 @@ html, body, .stApp {{
 
 /* ══════════════════════════════════════════════════════════════
    ANIMATED BACKGROUND ORBS
-══════════════════════════════════════════════════════════════ */
+═════════════════════════════��════════════════════════════════ */
 .lp-scene {{
     position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
 }}
@@ -2480,7 +2360,7 @@ def pg_official_login():
         if k not in st.session_state:
             st.session_state[k] = v
 
-    # ── Hero ──────────────────────────────────────────────────────────────────
+    # ── Hero ─────────────────────────────────────────────���────────────────────
     st.markdown(
         "<div class='lp-hero' style='"
         "background:linear-gradient(135deg,#0c1a3a 0%,#0369a1 45%,#1e1b4b 100%);'>"
@@ -2743,7 +2623,7 @@ def pg_official_login():
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ADMIN LOGIN
-# ═══════════════════════════════════════════════════════════════════════════════
+# ═════════════════════════════════════════════��═════════════════════════════════
 def pg_admin_login():
     dark = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
@@ -4054,7 +3934,7 @@ def _render_complaint_list(comps: list, lang: str, skip_ids: set) -> None:
         unsafe_allow_html=True,
     )
 
-    # ── Render only the current page ───────────────────────────────────────
+    # ── Render only the current page ──���────────────────────────────────────
     shown = 0
 
     start_no = page * PAGE_SIZE + 1
@@ -4405,7 +4285,7 @@ def _rating_card(c, uid, idx=0):
 # ─────────────────────────────────────────────────────────────────────────────
 
 
-# ─────────────────────────────────────────────────────────────────────────────
+# ────────────��────────────────────────────────────────────────────────────────
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -5352,7 +5232,7 @@ def _render_voice(lang: str):
  
 def _render_category(lang: str) -> None:
 
-    # ─────────────────────────────────────────────
+    # ───��─────────────────────────────────────────
     # FETCH DYNAMIC CATEGORIES
     # ─────────────────────────────────────────────
 
@@ -10475,7 +10355,7 @@ def pg_admin_departments():
 .dept-form-title{{font-size:0.90rem;font-weight:700;color:{_TXT};
     margin-bottom:14px;display:flex;align-items:center;gap:8px;}}
 
-/* ════════════════════════════════════════════════
+/* ═══════���════════════════════════════════════════
    FIX 1 — SELECTBOX TRIGGER (closed state)
    Streamlit v1.30+ uses two div levels inside
    .stSelectbox before reaching the styled div.
@@ -11174,7 +11054,7 @@ def pg_city_health_score():
             except (TypeError, ValueError):
                 pass
 
-    # ════════════════════════════════════════════════════════
+    # ═════════════════════���══════════════════════════════════
     # COMPUTE HEALTH SCORE  (all values clamped)
     # ════════════════════════════════════════════════════════
     area_metrics = []
@@ -11521,7 +11401,7 @@ button[data-testid="baseButton-secondary"][kind="secondary"]:has(div:contains("�
         unsafe_allow_html=True,
     )
 
-    # ── tabs ──────────────────────────────────────────────────────
+    # ── tabs ───��──────────────────────────────────────────────────
     def _stars(avg, cnt):
         try:
             v = max(0.0, min(5.0, float(avg or 0)))
@@ -11929,7 +11809,7 @@ def pg_admin_officials():
 
             st.markdown("</div><div style='height:8px'></div>", unsafe_allow_html=True)
 
-    # ── ACTIVE OFFICIALS ───────────────────────────────────────────
+    # ── ACTIVE OFFICIALS ────────────────────────────────────────��──
     if approved:
         st.markdown(
             f"<div class='off-sec'>✅ Active Officials ({len(approved)})</div>",
@@ -12861,7 +12741,7 @@ def _render_performance_analytics():
         st.markdown(_stat_card("🏢", "Top Department", "#0EA5E9", top_dept),
                     unsafe_allow_html=True)
 
-    # ── TOP 10 PERFORMERS ─────────────────────────────────────────────────────
+    # ── TOP 10 PERFORMERS ────────────���────────────────────────────────────────
     st.markdown('<div class="prem-section-header">Top 10 by Rating</div>', unsafe_allow_html=True)
     top10 = eligible_df[eligible_df["Rating Count"] > 0].nlargest(10, "Avg Rating")
     if not top10.empty:
@@ -14206,7 +14086,7 @@ def pg_public_transparency():
 </style>
 """, unsafe_allow_html=True)
 
-    # ════════════════════════════════════════════════════════
+    # ═══════════════════════════════════��════════════════════
     # HERO
     # ════════════════════════════════════════════════════════
     now_str = datetime.now().strftime("%d %b %Y, %I:%M %p")
@@ -14504,7 +14384,7 @@ def pg_public_transparency():
 
     # ════════════════════════════════════════════════════════
     # TIMESTAMP + BACK
-    # ════════════════════════════════════════════════════════
+    # ════════════════════���═══════════════════════════════════
     st.markdown(
         f"<div class='pt-ts'>🕐 Last updated: {datetime.now().strftime('%d %b %Y, %I:%M:%S %p')}"
         f" · Data refreshes in real-time</div>",
@@ -15585,7 +15465,7 @@ def pg_sla_management():
                 </div>
                 """, unsafe_allow_html=True)
 
-    # ══════════════════════════════════════════════════════════════════════════
+    # ══════════════════════════════════════════════���═══════════════════════════
     #  TAB 3 — SLA POLICIES
     # ══════════════════════════════════════════════════════════════════════════
     with tab3:
