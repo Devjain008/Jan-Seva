@@ -10963,16 +10963,16 @@ def pg_admin_officials():
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
 
     _CARD = "#10161F" if dark else "#FFFFFF"
-    _BG2  = "#080C14" if dark else "#F4F6FB"
     _BOR  = "#1E2A3D" if dark else "#E2E8F4"
     _TXT  = "#F0F4FF" if dark else "#0F172A"
     _SUB  = "#8896B0" if dark else "#64748B"
+    _HOV  = "#16213A" if dark else "#F8FAFF"
     _A1   = "#6366F1"
     _A2   = "#8B5CF6"
 
     st.markdown(f"""
 <style>
-/* ── hero ── */
+/* ── HERO ── */
 .off-hero{{
     background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#0f2744 100%);
     border-radius:22px;padding:1.75rem 2rem;margin-bottom:1.75rem;
@@ -10987,20 +10987,17 @@ def pg_admin_officials():
     color:#fff;margin-bottom:5px;position:relative;z-index:1;}}
 .off-hero-sub{{font-size:0.86rem;color:rgba(255,255,255,0.65);
     position:relative;z-index:1;font-weight:500;}}
-.off-hero-badges{{
-    display:flex;gap:10px;margin-top:14px;position:relative;z-index:1;flex-wrap:wrap;
-}}
+.off-hero-badges{{display:flex;gap:10px;margin-top:14px;position:relative;z-index:1;flex-wrap:wrap;}}
 .off-hero-stat{{
     background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.18);
-    border-radius:12px;padding:10px 16px;text-align:center;
-    backdrop-filter:blur(8px);min-width:80px;
+    border-radius:12px;padding:10px 16px;text-align:center;min-width:80px;
 }}
 .off-hero-stat-num{{font-family:'Sora',sans-serif;font-size:1.5rem;font-weight:800;
     color:#fff;line-height:1;margin-bottom:3px;}}
 .off-hero-stat-lbl{{font-size:0.60rem;font-weight:700;text-transform:uppercase;
     letter-spacing:0.08em;color:rgba(255,255,255,0.55);}}
 
-/* ── section header ── */
+/* ── SECTION HEADER ── */
 .off-sec{{font-size:0.70rem;font-weight:700;text-transform:uppercase;
     letter-spacing:0.10em;color:{_SUB};margin:22px 0 12px;
     display:flex;align-items:center;gap:10px;}}
@@ -11009,225 +11006,7 @@ def pg_admin_officials():
 .off-sec::after{{content:'';flex:1;height:1px;
     background:linear-gradient(to right,{_BOR},transparent);}}
 
-/* ── pending card ── */
-.off-pend-card{{
-    background:{_CARD};border:1px solid {"#78350F" if dark else "#FDE68A"};
-    border-left:4px solid #D97706;border-radius:16px;
-    padding:16px 18px;
-    box-shadow:0 0 0 3px {"rgba(120,53,15,0.15)" if dark else "#FFFBEB"};
-    transition:transform 0.18s,box-shadow 0.18s;
-}}
-.off-pend-card:hover{{transform:translateX(3px);
-    box-shadow:0 8px 24px rgba(217,119,6,0.15);}}
-.off-pend-name{{font-size:0.95rem;font-weight:800;color:{_TXT};margin-bottom:5px;}}
-.off-pend-meta{{font-size:0.76rem;color:{_SUB};
-    display:flex;gap:10px;flex-wrap:wrap;align-items:center;}}
-.off-meta-tag{{
-    background:{"#1A2236" if dark else "#F1F5F9"};
-    border:1px solid {_BOR};border-radius:20px;
-    padding:2px 9px;font-size:0.68rem;font-weight:600;color:{_SUB};
-}}
-.off-meta-tag.code{{
-    background:rgba(99,102,241,0.12);color:{_A1};
-    border-color:rgba(99,102,241,0.25);font-family:'Courier New',monospace;
-    font-weight:800;
-}}
-
-/* ── approved card ── */
-.off-appr-card{{
-    background:{_CARD};border:1px solid {_BOR};
-    border-left:4px solid #22C55E;border-radius:16px;
-    padding:16px 18px;
-    box-shadow:0 2px 8px rgba(15,23,42,0.06);
-    transition:transform 0.18s,box-shadow 0.18s;
-}}
-.off-appr-card:hover{{transform:translateX(3px);
-    box-shadow:0 8px 24px rgba(34,197,94,0.12);}}
-.off-appr-name{{font-size:0.95rem;font-weight:800;color:{_TXT};margin-bottom:5px;}}
-.off-appr-meta{{font-size:0.76rem;color:{_SUB};
-    display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}}
-
-/* ── stat pills row ── */
-.off-stats-row{{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px;}}
-.off-stat-pill{{
-    border-radius:10px;padding:6px 12px;text-align:center;
-    border:1px solid;min-width:70px;
-}}
-.off-stat-pill-num{{font-size:0.88rem;font-weight:800;line-height:1;margin-bottom:2px;}}
-.off-stat-pill-lbl{{font-size:0.60rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.05em;opacity:0.70;}}
-
-.off-stat-pill.resolved{{
-    background:{"rgba(74,222,128,0.12)" if dark else "#F0FDF4"};
-    border-color:{"rgba(74,222,128,0.25)" if dark else "#BBF7D0"};
-}}
-.off-stat-pill.resolved .off-stat-pill-num{{color:{"#4ADE80" if dark else "#15803D"};}}
-.off-stat-pill.resolved .off-stat-pill-lbl{{color:{"#4ADE80" if dark else "#15803D"};}}
-
-.off-stat-pill.assigned{{
-    background:rgba(99,102,241,0.10);
-    border-color:rgba(99,102,241,0.22);
-}}
-.off-stat-pill.assigned .off-stat-pill-num{{color:{_A1};}}
-.off-stat-pill.assigned .off-stat-pill-lbl{{color:{_A1};}}
-
-.off-stat-pill.rate{{
-    background:{"rgba(251,191,36,0.12)" if dark else "#FFFBEB"};
-    border-color:{"rgba(251,191,36,0.25)" if dark else "#FDE68A"};
-}}
-.off-stat-pill.rate .off-stat-pill-num{{color:{"#FBBF24" if dark else "#B45309"};}}
-.off-stat-pill.rate .off-stat-pill-lbl{{color:{"#FBBF24" if dark else "#B45309"};}}
-
-.off-stat-pill.rating{{
-    background:{"rgba(251,146,60,0.12)" if dark else "#FFF7ED"};
-    border-color:{"rgba(251,146,60,0.22)" if dark else "#FED7AA"};
-}}
-.off-stat-pill.rating .off-stat-pill-num{{color:{"#FB923C" if dark else "#C2410C"};}}
-.off-stat-pill.rating .off-stat-pill-lbl{{color:{"#FB923C" if dark else "#C2410C"};}}
-
-/* ── stars ── */
-.off-stars{{font-size:0.85rem;letter-spacing:1px;}}
-
-/* ── action buttons ── */
-.off-btn-approve > button{{
-    background:linear-gradient(135deg,#15803D,#22C55E) !important;
-    color:#fff !important;border:none !important;
-    border-radius:12px !important;font-size:0.80rem !important;
-    font-weight:700 !important;padding:9px 14px !important;
-    box-shadow:0 4px 12px rgba(34,197,94,0.30) !important;
-}}
-.off-btn-approve > button:hover{{
-    transform:translateY(-2px) !important;
-    box-shadow:0 8px 20px rgba(34,197,94,0.40) !important;
-}}
-.off-btn-reject > button{{
-    background:{"#1C0808" if dark else "#FFF1F2"} !important;
-    color:{"#F87171" if dark else "#BE123C"} !important;
-    border:1.5px solid {"#7F1D1D" if dark else "#FECDD3"} !important;
-    border-radius:12px !important;font-size:0.80rem !important;
-    font-weight:700 !important;padding:9px 14px !important;
-    box-shadow:none !important;
-}}
-/* ─────────────────────────────────────────
-   COMMON ACTION BUTTON STYLE
-───────────────────────────────────────── */
-
-.off-btn-approve,
-.off-btn-reject,
-.off-btn-remove{{
-
-    width:100%!important;
-}}
-
-/* Main button */
-.off-btn-approve .stButton>button,
-.off-btn-reject .stButton>button,
-.off-btn-remove .stButton>button{{
-
-    width:100%!important;
-
-    min-width:120px!important;
-
-    height:42px!important;
-
-    border-radius:12px!important;
-
-    font-size:.82rem!important;
-
-    font-weight:700!important;
-
-    padding:0 14px!important;
-
-    white-space:nowrap!important;
-
-    display:flex!important;
-
-    align-items:center!important;
-
-    justify-content:center!important;
-
-    transition:all .18s ease!important;
-}}
-
-/* APPROVE */
-.off-btn-approve .stButton>button{{
-
-    background:
-        linear-gradient(135deg,#16A34A,#22C55E)!important;
-
-    color:#FFFFFF!important;
-
-    border:none!important;
-
-    box-shadow:
-        0 8px 22px rgba(34,197,94,.24)!important;
-}}
-
-/* REJECT */
-.off-btn-reject .stButton>button{{
-
-    background:#FFFFFF!important;
-
-    color:#DC2626!important;
-
-    border:
-        1.5px solid rgba(220,38,38,.16)!important;
-
-    box-shadow:
-        0 4px 12px rgba(15,23,42,.05)!important;
-}}
-
-/* REMOVE */
-.off-btn-remove .stButton>button{{
-
-    background:#FFFFFF!important;
-
-    color:#DC2626!important;
-
-    border:
-        1.5px solid rgba(220,38,38,.16)!important;
-
-    box-shadow:
-        0 4px 12px rgba(15,23,42,.05)!important;
-}}
-
-/* Hover */
-.off-btn-approve .stButton>button:hover,
-.off-btn-reject .stButton>button:hover,
-.off-btn-remove .stButton>button:hover{{
-
-    transform:
-        translateY(-2px)!important;
-}}
-
-/* Mobile */
-@media(max-width:768px){{
-
-    .off-btn-approve .stButton>button,
-    .off-btn-reject .stButton>button,
-    .off-btn-remove .stButton>button{{
-
-        min-width:100%!important;
-
-        height:40px!important;
-
-        font-size:.78rem!important;
-    }}
-}}
-.off-btn-reject > button:hover{{
-    background:{"#2C1010" if dark else "#FFE4E6"} !important;
-    transform:translateY(-1px) !important;
-}}
-.off-btn-remove > button{{
-    background:{"#1C0808" if dark else "#FFF1F2"} !important;
-    color:{"#F87171" if dark else "#BE123C"} !important;
-    border:1.5px solid {"#7F1D1D" if dark else "#FECDD3"} !important;
-    border-radius:12px !important;font-size:0.78rem !important;
-    font-weight:700 !important;padding:8px 12px !important;
-    box-shadow:none !important;
-}}
-
-/* ── no-pending banner ── */
+/* ── NO PENDING BANNER ── */
 .off-no-pending{{
     background:{"rgba(74,222,128,0.08)" if dark else "#F0FDF4"};
     border:1px solid {"rgba(74,222,128,0.20)" if dark else "#BBF7D0"};
@@ -11237,56 +11016,160 @@ def pg_admin_officials():
 .off-no-pending-text{{font-size:0.83rem;font-weight:600;
     color:{"#4ADE80" if dark else "#15803D"};}}
 
+/* ── META TAG ── */
+.off-meta-tag{{
+    background:{"#1A2236" if dark else "#F1F5F9"};
+    border:1px solid {_BOR};border-radius:20px;
+    padding:2px 9px;font-size:0.68rem;font-weight:600;color:{_SUB};
+    display:inline-flex;align-items:center;gap:4px;
+}}
+.off-meta-tag.code{{
+    background:rgba(99,102,241,0.12);color:{_A1};
+    border-color:rgba(99,102,241,0.25);font-family:'Courier New',monospace;font-weight:800;
+}}
+
+/* ── PENDING CARD ── */
+.off-pend-card{{
+    background:{_CARD};
+    border:1px solid {"rgba(217,119,6,0.35)" if dark else "#FDE68A"};
+    border-left:4px solid #D97706;
+    border-radius:18px;padding:18px 20px 14px;
+    box-shadow:0 0 0 3px {"rgba(120,53,15,0.10)" if dark else "#FFFBEB"};
+    margin-bottom:4px;
+}}
+
+/* ── APPROVED CARD ── */
+.off-appr-card{{
+    background:{_CARD};
+    border:1px solid {_BOR};
+    border-left:4px solid #22C55E;
+    border-radius:18px;padding:18px 20px 14px;
+    box-shadow:0 2px 12px rgba(15,23,42,0.06);
+    margin-bottom:4px;
+    transition:box-shadow 0.18s;
+}}
+.off-appr-card:hover{{box-shadow:0 8px 28px rgba(34,197,94,0.10);}}
+
+/* ── CARD NAME ── */
+.off-card-name{{
+    font-size:0.96rem;font-weight:800;color:{_TXT};
+    margin-bottom:6px;display:flex;align-items:center;gap:8px;
+}}
+.off-card-meta{{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    margin-bottom:12px;
+}}
+
+/* ── STAT PILLS ── */
+.off-stats-row{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}}
+.off-stat-pill{{
+    border-radius:10px;padding:7px 13px;text-align:center;border:1px solid;min-width:72px;
+}}
+.off-stat-pill-num{{font-size:0.90rem;font-weight:800;line-height:1;margin-bottom:2px;}}
+.off-stat-pill-lbl{{font-size:0.58rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.05em;opacity:0.70;}}
+.off-stat-pill.assigned{{
+    background:rgba(99,102,241,0.10);border-color:rgba(99,102,241,0.22);}}
+.off-stat-pill.assigned .off-stat-pill-num{{color:{_A1};}}
+.off-stat-pill.assigned .off-stat-pill-lbl{{color:{_A1};}}
+.off-stat-pill.resolved{{
+    background:{"rgba(74,222,128,0.12)" if dark else "#F0FDF4"};
+    border-color:{"rgba(74,222,128,0.25)" if dark else "#BBF7D0"};}}
+.off-stat-pill.resolved .off-stat-pill-num{{color:{"#4ADE80" if dark else "#15803D"};}}
+.off-stat-pill.resolved .off-stat-pill-lbl{{color:{"#4ADE80" if dark else "#15803D"};}}
+.off-stat-pill.rate{{
+    background:{"rgba(251,191,36,0.12)" if dark else "#FFFBEB"};
+    border-color:{"rgba(251,191,36,0.25)" if dark else "#FDE68A"};}}
+.off-stat-pill.rate .off-stat-pill-num{{color:{"#FBBF24" if dark else "#B45309"};}}
+.off-stat-pill.rate .off-stat-pill-lbl{{color:{"#FBBF24" if dark else "#B45309"};}}
+.off-stat-pill.rating{{
+    background:{"rgba(251,146,60,0.12)" if dark else "#FFF7ED"};
+    border-color:{"rgba(251,146,60,0.22)" if dark else "#FED7AA"};}}
+.off-stat-pill.rating .off-stat-pill-num{{color:{"#FB923C" if dark else "#C2410C"};}}
+.off-stat-pill.rating .off-stat-pill-lbl{{color:{"#FB923C" if dark else "#C2410C"};}}
+
+/* ── DIVIDER INSIDE CARD ── */
+.off-card-divider{{
+    height:1px;
+    background:linear-gradient(90deg,transparent,{_BOR},transparent);
+    margin:10px 0 12px;
+}}
+
+/* ── ACTION BUTTONS INSIDE CARD ── */
+.off-btn-approve .stButton>button{{
+    background:linear-gradient(135deg,#15803D,#22C55E)!important;
+    color:#fff!important;border:none!important;
+    border-radius:10px!important;font-size:0.80rem!important;
+    font-weight:700!important;height:38px!important;
+    box-shadow:0 4px 12px rgba(34,197,94,0.28)!important;
+    transition:all 0.18s!important;
+}}
+.off-btn-approve .stButton>button:hover{{
+    transform:translateY(-2px)!important;
+    box-shadow:0 8px 20px rgba(34,197,94,0.40)!important;
+    filter:brightness(1.05)!important;
+}}
+.off-btn-reject .stButton>button{{
+    background:{"rgba(220,38,38,0.10)" if dark else "#FFF1F2"}!important;
+    color:{"#F87171" if dark else "#BE123C"}!important;
+    border:1.5px solid {"rgba(220,38,38,0.25)" if dark else "#FECDD3"}!important;
+    border-radius:10px!important;font-size:0.80rem!important;
+    font-weight:700!important;height:38px!important;
+    box-shadow:none!important;transition:all 0.18s!important;
+}}
+.off-btn-reject .stButton>button:hover{{
+    background:{"rgba(220,38,38,0.18)" if dark else "#FFE4E6"}!important;
+    transform:translateY(-1px)!important;
+}}
+.off-btn-remove .stButton>button{{
+    background:{"rgba(220,38,38,0.08)" if dark else "#FFF1F2"}!important;
+    color:{"#F87171" if dark else "#BE123C"}!important;
+    border:1.5px solid {"rgba(220,38,38,0.20)" if dark else "#FECDD3"}!important;
+    border-radius:10px!important;font-size:0.78rem!important;
+    font-weight:700!important;height:36px!important;
+    box-shadow:none!important;transition:all 0.18s!important;
+}}
+.off-btn-remove .stButton>button:hover{{
+    background:{"rgba(220,38,38,0.16)" if dark else "#FFE4E6"}!important;
+    transform:translateY(-1px)!important;
+}}
+
 @media(max-width:600px){{
     .off-hero{{padding:1.4rem 1rem;border-radius:18px;}}
     .off-hero-title{{font-size:1.4rem;}}
-    .off-pend-meta,.off-appr-meta{{flex-direction:column;gap:5px;}}
     .off-stats-row{{gap:6px;}}
+    .off-card-meta{{gap:5px;}}
 }}
 </style>
 """, unsafe_allow_html=True)
 
-    # ════════════════════════════════════════════════════════
-    # FETCH
-    # ════════════════════════════════════════════════════════
+    # ── FETCH ─────────────────────────────────────────────────────
     pending  = api("get", "/admin/officials/pending")
     all_offs = api("get", "/admin/officials/all")
     pending  = pending  if isinstance(pending,  list) else []
     all_offs = all_offs if isinstance(all_offs, list) else []
     approved = [o for o in all_offs if o.get("is_approved")]
 
-    # ════════════════════════════════════════════════════════
-    # HERO
-    # ════════════════════════════════════════════════════════
+    # ── HERO ──────────────────────────────────────────────────────
     st.markdown(
         f"<div class='off-hero'>"
-        f"<div class='off-hero-title'>👥 Officials</div>"
+        f"<div class='off-hero-title'>👥 Officials Management</div>"
         f"<div class='off-hero-sub'>Approve · reject · monitor performance</div>"
         f"<div class='off-hero-badges'>"
-        f"<div class='off-hero-stat'>"
-        f"<div class='off-hero-stat-num'>{len(approved)}</div>"
-        f"<div class='off-hero-stat-lbl'>✅ Active</div>"
-        f"</div>"
-        f"<div class='off-hero-stat'>"
-        f"<div class='off-hero-stat-num' style='color:#FCD34D;'>{len(pending)}</div>"
-        f"<div class='off-hero-stat-lbl'>⏳ Pending</div>"
-        f"</div>"
-        f"<div class='off-hero-stat'>"
-        f"<div class='off-hero-stat-num'>{len(all_offs)}</div>"
-        f"<div class='off-hero-stat-lbl'>👥 Total</div>"
-        f"</div>"
-        f"</div>"
-        f"</div>",
+        f"<div class='off-hero-stat'><div class='off-hero-stat-num'>{len(approved)}</div>"
+        f"<div class='off-hero-stat-lbl'>✅ Active</div></div>"
+        f"<div class='off-hero-stat'><div class='off-hero-stat-num' style='color:#FCD34D;'>{len(pending)}</div>"
+        f"<div class='off-hero-stat-lbl'>⏳ Pending</div></div>"
+        f"<div class='off-hero-stat'><div class='off-hero-stat-num'>{len(all_offs)}</div>"
+        f"<div class='off-hero-stat-lbl'>👥 Total</div></div>"
+        f"</div></div>",
         unsafe_allow_html=True,
     )
 
-    # ════════════════════════════════════════════════════════
-    # PENDING APPROVALS
-    # ════════════════════════════════════════════════════════
+    # ── PENDING APPROVALS ──────────────────────────────────────────
     st.markdown(
         f"<div class='off-sec'>⏳ Awaiting Approval"
-        f"{'  (' + str(len(pending)) + ')' if pending else ''}"
-        f"</div>",
+        f"{'  (' + str(len(pending)) + ')' if pending else ''}</div>",
         unsafe_allow_html=True,
     )
 
@@ -11304,40 +11187,46 @@ def pg_admin_officials():
             dept = o.get("department", "—")
             code = o.get("dept_code", "—")
 
+            # Card header
             st.markdown(
                 f"<div class='off-pend-card'>"
-                f"<div class='off-pend-name'>👤 {o.get('name','—')}</div>"
-                f"<div class='off-pend-meta'>"
+                f"<div class='off-card-name'>"
+                f"<span style='background:rgba(217,119,6,0.15);border-radius:50%;width:32px;height:32px;"
+                f"display:inline-flex;align-items:center;justify-content:center;font-size:0.9rem;'>👤</span>"
+                f"{o.get('name','—')}"
+                f"<span style='background:#FFFBEB;color:#92400E;border-radius:6px;"
+                f"padding:2px 8px;font-size:0.62rem;font-weight:700;border:1px solid #FDE68A;'>⏳ PENDING</span>"
+                f"</div>"
+                f"<div class='off-card-meta'>"
                 f"<span class='off-meta-tag'>📧 {o.get('email','—')}</span>"
                 f"<span class='off-meta-tag'>🏢 {dept}</span>"
                 f"<span class='off-meta-tag code'>🔑 {code}</span>"
                 f"{'<span class=\"off-meta-tag\">📅 ' + str(o.get('joined','')) + '</span>' if o.get('joined') else ''}"
                 f"</div>"
-                f"</div>",
+                f"<div class='off-card-divider'></div>",
                 unsafe_allow_html=True,
             )
 
-            pa1, pa2, pa3 = st.columns([3.8, 1.4, 1.4], gap="small")
-            with pa2:
+            # Buttons inside card
+            ba1, ba2, ba3 = st.columns([3, 1.2, 1.2])
+            with ba2:
                 st.markdown("<div class='off-btn-approve'>", unsafe_allow_html=True)
                 if st.button("✅ Approve", key=f"apv_{oid}", use_container_width=True):
-                    resp = api("put", f"/admin/officials/{oid}/approve")
-                    st.success("✅ Official approved!")
+                    api("put", f"/admin/officials/{oid}/approve")
+                    st.success("✅ Approved!")
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
-            with pa3:
+            with ba3:
                 st.markdown("<div class='off-btn-reject'>", unsafe_allow_html=True)
                 if st.button("❌ Reject", key=f"rej_{oid}", use_container_width=True):
                     api("put", f"/admin/officials/{oid}/reject")
-                    st.warning("Official rejected.")
+                    st.warning("Rejected.")
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+            st.markdown("</div><div style='height:8px'></div>", unsafe_allow_html=True)
 
-    # ════════════════════════════════════════════════════════
-    # ACTIVE OFFICIALS
-    # ════════════════════════════════════════════════════════
+    # ── ACTIVE OFFICIALS ───────────────────────────────────────────
     if approved:
         st.markdown(
             f"<div class='off-sec'>✅ Active Officials ({len(approved)})</div>",
@@ -11348,20 +11237,32 @@ def pg_admin_officials():
             oid        = o.get("id")
             assigned   = o.get("total_assigned", 0)
             resolved   = o.get("total_resolved", 0)
-            avg_rating = o.get("avg_rating", 0) or 0
+            avg_rating = float(o.get("avg_rating", 0) or 0)
             rating_cnt = o.get("rating_count", 0) or 0
             res_rate   = round(resolved / max(assigned, 1) * 100, 1)
 
-            # star string
             full  = int(avg_rating)
             half  = 1 if (avg_rating - full) >= 0.5 else 0
             empty = 5 - full - half
             star_str = "★" * full + ("½" if half else "") + "☆" * empty
 
+            bar_color = (
+                "linear-gradient(90deg,#22C55E,#10B981)" if res_rate >= 70
+                else "linear-gradient(90deg,#F59E0B,#D97706)" if res_rate >= 40
+                else "linear-gradient(90deg,#EF4444,#DC2626)"
+            )
+
+            # Card
             st.markdown(
                 f"<div class='off-appr-card'>"
-                f"<div class='off-appr-name'>👤 {o.get('name','—')}</div>"
-                f"<div class='off-appr-meta'>"
+                f"<div class='off-card-name'>"
+                f"<span style='background:rgba(34,197,94,0.12);border-radius:50%;width:32px;height:32px;"
+                f"display:inline-flex;align-items:center;justify-content:center;font-size:0.9rem;'>👤</span>"
+                f"{o.get('name','—')}"
+                f"<span style='background:#F0FDF4;color:#15803D;border-radius:6px;"
+                f"padding:2px 8px;font-size:0.62rem;font-weight:700;border:1px solid #BBF7D0;'>✅ ACTIVE</span>"
+                f"</div>"
+                f"<div class='off-card-meta'>"
                 f"<span class='off-meta-tag'>📧 {o.get('email','—')}</span>"
                 f"<span class='off-meta-tag'>🏢 {o.get('department','—')}</span>"
                 f"{'<span class=\"off-meta-tag\">📅 ' + str(o.get('joined','')) + '</span>' if o.get('joined') else ''}"
@@ -11369,38 +11270,37 @@ def pg_admin_officials():
                 f"<div class='off-stats-row'>"
                 f"<div class='off-stat-pill assigned'>"
                 f"<div class='off-stat-pill-num'>{assigned}</div>"
-                f"<div class='off-stat-pill-lbl'>Assigned</div>"
-                f"</div>"
+                f"<div class='off-stat-pill-lbl'>Assigned</div></div>"
                 f"<div class='off-stat-pill resolved'>"
                 f"<div class='off-stat-pill-num'>{resolved}</div>"
-                f"<div class='off-stat-pill-lbl'>Resolved</div>"
-                f"</div>"
+                f"<div class='off-stat-pill-lbl'>Resolved</div></div>"
                 f"<div class='off-stat-pill rate'>"
                 f"<div class='off-stat-pill-num'>{res_rate}%</div>"
-                f"<div class='off-stat-pill-lbl'>Rate</div>"
-                f"</div>"
+                f"<div class='off-stat-pill-lbl'>Rate</div></div>"
                 f"<div class='off-stat-pill rating'>"
                 f"<div class='off-stat-pill-num'>"
-                f"<span class='off-stars' style='color:#F59E0B;'>{star_str}</span> "
-                f"<span style='font-size:0.72rem;'>{avg_rating:.1f}</span>"
+                f"<span style='color:#F59E0B;'>{star_str}</span> "
+                f"<span style='font-size:0.72rem;'>{avg_rating:.1f}</span></div>"
+                f"<div class='off-stat-pill-lbl'>{rating_cnt} reviews</div></div>"
                 f"</div>"
-                f"<div class='off-stat-pill-lbl'>{rating_cnt} reviews</div>"
-                f"</div>"
-                f"</div>"
-                f"</div>",
+                # Resolution progress bar
+                f"<div style='background:{_BOR};border-radius:99px;height:6px;margin-bottom:14px;overflow:hidden;'>"
+                f"<div style='width:{min(res_rate,100)}%;height:100%;border-radius:99px;"
+                f"background:{bar_color};'></div></div>"
+                f"<div class='off-card-divider'></div>",
                 unsafe_allow_html=True,
             )
 
-            rc1, rc2, rc3 = st.columns([4.2, 1.6, 1.6], gap="small")
-            with rc3:
+            # Remove button inside card
+            rc1, rc2 = st.columns([5, 1.4])
+            with rc2:
                 st.markdown("<div class='off-btn-remove'>", unsafe_allow_html=True)
                 if st.button("🗑 Remove", key=f"rem_{oid}", use_container_width=True):
                     api("put", f"/admin/officials/{oid}/reject")
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-
+            st.markdown("</div><div style='height:8px'></div>", unsafe_allow_html=True)
 
 def pg_admin_complaints():
 
