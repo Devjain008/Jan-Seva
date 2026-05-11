@@ -1761,548 +1761,347 @@ def pg_language():
     """, height=0)
 
 
-import streamlit as st
+def pg_login_type():
+    dark  = st.session_state.get("dark_mode", False)
+    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
+
+    _CARD = "#12121A" if dark else "#FFFFFF"
+    _BOR  = "#1E293B" if dark else "#E2E8F0"
+    _TXT  = "#F8FAFC" if dark else "#0F172A"
+    _SUB  = "#94A3B8" if dark else "#64748B"
+    _A1   = "#0EA5E9"
+    _A2   = "#06B6D4"
+
+    st.markdown(f"""
+<style>
+.lt-wrap{{max-width:860px;margin:0 auto;padding:2rem 1rem;}}
+.lt-logo{{text-align:center;margin-bottom:2rem;}}
+.lt-logo-icon{{font-size:4rem;display:block;margin-bottom:12px;}}
+.lt-logo-title{{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;
+    color:{_TXT};margin-bottom:6px;}}
+.lt-logo-sub{{font-size:0.88rem;color:{_SUB};font-weight:500;}}
+.lt-role-card{{
+    background:{_CARD};border:1.5px solid {_BOR};border-radius:22px;
+    padding:28px 20px 22px;text-align:center;
+    box-shadow:0 4px 16px rgba(15,23,42,0.07);
+    transition:transform 0.20s,box-shadow 0.20s,border-color 0.20s;
+    margin-bottom:6px;position:relative;overflow:hidden;
+}}
+.lt-role-card::before{{content:'';position:absolute;top:0;left:0;right:0;
+    height:4px;border-radius:22px 22px 0 0;}}
+.lt-role-card.citizen::before{{background:linear-gradient(90deg,#0EA5E9,#06B6D4);}}
+.lt-role-card.official::before{{background:linear-gradient(90deg,#10B981,#059669);}}
+.lt-role-card.admin::before{{background:linear-gradient(90deg,#F59E0B,#EF4444);}}
+.lt-role-card:hover{{transform:translateY(-4px);box-shadow:0 16px 40px rgba(14,165,233,0.15);}}
+.lt-role-icon{{font-size:3rem;display:block;margin-bottom:12px;}}
+.lt-role-title{{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:800;
+    color:{_TXT};margin-bottom:5px;}}
+.lt-role-sub{{font-size:0.76rem;color:{_SUB};line-height:1.5;margin-bottom:16px;}}
+.lt-demo-box{{
+    background:{"rgba(99,102,241,0.06)" if dark else "#F8FAFF"};
+    border:1px solid {"rgba(99,102,241,0.18)" if dark else "#C7D2FE"};
+    border-radius:14px;padding:14px 18px;max-width:480px;margin:0 auto 24px;
+    text-align:left;
+}}
+.lt-demo-title{{font-size:0.72rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:0.08em;color:{_A1};margin-bottom:8px;}}
+.lt-demo-row{{font-size:0.78rem;color:{_SUB};margin-bottom:4px;line-height:1.5;}}
+.lt-demo-row strong{{color:{_TXT};}}
+</style>
+<div class="lt-wrap">
+    <div class="lt-logo">
+        <span class="lt-logo-icon">🏛️</span>
+        <div class="lt-logo-title">Jan Seva Portal</div>
+        <div class="lt-logo-sub">Choose your role to continue</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+    r1, r2, r3 = st.columns(3, gap="medium")
+
+    with r1:
+        st.markdown("""
+<div class="lt-role-card citizen">
+    <span class="lt-role-icon">👤</span>
+    <div class="lt-role-title">Citizen</div>
+    <div class="lt-role-sub">File complaints, track status,<br>access government schemes</div>
+</div>""", unsafe_allow_html=True)
+        if st.button("Login as Citizen", key="citizen_role_btn", use_container_width=True):
+            st.session_state.screen = "user_login"; st.rerun()
+
+    with r2:
+        st.markdown("""
+<div class="lt-role-card official">
+    <span class="lt-role-icon">🏢</span>
+    <div class="lt-role-title">Official</div>
+    <div class="lt-role-sub">Manage & resolve complaints<br>for your department</div>
+</div>""", unsafe_allow_html=True)
+        if st.button("Login as Official", key="official_role_btn", use_container_width=True):
+            st.session_state.screen = "official_login"; st.rerun()
+
+    with r3:
+        st.markdown("""
+<div class="lt-role-card admin">
+    <span class="lt-role-icon">👑</span>
+    <div class="lt-role-title">Admin</div>
+    <div class="lt-role-sub">System management,<br>analytics & oversight</div>
+</div>""", unsafe_allow_html=True)
+        if st.button("Login as Admin", key="admin_role_btn", use_container_width=True):
+            st.session_state.screen = "admin_login"; st.rerun()
+
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    bc1, bc2, bc3 = st.columns([1,2,1])
+    with bc2:
+        if st.button("← Change Language", key="lt_lang", use_container_width=True):
+            st.session_state.screen = "language"; st.rerun()
+
+
+
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# PREMIUM AUTH CSS ENGINE — Split-screen SaaS design system
+# CSS ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
-def _auth_css(dark=False, accent="#6366F1", accent2="#8B5CF6", accent3="#06B6D4"):
+# ═══════════════════════════════════════════════════════════════════════════════
+# IMPROVED & MODERN CSS WITH RESPONSIVE BUTTONS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# REFINED PREMIUM CSS — Modern SaaS Auth Polish
+# ═══════════════════════════════════════════════════════════════════════════════
+def _login_css(dark=False, accent="#6366F1", accent2="#8B5CF6"):
     """
-    World-class authentication CSS — split-screen, glassmorphism, responsive.
-    Inspired by: Stripe, Linear, Clerk, Vercel, Framer, Revolut
+    Premium SaaS-grade authentication CSS.
+    Inspired by: Stripe · Linear · Clerk · Vercel · GitHub · Notion
+    
+    Improvements:
+    - Softer shadows, refined borders
+    - Tighter spacing rhythm
+    - Modern input/button styling
+    - Better focus states & accessibility
+    - Fully responsive at 1024 / 768 / 480 breakpoints
+    - Reduced visual noise (less blur, glow, padding)
     """
 
     if dark:
-        PAGE_BG  = "#06070D"
-        PANEL_BG = "linear-gradient(135deg,#0A0B14 0%,#12131F 100%)"
-        CARD_BG  = "rgba(20,22,35,0.75)"
-        CARD_BD  = "rgba(255,255,255,0.08)"
-        TXT      = "#F1F5F9"
-        TXT_DIM  = "#CBD5E1"
-        SUB      = "#7C8AA0"
-        INP_BG   = "rgba(15,17,28,0.6)"
-        INP_BD   = "rgba(255,255,255,0.08)"
-        HOV      = "rgba(255,255,255,0.04)"
-        BRAND_TXT = "#FFFFFF"
-        BRAND_SUB = "rgba(255,255,255,0.65)"
-        green_bg = "rgba(6,40,18,0.6)";  green_bd = "rgba(34,197,94,0.3)";  green_txt = "#86EFAC"
-        amber_bg = "rgba(40,24,0,0.6)";  amber_bd = "rgba(245,158,11,0.3)"; amber_txt = "#FCD34D"
-        blue_bg  = "rgba(4,9,40,0.6)";   blue_bd  = "rgba(59,130,246,0.3)"; blue_txt  = "#93C5FD"
-        red_bg   = "rgba(40,4,4,0.6)";   red_bd   = "rgba(239,68,68,0.3)";  red_txt   = "#FCA5A5"
+        PAGE_BG   = "#0A0B12"
+        PAGE_GRAD = "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99,102,241,0.12), transparent), #0A0B12"
+        CARD_BG   = "rgba(20,22,32,0.85)"
+        CARD_BD   = "rgba(255,255,255,0.06)"
+        CARD_BD_H = "rgba(255,255,255,0.10)"
+        TXT       = "#F1F5F9"
+        TXT_DIM   = "#CBD5E1"
+        SUB       = "#7C8AA0"
+        INP_BG    = "rgba(15,17,26,0.6)"
+        INP_BD    = "rgba(255,255,255,0.08)"
+        INP_BD_H  = "rgba(255,255,255,0.14)"
+        HOV       = "rgba(255,255,255,0.04)"
+        SHADOW    = "0 1px 0 rgba(255,255,255,0.04) inset, 0 20px 50px -12px rgba(0,0,0,0.6), 0 8px 16px -8px rgba(0,0,0,0.4)"
+        green_bg  = "rgba(6,40,18,0.5)";  green_bd  = "rgba(34,197,94,0.25)";  green_txt = "#86EFAC"
+        amber_bg  = "rgba(40,24,0,0.5)";  amber_bd  = "rgba(245,158,11,0.25)"; amber_txt = "#FCD34D"
+        blue_bg   = "rgba(4,9,40,0.5)";   blue_bd   = "rgba(59,130,246,0.25)"; blue_txt  = "#93C5FD"
+        red_bg    = "rgba(40,4,4,0.5)";   red_bd    = "rgba(239,68,68,0.25)";  red_txt   = "#FCA5A5"
     else:
-        PAGE_BG  = "#F5F7FB"
-        PANEL_BG = "linear-gradient(135deg,#FAFBFF 0%,#F0F4FF 100%)"
-        CARD_BG  = "rgba(255,255,255,0.85)"
-        CARD_BD  = "rgba(226,232,240,0.8)"
-        TXT      = "#0B1228"
-        TXT_DIM  = "#334155"
-        SUB      = "#64748B"
-        INP_BG   = "rgba(248,250,253,0.9)"
-        INP_BD   = "rgba(15,23,42,0.08)"
-        HOV      = "rgba(99,102,241,0.04)"
-        BRAND_TXT = "#FFFFFF"
-        BRAND_SUB = "rgba(255,255,255,0.78)"
-        green_bg = "rgba(240,253,244,0.9)"; green_bd = "rgba(34,197,94,0.25)"; green_txt = "#15803D"
-        amber_bg = "rgba(255,251,235,0.9)"; amber_bd = "rgba(245,158,11,0.25)"; amber_txt = "#B45309"
-        blue_bg  = "rgba(239,246,255,0.9)"; blue_bd  = "rgba(59,130,246,0.2)";  blue_txt  = "#1D4ED8"
-        red_bg   = "rgba(254,242,242,0.9)"; red_bd   = "rgba(239,68,68,0.2)";   red_txt   = "#B91C1C"
+        PAGE_BG   = "#F8FAFC"
+        PAGE_GRAD = "radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99,102,241,0.08), transparent), #F8FAFC"
+        CARD_BG   = "rgba(255,255,255,0.85)"
+        CARD_BD   = "rgba(226,232,240,0.7)"
+        CARD_BD_H = "rgba(203,213,225,0.9)"
+        TXT       = "#0F172A"
+        TXT_DIM   = "#334155"
+        SUB       = "#64748B"
+        INP_BG    = "#FFFFFF"
+        INP_BD    = "rgba(15,23,42,0.10)"
+        INP_BD_H  = "rgba(15,23,42,0.16)"
+        HOV       = "rgba(99,102,241,0.04)"
+        SHADOW    = "0 1px 0 rgba(255,255,255,0.6) inset, 0 12px 32px -8px rgba(15,23,42,0.08), 0 4px 12px -4px rgba(15,23,42,0.04)"
+        green_bg  = "#F0FDF4";            green_bd  = "rgba(34,197,94,0.25)";  green_txt = "#15803D"
+        amber_bg  = "#FFFBEB";            amber_bd  = "rgba(245,158,11,0.25)"; amber_txt = "#B45309"
+        blue_bg   = "#EFF6FF";            blue_bd   = "rgba(59,130,246,0.20)"; blue_txt  = "#1D4ED8"
+        red_bg    = "#FEF2F2";            red_bd    = "rgba(239,68,68,0.20)";  red_txt   = "#B91C1C"
 
     return f"""
 <style>
 /* ════════════════════════════════════════════════════════════════
-   FONTS — Premium typography stack
+   FONTS
 ═══════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap');
 
 /* ════════════════════════════════════════════════════════════════
-   RESET — Strip Streamlit chrome
+   STREAMLIT RESET
 ═══════════════════════════════════════════════════════════════ */
 #MainMenu, footer, header[data-testid="stHeader"],
-.stDeployButton, .viewerBadge_container__1QSob,
-[data-testid="stToolbar"], [data-testid="stDecoration"],
-section[data-testid="stSidebar"] {{
+.stDeployButton, [data-testid="stToolbar"],
+[data-testid="stDecoration"], .viewerBadge_container__1QSob {{
     display: none !important;
 }}
 
 html, body, .stApp {{
-    background: {PAGE_BG} !important;
-    font-family: 'Inter', 'Plus Jakarta Sans', system-ui, sans-serif !important;
+    background: {PAGE_GRAD} !important;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif !important;
     -webkit-font-smoothing: antialiased !important;
+    -moz-osx-font-smoothing: grayscale !important;
     color: {TXT} !important;
-    overflow-x: hidden !important;
-}}
-
-.main {{
-    background: {PAGE_BG} !important;
-    padding: 0 !important;
 }}
 
 .main .block-container {{
-    padding: 0 !important;
-    max-width: 100% !important;
-    margin: 0 !important;
+    padding: 2.5rem 1.25rem 4rem !important;
+    max-width: 440px !important;
+    margin: 0 auto !important;
 }}
 
 [data-testid="stAppViewContainer"] {{
-    background: {PAGE_BG} !important;
+    background: transparent !important;
+}}
+
+/* Top accent line */
+.stApp::before {{
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, {accent}, {accent2}, transparent);
+    background-size: 200% 100%;
+    animation: stripe 6s ease infinite;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.6;
+}}
+@keyframes stripe {{
+    0%, 100% {{ background-position: 0% 50%; }}
+    50% {{ background-position: 100% 50%; }}
 }}
 
 /* ════════════════════════════════════════════════════════════════
-   SPLIT-SCREEN LAYOUT — Premium SaaS structure
+   HERO — Refined, minimal
 ═══════════════════════════════════════════════════════════════ */
-.auth-shell {{
-    display: grid;
-    grid-template-columns: 1.05fr 1fr;
-    min-height: 100vh;
+.lp-hero {{
     width: 100%;
+    border-radius: 18px;
+    padding: 1.75rem 1.5rem 1.5rem;
+    text-align: center;
     position: relative;
     overflow: hidden;
+    margin-bottom: 1rem;
+    border: 1px solid rgba(255,255,255,0.10);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.10) inset,
+        0 20px 40px -12px rgba(0,0,0,0.25);
 }}
-
-/* ── BRAND PANEL (Left) ── */
-.auth-brand {{
-    position: relative;
-    padding: 48px 56px;
-    background: linear-gradient(135deg, #1E1B4B 0%, #4338CA 35%, #6366F1 70%, #06B6D4 100%);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    min-height: 100vh;
-}}
-
-/* Animated mesh gradient orbs */
-.auth-brand::before {{
+.lp-hero::before {{
     content: '';
-    position: absolute;
-    top: -20%;
-    left: -10%;
-    width: 600px;
-    height: 600px;
-    background: radial-gradient(circle, rgba(139,92,246,0.4), transparent 60%);
-    border-radius: 50%;
-    filter: blur(80px);
-    animation: brand-orb-1 18s ease-in-out infinite;
-    pointer-events: none;
-}}
-.auth-brand::after {{
-    content: '';
-    position: absolute;
-    bottom: -15%;
-    right: -10%;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(6,182,212,0.35), transparent 60%);
-    border-radius: 50%;
-    filter: blur(80px);
-    animation: brand-orb-2 22s ease-in-out infinite;
-    pointer-events: none;
-}}
-@keyframes brand-orb-1 {{
-    0%, 100% {{ transform: translate(0, 0) scale(1); }}
-    33% {{ transform: translate(60px, 40px) scale(1.1); }}
-    66% {{ transform: translate(-30px, 80px) scale(0.95); }}
-}}
-@keyframes brand-orb-2 {{
-    0%, 100% {{ transform: translate(0, 0) scale(1); }}
-    50% {{ transform: translate(-50px, -60px) scale(1.15); }}
-}}
-
-/* Grid pattern overlay */
-.auth-brand-grid {{
     position: absolute;
     inset: 0;
-    background-image:
-        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+    background:
+        radial-gradient(ellipse 60% 50% at 50% 0%, rgba(255,255,255,0.12), transparent),
+        linear-gradient(180deg, rgba(255,255,255,0.04), transparent);
     pointer-events: none;
 }}
-
-/* ── Brand Logo ── */
-.auth-brand-logo {{
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    z-index: 2;
-}}
-.auth-brand-logo-icon {{
-    width: 48px;
-    height: 48px;
-    border-radius: 13px;
-    background: rgba(255,255,255,0.18);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.25);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.4rem;
-    box-shadow: 0 8px 24px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.3);
-}}
-.auth-brand-name {{
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 1.1rem;
-    font-weight: 800;
-    color: {BRAND_TXT};
-    letter-spacing: -0.02em;
-}}
-.auth-brand-tag {{
-    font-size: 0.72rem;
-    color: {BRAND_SUB};
-    font-weight: 500;
-    margin-top: 2px;
-}}
-
-/* ── Brand Content (middle) ── */
-.auth-brand-content {{
-    position: relative;
-    z-index: 2;
-    max-width: 480px;
-}}
-.auth-brand-eyebrow {{
+.lp-hero-icon {{
+    font-size: 2rem;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 6px 12px;
-    background: rgba(255,255,255,0.12);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 99px;
-    font-size: 0.7rem;
-    font-weight: 600;
-    color: {BRAND_TXT};
-    letter-spacing: 0.03em;
-    margin-bottom: 24px;
-    text-transform: uppercase;
-}}
-.auth-brand-eyebrow-dot {{
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #4ADE80;
-    box-shadow: 0 0 8px rgba(74,222,128,0.8);
-    animation: dot-pulse 2s ease-in-out infinite;
-}}
-@keyframes dot-pulse {{
-    0%, 100% {{ box-shadow: 0 0 8px rgba(74,222,128,0.8); }}
-    50% {{ box-shadow: 0 0 16px rgba(74,222,128,1); }}
-}}
-.auth-brand-headline {{
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 2.6rem;
-    font-weight: 800;
-    color: {BRAND_TXT};
-    letter-spacing: -0.04em;
-    line-height: 1.05;
-    margin-bottom: 20px;
-}}
-.auth-brand-headline span {{
-    background: linear-gradient(135deg, #fff 0%, #C7D2FE 50%, #67E8F9 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}}
-.auth-brand-desc {{
-    font-size: 1rem;
-    color: {BRAND_SUB};
-    line-height: 1.6;
-    font-weight: 400;
-    margin-bottom: 36px;
-}}
-
-/* Feature pills */
-.auth-brand-features {{
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    position: relative;
-    z-index: 2;
-}}
-.auth-brand-feature {{
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 18px;
-    background: rgba(255,255,255,0.08);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px;
-    transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-}}
-.auth-brand-feature:hover {{
-    background: rgba(255,255,255,0.12);
-    border-color: rgba(255,255,255,0.22);
-    transform: translateX(4px);
-}}
-.auth-brand-feature-icon {{
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.25), rgba(255,255,255,0.1));
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 1rem;
-    flex-shrink: 0;
-    border: 1px solid rgba(255,255,255,0.2);
-}}
-.auth-brand-feature-text {{
-    flex: 1;
-}}
-.auth-brand-feature-title {{
-    font-size: 0.86rem;
-    font-weight: 700;
-    color: {BRAND_TXT};
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-}}
-.auth-brand-feature-sub {{
-    font-size: 0.72rem;
-    color: {BRAND_SUB};
-    margin-top: 2px;
-    line-height: 1.4;
-}}
-
-/* Trust footer */
-.auth-brand-trust {{
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    position: relative;
-    z-index: 2;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255,255,255,0.12);
-}}
-.auth-brand-trust-badge {{
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 0.72rem;
-    color: {BRAND_SUB};
-    font-weight: 500;
-}}
-
-/* ════════════════════════════════════════════════════════════════
-   AUTH PANEL (Right)
-═══════════════════════════════════════════════════════════════ */
-.auth-panel {{
-    background: {PANEL_BG};
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 48px 32px;
-    min-height: 100vh;
-    position: relative;
-    overflow-y: auto;
-}}
-.auth-panel::before {{
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    width: 300px;
-    height: 300px;
-    background: radial-gradient(circle, rgba(99,102,241,0.06), transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}}
-
-.auth-panel-inner {{
-    width: 100%;
-    max-width: 420px;
-    position: relative;
-    z-index: 1;
-}}
-
-/* Top language switcher area */
-.auth-panel-top {{
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 28px;
-    font-size: 0.78rem;
-    color: {SUB};
-}}
-
-/* ────────────────────────────────────────────────────────────────
-   AUTH CARD
-──────────────────────────────────────────────────────────────── */
-.auth-card {{
-    background: {CARD_BG};
-    backdrop-filter: blur(30px) saturate(180%);
-    -webkit-backdrop-filter: blur(30px) saturate(180%);
-    border: 1px solid {CARD_BD};
-    border-radius: 20px;
-    padding: 36px 32px;
-    box-shadow:
-        0 1px 0 rgba(255,255,255,0.5) inset,
-        0 20px 50px -10px rgba(15,23,42,0.08),
-        0 8px 16px -4px rgba(15,23,42,0.04);
-    position: relative;
-}}
-
-.auth-card-icon {{
     width: 52px;
     height: 52px;
     border-radius: 14px;
-    background: linear-gradient(135deg, {accent} 0%, {accent2} 100%);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    box-shadow:
-        0 8px 20px {accent}40,
-        inset 0 1px 0 rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.14);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255,255,255,0.18);
+    margin-bottom: 12px;
     position: relative;
+    z-index: 1;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.18), inset 0 1px 0 rgba(255,255,255,0.2);
 }}
-.auth-card-icon::after {{
-    content: '';
-    position: absolute;
-    inset: 0;
-    border-radius: 14px;
-    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 60%);
-    pointer-events: none;
+.lp-hero-title {{
+    font-family: 'Inter', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+    letter-spacing: -0.025em;
+    line-height: 1.2;
+}}
+.lp-hero-sub {{
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.72);
+    position: relative;
+    z-index: 1;
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0;
 }}
 
-.auth-card-title {{
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    font-size: 1.6rem;
-    font-weight: 800;
-    color: {TXT};
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    margin-bottom: 6px;
+/* ════════════════════════════════════════════════════════════════
+   CARD — Cleaner, less blur, softer shadows
+═══════════════════════════════════════════════════════════════ */
+.lp-card,
+[data-testid="stExpander"],
+div[data-testid="element-container"]:has(> div > [data-testid="stVerticalBlockBorderWrapper"]) {{
+    background: {CARD_BG};
+    border: 1px solid {CARD_BD};
+    border-radius: 16px;
+    padding: 1.5rem 1.25rem;
+    margin-bottom: 0.75rem;
+    position: relative;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    box-shadow: {SHADOW};
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }}
-.auth-card-sub {{
-    font-size: 0.88rem;
-    color: {SUB};
-    font-weight: 500;
-    line-height: 1.5;
-    margin-bottom: 28px;
+
+/* Streamlit native container border override */
+[data-testid="stVerticalBlockBorderWrapper"] {{
+    background: {CARD_BG} !important;
+    border: 1px solid {CARD_BD} !important;
+    border-radius: 16px !important;
+    padding: 1.5rem 1.25rem !important;
+    backdrop-filter: blur(20px) saturate(180%) !important;
+    box-shadow: {SHADOW} !important;
+    transition: border-color 0.2s ease !important;
+}}
+
+.lp-card:hover,
+[data-testid="stVerticalBlockBorderWrapper"]:hover {{
+    border-color: {CARD_BD_H} !important;
 }}
 
 /* Section label */
-.auth-label {{
-    font-size: 0.68rem;
-    font-weight: 700;
+.lp-card-label {{
+    font-size: 0.7rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     color: {SUB};
-    margin: 4px 0 14px;
+    margin: 0 0 14px;
     display: flex;
     align-items: center;
     gap: 8px;
 }}
-.auth-label::before {{
+.lp-card-label::before {{
     content: '';
     width: 3px;
     height: 12px;
     background: linear-gradient(180deg, {accent}, {accent2});
     border-radius: 2px;
+    flex-shrink: 0;
 }}
 
 /* ════════════════════════════════════════════════════════════════
-   ROLE SELECTION CARDS (for role picker page)
-═══════════════════════════════════════════════════════════════ */
-.role-grid {{
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin: 4px 0 14px;
-}}
-.role-card {{
-    background: rgba(255,255,255,{0.04 if dark else 0.6});
-    border: 1.5px solid {CARD_BD};
-    border-radius: 14px;
-    padding: 16px 18px;
-    transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    position: relative;
-    overflow: hidden;
-}}
-.role-card::before {{
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    width: 3px;
-    background: linear-gradient(180deg, {accent}, {accent2});
-    transform: scaleY(0);
-    transition: transform 0.25s ease;
-    transform-origin: top;
-}}
-.role-card:hover {{
-    transform: translateY(-2px);
-    border-color: {accent}55;
-    box-shadow: 0 10px 30px {accent}15;
-}}
-.role-card:hover::before {{
-    transform: scaleY(1);
-}}
-.role-card-icon {{
-    width: 42px;
-    height: 42px;
-    border-radius: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.2rem;
-    flex-shrink: 0;
-    color: #fff;
-    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
-}}
-.role-card.citizen .role-card-icon  {{ background: linear-gradient(135deg, #6366F1, #8B5CF6); }}
-.role-card.official .role-card-icon {{ background: linear-gradient(135deg, #10B981, #059669); }}
-.role-card.admin .role-card-icon    {{ background: linear-gradient(135deg, #F59E0B, #EF4444); }}
-
-.role-card-text {{ flex: 1; min-width: 0; }}
-.role-card-title {{
-    font-size: 0.92rem;
-    font-weight: 700;
-    color: {TXT};
-    letter-spacing: -0.015em;
-    line-height: 1.2;
-}}
-.role-card-sub {{
-    font-size: 0.76rem;
-    color: {SUB};
-    margin-top: 3px;
-    line-height: 1.4;
-    font-weight: 500;
-}}
-.role-card-arrow {{
-    color: {SUB};
-    font-size: 1.1rem;
-    opacity: 0.4;
-    transition: all 0.25s ease;
-    flex-shrink: 0;
-}}
-.role-card:hover .role-card-arrow {{
-    color: {accent};
-    opacity: 1;
-    transform: translateX(4px);
-}}
-
-/* ════════════════════════════════════════════════════════════════
-   BUTTONS — Premium SaaS style
+   BUTTONS — Modern SaaS style (Stripe/Linear)
 ═══════════════════════════════════════════════════════════════ */
 .stButton > button,
 [data-testid="stFormSubmitButton"] > button {{
-    background: linear-gradient(135deg, {accent} 0%, {accent2} 100%) !important;
+    background: linear-gradient(180deg, {accent} 0%, {accent2} 100%) !important;
     color: #fff !important;
-    border: none !important;
-    border-radius: 11px !important;
-    padding: 11px 18px !important;
+    border: 1px solid {accent} !important;
+    border-radius: 10px !important;
+    padding: 10px 16px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.875rem !important;
     font-weight: 600 !important;
@@ -2311,48 +2110,56 @@ html, body, .stApp {{
     cursor: pointer !important;
     position: relative !important;
     overflow: hidden !important;
-    transition: all 0.22s cubic-bezier(0.4,0,0.2,1) !important;
+    transition: transform 0.15s ease, box-shadow 0.2s ease, filter 0.2s ease !important;
     box-shadow:
-        0 4px 14px {accent}40,
-        inset 0 1px 0 rgba(255,255,255,0.2) !important;
-    min-height: 44px !important;
+        0 1px 0 rgba(255,255,255,0.18) inset,
+        0 1px 2px rgba(15,23,42,0.10),
+        0 4px 12px {accent}30 !important;
+    min-height: 42px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
+    gap: 6px !important;
 }}
+
 .stButton > button::before,
 [data-testid="stFormSubmitButton"] > button::before {{
     content: '';
     position: absolute;
     top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-    transition: left 0.5s ease;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(180deg, rgba(255,255,255,0.18), transparent);
+    pointer-events: none;
+    border-radius: inherit;
 }}
+
 .stButton > button:hover,
 [data-testid="stFormSubmitButton"] > button:hover {{
-    transform: translateY(-2px) !important;
+    transform: translateY(-1px) !important;
     box-shadow:
-        0 10px 28px {accent}55,
-        inset 0 1px 0 rgba(255,255,255,0.25) !important;
+        0 1px 0 rgba(255,255,255,0.22) inset,
+        0 2px 4px rgba(15,23,42,0.10),
+        0 8px 20px {accent}40 !important;
+    filter: brightness(1.05) !important;
 }}
-.stButton > button:hover::before,
-[data-testid="stFormSubmitButton"] > button:hover::before {{
-    left: 100%;
-}}
+
 .stButton > button:active,
 [data-testid="stFormSubmitButton"] > button:active {{
-    transform: translateY(0) scale(0.99) !important;
+    transform: translateY(0) !important;
+    filter: brightness(0.98) !important;
 }}
-.stButton > button:focus,
-[data-testid="stFormSubmitButton"] > button:focus {{
+
+.stButton > button:focus-visible,
+[data-testid="stFormSubmitButton"] > button:focus-visible {{
     outline: none !important;
     box-shadow:
-        0 0 0 4px {accent}25,
-        0 4px 14px {accent}40 !important;
+        0 0 0 3px {accent}30,
+        0 1px 0 rgba(255,255,255,0.18) inset,
+        0 4px 12px {accent}30 !important;
 }}
+
 .stButton > button:disabled {{
     opacity: 0.5 !important;
     cursor: not-allowed !important;
@@ -2360,297 +2167,342 @@ html, body, .stApp {{
 }}
 
 /* ── Secondary / Back button ── */
-.auth-secondary .stButton > button {{
-    background: rgba(255,255,255,{0.05 if dark else 0.7}) !important;
+.lp-back .stButton > button {{
+    background: {INP_BG} !important;
     color: {TXT_DIM} !important;
-    border: 1px solid {CARD_BD} !important;
+    border: 1px solid {INP_BD} !important;
     box-shadow: 0 1px 2px rgba(15,23,42,0.04) !important;
-    font-weight: 600 !important;
-    backdrop-filter: blur(12px) !important;
+    font-weight: 500 !important;
 }}
-.auth-secondary .stButton > button:hover {{
-    background: rgba(255,255,255,{0.08 if dark else 0.95}) !important;
-    color: {TXT} !important;
-    border-color: {accent}44 !important;
-    box-shadow: 0 4px 12px rgba(15,23,42,0.06) !important;
-    transform: translateY(-1px) !important;
+.lp-back .stButton > button::before {{
+    display: none !important;
 }}
-
-/* ── Ghost / Link button ── */
-.auth-ghost .stButton > button {{
-    background: transparent !important;
-    color: {accent} !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-weight: 600 !important;
-    font-size: 0.82rem !important;
-    padding: 6px 12px !important;
-    min-height: 32px !important;
-}}
-.auth-ghost .stButton > button:hover {{
+.lp-back .stButton > button:hover {{
     background: {HOV} !important;
-    color: {accent} !important;
-    transform: none !important;
-    box-shadow: none !important;
+    color: {TXT} !important;
+    border-color: {INP_BD_H} !important;
+    transform: translateY(-1px) !important;
+    filter: none !important;
 }}
 
-/* ── Tab pills ── */
-.auth-tab-idle .stButton > button {{
+/* ── Tab pills (custom) ── */
+.lp-tab-idle .stButton > button {{
     background: transparent !important;
     color: {SUB} !important;
-    border: none !important;
+    border: 1px solid transparent !important;
     box-shadow: none !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     font-size: 0.84rem !important;
-    border-radius: 9px !important;
-    padding: 9px 14px !important;
-    min-height: 38px !important;
+    border-radius: 8px !important;
+    padding: 8px 14px !important;
+    min-height: 36px !important;
+    filter: none !important;
 }}
-.auth-tab-idle .stButton > button:hover {{
+.lp-tab-idle .stButton > button::before {{ display: none !important; }}
+.lp-tab-idle .stButton > button:hover {{
     background: {HOV} !important;
     color: {TXT} !important;
     transform: none !important;
     box-shadow: none !important;
 }}
-.auth-tab-active .stButton > button {{
-    background: linear-gradient(135deg, {accent} 0%, {accent2} 100%) !important;
-    color: #fff !important;
-    border: none !important;
-    box-shadow: 0 4px 12px {accent}40 !important;
+
+.lp-tab-active .stButton > button {{
+    background: {CARD_BG} !important;
+    color: {TXT} !important;
+    border: 1px solid {CARD_BD_H} !important;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.5) inset,
+        0 1px 2px rgba(15,23,42,0.05) !important;
     font-weight: 600 !important;
     font-size: 0.84rem !important;
-    border-radius: 9px !important;
-    padding: 9px 14px !important;
-    min-height: 38px !important;
+    border-radius: 8px !important;
+    padding: 8px 14px !important;
+    min-height: 36px !important;
+    filter: none !important;
+}}
+.lp-tab-active .stButton > button::before {{ display: none !important; }}
+.lp-tab-active .stButton > button:hover {{
+    transform: none !important;
 }}
 
 /* ════════════════════════════════════════════════════════════════
-   INPUTS
+   INPUTS — Clean, modern, minimal
 ═══════════════════════════════════════════════════════════════ */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea {{
     background: {INP_BG} !important;
-    border: 1.5px solid {INP_BD} !important;
-    border-radius: 11px !important;
+    border: 1px solid {INP_BD} !important;
+    border-radius: 10px !important;
     color: {TXT} !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.9rem !important;
     font-weight: 500 !important;
-    padding: 11px 14px !important;
-    transition: all 0.18s ease !important;
-    box-shadow: none !important;
-    min-height: 44px !important;
+    padding: 10px 14px !important;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
+    min-height: 42px !important;
 }}
+
 .stTextInput > div > div > input:hover,
 .stTextArea > div > div > textarea:hover {{
-    border-color: {INP_BD} !important;
-    background: {CARD_BG} !important;
+    border-color: {INP_BD_H} !important;
 }}
+
 .stTextInput > div > div > input:focus,
 .stTextArea > div > div > textarea:focus {{
     border-color: {accent} !important;
-    box-shadow: 0 0 0 4px {accent}20 !important;
-    background: {CARD_BG} !important;
+    box-shadow:
+        0 0 0 3px {accent}20,
+        0 1px 2px rgba(15,23,42,0.03) !important;
     outline: none !important;
 }}
+
 .stTextInput > div > div > input::placeholder,
 .stTextArea > div > div > textarea::placeholder {{
     color: {SUB} !important;
-    opacity: 0.6 !important;
+    opacity: 0.55 !important;
     font-weight: 400 !important;
 }}
-.stTextInput label, .stTextArea label {{
-    color: {TXT_DIM} !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.01em !important;
-    margin-bottom: 6px !important;
+
+/* Wrapper reset */
+.stTextInput > div > div,
+.stTextArea > div > div {{
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
 }}
+
+/* Labels */
+.stTextInput label, .stTextArea label,
 .stTextInput [data-testid="stWidgetLabel"] p,
 .stTextArea [data-testid="stWidgetLabel"] p {{
     color: {TXT_DIM} !important;
-    font-weight: 600 !important;
     font-size: 0.78rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 6px !important;
+    letter-spacing: -0.005em !important;
+    text-transform: none !important;
 }}
 
-/* Helper caption */
-.stCaption, [data-testid="stCaptionContainer"] {{
-    font-size: 0.74rem !important;
+/* Caption */
+.stCaption, [data-testid="stCaptionContainer"], small {{
+    font-size: 0.75rem !important;
     color: {SUB} !important;
+    line-height: 1.5 !important;
 }}
 
 /* ════════════════════════════════════════════════════════════════
-   PILL TAB BAR
+   CUSTOM TAB BAR
 ═══════════════════════════════════════════════════════════════ */
-.auth-tabs {{
+.lp-tabs {{
+    display: flex;
+    gap: 4px;
     background: {INP_BG};
     border: 1px solid {INP_BD};
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 24px;
+    border-radius: 10px;
+    padding: 3px;
+    margin-bottom: 14px;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.03);
 }}
 
-/* Native Streamlit tabs override */
+/* Native Streamlit tabs */
 .stTabs [data-baseweb="tab-list"] {{
     background: {INP_BG} !important;
     border: 1px solid {INP_BD} !important;
-    border-radius: 12px !important;
-    padding: 4px !important;
+    border-radius: 10px !important;
+    padding: 3px !important;
     gap: 2px !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
 }}
+
 .stTabs [data-baseweb="tab"] {{
-    border-radius: 9px !important;
+    border-radius: 7px !important;
     font-family: 'Inter', sans-serif !important;
     font-size: 0.84rem !important;
-    font-weight: 600 !important;
+    font-weight: 500 !important;
     color: {SUB} !important;
-    padding: 8px 14px !important;
-    border: none !important;
-    transition: all 0.2s ease !important;
-    min-height: 36px !important;
+    padding: 7px 14px !important;
+    border: 1px solid transparent !important;
+    transition: all 0.18s ease !important;
+    min-height: 34px !important;
+    flex: 1 !important;
+    text-align: center !important;
+    justify-content: center !important;
 }}
+
+.stTabs [data-baseweb="tab"]:hover {{
+    color: {TXT} !important;
+    background: {HOV} !important;
+}}
+
 .stTabs [aria-selected="true"] {{
-    background: linear-gradient(135deg, {accent}, {accent2}) !important;
-    color: #fff !important;
-    box-shadow: 0 2px 8px {accent}30 !important;
+    background: {CARD_BG} !important;
+    color: {TXT} !important;
+    font-weight: 600 !important;
+    border-color: {CARD_BD_H} !important;
+    box-shadow:
+        0 1px 0 rgba(255,255,255,0.5) inset,
+        0 1px 2px rgba(15,23,42,0.05) !important;
 }}
+
+.stTabs [data-baseweb="tab-highlight"],
+.stTabs [data-baseweb="tab-border"] {{
+    display: none !important;
+}}
+
 .stTabs [data-baseweb="tab-panel"] {{
     background: transparent !important;
-    padding: 20px 0 0 !important;
+    padding: 16px 0 0 !important;
 }}
-.stTabs [data-baseweb="tab-highlight"] {{ display: none !important; }}
-.stTabs [data-baseweb="tab-border"] {{ display: none !important; }}
 
 /* ════════════════════════════════════════════════════════════════
    STEP INDICATOR
 ═══════════════════════════════════════════════════════════════ */
-.auth-stepper {{
+.lp-step-wrap {{
     display: flex;
     align-items: center;
-    margin-bottom: 24px;
-    padding: 12px 4px;
+    margin-bottom: 18px;
+    padding: 6px 2px 4px;
 }}
-.auth-step {{
+
+.lp-step-col {{
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
+    gap: 5px;
+    flex: 0 0 auto;
 }}
-.auth-step-dot {{
-    width: 32px;
-    height: 32px;
+
+.lp-step-dot {{
+    width: 30px;
+    height: 30px;
     border-radius: 50%;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
+    font-weight: 600;
     font-size: 0.78rem;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
 }}
-.auth-step-dot.active {{
-    background: linear-gradient(135deg, {accent}, {accent2});
+
+.lp-step-dot.active {{
+    background: linear-gradient(180deg, {accent}, {accent2});
     color: #fff;
-    box-shadow: 0 4px 14px {accent}45, 0 0 0 4px {accent}15;
+    box-shadow:
+        0 0 0 4px {accent}15,
+        0 4px 10px {accent}35,
+        inset 0 1px 0 rgba(255,255,255,0.2);
 }}
-.auth-step-dot.done {{
+
+.lp-step-dot.done {{
     background: {accent};
     color: #fff;
+    box-shadow: 0 2px 6px {accent}25, inset 0 1px 0 rgba(255,255,255,0.15);
 }}
-.auth-step-dot.idle {{
+
+.lp-step-dot.idle {{
     background: {INP_BG};
     color: {SUB};
-    border: 1.5px solid {INP_BD};
+    border: 1px solid {INP_BD};
 }}
-.auth-step-lbl {{
-    font-size: 0.65rem;
-    font-weight: 700;
+
+.lp-step-lbl {{
+    font-size: 0.64rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
 }}
-.auth-step-lbl.active {{ color: {accent}; }}
-.auth-step-lbl.idle {{ color: {SUB}; }}
-.auth-step-line {{
+
+.lp-step-lbl.active {{ color: {accent}; }}
+.lp-step-lbl.idle {{ color: {SUB}; }}
+
+.lp-step-line {{
     flex: 1;
     height: 2px;
-    background: linear-gradient(90deg, {accent}66, {INP_BD});
-    margin: 0 12px 18px;
+    background: linear-gradient(90deg, {accent}40, {INP_BD});
+    margin: 0 10px 17px;
     border-radius: 2px;
 }}
 
 /* ════════════════════════════════════════════════════════════════
-   BANNERS / ALERTS / INFO CARDS
+   OTP + BANNERS — Refined
 ═══════════════════════════════════════════════════════════════ */
-.auth-otp-box {{
-    background: linear-gradient(135deg, {green_bg}, rgba(34,197,94,0.05));
+.lp-otp-box {{
+    background: {green_bg};
     border: 1px solid {green_bd};
-    border-radius: 13px;
+    border-radius: 12px;
     padding: 14px 16px;
-    margin: 14px 0;
+    margin: 12px 0;
     display: flex;
     align-items: center;
-    gap: 14px;
-    animation: slide-in 0.3s ease both;
+    gap: 12px;
+    animation: lp-slide-in 0.25s ease both;
 }}
-.auth-otp-icon {{
-    width: 38px;
-    height: 38px;
-    border-radius: 10px;
-    background: rgba(34,197,94,0.18);
+
+.lp-otp-icon {{
+    width: 36px;
+    height: 36px;
+    border-radius: 9px;
+    background: rgba(34,197,94,0.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     flex-shrink: 0;
 }}
-.auth-otp-label {{
-    font-size: 0.66rem;
+
+.lp-otp-label {{
+    font-size: 0.65rem;
     color: {green_txt};
-    font-weight: 700;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.08em;
     margin-bottom: 3px;
 }}
-.auth-otp-code {{
-    font-family: 'JetBrains Mono', monospace;
+
+.lp-otp-code {{
+    font-family: 'JetBrains Mono', 'Courier New', monospace;
     font-size: 1.5rem;
     font-weight: 600;
     color: {green_txt};
-    letter-spacing: 7px;
+    letter-spacing: 6px;
     display: block;
     line-height: 1;
 }}
 
-.auth-phone-badge {{
+.lp-phone-badge {{
     background: {blue_bg};
     border: 1px solid {blue_bd};
-    border-radius: 10px;
-    padding: 9px 13px;
+    border-radius: 9px;
+    padding: 8px 12px;
     font-size: 0.78rem;
     color: {blue_txt};
     font-weight: 500;
-    margin: 4px 0 14px;
+    margin-bottom: 12px;
     display: flex;
     align-items: center;
     gap: 7px;
 }}
 
-.auth-info {{
-    background: {blue_bg};
-    border: 1px solid {blue_bd};
+.lp-demo-hint {{
+    background: {amber_bg};
+    border: 1px solid {amber_bd};
     border-radius: 10px;
-    padding: 11px 13px;
-    font-size: 0.8rem;
-    color: {blue_txt};
-    font-weight: 500;
-    margin: 10px 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    line-height: 1.5;
+    padding: 11px 14px;
+    margin: 10px 0 0;
+    font-size: 0.78rem;
+    line-height: 1.55;
 }}
 
-.auth-verified {{
+.lp-demo-row {{
+    color: {amber_txt};
+    margin-bottom: 3px;
+}}
+
+.lp-demo-row strong {{ font-weight: 600; }}
+
+.lp-verified {{
     background: {green_bg};
     border: 1px solid {green_bd};
     border-radius: 10px;
@@ -2662,10 +2514,10 @@ html, body, .stApp {{
     display: flex;
     align-items: center;
     gap: 8px;
-    animation: slide-in 0.3s ease both;
+    animation: lp-slide-in 0.25s ease both;
 }}
 
-.auth-warn {{
+.lp-warn {{
     background: {amber_bg};
     border: 1px solid {amber_bd};
     border-radius: 10px;
@@ -2676,75 +2528,37 @@ html, body, .stApp {{
     margin: 10px 0;
 }}
 
-.auth-demo-hint {{
-    background: linear-gradient(135deg, {amber_bg}, rgba(245,158,11,0.04));
-    border: 1px dashed {amber_bd};
-    border-radius: 11px;
-    padding: 11px 14px;
-    margin: 12px 0 0;
-    font-size: 0.78rem;
-    line-height: 1.55;
-    color: {amber_txt};
+.lp-info {{
+    background: {blue_bg};
+    border: 1px solid {blue_bd};
+    border-radius: 10px;
+    padding: 10px 13px;
+    font-size: 0.8rem;
+    color: {blue_txt};
+    font-weight: 500;
+    margin: 10px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    line-height: 1.5;
 }}
-.auth-demo-hint strong {{ font-weight: 700; }}
 
-/* Streamlit native alerts */
+/* ════════════════════════════════════════════════════════════════
+   STREAMLIT ALERTS — Restyled
+═══════════════════════════════════════════════════════════════ */
 .stAlert {{
-    border-radius: 11px !important;
+    border-radius: 10px !important;
     border-width: 1px !important;
     font-family: 'Inter', sans-serif !important;
-    font-size: 0.84rem !important;
+    font-size: 0.83rem !important;
     padding: 10px 14px !important;
+    box-shadow: 0 1px 2px rgba(15,23,42,0.03) !important;
 }}
 
-/* ════════════════════════════════════════════════════════════════
-   FOOTER LINKS / SEPARATOR
-═══════════════════════════════════════════════════════════════ */
-.auth-divider {{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 20px 0 16px;
-    color: {SUB};
-    font-size: 0.74rem;
-    font-weight: 500;
+.stAlert > div {{
+    padding: 0 !important;
+    gap: 8px !important;
 }}
-.auth-divider::before,
-.auth-divider::after {{
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: {INP_BD};
-}}
-
-.auth-footer-text {{
-    text-align: center;
-    font-size: 0.78rem;
-    color: {SUB};
-    margin-top: 20px;
-    font-weight: 500;
-}}
-.auth-footer-text a, .auth-footer-text strong {{
-    color: {accent};
-    font-weight: 600;
-    text-decoration: none;
-}}
-
-/* ════════════════════════════════════════════════════════════════
-   ANIMATIONS
-═══════════════════════════════════════════════════════════════ */
-@keyframes fade-up {{
-    from {{ opacity: 0; transform: translateY(16px); }}
-    to {{ opacity: 1; transform: translateY(0); }}
-}}
-@keyframes slide-in {{
-    from {{ opacity: 0; transform: translateX(-8px); }}
-    to {{ opacity: 1; transform: translateX(0); }}
-}}
-.auth-card, .auth-brand-content, .auth-brand-features {{
-    animation: fade-up 0.5s cubic-bezier(0.22,1,0.36,1) both;
-}}
-.auth-brand-features {{ animation-delay: 0.1s; }}
 
 /* ════════════════════════════════════════════════════════════════
    FORM RESET
@@ -2754,399 +2568,386 @@ html, body, .stApp {{
     border: none !important;
     padding: 0 !important;
 }}
-[data-testid="stVerticalBlock"] {{ gap: 0.4rem !important; }}
 
-/* Container border reset */
-[data-testid="stExpander"] {{
-    background: transparent !important;
-    border: none !important;
+[data-testid="stVerticalBlock"] {{
+    gap: 0.5rem !important;
 }}
 
-/* Scrollbar */
-::-webkit-scrollbar {{ width: 6px; height: 6px; }}
+/* Spinner */
+.stSpinner > div {{
+    border-color: {accent} !important;
+    border-bottom-color: transparent !important;
+}}
+
+/* Misc text */
+p, span, div, label {{ color: inherit; }}
+.stMarkdown p {{ color: {TXT} !important; font-size: 0.88rem; line-height: 1.55; }}
+
+/* ════════════════════════════════════════════════════════════════
+   ANIMATIONS
+═══════════════════════════════════════════════════════════════ */
+@keyframes lp-fade-up {{
+    from {{ opacity: 0; transform: translateY(12px); }}
+    to {{ opacity: 1; transform: translateY(0); }}
+}}
+
+@keyframes lp-slide-in {{
+    from {{ opacity: 0; transform: translateX(-6px); }}
+    to {{ opacity: 1; transform: translateX(0); }}
+}}
+
+.lp-hero {{
+    animation: lp-fade-up 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}}
+
+[data-testid="stVerticalBlockBorderWrapper"],
+.lp-card {{
+    animation: lp-fade-up 0.45s cubic-bezier(0.22,1,0.36,1) both;
+    animation-delay: 0.05s;
+}}
+
+/* ════════════════════════════════════════════════════════════════
+   SCROLLBAR
+═══════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar {{ width: 8px; height: 8px; }}
 ::-webkit-scrollbar-track {{ background: transparent; }}
 ::-webkit-scrollbar-thumb {{
-    background: {accent}33;
+    background: {INP_BD_H};
     border-radius: 99px;
+    border: 2px solid transparent;
+    background-clip: content-box;
 }}
-::-webkit-scrollbar-thumb:hover {{ background: {accent}55; }}
+::-webkit-scrollbar-thumb:hover {{
+    background: {accent}66;
+    background-clip: content-box;
+}}
 
 /* ════════════════════════════════════════════════════════════════
-   RESPONSIVE — 1024px (Tablet landscape)
+   ACCESSIBILITY
+═══════════════════════════════════════════════════════════════ */
+*:focus-visible {{
+    outline: 2px solid {accent} !important;
+    outline-offset: 2px !important;
+    border-radius: 6px;
+}}
+
+.stButton > button:focus-visible,
+[data-testid="stFormSubmitButton"] > button:focus-visible,
+.stTextInput input:focus-visible,
+.stTextArea textarea:focus-visible {{
+    outline: none !important;
+}}
+
+@media (prefers-reduced-motion: reduce) {{
+    *, *::before, *::after {{
+        animation-duration: 0.01ms !important;
+        transition-duration: 0.01ms !important;
+    }}
+}}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — Tablet (1024px)
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 1024px) {{
-    .auth-shell {{
-        grid-template-columns: 1fr;
-    }}
-    .auth-brand {{
-        min-height: auto;
-        padding: 32px 32px 40px;
-    }}
-    .auth-brand-content {{
-        max-width: 100%;
-        text-align: center;
-        margin: 24px auto;
-    }}
-    .auth-brand-eyebrow {{ margin-left: auto; margin-right: auto; }}
-    .auth-brand-features {{
-        flex-direction: row;
-        flex-wrap: wrap;
-        justify-content: center;
-    }}
-    .auth-brand-feature {{
-        flex: 1 1 220px;
-        min-width: 0;
-    }}
-    .auth-brand-headline {{ font-size: 2.2rem; }}
-    .auth-brand-trust {{ justify-content: center; flex-wrap: wrap; }}
-    .auth-panel {{
-        min-height: auto;
-        padding: 40px 24px 60px;
+    .main .block-container {{
+        max-width: 460px !important;
+        padding: 2rem 1.25rem 3.5rem !important;
     }}
 }}
 
 /* ════════════════════════════════════════════════════════════════
-   RESPONSIVE — 768px (Tablet portrait)
+   RESPONSIVE — Tablet portrait (768px)
 ═══════════════════════════════════════════════════════════════ */
 @media (max-width: 768px) {{
-    .auth-brand {{
-        padding: 28px 24px 32px;
+    .main .block-container {{
+        padding: 1.5rem 1rem 3rem !important;
+        max-width: 100% !important;
     }}
-    .auth-brand-headline {{
-        font-size: 1.85rem;
-        letter-spacing: -0.03em;
-    }}
-    .auth-brand-desc {{
-        font-size: 0.92rem;
-        margin-bottom: 24px;
-    }}
-    .auth-brand-features {{
-        flex-direction: column;
-    }}
-    .auth-brand-feature {{
-        flex: 1 1 100%;
-    }}
-    .auth-card {{
-        padding: 28px 22px;
-        border-radius: 18px;
-    }}
-    .auth-card-title {{ font-size: 1.35rem; }}
-    .auth-card-icon {{
-        width: 46px;
-        height: 46px;
-        font-size: 1.3rem;
-    }}
-    .auth-panel {{
-        padding: 28px 16px 48px;
-    }}
-}}
 
-/* ════════════════════════════════════════════════════════════════
-   RESPONSIVE — 480px (Mobile)
-═══════════════════════════════════════════════════════════════ */
-@media (max-width: 480px) {{
-    .auth-brand {{
-        padding: 24px 18px 28px;
-    }}
-    .auth-brand-logo-icon {{ width: 42px; height: 42px; font-size: 1.2rem; }}
-    .auth-brand-name {{ font-size: 1rem; }}
-    .auth-brand-headline {{
-        font-size: 1.55rem;
-        line-height: 1.15;
-    }}
-    .auth-brand-desc {{ font-size: 0.86rem; }}
-    .auth-brand-eyebrow {{ font-size: 0.65rem; padding: 5px 10px; }}
-    .auth-brand-feature {{ padding: 12px 14px; }}
-    .auth-brand-feature-icon {{ width: 32px; height: 32px; font-size: 0.9rem; }}
-    .auth-brand-feature-title {{ font-size: 0.82rem; }}
-    .auth-brand-feature-sub {{ font-size: 0.7rem; }}
-
-    .auth-panel {{ padding: 20px 14px 40px; }}
-    .auth-card {{
-        padding: 22px 18px;
+    .lp-hero {{
+        padding: 1.5rem 1.25rem 1.25rem;
         border-radius: 16px;
+        margin-bottom: 0.875rem;
     }}
-    .auth-card-title {{ font-size: 1.2rem; }}
-    .auth-card-sub {{ font-size: 0.82rem; margin-bottom: 20px; }}
-    .auth-card-icon {{ width: 42px; height: 42px; font-size: 1.15rem; }}
+
+    .lp-hero-icon {{
+        width: 48px;
+        height: 48px;
+        font-size: 1.75rem;
+        margin-bottom: 10px;
+    }}
+
+    .lp-hero-title {{
+        font-size: 1.35rem;
+    }}
+
+    .lp-hero-sub {{
+        font-size: 0.8rem;
+    }}
+
+    .lp-card,
+    [data-testid="stVerticalBlockBorderWrapper"] {{
+        padding: 1.25rem 1rem !important;
+        border-radius: 14px !important;
+    }}
 
     .stButton > button,
     [data-testid="stFormSubmitButton"] > button {{
-        font-size: 0.84rem !important;
+        font-size: 0.85rem !important;
         padding: 10px 14px !important;
         min-height: 42px !important;
     }}
+
     .stTextInput > div > div > input,
     .stTextArea > div > div > textarea {{
-        font-size: 0.86rem !important;
+        font-size: 0.88rem !important;
         padding: 10px 13px !important;
         min-height: 42px !important;
     }}
 
-    .auth-otp-code {{ font-size: 1.3rem; letter-spacing: 5px; }}
-    .auth-step-dot {{ width: 28px; height: 28px; font-size: 0.7rem; }}
-    .auth-step-lbl {{ font-size: 0.6rem; }}
-    .role-card {{ padding: 14px 14px; }}
-    .role-card-icon {{ width: 38px; height: 38px; font-size: 1.1rem; }}
-    .role-card-title {{ font-size: 0.88rem; }}
-    .role-card-sub {{ font-size: 0.72rem; }}
+    .lp-otp-code {{
+        font-size: 1.35rem;
+        letter-spacing: 5px;
+    }}
+
+    .lp-step-dot {{
+        width: 28px;
+        height: 28px;
+        font-size: 0.72rem;
+    }}
+
+    .stTabs [data-baseweb="tab"] {{
+        padding: 7px 12px !important;
+        font-size: 0.8rem !important;
+        min-height: 32px !important;
+    }}
+}}
+
+/* ════════════════════════════════════════════════════════════════
+   RESPONSIVE — Mobile (480px)
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 480px) {{
+    .main .block-container {{
+        padding: 1.25rem 0.875rem 2.5rem !important;
+    }}
+
+    .lp-hero {{
+        padding: 1.25rem 1rem 1.1rem;
+        border-radius: 14px;
+        margin-bottom: 0.75rem;
+    }}
+
+    .lp-hero-icon {{
+        width: 44px;
+        height: 44px;
+        font-size: 1.5rem;
+        margin-bottom: 8px;
+        border-radius: 12px;
+    }}
+
+    .lp-hero-title {{
+        font-size: 1.2rem;
+        letter-spacing: -0.02em;
+    }}
+
+    .lp-hero-sub {{
+        font-size: 0.76rem;
+        line-height: 1.45;
+    }}
+
+    .lp-card,
+    [data-testid="stVerticalBlockBorderWrapper"] {{
+        padding: 1.1rem 0.9rem !important;
+        border-radius: 12px !important;
+    }}
+
+    .lp-card-label {{
+        font-size: 0.66rem;
+        margin-bottom: 11px;
+    }}
+
+    .stButton > button,
+    [data-testid="stFormSubmitButton"] > button {{
+        font-size: 0.82rem !important;
+        padding: 9px 12px !important;
+        min-height: 40px !important;
+        border-radius: 9px !important;
+    }}
+
+    .stTextInput > div > div > input,
+    .stTextArea > div > div > textarea {{
+        font-size: 0.86rem !important;
+        padding: 9px 12px !important;
+        min-height: 40px !important;
+        border-radius: 9px !important;
+    }}
+
+    .stTextInput label, .stTextArea label,
+    .stTextInput [data-testid="stWidgetLabel"] p,
+    .stTextArea [data-testid="stWidgetLabel"] p {{
+        font-size: 0.75rem !important;
+    }}
+
+    .lp-otp-box {{
+        padding: 12px 13px;
+        gap: 10px;
+        border-radius: 10px;
+    }}
+
+    .lp-otp-icon {{
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+    }}
+
+    .lp-otp-code {{
+        font-size: 1.2rem;
+        letter-spacing: 4px;
+    }}
+
+    .lp-phone-badge {{
+        font-size: 0.74rem;
+        padding: 7px 11px;
+    }}
+
+    .lp-info, .lp-verified, .lp-warn, .lp-demo-hint {{
+        font-size: 0.76rem;
+        padding: 9px 12px;
+        border-radius: 9px;
+    }}
+
+    .lp-step-dot {{
+        width: 26px;
+        height: 26px;
+        font-size: 0.68rem;
+    }}
+
+    .lp-step-lbl {{
+        font-size: 0.58rem;
+    }}
+
+    .lp-step-line {{
+        margin: 0 6px 14px;
+    }}
+
+    .stTabs [data-baseweb="tab"] {{
+        padding: 6px 10px !important;
+        font-size: 0.76rem !important;
+    }}
+
+    .stTabs [data-baseweb="tab-list"],
+    .lp-tabs {{
+        padding: 3px !important;
+        border-radius: 9px !important;
+    }}
+
+    /* Stack OTP action buttons on tiniest screens */
+    .stAlert {{
+        font-size: 0.78rem !important;
+        padding: 9px 12px !important;
+    }}
+}}
+
+/* ════════════════════════════════════════════════════════════════
+   EXTRA SMALL (360px and below)
+═══════════════════════════════════════════════════════════════ */
+@media (max-width: 360px) {{
+    .main .block-container {{
+        padding: 1rem 0.75rem 2rem !important;
+    }}
+
+    .lp-hero-title {{
+        font-size: 1.1rem;
+    }}
+
+    .lp-hero-sub {{
+        font-size: 0.72rem;
+    }}
+
+    .lp-otp-code {{
+        font-size: 1.05rem;
+        letter-spacing: 3px;
+    }}
 }}
 </style>
 """
-
-
 # ═══════════════════════════════════════════════════════════════════════════════
-# SHARED LAYOUT BUILDERS — Brand panel
-# ═══════════════════════════════════════════════════════════════════════════════
-def _render_brand_panel(eyebrow="Government of India · Verified", 
-                        headline_pre="Citizen services,",
-                        headline_accent="reimagined.",
-                        desc="A unified digital platform for filing complaints, tracking resolution, and accessing government schemes — designed for every citizen of India."):
-    """Render the premium left-side brand panel."""
-    st.markdown(f"""
-    <div class="auth-brand">
-        <div class="auth-brand-grid"></div>
-
-        <!-- Logo -->
-        <div class="auth-brand-logo">
-            <div class="auth-brand-logo-icon">🏛️</div>
-            <div>
-                <div class="auth-brand-name">Jan Seva Portal</div>
-                <div class="auth-brand-tag">जन सेवा · Citizen Services</div>
-            </div>
-        </div>
-
-        <!-- Middle content -->
-        <div class="auth-brand-content">
-            <div class="auth-brand-eyebrow">
-                <span class="auth-brand-eyebrow-dot"></span>
-                {eyebrow}
-            </div>
-            <h1 class="auth-brand-headline">
-                {headline_pre}<br><span>{headline_accent}</span>
-            </h1>
-            <p class="auth-brand-desc">{desc}</p>
-
-            <div class="auth-brand-features">
-                <div class="auth-brand-feature">
-                    <div class="auth-brand-feature-icon">⚡</div>
-                    <div class="auth-brand-feature-text">
-                        <div class="auth-brand-feature-title">Lightning-fast resolution</div>
-                        <div class="auth-brand-feature-sub">Average complaint response under 48 hours</div>
-                    </div>
-                </div>
-                <div class="auth-brand-feature">
-                    <div class="auth-brand-feature-icon">🔐</div>
-                    <div class="auth-brand-feature-text">
-                        <div class="auth-brand-feature-title">Bank-grade security</div>
-                        <div class="auth-brand-feature-sub">End-to-end encryption & OTP verification</div>
-                    </div>
-                </div>
-                <div class="auth-brand-feature">
-                    <div class="auth-brand-feature-icon">🤖</div>
-                    <div class="auth-brand-feature-text">
-                        <div class="auth-brand-feature-title">AI-powered assistance</div>
-                        <div class="auth-brand-feature-sub">24/7 multilingual support in 12+ languages</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Trust footer -->
-        <div class="auth-brand-trust">
-            <div class="auth-brand-trust-badge">🛡️ ISO 27001 Certified</div>
-            <div class="auth-brand-trust-badge">🇮🇳 Made in India</div>
-            <div class="auth-brand-trust-badge">✓ MeitY Approved</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-def _open_auth_shell():
-    """Open split-screen layout."""
-    st.markdown('<div class="auth-shell">', unsafe_allow_html=True)
-
-
-def _open_auth_panel():
-    """Open right-side auth panel container."""
-    st.markdown('<div class="auth-panel"><div class="auth-panel-inner">', unsafe_allow_html=True)
-
-
-def _close_auth_shell():
-    """Close shell + panel."""
-    st.markdown('</div></div></div>', unsafe_allow_html=True)
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# ROLE SELECTION PAGE — Premium card picker
-# ═══════════════════════════════════════════════════════════════════════════════
-def pg_login_type():
-    dark = st.session_state.get("dark_mode", False)
-    try:
-        st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    except Exception:
-        pass
-    st.markdown(_auth_css(dark, accent="#6366F1", accent2="#8B5CF6"), unsafe_allow_html=True)
-
-    _open_auth_shell()
-    _render_brand_panel(
-        eyebrow="Secure · Verified · Trusted",
-        headline_pre="Welcome to",
-        headline_accent="Jan Seva Portal.",
-        desc="Choose your role to access India's most trusted citizen services platform. File complaints, manage departments, or oversee operations.",
-    )
-    _open_auth_panel()
-
-    st.markdown("""
-    <div class="auth-card">
-        <div class="auth-card-icon">👋</div>
-        <div class="auth-card-title">Select your role</div>
-        <div class="auth-card-sub">Choose how you'd like to sign in to continue</div>
-        <div class="auth-label">Account Types</div>
-    """, unsafe_allow_html=True)
-
-    # ── Citizen ──
-    st.markdown("""
-    <div class="role-card citizen">
-        <div class="role-card-icon">👤</div>
-        <div class="role-card-text">
-            <div class="role-card-title">Citizen</div>
-            <div class="role-card-sub">File complaints, track status & access schemes</div>
-        </div>
-        <div class="role-card-arrow">→</div>
-    </div>
-    """, unsafe_allow_html=True)
-    if st.button("Continue as Citizen", key="citizen_role_btn", use_container_width=True):
-        st.session_state.screen = "user_login"
-        st.rerun()
-
-    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
-    # ── Official ──
-    st.markdown("""
-    <div class="role-card official">
-        <div class="role-card-icon">🏢</div>
-        <div class="role-card-text">
-            <div class="role-card-title">Government Official</div>
-            <div class="role-card-sub">Manage & resolve department complaints</div>
-        </div>
-        <div class="role-card-arrow">→</div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-    if st.button("Continue as Official", key="official_role_btn", use_container_width=True):
-        st.session_state.screen = "official_login"
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
-    # ── Admin ──
-    st.markdown("""
-    <div class="role-card admin">
-        <div class="role-card-icon">👑</div>
-        <div class="role-card-text">
-            <div class="role-card-title">Administrator</div>
-            <div class="role-card-sub">System management, analytics & oversight</div>
-        </div>
-        <div class="role-card-arrow">→</div>
-    </div>
-    """, unsafe_allow_html=True)
-    st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-    if st.button("Continue as Admin", key="admin_role_btn", use_container_width=True):
-        st.session_state.screen = "admin_login"
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # Divider + Language
-    st.markdown('<div class="auth-divider">or</div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-ghost">', unsafe_allow_html=True)
-    if st.button("🌐  Change Language", key="lt_lang", use_container_width=True):
-        st.session_state.screen = "language"
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown('<div class="auth-footer-text">Protected by industry-leading encryption · <strong>v2.0</strong></div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)  # close auth-card
-
-    _close_auth_shell()
-
-
-# ═══════════════════════════════════════════════════════════════════════════════
-# CITIZEN LOGIN — OTP flow
+# CITIZEN LOGIN
 # ═══════════════════════════════════════════════════════════════════════════════
 def pg_user_login():
     dark = st.session_state.get("dark_mode", False)
-    try:
-        st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    except Exception:
-        pass
-    st.markdown(_auth_css(dark, accent="#6366F1", accent2="#8B5CF6"), unsafe_allow_html=True)
+    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
+    st.markdown(_login_css(dark, accent="#6366F1", accent2="#8B5CF6"), unsafe_allow_html=True)
 
     for k, v in [("otp_sent", False), ("login_phone", ""), ("demo_otp", "")]:
         if k not in st.session_state:
             st.session_state[k] = v
 
-    _open_auth_shell()
-    _render_brand_panel(
-        eyebrow="Citizen Access · Verified",
-        headline_pre="Your voice,",
-        headline_accent="instantly heard.",
-        desc="Sign in to file complaints, track resolutions in real-time, and discover government schemes tailored for you.",
+    # ── Hero ──────────────────────────────────────────────────────────────────
+    st.markdown(
+        "<div class='lp-hero' style='"
+        "background:linear-gradient(135deg,#1e1b4b 0%,#4338CA 45%,#0c4a6e 100%);'>"
+        "<span class='lp-hero-icon'>👤</span>"
+        "<div class='lp-hero-title'>Welcome back</div>"
+        "<div class='lp-hero-sub'>File complaints · track status · access government schemes</div>"
+        "</div>",
+        unsafe_allow_html=True,
     )
-    _open_auth_panel()
 
-    st.markdown("""
-    <div class="auth-card">
-        <div class="auth-card-icon">👤</div>
-        <div class="auth-card-title">Welcome back</div>
-        <div class="auth-card-sub">Sign in or create an account to continue</div>
-    """, unsafe_allow_html=True)
+    tab1, tab2 = st.tabs(["🔐  Login", "📝  Register"])
 
-    tab1, tab2 = st.tabs(["🔐  Sign In", "✨  Create Account"])
-
-    # ── LOGIN TAB ──
+    # ── LOGIN ─────────────────────────────────────────────────────────────────
     with tab1:
-        if not st.session_state.otp_sent:
-            st.markdown('<div class="auth-label">Phone Verification</div>', unsafe_allow_html=True)
-            phone = st.text_input("Mobile number", placeholder="10-digit Indian mobile", key="login_phone_input")
-            st.caption("📞 A one-time password will be sent via SMS")
+        st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
 
-            if st.button("Send Verification Code", key="send_otp_btn", use_container_width=True):
+        if not st.session_state.otp_sent:
+            st.markdown("<div class='lp-card-label'>Phone Verification</div>", unsafe_allow_html=True)
+            phone = st.text_input(
+                "Mobile number",
+                placeholder="Enter 10-digit number",
+                key="login_phone_input",
+            )
+            st.caption("📞 A one-time password will be sent to your number")
+
+            if st.button("📲  Send OTP", key="send_otp_btn", use_container_width=True):
                 p = phone.strip()
                 if not p:
                     st.error("Please enter your phone number.")
                 elif len(p) != 10 or not p.isdigit():
-                    st.error("Enter a valid 10-digit number.")
+                    st.error("Enter a valid 10-digit number (digits only).")
                 else:
                     with st.spinner("Sending OTP…"):
                         resp = api("post", "/auth/user/send-otp", json={"phone": p})
                     if resp.get("success"):
-                        st.session_state.otp_sent = True
+                        st.session_state.otp_sent    = True
                         st.session_state.login_phone = p
-                        st.session_state.demo_otp = resp.get("otp", "123456")
+                        st.session_state.demo_otp    = resp.get("otp", "123456")
                         st.rerun()
                     else:
-                        st.error(resp.get("detail", "Failed to send OTP."))
+                        st.error(resp.get("detail", "Failed to send OTP. Try again."))
         else:
-            st.markdown('<div class="auth-label">Verify OTP</div>', unsafe_allow_html=True)
+            st.markdown("<div class='lp-card-label'>Enter OTP</div>", unsafe_allow_html=True)
             st.markdown(
-                f'<div class="auth-phone-badge">📱 Code sent to <strong style="margin-left:auto;">+91 {st.session_state.login_phone}</strong></div>',
+                f"<div class='lp-phone-badge'>📱 Code sent to +91 {st.session_state.login_phone}</div>",
                 unsafe_allow_html=True,
             )
             st.markdown(
-                f"""<div class="auth-otp-box">
-                    <div class="auth-otp-icon">🔑</div>
-                    <div>
-                        <div class="auth-otp-label">Demo OTP (for testing)</div>
-                        <span class="auth-otp-code">{st.session_state.demo_otp}</span>
-                    </div>
-                </div>""",
+                f"<div class='lp-otp-box'>"
+                f"<span class='lp-otp-icon'>🔑</span>"
+                f"<div>"
+                f"<div class='lp-otp-label'>Demo OTP</div>"
+                f"<span class='lp-otp-code'>{st.session_state.demo_otp}</span>"
+                f"</div></div>",
                 unsafe_allow_html=True,
             )
-            otp = st.text_input("Enter 6-digit code", placeholder="••••••", key="temp_otp", type="password")
+            otp = st.text_input(
+                "OTP",
+                placeholder="6-digit code",
+                key="temp_otp",
+                type="password",
+            )
 
-            if st.button("Verify & Sign In", key="verify_otp_btn", use_container_width=True):
+            if st.button("✅  Verify & Sign in", key="verify_otp_btn", use_container_width=True):
                 if not otp:
                     st.error("Please enter the OTP.")
                 else:
@@ -3154,20 +2955,19 @@ def pg_user_login():
                         resp = api("post", "/auth/user/verify-otp",
                                    json={"phone": st.session_state.login_phone, "otp": otp})
                     if resp.get("success"):
-                        st.session_state.user = resp
-                        st.session_state.role = "user"
+                        st.session_state.user     = resp
+                        st.session_state.role     = "user"
                         st.session_state.otp_sent = False
                         st.session_state.demo_otp = ""
-                        st.session_state.screen = "user_dashboard"
+                        st.session_state.screen   = "user_dashboard"
                         st.rerun()
                     else:
-                        st.error(resp.get("detail", "Invalid OTP."))
+                        st.error(resp.get("detail", "Invalid OTP. Please try again."))
 
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
             ra, rb = st.columns(2)
             with ra:
-                st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-                if st.button("🔄  Resend", key="resend_otp_btn", use_container_width=True):
+                if st.button("🔄  Resend OTP", key="resend_otp_btn", use_container_width=True):
                     with st.spinner("Resending…"):
                         resp = api("post", "/auth/user/send-otp",
                                    json={"phone": st.session_state.login_phone})
@@ -3176,72 +2976,71 @@ def pg_user_login():
                         st.success("New OTP sent!")
                         st.rerun()
                     else:
-                        st.error("Failed to resend.")
-                st.markdown("</div>", unsafe_allow_html=True)
+                        st.error("Failed to resend OTP.")
             with rb:
-                st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
+                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
                 if st.button("← Cancel", key="cancel_otp_btn", use_container_width=True):
                     st.session_state.otp_sent = False
                     st.session_state.demo_otp = ""
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── REGISTER TAB ──
+        
+        st.markdown("</div>", unsafe_allow_html=True)   # .lp-card
+
+    # ── REGISTER ──────────────────────────────────────────────────────────────
     with tab2:
-        st.markdown('<div class="auth-label">New Account</div>', unsafe_allow_html=True)
-        with st.form(key="register_form", clear_on_submit=True):
-            r_name = st.text_input("Full name", placeholder="Your full name", key="reg_name")
-            r_phone = st.text_input("Phone number", placeholder="10-digit mobile", key="reg_phone")
-            r_address = st.text_area("Address", placeholder="Your complete address", key="reg_address", height=80)
-            submitted = st.form_submit_button("Create My Account", use_container_width=True)
+        with st.container(border=True):
+            st.markdown("<div class='lp-card-label'>Create account</div>", unsafe_allow_html=True)
+            with st.form(key="register_form", clear_on_submit=True):
+                r_name    = st.text_input("Full name *",       placeholder="Your full name",        key="reg_name")
+                r_phone   = st.text_input("Phone number *",    placeholder="10-digit number",       key="reg_phone")
+                r_address = st.text_area ("Address *",         placeholder="Your complete address", key="reg_address", height=90)
+                submitted = st.form_submit_button("📝  Create Account", use_container_width=True)
 
-        if submitted:
-            if not r_name:
-                st.error("Please enter your full name.")
-            elif not r_phone or len(r_phone.strip()) != 10 or not r_phone.strip().isdigit():
-                st.error("Enter a valid 10-digit phone number.")
-            elif not r_address:
-                st.error("Please enter your address.")
-            else:
-                with st.spinner("Creating account…"):
-                    resp = api("post", "/auth/user/signup", json={
-                        "name": r_name,
-                        "phone": r_phone.strip(),
-                        "address": r_address,
-                        "language": st.session_state.get("language", "en"),
-                    })
-                if resp.get("success"):
-                    st.success("✅ Account created! Switch to Sign In tab.")
-                    st.balloons()
+            if submitted:
+                if not r_name:
+                    st.error("Please enter your full name.")
+                elif not r_phone or len(r_phone.strip()) != 10 or not r_phone.strip().isdigit():
+                    st.error("Enter a valid 10-digit phone number.")
+                elif not r_address:
+                    st.error("Please enter your address.")
                 else:
-                    em = resp.get("detail", "Registration failed.")
-                    st.error("❌ Phone already registered." if "already" in em.lower() else f"❌ {em}")
+                    with st.spinner("Creating account…"):
+                        resp = api("post", "/auth/user/signup", json={
+                            "name":     r_name,
+                            "phone":    r_phone.strip(),
+                            "address":  r_address,
+                            "language": st.session_state.get("language", "en"),
+                        })
+                    if resp.get("success"):
+                        st.success("✅ Account created! Switch to Login to sign in.")
+                        st.balloons()
+                    else:
+                        em = resp.get("detail", "Registration failed.")
+                        st.error(
+                            "❌ Phone already registered — please login."
+                            if "already" in em.lower() else f"❌ {em}"
+                        )
 
-    # Footer
-    st.markdown('<div class="auth-divider">or</div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
+    # ── Back ──────────────────────────────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
     if st.button("← Back to Role Selection", key="back_to_role", use_container_width=True):
         st.session_state.otp_sent = False
         st.session_state.demo_otp = ""
-        st.session_state.screen = "login_type"
+        st.session_state.screen   = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="auth-footer-text">By signing in, you agree to our <strong>Terms</strong> & <strong>Privacy Policy</strong></div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)  # close auth-card
-    _close_auth_shell()
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# OFFICIAL LOGIN — Login + Request access + Forgot password
+# OFFICIAL LOGIN
 # ═══════════════════════════════════════════════════════════════════════════════
 def pg_official_login():
     dark = st.session_state.get("dark_mode", False)
-    try:
-        st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    except Exception:
-        pass
-    st.markdown(_auth_css(dark, accent="#0EA5E9", accent2="#6366F1"), unsafe_allow_html=True)
+    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
+    st.markdown(_login_css(dark, accent="#0EA5E9", accent2="#6366F1"), unsafe_allow_html=True)
 
     for k, v in [
         ("off_active_tab", "login"), ("off_step", 1), ("off_data", {}),
@@ -3251,324 +3050,324 @@ def pg_official_login():
         if k not in st.session_state:
             st.session_state[k] = v
 
-    _open_auth_shell()
-    _render_brand_panel(
-        eyebrow="Official Portal · Secure Access",
-        headline_pre="Empowering",
-        headline_accent="public service.",
-        desc="Manage department operations, resolve citizen complaints efficiently, and drive transparent governance with powerful analytics.",
+    # ── Hero ─────────────────────────────────────────────���────────────────────
+    st.markdown(
+        "<div class='lp-hero' style='"
+        "background:linear-gradient(135deg,#0c1a3a 0%,#0369a1 45%,#1e1b4b 100%);'>"
+        "<span class='lp-hero-icon'>🏢</span>"
+        "<div class='lp-hero-title'>Official Portal</div>"
+        "<div class='lp-hero-sub'>Department management &amp; complaint resolution</div>"
+        "</div>",
+        unsafe_allow_html=True,
     )
-    _open_auth_panel()
 
-    st.markdown("""
-    <div class="auth-card">
-        <div class="auth-card-icon">🏢</div>
-        <div class="auth-card-title">Official Portal</div>
-        <div class="auth-card-sub">Sign in to manage your department workflow</div>
-    """, unsafe_allow_html=True)
-
-    # ── Custom pill tabs ──
+    # ── Custom pill tabs ───────────────────────────────────────────────────────
+    st.markdown("<div class='lp-tabs'>", unsafe_allow_html=True)
     tc1, tc2 = st.columns(2)
     with tc1:
-        cls = "auth-tab-active" if st.session_state.off_active_tab == "login" else "auth-tab-idle"
-        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-        if st.button("🔐  Sign In", key="tab_login_btn", use_container_width=True):
+        cls = "lp-tab-active" if st.session_state.off_active_tab == "login" else "lp-tab-idle"
+        st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+        if st.button("🔐  Login", key="tab_login_btn", use_container_width=True):
             st.session_state.off_active_tab = "login"
             st.session_state.show_forgot = False
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with tc2:
-        cls = "auth-tab-active" if st.session_state.off_active_tab == "request" else "auth-tab-idle"
-        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-        if st.button("✨  Request Access", key="tab_request_btn", use_container_width=True):
+        cls = "lp-tab-active" if st.session_state.off_active_tab == "request" else "lp-tab-idle"
+        st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+        if st.button("📝  Request Access", key="tab_request_btn", use_container_width=True):
             st.session_state.off_active_tab = "request"
             st.session_state.show_forgot = False
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
-
-    # ══════════ LOGIN + FORGOT PASSWORD ══════════
+    # ══════════════════ LOGIN + FORGOT PASSWORD ════════════════════════════════
     if st.session_state.off_active_tab == "login":
+
         if not st.session_state.show_forgot:
-            st.markdown('<div class="auth-label">Credentials</div>', unsafe_allow_html=True)
-            with st.form(key="official_login_form", clear_on_submit=False):
-                email = st.text_input("Email address", placeholder="official@department.gov.in", key="official_email")
-                password = st.text_input("Password", placeholder="Enter your password", key="official_password", type="password")
-                submitted = st.form_submit_button("Sign In to Portal", use_container_width=True)
+            # Normal login
+            with st.container(border=True):
+                st.markdown("<div class='lp-card-label'>Official credentials</div>", unsafe_allow_html=True)
+                with st.form(key="official_login_form", clear_on_submit=False):
+                    email    = st.text_input("Email address", placeholder="official@department.gov.in", key="official_email")
+                    password = st.text_input("Password",      placeholder="Your password",              key="official_password", type="password")
+                    submitted = st.form_submit_button("🔑  Sign In", use_container_width=True)
 
-            if submitted:
-                if not email or not password:
-                    st.error("Please enter both email and password.")
-                else:
-                    with st.spinner("Authenticating…"):
-                        resp = api("post", "/auth/official/login",
-                                   json={"email": email, "password": password})
-                    if resp.get("success"):
-                        st.session_state.official = resp
-                        st.session_state.role = "official"
-                        st.session_state.screen = "official_dashboard"
-                        st.rerun()
+                if submitted:
+                    if not email or not password:
+                        st.error("Please enter both email and password.")
                     else:
-                        st.error(resp.get("detail", "Invalid email or password."))
+                        with st.spinner("Logging in…"):
+                            resp = api("post", "/auth/official/login",
+                                       json={"email": email, "password": password})
+                        if resp.get("success"):
+                            st.session_state.official = resp
+                            st.session_state.role     = "official"
+                            st.session_state.screen   = "official_dashboard"
+                            st.rerun()
+                        else:
+                            st.error(resp.get("detail", "Invalid email or password."))
 
-            st.markdown('<div class="auth-ghost" style="text-align:center;">', unsafe_allow_html=True)
-            if st.button("Forgot password?", key="forgot_pwd_btn", use_container_width=True):
-                st.session_state.show_forgot = True
-                st.session_state.forgot_step = 1
-                st.session_state.forgot_otp_verified = False
-                st.session_state.forgot_email = ""
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                if st.button("🔒  Forgot password?", key="forgot_pwd_btn", use_container_width=False):
+                    st.session_state.show_forgot          = True
+                    st.session_state.forgot_step          = 1
+                    st.session_state.forgot_otp_verified  = False
+                    st.session_state.forgot_email         = ""
+                    st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
         else:
             # Forgot password flow
-            st.markdown('<div class="auth-label">Reset Password</div>', unsafe_allow_html=True)
-            step = st.session_state.forgot_step
+            with st.container(border=True):
+                st.markdown("<div class='lp-card-label'>Reset password</div>", unsafe_allow_html=True)
+                step = st.session_state.forgot_step
 
-            if step == 1:
-                forgot_email = st.text_input("Registered email", placeholder="your@department.gov.in", key="forgot_email_input")
-                if st.button("Send Reset Code", use_container_width=True, key="send_reset_btn"):
-                    if not forgot_email:
-                        st.error("Please enter your email.")
-                    elif "@" not in forgot_email or "." not in forgot_email.split("@")[-1]:
-                        st.error("Enter a valid email address.")
-                    else:
-                        st.session_state.forgot_email = forgot_email
-                        st.session_state.forgot_step = 2
-                        st.success("Demo OTP sent — use **123456**")
-                        st.rerun()
-
-            elif step == 2:
-                st.markdown(
-                    f'<div class="auth-info">📧 Code sent to <strong style="margin-left:4px;">{st.session_state.forgot_email}</strong> — use <strong style="margin-left:4px;">123456</strong></div>',
-                    unsafe_allow_html=True,
-                )
-                otp = st.text_input("Reset code", type="password", placeholder="6-digit code", key="reset_otp")
-                col1, col2 = st.columns(2)
-                with col1:
-                    if st.button("Verify Code", use_container_width=True, key="verify_reset"):
-                        if otp == "123456":
-                            st.session_state.forgot_otp_verified = True
-                            st.session_state.forgot_step = 3
-                            st.rerun()
+                if step == 1:
+                    forgot_email = st.text_input("Registered email address", key="forgot_email_input")
+                    if st.button("📲  Send Reset OTP", use_container_width=True):
+                        if not forgot_email:
+                            st.error("Please enter your email.")
+                        elif "@" not in forgot_email or "." not in forgot_email.split("@")[-1]:
+                            st.error("Please enter a valid email (e.g. name@example.com).")
                         else:
-                            st.error("Invalid code.")
-                with col2:
-                    st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-                    if st.button("🔄  Resend", use_container_width=True, key="resend_reset"):
-                        st.success("Resent (123456)")
-                    st.markdown("</div>", unsafe_allow_html=True)
-
-            else:
-                st.markdown('<div class="auth-verified">✅ Email verified — set your new password</div>', unsafe_allow_html=True)
-                new_password = st.text_input("New password", type="password", placeholder="Min 6 characters", key="new_pwd")
-                confirm_password = st.text_input("Confirm password", type="password", placeholder="Re-enter password", key="confirm_pwd")
-                if st.button("Update Password", use_container_width=True, key="update_pwd"):
-                    if not new_password or not confirm_password:
-                        st.error("Please fill both fields.")
-                    elif len(new_password) < 6:
-                        st.error("Password must be at least 6 characters.")
-                    elif new_password != confirm_password:
-                        st.error("Passwords do not match.")
-                    else:
-                        with st.spinner("Updating…"):
-                            resp = api("post", "/auth/official/reset-password", json={
-                                "email": st.session_state.forgot_email,
-                                "new_password": new_password,
-                            })
-                        if resp.get("success"):
-                            st.success("✅ Password reset! Please sign in.")
-                            for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
-                                st.session_state.pop(key, None)
+                            st.session_state.forgot_email = forgot_email
+                            st.session_state.forgot_step  = 2
+                            st.success("Demo OTP sent — use **123456**")
                             st.rerun()
-                        else:
-                            st.error(f"Reset failed: {resp.get('detail', 'Unknown error')}")
 
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-            if st.button("← Back to Sign In", use_container_width=True, key="back_to_login_from_forgot"):
-                for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
-                    st.session_state.pop(key, None)
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+                elif step == 2:
+                    st.markdown(
+                        f"<div class='lp-info'>📧 OTP sent to <strong>{st.session_state.forgot_email}</strong> — use <strong>123456</strong></div>",
+                        unsafe_allow_html=True,
+                    )
+                    otp = st.text_input("Enter OTP", type="password", placeholder="123456", key="reset_otp")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        if st.button("✅  Verify OTP", use_container_width=True):
+                            if otp == "123456":
+                                st.session_state.forgot_otp_verified = True
+                                st.session_state.forgot_step         = 3
+                                st.rerun()
+                            else:
+                                st.error("Invalid OTP — use 123456.")
+                    with col2:
+                        if st.button("🔄  Resend", use_container_width=True):
+                            st.success("Demo OTP resent (still 123456).")
 
-    # ══════════ REQUEST ACCESS ══════════
-    else:
-        step = st.session_state.off_step
-        st.markdown(f"""
-        <div class="auth-stepper">
-            <div class="auth-step">
-                <div class="auth-step-dot {'active' if step==1 else 'done'}">{'1' if step==1 else '✓'}</div>
-                <div class="auth-step-lbl {'active' if step==1 else 'idle'}">Details</div>
-            </div>
-            <div class="auth-step-line"></div>
-            <div class="auth-step">
-                <div class="auth-step-dot {'active' if step==2 else 'idle'}">2</div>
-                <div class="auth-step-lbl {'active' if step==2 else 'idle'}">Verify</div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        if step == 1:
-            st.markdown('<div class="auth-label">Your Information</div>', unsafe_allow_html=True)
-            d = st.session_state.off_data
-            nm = st.text_input("Full name", value=d.get("name", ""), placeholder="As per government ID", key="off_name")
-            em = st.text_input("Email", value=d.get("email", ""), placeholder="official@dept.gov.in", key="off_email")
-            ph = st.text_input("Phone (10 digits)", value=d.get("phone", ""), placeholder="Mobile number", key="off_phone")
-            pw = st.text_input("Password (min 6 chars)", value=d.get("password", ""), placeholder="Create strong password", key="off_pass", type="password")
-            dc = st.text_input("Department code", value=d.get("dept_code", ""), placeholder="Provided by admin", key="off_dept")
-
-            if st.button("Continue & Verify Phone", use_container_width=True, key="off_send_otp"):
-                errs = [f for f, v in [("Name", nm), ("Email", em), ("Phone", ph), ("Password", pw), ("Dept Code", dc)] if not v]
-                if errs:
-                    st.error("Missing: " + ", ".join(errs))
-                elif len(ph) != 10 or not ph.isdigit():
-                    st.error("Phone must be exactly 10 digits.")
-                elif len(pw) < 6:
-                    st.error("Password must be at least 6 characters.")
                 else:
-                    st.session_state.off_data = {"name": nm, "email": em, "phone": ph, "password": pw, "dept_code": dc}
-                    st.session_state.off_step = 2
-                    st.session_state.off_otp_verified = False
+                    st.markdown(
+                        "<div class='lp-verified'>✅ Email verified — set your new password</div>",
+                        unsafe_allow_html=True,
+                    )
+                    new_password     = st.text_input("New password",         type="password", key="new_pwd")
+                    confirm_password = st.text_input("Confirm new password", type="password", key="confirm_pwd")
+                    if st.button("🔐  Reset Password", use_container_width=True):
+                        if not new_password or not confirm_password:
+                            st.error("Please fill both fields.")
+                        elif len(new_password) < 6:
+                            st.error("Password must be at least 6 characters.")
+                        elif new_password != confirm_password:
+                            st.error("Passwords do not match.")
+                        else:
+                            with st.spinner("Updating…"):
+                                resp = api("post", "/auth/official/reset-password", json={
+                                    "email": st.session_state.forgot_email,
+                                    "new_password": new_password,
+                                })
+                            if resp.get("success"):
+                                st.success("✅ Password reset! Please sign in.")
+                                for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
+                                    st.session_state.pop(key, None)
+                                st.rerun()
+                            else:
+                                st.error(f"Reset failed: {resp.get('detail', 'Unknown error')}")
+
+                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                if st.button("← Back to login", use_container_width=True, key="back_to_login_from_forgot"):
+                    for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
+                        st.session_state.pop(key, None)
                     st.rerun()
-        else:
-            st.markdown('<div class="auth-label">Phone Verification</div>', unsafe_allow_html=True)
-            masked = "******" + st.session_state.off_data.get("phone", "")[-4:]
-            st.markdown(
-                f'<div class="auth-info">📱 OTP sent to <strong style="margin-left:4px;">{masked}</strong> — demo code: <strong style="margin-left:4px;">123456</strong></div>',
-                unsafe_allow_html=True,
-            )
-            otp = st.text_input("6-digit OTP", type="password", placeholder="••••••", key="off_otp_input", max_chars=6)
-
-            if st.session_state.off_otp_verified:
-                st.markdown('<div class="auth-verified">✅ Phone verified — ready to submit</div>', unsafe_allow_html=True)
-
-            oc1, oc2 = st.columns(2)
-            with oc1:
-                if st.button("Verify OTP", use_container_width=True, key="off_verify_otp"):
-                    if otp and otp.strip() == "123456":
-                        st.session_state.off_otp_verified = True
-                        st.rerun()
-                    else:
-                        st.error("Invalid OTP — use 123456.")
-            with oc2:
-                st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-                if st.button("🔄  Resend", use_container_width=True, key="off_resend_otp"):
-                    st.info("Resent (123456)")
                 st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+    # ══════════════════ REQUEST ACCESS ════════════════════════════════════════
+    else:
+        with st.container(border=True):
+            step = st.session_state.off_step
 
-            if st.session_state.off_otp_verified:
-                if st.button("Submit Access Request", use_container_width=True, key="off_submit_request"):
-                    with st.spinner("Submitting…"):
-                        resp = api("post", "/auth/official/signup", json=st.session_state.off_data)
-                    if resp.get("success"):
-                        st.success("✅ Request submitted! Awaiting admin approval.")
-                        for k in ("off_step", "off_data", "off_otp_verified"):
-                            st.session_state.pop(k, None)
-                        st.session_state.off_active_tab = "login"
-                        st.balloons()
-                        st.rerun()
+            # Step indicator
+            st.markdown(
+                f"<div class='lp-step-wrap'>"
+                f"  <div class='lp-step-col'>"
+                f"    <div class='lp-step-dot {'active' if step==1 else 'done'}'>{'1' if step==1 else '✓'}</div>"
+                f"    <div class='lp-step-lbl {'active' if step==1 else 'idle'}'>Details</div>"
+                f"  </div>"
+                f"  <div class='lp-step-line'></div>"
+                f"  <div class='lp-step-col'>"
+                f"    <div class='lp-step-dot {'active' if step==2 else 'idle'}'>2</div>"
+                f"    <div class='lp-step-lbl {'active' if step==2 else 'idle'}'>Verify</div>"
+                f"  </div>"
+                f"</div>",
+                unsafe_allow_html=True,
+            )
+
+            if step == 1:
+                st.markdown("<div class='lp-card-label'>Your details</div>", unsafe_allow_html=True)
+                d  = st.session_state.off_data
+                nm = st.text_input("Full name *",               value=d.get("name",""),      key="off_name")
+                em = st.text_input("Email address *",           value=d.get("email",""),     key="off_email")
+                ph = st.text_input("Phone number * (10 digits)",value=d.get("phone",""),     key="off_phone")
+                pw = st.text_input("Password * (min 6 chars)",  value=d.get("password",""),  key="off_pass",  type="password")
+                dc = st.text_input("Department code *",         value=d.get("dept_code",""), key="off_dept",
+                                   help="Contact your department admin for this code")
+                st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
+
+                if st.button("📲  Continue & Send OTP", use_container_width=True, key="off_send_otp"):
+                    errs = [f for f, v in [("Name",nm),("Email",em),("Phone",ph),("Password",pw),("Dept Code",dc)] if not v]
+                    if errs:
+                        st.error("Missing: " + ", ".join(errs))
+                    elif len(ph) != 10 or not ph.isdigit():
+                        st.error("Phone must be exactly 10 digits.")
+                    elif len(pw) < 6:
+                        st.error("Password must be at least 6 characters.")
                     else:
-                        em2 = resp.get("detail", "Unknown error")
-                        st.error("❌ Email already registered." if "already" in em2.lower() else f"❌ {em2}")
+                        st.session_state.off_data         = {"name":nm,"email":em,"phone":ph,"password":pw,"dept_code":dc}
+                        st.session_state.off_step         = 2
+                        st.session_state.off_otp_verified = False
+                        st.rerun()
             else:
-                st.markdown('<div class="auth-warn">🔐 Verify OTP above to enable submission</div>', unsafe_allow_html=True)
+                st.markdown("<div class='lp-card-label'>Phone verification</div>", unsafe_allow_html=True)
+                masked = "******" + st.session_state.off_data.get("phone","")[-4:]
+                st.markdown(
+                    f"<div class='lp-info'>📱 OTP sent to <strong>{masked}</strong> — use demo code <strong>123456</strong></div>",
+                    unsafe_allow_html=True,
+                )
+                otp = st.text_input(
+                    "OTP", type="password", placeholder="6-digit code",
+                    key="off_otp_input", max_chars=6, label_visibility="collapsed",
+                )
 
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
-            if st.button("← Edit Details", use_container_width=True, key="off_back_step1"):
-                st.session_state.off_step = 1
-                st.session_state.off_otp_verified = False
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
+                if st.session_state.off_otp_verified:
+                    st.markdown(
+                        "<div class='lp-verified'>✅ Phone verified — ready to submit!</div>",
+                        unsafe_allow_html=True,
+                    )
 
-    # Footer
-    st.markdown('<div class="auth-divider">or</div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
+                oc1, oc2 = st.columns(2)
+                with oc1:
+                    if st.button("✅  Verify OTP", use_container_width=True, key="off_verify_otp"):
+                        if otp and otp.strip() == "123456":
+                            st.session_state.off_otp_verified = True
+                            st.rerun()
+                        else:
+                            st.error("Invalid OTP — use 123456.")
+                with oc2:
+                    if st.button("🔄  Resend", use_container_width=True, key="off_resend_otp"):
+                        st.info("Demo OTP resent — still 123456.")
+
+                st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
+
+                if st.session_state.off_otp_verified:
+                    if st.button("📝  Submit Request", use_container_width=True, key="off_submit_request"):
+                        with st.spinner("Submitting…"):
+                            resp = api("post", "/auth/official/signup", json=st.session_state.off_data)
+                        if resp.get("success"):
+                            st.success("✅ Request submitted! Awaiting admin approval.")
+                            for k in ("off_step", "off_data", "off_otp_verified"):
+                                st.session_state.pop(k, None)
+                            st.session_state.off_active_tab = "login"
+                            st.balloons()
+                            st.rerun()
+                        else:
+                            em2 = resp.get("detail", "Unknown error")
+                            st.error(
+                                "❌ Email already registered — try logging in."
+                                if "already" in em2.lower() else f"❌ {em2}"
+                            )
+                else:
+                    st.markdown(
+                        "<div class='lp-warn'>🔐 Verify your OTP above before submitting.</div>",
+                        unsafe_allow_html=True,
+                    )
+
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                if st.button("← Edit details", use_container_width=True, key="off_back_step1"):
+                    st.session_state.off_step         = 1
+                    st.session_state.off_otp_verified = False
+                    st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+
+    # ── Back ──────────────────────────────────────────────────────────────────
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
     if st.button("← Back to Role Selection", key="official_back", use_container_width=True):
-        for k in ("off_step", "off_data", "off_otp_verified", "off_active_tab",
-                  "show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"):
+        for k in ("off_step","off_data","off_otp_verified","off_active_tab",
+                  "show_forgot","forgot_step","forgot_email","forgot_otp_verified"):
             st.session_state.pop(k, None)
         st.session_state.screen = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="auth-footer-text">Need help? Contact your <strong>department administrator</strong></div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)  # close auth-card
-    _close_auth_shell()
-
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ADMIN LOGIN
-# ═══════════════════════════════════════════════════════════════════════════════
+# ═════════════════════════════════════════════��═════════════════════════════════
 def pg_admin_login():
     dark = st.session_state.get("dark_mode", False)
-    try:
-        st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    except Exception:
-        pass
-    st.markdown(_auth_css(dark, accent="#F59E0B", accent2="#EF4444"), unsafe_allow_html=True)
-
-    _open_auth_shell()
-    _render_brand_panel(
-        eyebrow="Admin Console · Restricted",
-        headline_pre="Command,",
-        headline_accent="at every layer.",
-        desc="Full system oversight with real-time analytics, predictive insights, and comprehensive management tools for nationwide operations.",
-    )
-    _open_auth_panel()
-
-    st.markdown("""
-    <div class="auth-card">
-        <div class="auth-card-icon">👑</div>
-        <div class="auth-card-title">Admin Console</div>
-        <div class="auth-card-sub">Restricted access · Authorized personnel only</div>
-        <div class="auth-label">Administrator Credentials</div>
-    """, unsafe_allow_html=True)
-
-    with st.form(key="admin_login_form", clear_on_submit=False):
-        username = st.text_input("Username", placeholder="Enter admin username", key="admin_username")
-        password = st.text_input("Password", placeholder="Enter password", key="admin_password", type="password")
-        submitted = st.form_submit_button("Access Admin Panel", use_container_width=True)
-
-    if submitted:
-        if not username:
-            st.error("Please enter your username.")
-        elif not password:
-            st.error("Please enter your password.")
-        else:
-            with st.spinner("Authenticating…"):
-                resp = api("post", "/auth/admin/login",
-                           json={"username": username, "password": password})
-            if resp.get("success"):
-                st.session_state.admin = resp
-                st.session_state.role = "admin"
-                st.session_state.screen = "admin_dashboard"
-                st.rerun()
-            else:
-                st.error(resp.get("detail", "Invalid credentials."))
+    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
+    st.markdown(_login_css(dark, accent="#F59E0B", accent2="#EF4444"), unsafe_allow_html=True)
 
     st.markdown(
-        '<div class="auth-demo-hint">'
-        '🔑 <strong>Demo credentials:</strong> admin / admin123'
-        '</div>',
+        "<div class='lp-hero' style='"
+        "background:linear-gradient(135deg,#3b1a00 0%,#78350f 45%,#1c1917 100%);'>"
+        "<span class='lp-hero-icon'>👑</span>"
+        "<div class='lp-hero-title'>Admin Panel</div>"
+        "<div class='lp-hero-sub'>System administration · analytics · oversight</div>"
+        "</div>",
         unsafe_allow_html=True,
     )
 
-    # Footer
-    st.markdown('<div class="auth-divider">or</div>', unsafe_allow_html=True)
-    st.markdown('<div class="auth-secondary">', unsafe_allow_html=True)
+    with st.container(border=True):
+        st.markdown("<div class='lp-card-label'>Administrator credentials</div>", unsafe_allow_html=True)
+        with st.form(key="admin_login_form", clear_on_submit=False):
+            username = st.text_input("Username", placeholder="Enter your username",  key="admin_username")
+            password = st.text_input("Password", placeholder="Enter your password",  key="admin_password", type="password")
+            submitted = st.form_submit_button("👑  Login to Admin Panel", use_container_width=True)
+
+        if submitted:
+            if not username:
+                st.error("Please enter your username.")
+            elif not password:
+                st.error("Please enter your password.")
+            else:
+                with st.spinner("Authenticating…"):
+                    resp = api("post", "/auth/admin/login",
+                               json={"username": username, "password": password})
+                if resp.get("success"):
+                    st.session_state.admin  = resp
+                    st.session_state.role   = "admin"
+                    st.session_state.screen = "admin_dashboard"
+                    st.rerun()
+                else:
+                    st.error(resp.get("detail", "Invalid username or password."))
+
+        st.markdown(
+            "<div class='lp-demo-hint'>"
+            "<div class='lp-demo-row'><strong>Default credentials:</strong> admin / admin123</div>"
+            "</div>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
     if st.button("← Back to Role Selection", key="admin_back", use_container_width=True):
         st.session_state.screen = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown('<div class="auth-footer-text">🛡️ This is a <strong>secure restricted zone</strong> — all actions are logged</div>', unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)  # close auth-card
-    _close_auth_shell()
+
 # ═════════════════════════════════════════════════════════════════════════════
 # USER DASHBOARD
 # ═════════════════════════════════════════════════════════════════════════════
