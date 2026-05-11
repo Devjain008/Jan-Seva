@@ -177,81 +177,136 @@ def stars_html(avg, count=0):
         f'<span style="font-size:.78rem;opacity:.7;"> {avg:.1f}{ct}</span>'
     )
 
-# ═════════════════════════════════════════════════════════════════════════════
-# SIDEBAR
-# ═════════════════════════════════════════════════════════════════════════════
-def render_sidebar():
+import streamlit as st
 
-    # ── Hide Streamlit auto-nav & Modern Sidebar Styling ─────────────────────
+
+def render_sidebar():
+    """
+    Ultra-Premium Sidebar Navigation for Jan Seva Portal
+    Inspired by: Linear · Notion · Vercel · Stripe · Discord · Revolut
+    """
+
+    # ═══════════════════════════════════════════════════════════════════════
+    # PREMIUM CSS — Glassmorphism + Modern SaaS Design System
+    # ═══════════════════════════════════════════════════════════════════════
     st.markdown("""
     <style>
-    /* ═══════════════════════════════════════════════════════════
-       HIDE DEFAULT STREAMLIT ELEMENTS
-    ═══════════════════════════════════════════════════════════ */
-    section[data-testid="stSidebar"] nav { display:none !important; }
-    div[data-testid="stSidebarNav"]      { display:none !important; }
-    ul[data-testid="stSidebarNavItems"]  { display:none !important; }
-    button[data-testid="baseButton-header"] { display:none !important; }
+    /* ──────────────────────────────────────────────────────────────
+       FONTS — Premium typography stack
+    ────────────────────────────────────────────────────────────── */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
-    /* ═══════════════════════════════════════════════════════════
-       SIDEBAR TOGGLE BUTTON
-    ═══════════════════════════════════════════════════════════ */
+    /* ──────────────────────────────────────────────────────────────
+       DESIGN TOKENS
+    ────────────────────────────────────────────────────────────── */
+    :root {
+        --sb-bg            : #FAFBFF;
+        --sb-bg-elevated   : #FFFFFF;
+        --sb-border        : #ECEEF5;
+        --sb-border-hover  : #E0E7FF;
+        --sb-text          : #0F172A;
+        --sb-text-muted    : #64748B;
+        --sb-text-subtle   : #94A3B8;
+        --sb-primary       : #6366F1;
+        --sb-primary-dark  : #4F46E5;
+        --sb-secondary     : #8B5CF6;
+        --sb-accent        : #06B6D4;
+        --sb-success       : #10B981;
+        --sb-danger        : #EF4444;
+        --sb-warning       : #F59E0B;
+        --sb-grad-primary  : linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%);
+        --sb-grad-active   : linear-gradient(90deg, rgba(99,102,241,0.10) 0%, rgba(139,92,246,0.06) 100%);
+        --sb-shadow-sm     : 0 1px 2px rgba(15,23,42,0.04);
+        --sb-shadow-md     : 0 4px 12px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
+        --sb-shadow-lg     : 0 12px 32px rgba(99,102,241,0.12), 0 4px 12px rgba(15,23,42,0.04);
+        --sb-shadow-glow   : 0 0 24px rgba(99,102,241,0.18);
+        --sb-radius        : 10px;
+        --sb-radius-lg     : 14px;
+        --sb-ease          : cubic-bezier(0.4, 0, 0.2, 1);
+        --sb-ease-bounce   : cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       HIDE DEFAULT STREAMLIT ELEMENTS
+    ────────────────────────────────────────────────────────────── */
+    section[data-testid="stSidebar"] nav,
+    div[data-testid="stSidebarNav"],
+    ul[data-testid="stSidebarNavItems"],
+    button[data-testid="baseButton-header"] { display: none !important; }
+    #MainMenu { visibility: hidden; }
+    footer { visibility: hidden; }
+    header[data-testid="stHeader"] { background: transparent !important; }
+
+    /* ──────────────────────────────────────────────────────────────
+       FLOATING TOGGLE BUTTON — Premium glass pill
+    ────────────────────────────────────────────────────────────── */
     button[data-testid="stSidebarCollapseButton"],
     button[kind="header"],
-    [data-testid="collapsedControl"],
-    button[data-testid="baseButton-headerNoPadding"] {
-        background: linear-gradient(135deg, #6366F1, #8B5CF6) !important;
-        border-radius: 10px !important;
-        width: 30px !important;
-        height: 30px !important;
-        box-shadow: 0 4px 12px rgba(99,102,241,0.30) !important;
-        border: 1.5px solid #FFFFFF !important;
-        transition: all 0.2s ease !important;
+    [data-testid="collapsedControl"] {
+        background: rgba(255,255,255,0.85) !important;
+        backdrop-filter: blur(20px) saturate(180%) !important;
+        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+        border-radius: 12px !important;
+        width: 42px !important;
+        height: 42px !important;
+        box-shadow: 0 8px 24px rgba(15,23,42,0.08),
+                    0 2px 6px rgba(15,23,42,0.04),
+                    inset 0 1px 0 rgba(255,255,255,0.8) !important;
+        border: 1px solid rgba(236,238,245,0.8) !important;
+        transition: all 0.25s var(--sb-ease-bounce) !important;
         z-index: 999999 !important;
     }
     button[data-testid="stSidebarCollapseButton"]:hover,
-    button[kind="header"]:hover,
-    [data-testid="collapsedControl"]:hover {
-        transform: scale(1.05) !important;
-        box-shadow: 0 6px 16px rgba(99,102,241,0.45) !important;
+    button[kind="header"]:hover {
+        background: rgba(255,255,255,0.95) !important;
+        transform: scale(1.08) rotate(-3deg) !important;
+        box-shadow: 0 12px 32px rgba(99,102,241,0.18),
+                    0 4px 12px rgba(15,23,42,0.06) !important;
+        border-color: rgba(99,102,241,0.3) !important;
     }
     button[data-testid="stSidebarCollapseButton"] svg,
-    button[kind="header"] svg,
-    [data-testid="collapsedControl"] svg,
-    button[data-testid="baseButton-headerNoPadding"] svg {
-        color: #FFFFFF !important;
-        fill: #FFFFFF !important;
-        stroke: #FFFFFF !important;
-        width: 16px !important;
-        height: 16px !important;
+    button[kind="header"] svg {
+        color: var(--sb-primary) !important;
+        stroke: var(--sb-primary) !important;
+        width: 18px !important;
+        height: 18px !important;
+        stroke-width: 2.5 !important;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       SIDEBAR SHELL — Clean modern look
-    ═══════════════════════════════════════════════════════════ */
+    /* ──────────────────────────────────────────────────────────────
+       SIDEBAR SHELL — Premium glass surface
+    ────────────────────────────────────────────────────────────── */
     section[data-testid="stSidebar"] {
-        background: #FFFFFF !important;
-        border-right: 1px solid #EEF0F5 !important;
-        box-shadow: none !important;
-        min-width: 260px !important;
-        max-width: 280px !important;
+        background: var(--sb-bg) !important;
+        background-image:
+            radial-gradient(at 0% 0%, rgba(99,102,241,0.04) 0px, transparent 50%),
+            radial-gradient(at 100% 100%, rgba(139,92,246,0.03) 0px, transparent 50%) !important;
+        border-right: 1px solid var(--sb-border) !important;
+        box-shadow: 4px 0 24px rgba(15,23,42,0.02) !important;
+        min-width: 280px !important;
+        max-width: 296px !important;
+        font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif !important;
     }
     section[data-testid="stSidebar"] > div:first-child {
         padding: 0 !important;
+        background: transparent !important;
+    }
+    section[data-testid="stSidebar"] * {
+        font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
     }
 
     /* Custom scrollbar */
-    section[data-testid="stSidebar"] ::-webkit-scrollbar { width: 4px !important; }
+    section[data-testid="stSidebar"] ::-webkit-scrollbar { width: 6px !important; }
     section[data-testid="stSidebar"] ::-webkit-scrollbar-track { background: transparent !important; }
     section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {
-        background: #D1D5DB !important;
+        background: linear-gradient(180deg, #CBD5E1, #94A3B8) !important;
         border-radius: 10px !important;
     }
     section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover {
-        background: #9CA3AF !important;
+        background: linear-gradient(180deg, var(--sb-primary), var(--sb-secondary)) !important;
     }
 
-    /* Remove default streamlit spacing */
+    /* Reset block container spacing */
     section[data-testid="stSidebar"] .block-container,
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
         gap: 0 !important;
@@ -261,158 +316,407 @@ def render_sidebar():
         gap: 2px !important;
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       NAV BUTTONS — Linear/Notion style
-    ═══════════════════════════════════════════════════════════ */
+    /* ──────────────────────────────────────────────────────────────
+       LOGO HEADER — Premium gradient brand
+    ────────────────────────────────────────────────────────────── */
+    .sb-logo {
+        padding: 22px 18px 18px;
+        display: flex;
+        align-items: center;
+        gap: 13px;
+        background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.6) 100%);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid var(--sb-border);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .sb-logo-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        background: var(--sb-grad-primary);
+        background-size: 200% 200%;
+        animation: gradient-shift 8s ease infinite;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        flex-shrink: 0;
+        box-shadow: 0 8px 20px rgba(99,102,241,0.35),
+                    inset 0 1px 0 rgba(255,255,255,0.3),
+                    inset 0 -1px 0 rgba(0,0,0,0.1);
+        position: relative;
+    }
+    .sb-logo-icon::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 12px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent 50%);
+        pointer-events: none;
+    }
+    @keyframes gradient-shift {
+        0%, 100% { background-position: 0% 50%; }
+        50% { background-position: 100% 50%; }
+    }
+    .sb-logo-text { flex: 1; min-width: 0; }
+    .sb-logo-title {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--sb-text);
+        letter-spacing: -0.03em;
+        line-height: 1.15;
+        background: linear-gradient(135deg, #0F172A 0%, #4F46E5 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .sb-logo-sub {
+        font-size: 0.7rem;
+        color: var(--sb-text-subtle);
+        margin-top: 3px;
+        font-weight: 600;
+        letter-spacing: 0.01em;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       PROFILE CARD — Glassmorphism premium card
+    ────────────────────────────────────────────────────────────── */
+    .sb-profile {
+        margin: 14px 12px 10px;
+        padding: 13px 13px;
+        background: rgba(255,255,255,0.75);
+        backdrop-filter: blur(20px) saturate(180%);
+        -webkit-backdrop-filter: blur(20px) saturate(180%);
+        border: 1px solid rgba(236,238,245,0.9);
+        border-radius: var(--sb-radius-lg);
+        transition: all 0.3s var(--sb-ease);
+        box-shadow: var(--sb-shadow-sm);
+        position: relative;
+        overflow: hidden;
+    }
+    .sb-profile::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--sb-grad-primary);
+        opacity: 0;
+        transition: opacity 0.3s var(--sb-ease);
+    }
+    .sb-profile:hover {
+        border-color: var(--sb-border-hover);
+        box-shadow: var(--sb-shadow-lg);
+        transform: translateY(-2px);
+    }
+    .sb-profile:hover::before { opacity: 1; }
+
+    .sb-profile-inner {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .sb-profile-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 11px;
+        background: var(--sb-grad-primary);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+        color: #fff;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        box-shadow: 0 6px 14px rgba(99,102,241,0.32),
+                    inset 0 1px 0 rgba(255,255,255,0.25);
+        position: relative;
+    }
+    .sb-profile-avatar::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 11px;
+        background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 60%);
+    }
+    .sb-profile-info { flex: 1; min-width: 0; }
+    .sb-profile-name {
+        font-size: 0.87rem;
+        font-weight: 700;
+        color: var(--sb-text);
+        letter-spacing: -0.02em;
+        line-height: 1.25;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    .sb-profile-sub {
+        font-size: 0.72rem;
+        color: var(--sb-text-muted);
+        margin-top: 4px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .sb-role-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 2px 7px;
+        border-radius: 6px;
+        font-size: 0.62rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
+        color: var(--sb-primary-dark);
+        border: 1px solid rgba(99,102,241,0.15);
+    }
+    .sb-profile-status {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--sb-success);
+        box-shadow: 0 0 0 2px rgba(16,185,129,0.2),
+                    0 0 10px rgba(16,185,129,0.5);
+        animation: pulse-status 2s ease-in-out infinite;
+        flex-shrink: 0;
+    }
+    @keyframes pulse-status {
+        0%, 100% {
+            box-shadow: 0 0 0 2px rgba(16,185,129,0.2), 0 0 10px rgba(16,185,129,0.5);
+        }
+        50% {
+            box-shadow: 0 0 0 4px rgba(16,185,129,0.3), 0 0 16px rgba(16,185,129,0.7);
+        }
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       SECTION LABELS — Modern uppercase headers
+    ────────────────────────────────────────────────────────────── */
+    .sb-section-label {
+        font-size: 0.66rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--sb-text-subtle);
+        padding: 18px 20px 8px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .sb-section-label::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg, var(--sb-border), transparent);
+        margin-left: 4px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       NAV BUTTONS — Premium hover with active glow
+    ────────────────────────────────────────────────────────────── */
     section[data-testid="stSidebar"] .stButton { margin: 0 !important; }
+
     section[data-testid="stSidebar"] .stButton > button {
-        background    : transparent !important;
-        border        : 1px solid transparent !important;
-        box-shadow    : none !important;
-        border-radius : 8px !important;
-        padding       : 8px 12px !important;
-        font-size     : 0.84rem !important;
-        font-weight   : 500 !important;
-        color         : #4B5563 !important;
-        text-align    : left !important;
+        background: transparent !important;
+        border: 1px solid transparent !important;
+        box-shadow: none !important;
+        border-radius: var(--sb-radius) !important;
+        padding: 10px 13px !important;
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        color: var(--sb-text-muted) !important;
+        text-align: left !important;
         justify-content: flex-start !important;
-        width         : 100% !important;
-        min-height    : 36px !important;
-        height        : 36px !important;
-        transition    : all 0.15s ease !important;
-        letter-spacing: -0.005em !important;
-        position      : relative !important;
-        line-height   : 1.2 !important;
+        width: 100% !important;
+        min-height: 40px !important;
+        height: 40px !important;
+        transition: all 0.18s var(--sb-ease) !important;
+        letter-spacing: -0.01em !important;
+        position: relative !important;
+        line-height: 1.2 !important;
+        overflow: hidden !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(99,102,241,0.06), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.5s var(--sb-ease);
     }
     section[data-testid="stSidebar"] .stButton > button:hover {
-        background : #F3F4F6 !important;
-        color      : #111827 !important;
-        transform  : none !important;
-        filter     : none !important;
+        background: rgba(99,102,241,0.06) !important;
+        color: var(--sb-text) !important;
+        border-color: rgba(99,102,241,0.1) !important;
+        transform: translateX(2px) !important;
+    }
+    section[data-testid="stSidebar"] .stButton > button:hover::before {
+        transform: translateX(100%);
     }
     section[data-testid="stSidebar"] .stButton > button:active {
-        background: #E5E7EB !important;
-        transform: none !important;
+        transform: translateX(2px) scale(0.98) !important;
     }
     section[data-testid="stSidebar"] .stButton > button:focus {
         box-shadow: none !important;
         outline: none !important;
     }
 
-    /* ── ACTIVE nav button ── */
+    /* ── ACTIVE NAV — Premium gradient with glow indicator ── */
     section[data-testid="stSidebar"] .sb-active .stButton > button {
-        background : linear-gradient(90deg, #EEF2FF 0%, #F5F3FF 100%) !important;
-        color      : #4338CA !important;
+        background: var(--sb-grad-active) !important;
+        color: var(--sb-primary-dark) !important;
         font-weight: 600 !important;
-        border     : 1px solid #E0E7FF !important;
-        box-shadow : 0 1px 2px rgba(99,102,241,0.06) !important;
+        border: 1px solid rgba(99,102,241,0.18) !important;
+        box-shadow: 0 2px 8px rgba(99,102,241,0.1),
+                    inset 0 1px 0 rgba(255,255,255,0.6) !important;
     }
-    section[data-testid="stSidebar"] .sb-active .stButton > button::before {
+    section[data-testid="stSidebar"] .sb-active .stButton > button::after {
         content: '';
         position: absolute;
         left: 0;
         top: 50%;
         transform: translateY(-50%);
         width: 3px;
-        height: 18px;
-        background: linear-gradient(180deg, #6366F1, #8B5CF6);
-        border-radius: 0 3px 3px 0;
+        height: 22px;
+        background: var(--sb-grad-primary);
+        border-radius: 0 4px 4px 0;
+        box-shadow: 0 0 12px rgba(99,102,241,0.6);
+        animation: glow-pulse 2s ease-in-out infinite;
+    }
+    @keyframes glow-pulse {
+        0%, 100% { box-shadow: 0 0 12px rgba(99,102,241,0.5); }
+        50% { box-shadow: 0 0 20px rgba(99,102,241,0.8); }
+    }
+    section[data-testid="stSidebar"] .sb-active .stButton > button:hover {
+        background: linear-gradient(90deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10)) !important;
+        transform: translateX(2px) !important;
     }
 
-    /* ── UTILITY buttons (language) ── */
+    /* ── NAV ITEM WRAPPER ── */
+    .sb-nav-item { padding: 1px 10px; }
+
+    /* ──────────────────────────────────────────────────────────────
+       UTILITY BUTTONS (language, etc.)
+    ────────────────────────────────────────────────────────────── */
     section[data-testid="stSidebar"] .sb-util .stButton > button {
-        background    : #F9FAFB !important;
-        border        : 1px solid #E5E7EB !important;
-        border-radius : 8px !important;
-        color         : #4B5563 !important;
-        font-size     : 0.80rem !important;
-        font-weight   : 500 !important;
-        padding       : 8px 12px !important;
+        background: rgba(255,255,255,0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid var(--sb-border) !important;
+        border-radius: var(--sb-radius) !important;
+        color: var(--sb-text-muted) !important;
+        font-size: 0.82rem !important;
+        font-weight: 600 !important;
         justify-content: center !important;
-        text-align    : center !important;
-        min-height    : 36px !important;
-        height        : 36px !important;
+        text-align: center !important;
+        min-height: 40px !important;
+        height: 40px !important;
+        box-shadow: var(--sb-shadow-sm) !important;
     }
     section[data-testid="stSidebar"] .sb-util .stButton > button:hover {
-        background  : #F3F4F6 !important;
-        border-color: #D1D5DB !important;
-        color       : #111827 !important;
+        background: rgba(255,255,255,0.95) !important;
+        border-color: var(--sb-primary) !important;
+        color: var(--sb-primary-dark) !important;
+        box-shadow: 0 4px 12px rgba(99,102,241,0.15) !important;
+        transform: translateY(-1px) !important;
     }
 
-    /* ── LOGOUT button ── */
+    /* ──────────────────────────────────────────────────────────────
+       LOGOUT BUTTON — Elegant danger style
+    ────────────────────────────────────────────────────────────── */
     section[data-testid="stSidebar"] .sb-logout .stButton > button {
-        background    : #FFFFFF !important;
-        border        : 1px solid #FECACA !important;
-        border-radius : 8px !important;
-        color         : #DC2626 !important;
-        font-weight   : 600 !important;
+        background: rgba(255,255,255,0.7) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid rgba(239,68,68,0.2) !important;
+        border-radius: var(--sb-radius) !important;
+        color: var(--sb-danger) !important;
+        font-weight: 600 !important;
         justify-content: center !important;
-        text-align    : center !important;
-        padding       : 8px 12px !important;
-        font-size     : 0.82rem !important;
-        min-height    : 36px !important;
-        height        : 36px !important;
+        text-align: center !important;
+        font-size: 0.84rem !important;
+        min-height: 40px !important;
+        height: 40px !important;
+        box-shadow: 0 1px 3px rgba(239,68,68,0.04) !important;
     }
     section[data-testid="stSidebar"] .sb-logout .stButton > button:hover {
-        background : #FEF2F2 !important;
-        color      : #B91C1C !important;
+        background: linear-gradient(135deg, #FEF2F2, #FEE2E2) !important;
+        color: #B91C1C !important;
         border-color: #FCA5A5 !important;
+        box-shadow: 0 6px 16px rgba(239,68,68,0.18) !important;
+        transform: translateY(-1px) !important;
     }
 
-    /* ── LOGIN action buttons ── */
+    /* ──────────────────────────────────────────────────────────────
+       LOGIN BUTTONS
+    ────────────────────────────────────────────────────────────── */
     section[data-testid="stSidebar"] .sb-login .stButton > button {
-        background    : #FFFFFF !important;
-        border        : 1px solid #E5E7EB !important;
-        border-radius : 8px !important;
-        color         : #374151 !important;
-        font-weight   : 600 !important;
+        background: rgba(255,255,255,0.8) !important;
+        backdrop-filter: blur(10px) !important;
+        border: 1px solid var(--sb-border) !important;
+        border-radius: 11px !important;
+        color: var(--sb-text) !important;
+        font-weight: 600 !important;
         justify-content: center !important;
-        text-align    : center !important;
-        padding       : 9px 10px !important;
-        font-size     : 0.80rem !important;
-        min-height    : 38px !important;
+        text-align: center !important;
+        font-size: 0.83rem !important;
+        min-height: 44px !important;
+        height: 44px !important;
+        box-shadow: var(--sb-shadow-sm) !important;
     }
     section[data-testid="stSidebar"] .sb-login .stButton > button:hover {
-        background  : #F9FAFB !important;
-        border-color: #6366F1 !important;
-        color       : #4338CA !important;
-        box-shadow  : 0 2px 8px rgba(99,102,241,0.10) !important;
+        background: rgba(255,255,255,1) !important;
+        border-color: var(--sb-primary) !important;
+        color: var(--sb-primary-dark) !important;
+        box-shadow: 0 8px 20px rgba(99,102,241,0.18) !important;
+        transform: translateY(-2px) !important;
     }
     section[data-testid="stSidebar"] .sb-login-primary .stButton > button {
-        background    : linear-gradient(135deg, #6366F1, #8B5CF6) !important;
-        border        : 1px solid transparent !important;
-        color         : #FFFFFF !important;
-        box-shadow    : 0 2px 8px rgba(99,102,241,0.25) !important;
+        background: var(--sb-grad-primary) !important;
+        background-size: 200% 200% !important;
+        border: 1px solid transparent !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 6px 16px rgba(99,102,241,0.35),
+                    inset 0 1px 0 rgba(255,255,255,0.2) !important;
     }
     section[data-testid="stSidebar"] .sb-login-primary .stButton > button:hover {
-        box-shadow  : 0 4px 14px rgba(99,102,241,0.40) !important;
-        color       : #FFFFFF !important;
-        transform   : translateY(-1px) !important;
+        background-position: 100% 50% !important;
+        color: #FFFFFF !important;
+        box-shadow: 0 12px 28px rgba(99,102,241,0.5),
+                    inset 0 1px 0 rgba(255,255,255,0.3) !important;
+        transform: translateY(-2px) !important;
     }
 
-    /* ── Expander in sidebar ── */
+    /* ──────────────────────────────────────────────────────────────
+       EXPANDER (admin groups)
+    ────────────────────────────────────────────────────────────── */
     section[data-testid="stSidebar"] .streamlit-expanderHeader,
     section[data-testid="stSidebar"] details summary {
-        background    : transparent !important;
-        border        : none !important;
-        font-size     : 0.68rem !important;
-        font-weight   : 700 !important;
+        background: transparent !important;
+        border: none !important;
+        font-size: 0.68rem !important;
+        font-weight: 800 !important;
         text-transform: uppercase !important;
-        letter-spacing: 0.08em !important;
-        color         : #9CA3AF !important;
-        padding       : 8px 12px !important;
-        border-radius : 6px !important;
-        transition    : color 0.15s ease !important;
+        letter-spacing: 0.12em !important;
+        color: var(--sb-text-subtle) !important;
+        padding: 12px 16px !important;
+        border-radius: 8px !important;
+        transition: all 0.2s var(--sb-ease) !important;
+        margin: 4px 10px !important;
     }
     section[data-testid="stSidebar"] .streamlit-expanderHeader:hover,
     section[data-testid="stSidebar"] details summary:hover {
-        color: #6366F1 !important;
-        background: #F9FAFB !important;
-    }
-    section[data-testid="stSidebar"] .streamlit-expanderContent {
-        background : transparent !important;
-        border     : none !important;
-        padding    : 2px 0 6px !important;
+        color: var(--sb-primary) !important;
+        background: rgba(99,102,241,0.05) !important;
     }
     section[data-testid="stSidebar"] [data-testid="stExpander"] {
         border: none !important;
@@ -420,257 +724,233 @@ def render_sidebar():
         box-shadow: none !important;
     }
 
-    /* ── Section label ── */
-    .sb-section-label {
-        font-size     : 0.66rem;
-        font-weight   : 700;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        color         : #9CA3AF;
-        padding       : 14px 16px 6px;
+    /* ──────────────────────────────────────────────────────────────
+       WELCOME CARD (logged-out)
+    ────────────────────────────────────────────────────────────── */
+    .sb-welcome {
+        margin: 14px 12px 16px;
+        padding: 22px 18px;
+        background: linear-gradient(135deg,
+                    rgba(99,102,241,0.06) 0%,
+                    rgba(139,92,246,0.04) 50%,
+                    rgba(6,182,212,0.05) 100%);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(99,102,241,0.15);
+        border-radius: 16px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(99,102,241,0.08);
     }
-
-    /* ═══════════════════════════════════════════════════════════
-       LOGO BLOCK — Clean header
-    ═══════════════════════════════════════════════════════════ */
-    .sb-logo {
-        padding         : 18px 16px 16px;
-        display         : flex;
-        align-items     : center;
-        gap             : 11px;
-        border-bottom   : 1px solid #F1F3F8;
+    .sb-welcome::before {
+        content: '';
+        position: absolute;
+        top: -60%;
+        right: -30%;
+        width: 180px;
+        height: 180px;
+        background: radial-gradient(circle, rgba(139,92,246,0.18), transparent 70%);
+        border-radius: 50%;
+        animation: float-orb 8s ease-in-out infinite;
     }
-    .sb-logo-icon {
-        width           : 38px;
-        height          : 38px;
-        border-radius   : 10px;
-        background      : linear-gradient(135deg, #6366F1, #8B5CF6);
-        display         : flex;
-        align-items     : center;
-        justify-content : center;
-        font-size       : 1.15rem;
-        flex-shrink     : 0;
-        box-shadow      : 0 4px 12px rgba(99,102,241,0.30),
-                          inset 0 1px 0 rgba(255,255,255,0.2);
+    .sb-welcome::after {
+        content: '';
+        position: absolute;
+        bottom: -50%;
+        left: -20%;
+        width: 140px;
+        height: 140px;
+        background: radial-gradient(circle, rgba(6,182,212,0.15), transparent 70%);
+        border-radius: 50%;
+        animation: float-orb 10s ease-in-out infinite reverse;
     }
-    .sb-logo-text { flex: 1; min-width: 0; }
-    .sb-logo-title {
-        font-family  : 'Inter','DM Sans',sans-serif;
-        font-size    : 0.95rem;
-        font-weight  : 700;
-        color        : #111827;
-        letter-spacing: -0.02em;
-        white-space  : nowrap;
-        line-height  : 1.2;
+    @keyframes float-orb {
+        0%, 100% { transform: translate(0, 0) scale(1); }
+        50% { transform: translate(10px, -10px) scale(1.1); }
     }
-    .sb-logo-sub {
-        font-size  : 0.68rem;
-        color      : #9CA3AF;
-        margin-top : 2px;
-        font-weight: 500;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       PROFILE CARD — Compact & clean
-    ═══════════════════════════════════════════════════════════ */
-    .sb-profile {
-        margin      : 12px 12px 8px;
-        padding     : 10px 12px;
-        background  : #F9FAFB;
-        border      : 1px solid #EEF0F5;
-        border-radius: 10px;
-        transition  : all 0.2s ease;
-    }
-    .sb-profile:hover {
-        background  : #F3F4F6;
-        border-color: #E5E7EB;
-    }
-    .sb-profile-inner {
-        display    : flex;
-        align-items: center;
-        gap        : 10px;
-    }
-    .sb-profile-avatar {
-        width           : 36px;
-        height          : 36px;
-        border-radius   : 9px;
-        background      : linear-gradient(135deg, #6366F1, #8B5CF6);
-        display         : flex;
-        align-items     : center;
-        justify-content : center;
-        font-size       : 0.85rem;
-        flex-shrink     : 0;
-        color           : #fff;
-        font-weight     : 700;
-        box-shadow      : 0 2px 6px rgba(99,102,241,0.25);
-        letter-spacing  : -0.02em;
-    }
-    .sb-profile-info { flex: 1; min-width: 0; }
-    .sb-profile-name {
-        font-size  : 0.82rem;
-        font-weight: 600;
-        color      : #111827;
-        white-space: nowrap;
-        overflow   : hidden;
-        text-overflow: ellipsis;
-        letter-spacing: -0.01em;
-        line-height: 1.3;
-    }
-    .sb-profile-sub {
-        font-size  : 0.70rem;
-        color      : #6B7280;
-        margin-top : 2px;
-        white-space: nowrap;
-        overflow   : hidden;
-        text-overflow: ellipsis;
-        font-weight: 500;
-        display    : flex;
-        align-items: center;
-        gap        : 4px;
-    }
-    .sb-profile-status {
+    .sb-welcome-icon {
+        font-size: 2rem;
         display: inline-block;
+        margin-bottom: 8px;
+        animation: wave 2.5s ease-in-out infinite;
+        transform-origin: 70% 70%;
+        position: relative;
+        z-index: 1;
+    }
+    @keyframes wave {
+        0%, 100% { transform: rotate(0deg); }
+        20% { transform: rotate(14deg); }
+        40% { transform: rotate(-8deg); }
+        60% { transform: rotate(10deg); }
+        80% { transform: rotate(-4deg); }
+    }
+    .sb-welcome-text {
+        font-family: 'Plus Jakarta Sans', sans-serif !important;
+        font-weight: 800;
+        background: var(--sb-grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        font-size: 1rem;
+        display: block;
+        margin-bottom: 6px;
+        letter-spacing: -0.02em;
+        position: relative;
+        z-index: 1;
+    }
+    .sb-welcome-sub {
+        font-size: 0.76rem;
+        color: var(--sb-text-muted);
+        line-height: 1.5;
+        font-weight: 500;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       DIVIDER
+    ────────────────────────────────────────────────────────────── */
+    .sb-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, var(--sb-border), transparent);
+        margin: 14px 18px;
+    }
+
+    /* ──────────────────────────────────────────────────────────────
+       FOOTER
+    ────────────────────────────────────────────────────────────── */
+    .sb-footer {
+        padding: 16px 18px 20px;
+        font-size: 0.68rem;
+        color: var(--sb-text-subtle);
+        text-align: center;
+        line-height: 1.7;
+        border-top: 1px solid var(--sb-border);
+        margin-top: 14px;
+        font-weight: 500;
+        background: linear-gradient(180deg, transparent, rgba(255,255,255,0.5));
+    }
+    .sb-footer strong {
+        color: var(--sb-text);
+        font-weight: 700;
+        background: var(--sb-grad-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    .sb-footer-version {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08));
+        color: var(--sb-primary-dark);
+        font-size: 0.62rem;
+        font-weight: 700;
+        padding: 4px 10px;
+        border-radius: 20px;
+        margin-bottom: 8px;
+        letter-spacing: 0.03em;
+        border: 1px solid rgba(99,102,241,0.15);
+    }
+    .sb-footer-version::before {
+        content: '';
         width: 6px;
         height: 6px;
         border-radius: 50%;
-        background: #10B981;
-        box-shadow: 0 0 0 2px rgba(16,185,129,0.20);
-        flex-shrink: 0;
+        background: var(--sb-success);
+        box-shadow: 0 0 6px rgba(16,185,129,0.6);
     }
-
-    /* Role badge variants */
-    .sb-role-citizen { background: #EEF2FF; color: #4338CA; border-color: #E0E7FF; }
-    .sb-role-official { background: #ECFDF5; color: #047857; border-color: #A7F3D0; }
-    .sb-role-admin { background: #FEF3C7; color: #B45309; border-color: #FDE68A; }
-
-    /* ── Nav item wrapper ── */
-    .sb-nav-item {
-        padding: 1px 8px;
-    }
-
-    /* ── Badge in nav button ── */
-    .sb-nav-badge {
+    .sb-footer-heart {
         display: inline-block;
-        background: #EF4444;
-        color: #FFFFFF;
-        font-size: 0.65rem;
-        font-weight: 700;
-        padding: 2px 6px;
-        border-radius: 10px;
-        margin-left: auto;
-        min-width: 18px;
-        text-align: center;
-        line-height: 1.3;
+        animation: heartbeat 1.5s ease-in-out infinite;
+        color: #EF4444;
+    }
+    @keyframes heartbeat {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.2); }
     }
 
-    /* ── Divider ── */
-    .sb-divider {
-        height     : 1px;
-        background : #F1F3F8;
-        margin     : 10px 16px;
-    }
+    /* ──────────────────────────────────────────────────────────────
+       BOTTOM CONTROLS
+    ────────────────────────────────────────────────────────────── */
+    .sb-bottom { padding: 0 12px; }
 
-    /* ── Welcome card (logged-out) ── */
-    .sb-welcome {
-        margin      : 8px 12px 12px;
-        padding     : 16px 14px;
-        background  : linear-gradient(135deg, #F8FAFF 0%, #F5F3FF 100%);
-        border      : 1px solid #E0E7FF;
-        border-radius: 12px;
-        text-align  : center;
-    }
-    .sb-welcome-icon {
-        font-size: 1.6rem;
-        display: block;
-        margin-bottom: 4px;
-    }
-    .sb-welcome-text {
-        font-weight: 700;
-        color: #4338CA;
-        font-size: 0.86rem;
-        display: block;
-        margin-bottom: 2px;
-    }
-    .sb-welcome-sub {
-        font-size: 0.74rem;
-        color: #6B7280;
-        line-height: 1.4;
-    }
-
-    /* ── Footer ── */
-    .sb-footer {
-        padding    : 14px 16px 18px;
-        font-size  : 0.64rem;
-        color      : #9CA3AF;
-        text-align : center;
-        line-height: 1.7;
-        border-top : 1px solid #F1F3F8;
-        margin-top : 12px;
-        font-weight: 500;
-    }
-    .sb-footer strong {
-        color: #4B5563;
-        font-weight: 600;
-    }
-    .sb-footer-version {
-        display: inline-block;
-        background: #F3F4F6;
-        color: #6B7280;
-        font-size: 0.60rem;
-        font-weight: 600;
-        padding: 2px 7px;
-        border-radius: 10px;
-        margin-bottom: 4px;
-    }
-
-    /* ── Bottom controls wrapper ── */
-    .sb-bottom {
-        padding: 0 12px;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
+    /* ──────────────────────────────────────────────────────────────
        RESPONSIVE
-    ═══════════════════════════════════════════════════════════ */
+    ────────────────────────────────────────────────────────────── */
     @media (max-width: 768px) {
         section[data-testid="stSidebar"] {
-            min-width: 250px !important;
-            max-width: 270px !important;
+            min-width: 260px !important;
+            max-width: 280px !important;
         }
+        .sb-logo { padding: 18px 14px 14px; }
+        .sb-logo-icon { width: 38px; height: 38px; font-size: 1.15rem; }
+        .sb-logo-title { font-size: 0.95rem; }
     }
+
+    /* ──────────────────────────────────────────────────────────────
+       ENTRANCE ANIMATION
+    ────────────────────────────────────────────────────────────── */
+    @keyframes fade-slide-in {
+        from { opacity: 0; transform: translateX(-8px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    .sb-nav-item, .sb-profile, .sb-welcome, .sb-logo {
+        animation: fade-slide-in 0.4s var(--sb-ease) backwards;
+    }
+    .sb-nav-item:nth-child(1) { animation-delay: 0.05s; }
+    .sb-nav-item:nth-child(2) { animation-delay: 0.10s; }
+    .sb-nav-item:nth-child(3) { animation-delay: 0.15s; }
+    .sb-nav-item:nth-child(4) { animation-delay: 0.20s; }
+    .sb-nav-item:nth-child(5) { animation-delay: 0.25s; }
+    .sb-nav-item:nth-child(6) { animation-delay: 0.30s; }
     </style>
     """, unsafe_allow_html=True)
 
-    role = st.session_state.role
-    lang = st.session_state.language
+    # ═══════════════════════════════════════════════════════════════════════
+    # SESSION STATE
+    # ═══════════════════════════════════════════════════════════════════════
+    role = st.session_state.get("role")
+    lang = st.session_state.get("language", "en")
 
-    def _(key): return t(key)
+    def _(key):
+        try:
+            return t(key)
+        except Exception:
+            return key.replace("_", " ").title()
 
-    # ── Unread count ─────────────────────────────────────────────────────────
+    # ── Unread notification count ──
     unread_count = 0
     if role == "user":
-        uid = (st.session_state.user or {}).get("user_id")
+        uid = (st.session_state.get("user") or {}).get("user_id")
         if uid:
-            notifs = api("get", f"/schemes/user/notifications/{uid}")
-            if isinstance(notifs, list):
-                unread_count = sum(1 for n in notifs if not n.get("is_read"))
+            try:
+                notifs = api("get", f"/schemes/user/notifications/{uid}")
+                if isinstance(notifs, list):
+                    unread_count = sum(1 for n in notifs if not n.get("is_read"))
+            except Exception:
+                pass
 
+    # ═══════════════════════════════════════════════════════════════════════
+    # SIDEBAR RENDER
+    # ═══════════════════════════════════════════════════════════════════════
     with st.sidebar:
 
-        # ── Logo ────────────────────────────────────────────────────────────
+        # ── LOGO ──
         st.markdown("""
         <div class="sb-logo">
             <div class="sb-logo-icon">🏛️</div>
             <div class="sb-logo-text">
                 <div class="sb-logo-title">Jan Seva Portal</div>
-                <div class="sb-logo-sub">जन सेवा पोर्टल</div>
+                <div class="sb-logo-sub">जन सेवा • Citizen Services</div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # ── Profile card ─────────────────────────────────────────────────────
+        # ── PROFILE CARD ──
         if role == "user":
-            u     = st.session_state.user or {}
-            name  = u.get("name", "Citizen")
+            u = st.session_state.get("user") or {}
+            name = u.get("name", "Citizen")
             phone = u.get("phone", "")
             inits = "".join(p[0].upper() for p in name.split()[:2]) or "U"
             st.markdown(f"""
@@ -681,7 +961,8 @@ def render_sidebar():
                         <div class="sb-profile-name">{name}</div>
                         <div class="sb-profile-sub">
                             <span class="sb-profile-status"></span>
-                            {phone or "Citizen Account"}
+                            <span>{phone or "Citizen"}</span>
+                            <span class="sb-role-badge">User</span>
                         </div>
                     </div>
                 </div>
@@ -689,19 +970,20 @@ def render_sidebar():
             """, unsafe_allow_html=True)
 
         elif role == "official":
-            o    = st.session_state.official or {}
+            o = st.session_state.get("official") or {}
             name = o.get("name", "Official")
             dept = o.get("department", "Department")
             inits = "".join(p[0].upper() for p in name.split()[:2]) or "O"
             st.markdown(f"""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar" style="background:linear-gradient(135deg,#10B981,#059669);box-shadow:0 2px 6px rgba(16,185,129,0.25);">{inits}</div>
+                    <div class="sb-profile-avatar" style="background:linear-gradient(135deg,#10B981,#059669,#06B6D4);">{inits}</div>
                     <div class="sb-profile-info">
                         <div class="sb-profile-name">{name}</div>
                         <div class="sb-profile-sub">
                             <span class="sb-profile-status"></span>
-                            {dept}
+                            <span>{dept}</span>
+                            <span class="sb-role-badge" style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.10));color:#047857;border-color:rgba(16,185,129,0.2);">Officer</span>
                         </div>
                     </div>
                 </div>
@@ -712,22 +994,22 @@ def render_sidebar():
             st.markdown("""
             <div class="sb-profile">
                 <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar" style="background:linear-gradient(135deg,#F59E0B,#D97706);box-shadow:0 2px 6px rgba(245,158,11,0.25);">👑</div>
+                    <div class="sb-profile-avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444,#EC4899);">👑</div>
                     <div class="sb-profile-info">
                         <div class="sb-profile-name">System Admin</div>
                         <div class="sb-profile-sub">
                             <span class="sb-profile-status"></span>
-                            Administrator
+                            <span>Super User</span>
+                            <span class="sb-role-badge" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.10));color:#B45309;border-color:rgba(245,158,11,0.25);">Admin</span>
                         </div>
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
 
-        # ── Helper: render one nav button ────────────────────────────────────
+        # ── HELPER: Navigation button ──
         def _nav_btn(icon: str, label: str, screen: str, badge: str = ""):
-            is_active = st.session_state.screen == screen
-            # Use a thin space character for better alignment
+            is_active = st.session_state.get("screen") == screen
             full_label = f"{icon}   {label}"
             if badge:
                 full_label += f"   • {badge}"
@@ -738,109 +1020,108 @@ def render_sidebar():
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # ════════════════════════════════════════════════════════════════════
-        # USER NAV
-        # ════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
+        # USER NAVIGATION
+        # ═══════════════════════════════════════════════════════════════════
         if role == "user":
-            st.markdown('<div class="sb-section-label">Menu</div>',
-                        unsafe_allow_html=True)
-
+            st.markdown('<div class="sb-section-label">Workspace</div>', unsafe_allow_html=True)
             _nav_btn("🏠", _("dashboard"),        "user_dashboard")
-            _nav_btn("📢", _("file_complaint"),    "file_complaint")
-            _nav_btn("🔍", _("track_complaint"),   "tracking")
-            _nav_btn("📜", _("govt_schemes"),      "schemes")
-            _nav_btn("🤖", _("ai_assistant"),      "assistant")
+            _nav_btn("📢", _("file_complaint"),   "file_complaint")
+            _nav_btn("🔍", _("track_complaint"),  "tracking")
 
-            # Notifications — with live badge
+            st.markdown('<div class="sb-section-label">Services</div>', unsafe_allow_html=True)
+            _nav_btn("📜", _("govt_schemes"),     "schemes")
+            _nav_btn("🤖", _("ai_assistant"),     "assistant")
             notif_badge = f"{unread_count}" if unread_count else ""
-            _nav_btn("🔔", _("notifications"),     "notifications", badge=notif_badge)
+            _nav_btn("🔔", _("notifications"),    "notifications", badge=notif_badge)
 
-        # ════════════════════════════════════════════════════════════════════
-        # OFFICIAL NAV
-        # ════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
+        # OFFICIAL NAVIGATION
+        # ═══════════════════════════════════════════════════════════════════
         elif role == "official":
-            st.markdown('<div class="sb-section-label">Menu</div>',
-                        unsafe_allow_html=True)
+            st.markdown('<div class="sb-section-label">Workspace</div>', unsafe_allow_html=True)
+            _nav_btn("📊", _("dashboard"),       "official_dashboard")
+            _nav_btn("📋", _("complaints"),      "official_complaints")
 
-            _nav_btn("📊", _("dashboard"),     "official_dashboard")
-            _nav_btn("📋", _("complaints"),    "official_complaints")
-            _nav_btn("🏆", _("leaderboard"),   "official_leaderboard")
-            _nav_btn("📜", _("govt_schemes"),  "schemes")
+            st.markdown('<div class="sb-section-label">Insights</div>', unsafe_allow_html=True)
+            _nav_btn("🏆", _("leaderboard"),     "official_leaderboard")
+            _nav_btn("📜", _("govt_schemes"),    "schemes")
 
-        # ════════════════════════════════════════════════════════════════════
-        # ADMIN NAV
-        # ════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
+        # ADMIN NAVIGATION
+        # ═══════════════════════════════════════════════════════════════════
         elif role == "admin":
-
             def _admin_group(group_label: str, items: list, expanded: bool = False):
                 with st.expander(group_label, expanded=expanded):
                     for icon, label, screen in items:
                         _nav_btn(icon, label, screen)
 
-            _admin_group("Overview", [
-                ("📊", _("dashboard"),       "admin_dashboard"),
-                ("🏢", _("departments"),     "admin_departments"),
-                ("👥", _("officials"),       "admin_officials"),
-                ("📢", _("all_complaints"),  "admin_complaints"),
+            _admin_group("⚡  Overview", [
+                ("📊", _("dashboard"),      "admin_dashboard"),
+                ("🏢", _("departments"),    "admin_departments"),
+                ("👥", _("officials"),      "admin_officials"),
+                ("📢", _("all_complaints"), "admin_complaints"),
             ], expanded=True)
 
-            _admin_group("Performance", [
-                ("🏆", _("leaderboard"),  "admin_leaderboard"),
-                ("🔮", "Predictive AI",   "predictive_analytics"),
-                ("⏱️", "SLA Tracking",    "sla_management"),
+            _admin_group("🚀  Performance", [
+                ("🏆", _("leaderboard"),   "admin_leaderboard"),
+                ("🔮", "Predictive AI",    "predictive_analytics"),
+                ("⏱️", "SLA Tracking",     "sla_management"),
             ])
 
-            _admin_group("City Analytics", [
+            _admin_group("🌆  City Analytics", [
                 ("🏙️", "City Health Score", "city_health_score"),
             ])
 
-            _admin_group("Live Monitoring", [
+            _admin_group("📡  Live Monitoring", [
                 ("📈", "Live Dashboard", "live_dashboard"),
             ])
 
-            _admin_group("Content", [
+            _admin_group("📦  Content", [
                 ("📜", _("schemes"),  "admin_schemes"),
                 ("🗺️", "Heatmap",    "admin_heatmap"),
             ])
 
-        # ════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
         # LOGGED-OUT STATE
-        # ════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
         else:
             st.markdown("""
             <div class="sb-welcome">
                 <span class="sb-welcome-icon">👋</span>
-                <span class="sb-welcome-text">Welcome!</span>
-                <span class="sb-welcome-sub">Sign in to access your account</span>
+                <span class="sb-welcome-text">Welcome Back!</span>
+                <span class="sb-welcome-sub">Sign in to access your<br>citizen services dashboard</span>
             </div>
             """, unsafe_allow_html=True)
 
-            st.markdown('<div class="sb-section-label">Sign In As</div>',
-                        unsafe_allow_html=True)
+            st.markdown('<div class="sb-section-label">Sign In As</div>', unsafe_allow_html=True)
 
             c1, c2 = st.columns(2)
             with c1:
                 st.markdown('<div class="sb-nav-item sb-login sb-login-primary">', unsafe_allow_html=True)
-                if st.button("👤 Citizen",  key="login_citizen",  use_container_width=True):
-                    st.session_state.screen = "user_login"; st.rerun()
+                if st.button("👤 Citizen", key="login_citizen", use_container_width=True):
+                    st.session_state.screen = "user_login"
+                    st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
             with c2:
                 st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
-                if st.button("🏢 Official", key="login_official", use_container_width=True):
-                    st.session_state.screen = "official_login"; st.rerun()
+                if st.button("🏢 Officer", key="login_official", use_container_width=True):
+                    st.session_state.screen = "official_login"
+                    st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
+            st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
             st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
-            if st.button("👑 Admin", key="login_admin", use_container_width=True):
-                st.session_state.screen = "admin_login"; st.rerun()
+            if st.button("👑 Administrator", key="login_admin", use_container_width=True):
+                st.session_state.screen = "admin_login"
+                st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # ════════════════════════════════════════════════════════════════════
-        # BOTTOM CONTROLS  (language + logout)
-        # ════════════════════════════════════════════════════════════════════
+        # ═══════════════════════════════════════════════════════════════════
+        # BOTTOM CONTROLS — Language + Logout
+        # ═══════════════════════════════════════════════════════════════════
         st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
 
-        # Language toggle
         lang_label = "🌐  हिंदी" if lang == "en" else "🌐  English"
         st.markdown('<div class="sb-util sb-bottom">', unsafe_allow_html=True)
         if st.button(lang_label, key="sb_lang", use_container_width=True):
@@ -848,20 +1129,24 @@ def render_sidebar():
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
 
-        # Logout
         if role:
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
             st.markdown('<div class="sb-logout sb-bottom">', unsafe_allow_html=True)
             if st.button("🚪  Sign Out", key="sb_logout", use_container_width=True):
-                logout()
+                try:
+                    logout()
+                except Exception:
+                    for k in ["role", "user", "official", "screen"]:
+                        st.session_state.pop(k, None)
+                    st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
 
-        # Footer
+        # ── FOOTER ──
         st.markdown("""
         <div class="sb-footer">
-            <span class="sb-footer-version">v2.0</span><br>
+            <span class="sb-footer-version">v2.0 • Live</span><br>
             <strong>Jan Seva Portal</strong><br>
-            Made with ❤️ in 🇮🇳
+            Made with <span class="sb-footer-heart">❤</span> in 🇮🇳
         </div>
         """, unsafe_allow_html=True)
 
@@ -1473,1073 +1758,944 @@ def pg_language():
     """, height=0)
 
 
-def pg_login_type():
-    dark  = st.session_state.get("dark_mode", False)
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-
-    _CARD = "#12121A" if dark else "#FFFFFF"
-    _BOR  = "#1E293B" if dark else "#E2E8F0"
-    _TXT  = "#F8FAFC" if dark else "#0F172A"
-    _SUB  = "#94A3B8" if dark else "#64748B"
-    _A1   = "#0EA5E9"
-    _A2   = "#06B6D4"
-
-    st.markdown(f"""
-<style>
-.lt-wrap{{max-width:860px;margin:0 auto;padding:2rem 1rem;}}
-.lt-logo{{text-align:center;margin-bottom:2rem;}}
-.lt-logo-icon{{font-size:4rem;display:block;margin-bottom:12px;}}
-.lt-logo-title{{font-family:'Sora',sans-serif;font-size:2rem;font-weight:800;
-    color:{_TXT};margin-bottom:6px;}}
-.lt-logo-sub{{font-size:0.88rem;color:{_SUB};font-weight:500;}}
-.lt-role-card{{
-    background:{_CARD};border:1.5px solid {_BOR};border-radius:22px;
-    padding:28px 20px 22px;text-align:center;
-    box-shadow:0 4px 16px rgba(15,23,42,0.07);
-    transition:transform 0.20s,box-shadow 0.20s,border-color 0.20s;
-    margin-bottom:6px;position:relative;overflow:hidden;
-}}
-.lt-role-card::before{{content:'';position:absolute;top:0;left:0;right:0;
-    height:4px;border-radius:22px 22px 0 0;}}
-.lt-role-card.citizen::before{{background:linear-gradient(90deg,#0EA5E9,#06B6D4);}}
-.lt-role-card.official::before{{background:linear-gradient(90deg,#10B981,#059669);}}
-.lt-role-card.admin::before{{background:linear-gradient(90deg,#F59E0B,#EF4444);}}
-.lt-role-card:hover{{transform:translateY(-4px);box-shadow:0 16px 40px rgba(14,165,233,0.15);}}
-.lt-role-icon{{font-size:3rem;display:block;margin-bottom:12px;}}
-.lt-role-title{{font-family:'Sora',sans-serif;font-size:1.05rem;font-weight:800;
-    color:{_TXT};margin-bottom:5px;}}
-.lt-role-sub{{font-size:0.76rem;color:{_SUB};line-height:1.5;margin-bottom:16px;}}
-.lt-demo-box{{
-    background:{"rgba(99,102,241,0.06)" if dark else "#F8FAFF"};
-    border:1px solid {"rgba(99,102,241,0.18)" if dark else "#C7D2FE"};
-    border-radius:14px;padding:14px 18px;max-width:480px;margin:0 auto 24px;
-    text-align:left;
-}}
-.lt-demo-title{{font-size:0.72rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.08em;color:{_A1};margin-bottom:8px;}}
-.lt-demo-row{{font-size:0.78rem;color:{_SUB};margin-bottom:4px;line-height:1.5;}}
-.lt-demo-row strong{{color:{_TXT};}}
-</style>
-<div class="lt-wrap">
-    <div class="lt-logo">
-        <span class="lt-logo-icon">🏛️</span>
-        <div class="lt-logo-title">Jan Seva Portal</div>
-        <div class="lt-logo-sub">Choose your role to continue</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-    r1, r2, r3 = st.columns(3, gap="medium")
-
-    with r1:
-        st.markdown("""
-<div class="lt-role-card citizen">
-    <span class="lt-role-icon">👤</span>
-    <div class="lt-role-title">Citizen</div>
-    <div class="lt-role-sub">File complaints, track status,<br>access government schemes</div>
-</div>""", unsafe_allow_html=True)
-        if st.button("Login as Citizen", key="citizen_role_btn", use_container_width=True):
-            st.session_state.screen = "user_login"; st.rerun()
-
-    with r2:
-        st.markdown("""
-<div class="lt-role-card official">
-    <span class="lt-role-icon">🏢</span>
-    <div class="lt-role-title">Official</div>
-    <div class="lt-role-sub">Manage & resolve complaints<br>for your department</div>
-</div>""", unsafe_allow_html=True)
-        if st.button("Login as Official", key="official_role_btn", use_container_width=True):
-            st.session_state.screen = "official_login"; st.rerun()
-
-    with r3:
-        st.markdown("""
-<div class="lt-role-card admin">
-    <span class="lt-role-icon">👑</span>
-    <div class="lt-role-title">Admin</div>
-    <div class="lt-role-sub">System management,<br>analytics & oversight</div>
-</div>""", unsafe_allow_html=True)
-        if st.button("Login as Admin", key="admin_role_btn", use_container_width=True):
-            st.session_state.screen = "admin_login"; st.rerun()
-
-    st.markdown("<br>", unsafe_allow_html=True)
-
-    bc1, bc2, bc3 = st.columns([1,2,1])
-    with bc2:
-        if st.button("← Change Language", key="lt_lang", use_container_width=True):
-            st.session_state.screen = "language"; st.rerun()
 
 
-
+import streamlit as st
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
-# CSS ENGINE
-# ═══════════════════════════════════════════════════════════════════════════════
-# ═══════════════════════════════════════════════════════════════════════════════
-# IMPROVED & MODERN CSS WITH RESPONSIVE BUTTONS
+# MASTER CSS — injected once per page
 # ═══════════════════════════════════════════════════════════════════════════════
 
 def _login_css(dark=False, accent="#6366F1", accent2="#8B5CF6"):
-    """Enhanced CSS with better button UX and responsive design"""
-    
-    if dark:
-        PAGE_BG   = "#05070F"
-        CARD_BG   = "rgba(13,18,36,0.72)"
-        CARD_BD   = "rgba(255,255,255,0.07)"
-        TXT       = "#EFF2FF"
-        SUB       = "#7C8FAC"
-        INP_BG    = "rgba(15,24,40,0.80)"
-        INP_BD    = "rgba(255,255,255,0.09)"
-        HOV       = "rgba(255,255,255,0.05)"
-        ORB1      = "rgba(99,102,241,0.18)"
-        ORB2      = "rgba(139,92,246,0.12)"
-        ORB3      = "rgba(14,165,233,0.10)"
-        SHADOW    = "0 32px 80px rgba(0,0,0,0.65),0 8px 24px rgba(0,0,0,0.40)"
-        BTN_SH    = f"0 4px 24px {accent}55"
-        BTN_BG_H  = f"rgba({int(accent[1:3],16)},{int(accent[3:5],16)},{int(accent[5:7],16)},0.15)"
-        green_bg  = "rgba(6,40,18,0.80)";  green_bd  = "#166534"; green_txt = "#4ADE80"
-        amber_bg  = "rgba(40,24,0,0.80)";  amber_bd  = "#92400E"; amber_txt = "#FCD34D"
-        blue_bg   = "rgba(4,9,40,0.80)";   blue_bd   = "#1E40AF"; blue_txt  = "#93C5FD"
-        red_bg    = "rgba(40,4,4,0.80)";   red_bd    = "#991B1B"; red_txt   = "#FCA5A5"
-    else:
-        PAGE_BG   = "#F0F4FF"
-        CARD_BG   = "rgba(255,255,255,0.70)"
-        CARD_BD   = "rgba(255,255,255,0.90)"
-        TXT       = "#0B1428"
-        SUB       = "#5A6A85"
-        INP_BG    = "rgba(240,244,251,0.90)"
-        INP_BD    = "rgba(11,20,40,0.10)"
-        HOV       = "rgba(79,70,229,0.05)"
-        ORB1      = "rgba(99,102,241,0.12)"
-        ORB2      = "rgba(139,92,246,0.08)"
-        ORB3      = "rgba(14,165,233,0.07)"
-        SHADOW    = "0 24px 64px rgba(11,20,40,0.14),0 4px 16px rgba(11,20,40,0.08)"
-        BTN_SH    = f"0 4px 20px {accent}40"
-        BTN_BG_H  = f"rgba({int(accent[1:3],16)},{int(accent[3:5],16)},{int(accent[5:7],16)},0.08)"
-        green_bg  = "rgba(240,253,244,0.90)"; green_bd  = "#86EFAC"; green_txt = "#166534"
-        amber_bg  = "rgba(255,251,235,0.90)"; amber_bd  = "#FDE68A"; amber_txt = "#92400E"
-        blue_bg   = "rgba(239,246,255,0.90)"; blue_bd   = "#BFDBFE"; blue_txt  = "#1E40AF"
-        red_bg    = "rgba(254,242,242,0.90)"; red_bd    = "#FECACA"; red_txt   = "#991B1B"
+    """
+    Full CSS engine for all auth pages.
+    dark param kept for API compatibility but light only.
+    accent / accent2 let each page tune the palette.
+    """
+    a   = accent
+    a2  = accent2
+
+    # Derive RGB channels for box-shadow tints
+    def _rgb(h):
+        h = h.lstrip("#")
+        return int(h[0:2],16), int(h[2:4],16), int(h[4:6],16)
+    ar, ag, ab   = _rgb(a)
+    a2r,a2g,a2b  = _rgb(a2)
 
     return f"""
 <style>
-/* ── FONTS ── */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap');
+/* ── GOOGLE FONTS ─────────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap');
 
-/* ══════════════════════════════════════════════════════════════
-   RESET — strip all Streamlit chrome
-══════════════════════════════════════════════════════════════ */
+/* ── RESET STREAMLIT ──────────────────────────────────────── */
 #MainMenu, footer, header, .stDeployButton,
 .viewerBadge_container__1QSob {{ display:none!important; }}
 
 html, body, .stApp {{
-    background:{PAGE_BG}!important;
-    font-family:'Outfit',system-ui,sans-serif!important;
+    background:#F0F2FF!important;
+    font-family:'Plus Jakarta Sans',system-ui,sans-serif!important;
     -webkit-font-smoothing:antialiased;
-    color:{TXT}!important;
+    min-height:100vh;
 }}
 
 .main .block-container {{
-    padding:2rem 1.25rem 4rem!important;
-    max-width:480px!important;
-    margin:0 auto!important;
+    padding:0!important;
+    max-width:100%!important;
+    margin:0!important;
 }}
 
-/* ══════════════════════════════════════════════════════════════
-   ANIMATED BACKGROUND ORBS
-═════════════════════════════��════════════════════════════════ */
-.lp-scene {{
-    position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden;
-}}
-.lp-orb {{
-    position:absolute;border-radius:50%;filter:blur(80px);
-    animation:lp-drift 12s ease-in-out infinite;
-}}
-.lp-orb-1 {{
-    width:520px;height:520px;
-    background:{ORB1};
-    top:-140px;left:-120px;
-    animation-duration:14s;
-}}
-.lp-orb-2 {{
-    width:380px;height:380px;
-    background:{ORB2};
-    bottom:-80px;right:-80px;
-    animation-duration:18s;animation-delay:-6s;
-}}
-.lp-orb-3 {{
-    width:280px;height:280px;
-    background:{ORB3};
-    top:40%;left:60%;
-    animation-duration:10s;animation-delay:-3s;
-}}
-@keyframes lp-drift {{
-    0%,100%  {{ transform:translate(0,0) scale(1); }}
-    33%      {{ transform:translate(40px,-30px) scale(1.06); }}
-    66%      {{ transform:translate(-20px,40px) scale(0.96); }}
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   TOP GRADIENT STRIPE
-══════════════════════════════════════════════════════════════ */
-.stApp::before {{
-    content:'';display:block;position:fixed;top:0;left:0;right:0;height:2px;
-    background:linear-gradient(90deg,{accent},{accent2},#22D3EE,{accent});
-    background-size:200% 100%;
-    animation:lp-stripe 5s ease infinite;
-    z-index:9999;pointer-events:none;
-}}
-@keyframes lp-stripe {{
-    0%,100%{{background-position:0% 50%;}}50%{{background-position:100% 50%;}}
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   HERO
-══════════════════════════════════════════════════════════════ */
-.lp-hero {{
-    width:100%;border-radius:28px;
-    padding:2.5rem 2rem 2.2rem;text-align:center;
-    position:relative;overflow:hidden;
-    margin-bottom:1.25rem;z-index:1;
-    backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-    border:1px solid rgba(255,255,255,0.14);
-    box-shadow:{SHADOW};
-}}
-.lp-hero::before {{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(135deg,
-        rgba(255,255,255,0.12) 0%,
-        rgba(255,255,255,0.04) 50%,
-        rgba(255,255,255,0.08) 100%);
+/* ── ANIMATED MESH BACKGROUND ─────────────────────────────── */
+.auth-bg {{
+    position:fixed;inset:0;z-index:0;
+    background:
+        radial-gradient(ellipse 900px 700px at 10% 20%,  rgba({ar},{ag},{ab},0.13) 0%, transparent 60%),
+        radial-gradient(ellipse 700px 500px at 90% 80%,  rgba({a2r},{a2g},{a2b},0.10) 0%, transparent 60%),
+        radial-gradient(ellipse 500px 400px at 60% 10%,  rgba(34,211,238,0.07) 0%, transparent 60%),
+        linear-gradient(160deg,#EEF0FF 0%,#F5F3FF 40%,#EFF6FF 70%,#F0F2FF 100%);
+    overflow:hidden;
     pointer-events:none;
 }}
-.lp-hero-icon {{
-    font-size:3rem;display:block;margin-bottom:14px;
+.auth-bg::before {{
+    content:'';position:absolute;
+    width:600px;height:600px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba({ar},{ag},{ab},0.08) 0%,transparent 70%);
+    top:-200px;left:-200px;
+    animation:orb-drift-a 18s ease-in-out infinite;
+}}
+.auth-bg::after {{
+    content:'';position:absolute;
+    width:500px;height:500px;
+    border-radius:50%;
+    background:radial-gradient(circle,rgba({a2r},{a2g},{a2b},0.07) 0%,transparent 70%);
+    bottom:-150px;right:-150px;
+    animation:orb-drift-b 22s ease-in-out infinite;
+}}
+@keyframes orb-drift-a {{
+    0%,100%{{transform:translate(0,0) scale(1);}}
+    33%{{transform:translate(60px,-40px) scale(1.1);}}
+    66%{{transform:translate(-30px,60px) scale(0.92);}}
+}}
+@keyframes orb-drift-b {{
+    0%,100%{{transform:translate(0,0) scale(1);}}
+    50%{{transform:translate(-50px,-60px) scale(1.08);}}
+}}
+
+/* ── TOP GRADIENT STRIPE ──────────────────────────────────── */
+.stApp::before {{
+    content:'';display:block;position:fixed;
+    top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,{a},{a2},#22D3EE,{a});
+    background-size:300% 100%;
+    animation:stripe-move 6s linear infinite;
+    z-index:9999;pointer-events:none;
+}}
+@keyframes stripe-move {{
+    0%{{background-position:0% 50%;}}
+    100%{{background-position:300% 50%;}}
+}}
+
+/* ── OUTER WRAPPER ────────────────────────────────────────── */
+.auth-outer {{
     position:relative;z-index:1;
-    animation:lp-float 4s ease-in-out infinite;
-    filter:drop-shadow(0 8px 24px rgba(0,0,0,0.30));
-}}
-@keyframes lp-float {{
-    0%,100%{{transform:translateY(0) rotate(-2deg);}}
-    50%{{transform:translateY(-10px) rotate(2deg);}}
-}}
-.lp-hero-title {{
-    font-family:'Outfit',sans-serif;
-    font-size:1.75rem;font-weight:800;color:#fff;
-    margin-bottom:6px;position:relative;z-index:1;
-    letter-spacing:-0.04em;line-height:1.15;
-    text-shadow:0 2px 20px rgba(0,0,0,0.25);
-}}
-.lp-hero-sub {{
-    font-size:0.85rem;color:rgba(255,255,255,0.70);
-    position:relative;z-index:1;font-weight:400;
-    letter-spacing:0.01em;line-height:1.6;
+    min-height:100vh;
+    display:flex;
+    align-items:stretch;
+    padding:0;
 }}
 
-/* ══════════════════════════════════════════════════════════════
-   GLASS CARD
-══════════════════════════════════════════════════════════════ */
-.lp-card {{
-    background:{CARD_BG};
-    border:1px solid {CARD_BD};
+/* ══════════════════════════════════════════════════════════
+   LEFT PANEL — branding
+══════════════════════════════════════════════════════════ */
+.auth-left {{
+    width:44%;
+    min-height:100vh;
+    background:linear-gradient(145deg,#1e1b4b 0%,#3730a3 35%,#1d4ed8 70%,#0c4a6e 100%);
+    position:relative;overflow:hidden;
+    display:flex;flex-direction:column;
+    justify-content:space-between;
+    padding:3rem 3rem 2.5rem;
+}}
+.auth-left::before {{
+    content:'';position:absolute;
+    width:700px;height:700px;border-radius:50%;
+    background:radial-gradient(circle,rgba(255,255,255,0.06) 0%,transparent 60%);
+    top:-200px;right:-200px;pointer-events:none;
+}}
+.auth-left::after {{
+    content:'';position:absolute;
+    width:400px;height:400px;border-radius:50%;
+    background:radial-gradient(circle,rgba(99,102,241,0.25) 0%,transparent 70%);
+    bottom:-100px;left:-100px;pointer-events:none;
+}}
+
+/* brand logo */
+.al-logo {{
+    display:flex;align-items:center;gap:12px;position:relative;z-index:2;
+}}
+.al-logo-icon {{
+    width:44px;height:44px;border-radius:12px;
+    background:linear-gradient(135deg,rgba(255,255,255,0.25),rgba(255,255,255,0.10));
+    border:1px solid rgba(255,255,255,0.20);
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.3rem;
+    backdrop-filter:blur(12px);
+}}
+.al-logo-name {{
+    font-size:1rem;font-weight:800;color:#fff;letter-spacing:-0.01em;
+}}
+.al-logo-tag {{
+    font-size:0.62rem;color:rgba(255,255,255,0.5);
+    font-weight:500;letter-spacing:0.08em;text-transform:uppercase;
+    margin-top:1px;
+}}
+
+/* hero text */
+.al-hero {{ position:relative;z-index:2;margin-top:3rem; }}
+.al-hero-eyebrow {{
+    display:inline-flex;align-items:center;gap:7px;
+    background:rgba(255,255,255,0.10);
+    border:1px solid rgba(255,255,255,0.16);
+    border-radius:99px;padding:5px 14px;
+    font-size:0.72rem;font-weight:700;color:rgba(255,255,255,0.80);
+    letter-spacing:0.06em;text-transform:uppercase;margin-bottom:20px;
+}}
+.al-hero-eyebrow-dot {{
+    width:6px;height:6px;border-radius:50%;
+    background:#4ADE80;
+    box-shadow:0 0 8px #4ADE80;
+    animation:pulse-dot 2s ease infinite;
+}}
+@keyframes pulse-dot {{
+    0%,100%{{opacity:1;transform:scale(1);}}
+    50%{{opacity:0.6;transform:scale(0.8);}}
+}}
+.al-hero-title {{
+    font-size:2.6rem;font-weight:900;color:#fff;
+    line-height:1.12;letter-spacing:-0.04em;
+    margin-bottom:16px;
+}}
+.al-hero-title span {{
+    background:linear-gradient(90deg,#A5B4FC,#67E8F9);
+    -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    background-clip:text;
+}}
+.al-hero-sub {{
+    font-size:0.92rem;color:rgba(255,255,255,0.60);
+    line-height:1.70;max-width:340px;font-weight:400;
+}}
+
+/* stat cards row */
+.al-stats {{
+    position:relative;z-index:2;
+    display:flex;gap:12px;flex-wrap:wrap;margin-top:2.5rem;
+}}
+.al-stat {{
+    flex:1;min-width:100px;
+    background:rgba(255,255,255,0.07);
+    border:1px solid rgba(255,255,255,0.12);
+    border-radius:16px;padding:14px 16px;
+    backdrop-filter:blur(10px);
+    transition:transform 0.22s,background 0.22s;
+}}
+.al-stat:hover {{
+    transform:translateY(-3px);
+    background:rgba(255,255,255,0.11);
+}}
+.al-stat-num {{
+    font-size:1.6rem;font-weight:900;color:#fff;
+    line-height:1;margin-bottom:4px;letter-spacing:-0.03em;
+}}
+.al-stat-lbl {{
+    font-size:0.64rem;font-weight:700;
+    color:rgba(255,255,255,0.45);
+    text-transform:uppercase;letter-spacing:0.08em;
+}}
+
+/* feature pills */
+.al-pills {{
+    position:relative;z-index:2;
+    display:flex;flex-wrap:wrap;gap:8px;margin-top:1.8rem;
+}}
+.al-pill {{
+    display:inline-flex;align-items:center;gap:6px;
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:99px;padding:6px 13px;
+    font-size:0.72rem;font-weight:600;
+    color:rgba(255,255,255,0.72);
+}}
+
+/* footer credit */
+.al-footer {{
+    position:relative;z-index:2;
+    font-size:0.68rem;color:rgba(255,255,255,0.28);
+    font-weight:500;
+}}
+
+/* ══════════════════════════════════════════════════════════
+   RIGHT PANEL — auth forms
+══════════════════════════════════════════════════════════ */
+.auth-right {{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;
+    padding:2.5rem 2rem;
+    position:relative;z-index:1;
+    overflow-y:auto;
+}}
+
+.ar-inner {{
+    width:100%;max-width:430px;
+    animation:fade-up 0.42s cubic-bezier(0.22,1,0.36,1) both;
+}}
+@keyframes fade-up {{
+    from{{opacity:0;transform:translateY(24px);}}
+    to{{opacity:1;transform:translateY(0);}}
+}}
+
+/* page title above card */
+.ar-page-title {{
+    text-align:center;margin-bottom:1.75rem;
+}}
+.ar-page-icon {{
+    width:60px;height:60px;border-radius:18px;
+    background:linear-gradient(135deg,{a},{a2});
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;margin:0 auto 14px;
+    box-shadow:0 12px 32px rgba({ar},{ag},{ab},0.35);
+    animation:icon-float 4s ease-in-out infinite;
+}}
+@keyframes icon-float {{
+    0%,100%{{transform:translateY(0);}}
+    50%{{transform:translateY(-6px);}}
+}}
+.ar-page-h1 {{
+    font-size:1.55rem;font-weight:800;color:#0F172A;
+    letter-spacing:-0.04em;margin-bottom:5px;
+}}
+.ar-page-sub {{
+    font-size:0.82rem;color:#64748B;font-weight:400;
+}}
+
+/* ── GLASS CARD ───────────────────────────────────────────── */
+.ar-card {{
+    background:rgba(255,255,255,0.78);
+    border:1px solid rgba(255,255,255,0.92);
     border-radius:24px;
-    padding:28px 24px 22px;
-    margin-bottom:10px;
-    position:relative;overflow:hidden;z-index:1;
+    padding:30px 28px 24px;
     backdrop-filter:blur(32px);-webkit-backdrop-filter:blur(32px);
-    box-shadow:{SHADOW};
-    transition:border-color 0.22s,box-shadow 0.22s;
+    box-shadow:
+        0 4px 6px rgba(15,23,42,0.04),
+        0 12px 40px rgba(15,23,42,0.08),
+        0 0 0 1px rgba(255,255,255,0.60) inset;
+    position:relative;overflow:hidden;
+    transition:box-shadow 0.24s;
 }}
-.lp-card::before {{
-    content:'';position:absolute;top:0;left:0;right:0;height:1px;
-    background:linear-gradient(90deg,transparent,{accent}88,transparent);
+.ar-card::before {{
+    content:'';position:absolute;
+    top:0;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent,{a}66,transparent);
 }}
-.lp-card:hover {{
-    border-color:rgba(255,255,255,0.18);
-    box-shadow:{SHADOW},0 0 0 1px {accent}22;
+.ar-card:hover {{
+    box-shadow:
+        0 4px 6px rgba(15,23,42,0.05),
+        0 20px 60px rgba({ar},{ag},{ab},0.10),
+        0 0 0 1px rgba(255,255,255,0.70) inset;
 }}
 
-/* ── Section label ── */
+/* ── SECTION LABEL ────────────────────────────────────────── */
+.ar-label {{
+    font-size:0.66rem;font-weight:800;text-transform:uppercase;
+    letter-spacing:0.12em;color:{a};margin-bottom:18px;
+    display:flex;align-items:center;gap:8px;
+}}
+.ar-label::before {{
+    content:'';width:3px;height:12px;
+    background:linear-gradient(180deg,{a},{a2});
+    border-radius:99px;flex-shrink:0;
+}}
+
+/* ── TAB PILL BAR ─────────────────────────────────────────── */
+.ar-tabs {{
+    display:flex;gap:4px;
+    background:rgba(241,245,249,0.80);
+    border:1px solid rgba(226,232,240,0.80);
+    border-radius:16px;padding:4px;
+    margin-bottom:22px;
+    backdrop-filter:blur(8px);
+}}
+
+/* ── STREAMLIT NATIVE TABS ────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {{
+    background:rgba(241,245,249,0.80)!important;
+    border:1px solid rgba(226,232,240,0.80)!important;
+    border-radius:16px!important;
+    padding:4px!important;gap:4px!important;
+    backdrop-filter:blur(8px)!important;
+    box-shadow:none!important;
+}}
+.stTabs [data-baseweb="tab"] {{
+    border-radius:11px!important;
+    font-family:'Plus Jakarta Sans',sans-serif!important;
+    font-size:0.82rem!important;font-weight:600!important;
+    color:#64748B!important;
+    padding:9px 18px!important;border:none!important;
+    transition:all 0.20s ease!important;
+    background:transparent!important;
+    min-height:38px!important;
+}}
+.stTabs [aria-selected="true"] {{
+    background:linear-gradient(135deg,{a},{a2})!important;
+    color:#fff!important;
+    box-shadow:0 4px 14px rgba({ar},{ag},{ab},0.38)!important;
+}}
+.stTabs [data-baseweb="tab-panel"] {{
+    background:transparent!important;
+    padding:20px 0 0!important;
+}}
+
+/* ── INPUTS ───────────────────────────────────────────────── */
+.stTextInput > div > div > input,
+.stTextArea  > div > div > textarea {{
+    background:rgba(248,250,252,0.90)!important;
+    border:1.5px solid #E2E8F4!important;
+    border-radius:13px!important;
+    color:#0F172A!important;
+    font-family:'Plus Jakarta Sans',sans-serif!important;
+    font-size:0.88rem!important;font-weight:500!important;
+    padding:12px 16px!important;
+    transition:border-color 0.18s,box-shadow 0.18s,background 0.18s!important;
+    box-shadow:0 1px 3px rgba(15,23,42,0.04)!important;
+    min-height:44px!important;
+}}
+.stTextInput > div > div > input:focus,
+.stTextArea  > div > div > textarea:focus {{
+    border-color:{a}!important;
+    box-shadow:0 0 0 4px rgba({ar},{ag},{ab},0.12),0 1px 3px rgba(15,23,42,0.04)!important;
+    background:#fff!important;outline:none!important;
+}}
+.stTextInput > div > div > input::placeholder,
+.stTextArea  > div > div > textarea::placeholder {{
+    color:#94A3B8!important;font-weight:400!important;
+}}
+.stTextInput label, .stTextArea label {{
+    color:#374151!important;
+    font-size:0.72rem!important;font-weight:700!important;
+    text-transform:uppercase!important;letter-spacing:0.09em!important;
+    margin-bottom:6px!important;
+    font-family:'Plus Jakarta Sans',sans-serif!important;
+}}
+
+/* ── PRIMARY BUTTON ───────────────────────────────────────── */
+.stButton > button {{
+    background:linear-gradient(135deg,{a} 0%,{a2} 100%)!important;
+    color:#fff!important;border:none!important;
+    border-radius:13px!important;
+    padding:12px 20px!important;
+    font-family:'Plus Jakarta Sans',sans-serif!important;
+    font-size:0.875rem!important;font-weight:700!important;
+    letter-spacing:0.01em!important;
+    width:100%!important;cursor:pointer!important;
+    position:relative!important;overflow:hidden!important;
+    transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1)!important;
+    box-shadow:0 4px 18px rgba({ar},{ag},{ab},0.38)!important;
+    min-height:46px!important;
+    display:flex!important;align-items:center!important;
+    justify-content:center!important;gap:7px!important;
+}}
+.stButton > button::before {{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,0.18) 0%,transparent 100%);
+    pointer-events:none;border-radius:inherit;
+}}
+.stButton > button:hover {{
+    transform:translateY(-3px) scale(1.015)!important;
+    box-shadow:0 10px 36px rgba({ar},{ag},{ab},0.52),0 0 18px rgba({ar},{ag},{ab},0.28)!important;
+    filter:brightness(1.06)!important;
+}}
+.stButton > button:active {{
+    transform:translateY(-1px) scale(0.985)!important;
+    filter:brightness(0.95)!important;
+}}
+.stButton > button:disabled {{
+    opacity:0.50!important;cursor:not-allowed!important;
+    transform:none!important;
+}}
+
+/* ── FORM SUBMIT BUTTON ───────────────────────────────────── */
+[data-testid="stFormSubmitButton"] > button {{
+    background:linear-gradient(135deg,{a} 0%,{a2} 100%)!important;
+    color:#fff!important;border:none!important;
+    border-radius:13px!important;padding:12px 20px!important;
+    font-family:'Plus Jakarta Sans',sans-serif!important;
+    font-size:0.875rem!important;font-weight:700!important;
+    width:100%!important;cursor:pointer!important;
+    position:relative!important;overflow:hidden!important;
+    transition:all 0.22s cubic-bezier(0.34,1.56,0.64,1)!important;
+    box-shadow:0 4px 18px rgba({ar},{ag},{ab},0.38)!important;
+    min-height:46px!important;margin-top:8px!important;
+}}
+[data-testid="stFormSubmitButton"] > button:hover {{
+    transform:translateY(-3px) scale(1.015)!important;
+    box-shadow:0 10px 36px rgba({ar},{ag},{ab},0.52)!important;
+    filter:brightness(1.06)!important;
+}}
+
+/* ── SECONDARY / BACK BUTTON ──────────────────────────────── */
+.btn-secondary .stButton > button {{
+    background:rgba(248,250,252,0.90)!important;
+    color:#475569!important;
+    border:1.5px solid #E2E8F4!important;
+    box-shadow:0 1px 4px rgba(15,23,42,0.06)!important;
+    font-weight:600!important;
+}}
+.btn-secondary .stButton > button:hover {{
+    background:#F1F5F9!important;
+    color:#1E293B!important;
+    border-color:#CBD5E1!important;
+    transform:translateY(-2px)!important;
+    box-shadow:0 4px 14px rgba(15,23,42,0.10)!important;
+    filter:none!important;
+}}
+
+/* Tab idle/active wrappers */
+.lp-tab-active .stButton > button {{
+    background:linear-gradient(135deg,{a},{a2})!important;
+    color:#fff!important;border:none!important;
+    box-shadow:0 4px 14px rgba({ar},{ag},{ab},0.38)!important;
+    font-size:0.82rem!important;font-weight:700!important;
+    border-radius:11px!important;min-height:38px!important;
+    padding:9px 18px!important;
+}}
+.lp-tab-idle .stButton > button {{
+    background:transparent!important;color:#64748B!important;
+    border:none!important;box-shadow:none!important;
+    font-size:0.82rem!important;font-weight:600!important;
+    border-radius:11px!important;min-height:38px!important;
+    padding:9px 18px!important;
+}}
+.lp-tab-idle .stButton > button:hover {{
+    background:rgba(99,102,241,0.06)!important;
+    color:#374151!important;transform:none!important;
+    box-shadow:none!important;filter:none!important;
+}}
+
+/* ── BANNERS ──────────────────────────────────────────────── */
+.lp-otp-box {{
+    background:linear-gradient(135deg,#ECFDF5,#D1FAE5);
+    border:1px solid #A7F3D0;border-radius:16px;
+    padding:16px 18px;margin:12px 0;
+    display:flex;align-items:center;gap:14px;
+    animation:slide-in 0.28s ease both;
+}}
+.lp-otp-icon {{ font-size:1.5rem;flex-shrink:0; }}
+.lp-otp-label {{
+    font-size:0.66rem;color:#059669;font-weight:800;
+    text-transform:uppercase;letter-spacing:0.10em;margin-bottom:4px;
+}}
+.lp-otp-code {{
+    font-family:'DM Mono','Courier New',monospace;
+    font-size:2rem;font-weight:500;color:#065F46;
+    letter-spacing:10px;display:block;line-height:1;
+}}
+.lp-phone-badge {{
+    background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
+    border:1px solid #BFDBFE;border-radius:11px;
+    padding:9px 14px;font-size:0.78rem;color:#1D4ED8;
+    font-weight:600;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;
+}}
+.lp-demo-hint {{
+    background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+    border:1px solid #FDE68A;border-radius:14px;
+    padding:13px 16px;margin:10px 0;
+    font-size:0.76rem;line-height:1.65;
+}}
+.lp-demo-row {{ color:#92400E;margin-bottom:3px; }}
+.lp-demo-row strong {{ font-weight:700; }}
+.lp-verified {{
+    background:linear-gradient(135deg,#ECFDF5,#D1FAE5);
+    border:1px solid #A7F3D0;border-radius:12px;
+    padding:11px 15px;font-size:0.80rem;color:#065F46;
+    font-weight:600;margin:10px 0;
+    display:flex;align-items:center;gap:8px;
+    animation:slide-in 0.28s ease both;
+}}
+.lp-warn {{
+    background:linear-gradient(135deg,#FFFBEB,#FEF3C7);
+    border:1px solid #FDE68A;border-radius:12px;
+    padding:11px 15px;font-size:0.78rem;color:#92400E;
+    font-weight:500;margin:10px 0;
+}}
+.lp-info {{
+    background:linear-gradient(135deg,#EFF6FF,#DBEAFE);
+    border:1px solid #BFDBFE;border-radius:12px;
+    padding:12px 15px;font-size:0.80rem;color:#1D4ED8;
+    font-weight:500;margin:10px 0;
+    display:flex;align-items:flex-start;gap:8px;line-height:1.6;
+}}
 .lp-card-label {{
-    font-size:0.68rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:0.12em;color:{SUB};margin-bottom:18px;
+    font-size:0.66rem;font-weight:800;text-transform:uppercase;
+    letter-spacing:0.12em;color:{a};margin-bottom:18px;
     display:flex;align-items:center;gap:8px;
 }}
 .lp-card-label::before {{
     content:'';width:3px;height:12px;
-    background:linear-gradient(180deg,{accent},{accent2});
+    background:linear-gradient(180deg,{a},{a2});
     border-radius:99px;flex-shrink:0;
 }}
 
-/* ══════════════════════════════════════════════════════════════
-   IMPROVED BUTTONS - PRIMARY GRADIENT
-══════════════════════════════════════════════════════════════ */
-.stButton > button {{
-    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
-    color:#fff!important;
-    border:none!important;
-    border-radius:14px!important;
-    padding:12px 18px!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.875rem!important;
-    font-weight:700!important;
-    letter-spacing:0.01em!important;
-    width:100%!important;
-    cursor:pointer!important;
-    position:relative!important;
-    overflow:hidden!important;
-    transition:all 0.24s cubic-bezier(0.34,1.56,0.64,1)!important;
-    box-shadow:{BTN_SH}!important;
-    min-height:44px!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    gap:6px!important;
-}}
-
-.stButton > button::before {{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:linear-gradient(180deg,rgba(255,255,255,0.2) 0%,transparent 100%);
-    pointer-events:none;
-    border-radius:inherit;
-}}
-
-.stButton > button::after {{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:radial-gradient(circle at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255,255,255,0.2) 0%, transparent 70%);
-    opacity:0;
-    transition:opacity 0.4s ease;
-    pointer-events:none;
-    border-radius:inherit;
-}}
-
-.stButton > button:hover {{
-    transform:translateY(-3px) scale(1.02)!important;
-    box-shadow:0 12px 40px {accent}66,0 0 20px {accent}33!important;
-    filter:brightness(1.08)!important;
-}}
-
-.stButton > button:active {{
-    transform:translateY(-1px) scale(0.98)!important;
-    filter:brightness(0.95)!important;
-}}
-
-.stButton > button:focus {{
-    outline:none!important;
-    box-shadow:0 0 0 4px {accent}22,{BTN_SH}!important;
-}}
-
-/* ── Secondary button (Back, Cancel) ── */
-.lp-back .stButton > button {{
-    background:linear-gradient(135deg,rgba(255,255,255,0.08),rgba(255,255,255,0.04))!important;
-    color:{TXT}!important;
-    border:1.5px solid {CARD_BD}!important;
-    box-shadow:0 4px 12px rgba(0,0,0,0.08)!important;
-    font-weight:600!important;
-    backdrop-filter:blur(12px)!important;
-    -webkit-backdrop-filter:blur(12px)!important;
-}}
-
-.lp-back .stButton > button:hover {{
-    background:linear-gradient(135deg,rgba(255,255,255,0.12),rgba(255,255,255,0.06))!important;
-    color:{TXT}!important;
-    transform:translateY(-2px)!important;
-    box-shadow:0 8px 24px rgba(0,0,0,0.12),0 0 0 1px {accent}22!important;
-    border-color:{accent}44!important;
-    filter:none!important;
-}}
-
-/* ── Tab-idle style ── */
-.lp-tab-idle .stButton > button {{
-    background:transparent!important;
-    color:{SUB}!important;
-    border:1.5px solid transparent!important;
-    box-shadow:none!important;
-    font-weight:600!important;
-    font-size:0.84rem!important;
-    border-radius:12px!important;
-    padding:10px 16px!important;
-    filter:none!important;
-    transform:none!important;
-    transition:all 0.20s ease!important;
-}}
-
-.lp-tab-idle .stButton > button:hover {{
-    background:{HOV}!important;
-    color:{TXT}!important;
-    transform:none!important;
-    box-shadow:none!important;
-    filter:none!important;
-    border-color:{accent}44!important;
-}}
-
-/* ── Tab-active style ── */
-.lp-tab-active .stButton > button {{
-    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
-    color:#fff!important;
-    border:none!important;
-    box-shadow:0 6px 20px {accent}50!important;
-    font-size:0.84rem!important;
-    font-weight:700!important;
-    border-radius:12px!important;
-    padding:10px 16px!important;
-    transform:none!important;
-    filter:none!important;
-}}
-
-.lp-tab-active .stButton > button:hover {{
-    box-shadow:0 8px 28px {accent}66!important;
-    transform:translateY(-2px)!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   FORM SUBMIT BUTTON
-══════════════════════════════════════════════════════════════ */
-[data-testid="stFormSubmitButton"] > button {{
-    background:linear-gradient(135deg,{accent} 0%,{accent2} 100%)!important;
-    color:#fff!important;
-    border:none!important;
-    border-radius:14px!important;
-    padding:12px 20px!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.875rem!important;
-    font-weight:700!important;
-    width:100%!important;
-    cursor:pointer!important;
-    position:relative!important;
-    overflow:hidden!important;
-    transition:all 0.24s cubic-bezier(0.34,1.56,0.64,1)!important;
-    box-shadow:{BTN_SH}!important;
-    margin-top:6px!important;
-    min-height:44px!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-}}
-
-[data-testid="stFormSubmitButton"] > button:hover {{
-    transform:translateY(-3px) scale(1.02)!important;
-    box-shadow:0 12px 40px {accent}66,0 0 20px {accent}33!important;
-    filter:brightness(1.08)!important;
-}}
-
-[data-testid="stFormSubmitButton"] > button:active {{
-    transform:translateY(-1px) scale(0.98)!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   INPUTS  — fully overridden
-══════════════════════════════════════════════════════════════ */
-.stTextInput > div > div > input,
-.stTextArea  > div > div > textarea {{
-    background:{INP_BG}!important;
-    border:1.5px solid {INP_BD}!important;
-    border-radius:14px!important;
-    color:{TXT}!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.9rem!important;
-    font-weight:400!important;
-    padding:12px 16px!important;
-    transition:border-color 0.18s,box-shadow 0.18s,background 0.18s!important;
-    backdrop-filter:blur(8px)!important;
-    -webkit-backdrop-filter:blur(8px)!important;
-    box-shadow:none!important;
-    min-height:42px!important;
-}}
-
-.stTextInput > div > div > input:focus,
-.stTextArea  > div > div > textarea:focus {{
-    border-color:{accent}!important;
-    box-shadow:0 0 0 4px {accent}28,0 0 16px {accent}18!important;
-    background:{CARD_BG}!important;
-    outline:none!important;
-}}
-
-.stTextInput > div > div > input::placeholder,
-.stTextArea  > div > div > textarea::placeholder {{
-    color:{SUB}!important;
-    opacity:0.55!important;
-    font-weight:300!important;
-}}
-
-/* field labels */
-.stTextInput label, .stTextArea label {{
-    color:{SUB}!important;
-    font-size:0.72rem!important;
-    font-weight:600!important;
-    text-transform:uppercase!important;
-    letter-spacing:0.09em!important;
-    margin-bottom:6px!important;
-    font-family:'Outfit',sans-serif!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   CUSTOM TAB BAR
-══════════════════════════════════════════════════════════════ */
-.lp-tabs {{
-    display:flex;
-    gap:4px;
-    background:{CARD_BG};
-    border:1px solid {CARD_BD};
-    border-radius:18px;
-    padding:5px;
-    margin-bottom:16px;
-    backdrop-filter:blur(20px);
-    -webkit-backdrop-filter:blur(20px);
-    box-shadow:0 4px 16px rgba(0,0,0,0.12);
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   STEP INDICATOR
-══════════════════════════════════════════════════════════════ */
+/* ── STEP INDICATOR ───────────────────────────────────────── */
 .lp-step-wrap {{
-    display:flex;
-    align-items:center;
-    margin-bottom:20px;
+    display:flex;align-items:center;margin-bottom:20px;
 }}
-
 .lp-step-col {{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:4px;
-    flex:0 0 auto;
+    display:flex;flex-direction:column;align-items:center;gap:4px;flex:0 0 auto;
 }}
-
 .lp-step-dot {{
-    width:36px;
-    height:36px;
-    border-radius:50%;
-    flex-shrink:0;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-weight:800;
-    font-size:0.80rem;
+    width:36px;height:36px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:0.78rem;
     transition:all 0.28s cubic-bezier(0.34,1.56,0.64,1);
 }}
-
 .lp-step-dot.active {{
-    background:linear-gradient(135deg,{accent},{accent2});
-    color:#fff;
-    box-shadow:0 6px 20px {accent}50,0 0 0 4px {accent}18;
+    background:linear-gradient(135deg,{a},{a2});color:#fff;
+    box-shadow:0 6px 20px rgba({ar},{ag},{ab},0.44),0 0 0 4px rgba({ar},{ag},{ab},0.14);
 }}
-
 .lp-step-dot.done {{
-    background:{accent};
-    color:#fff;
-    box-shadow:0 2px 8px {accent}33;
+    background:{a};color:#fff;
+    box-shadow:0 2px 8px rgba({ar},{ag},{ab},0.28);
 }}
-
 .lp-step-dot.idle {{
-    background:{INP_BG};
-    color:{SUB};
-    border:1.5px solid {INP_BD};
+    background:#F1F5F9;color:#94A3B8;
+    border:1.5px solid #E2E8F4;
 }}
-
 .lp-step-lbl {{
-    font-size:0.62rem;
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:0.09em;
+    font-size:0.60rem;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;
 }}
-
-.lp-step-lbl.active {{ color:{accent}; }}
-.lp-step-lbl.idle   {{ color:{SUB}; }}
-
+.lp-step-lbl.active {{ color:{a}; }}
+.lp-step-lbl.idle   {{ color:#94A3B8; }}
 .lp-step-line {{
-    flex:1;
-    height:2px;
-    background:linear-gradient(90deg,{accent}44,{INP_BD});
-    margin:0 10px 20px;
-    border-radius:2px;
+    flex:1;height:2px;
+    background:linear-gradient(90deg,{a}44,#E2E8F4);
+    margin:0 10px 20px;border-radius:2px;
 }}
 
-/* ══════════════════════════════════════════════════════════════
-   BANNERS
-══════════════════════════════════════════════════════════════ */
-.lp-otp-box {{
-    background:{green_bg};
-    border:1px solid {green_bd}44;
-    border-radius:16px;
-    padding:16px 18px;
-    margin:12px 0;
-    display:flex;
-    align-items:center;
-    gap:14px;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-    animation:lp-slide-in 0.28s ease both;
+/* ── DIVIDER ──────────────────────────────────────────────── */
+.ar-divider {{
+    display:flex;align-items:center;gap:12px;margin:16px 0;
+}}
+.ar-divider-line {{
+    flex:1;height:1px;background:#E2E8F4;
+}}
+.ar-divider-txt {{
+    font-size:0.70rem;font-weight:600;color:#94A3B8;
+    text-transform:uppercase;letter-spacing:0.08em;
 }}
 
-.lp-otp-icon {{ font-size:1.4rem;flex-shrink:0; }}
-
-.lp-otp-label {{
-    font-size:0.70rem;
-    color:{green_txt};
-    font-weight:700;
-    text-transform:uppercase;
-    letter-spacing:0.08em;
-    margin-bottom:4px;
-}}
-
-.lp-otp-code {{
-    font-family:'DM Mono','Courier New',monospace;
-    font-size:1.8rem;
-    font-weight:500;
-    color:{green_txt};
-    letter-spacing:8px;
-    display:block;
-    line-height:1;
-}}
-
-.lp-phone-badge {{
-    background:{blue_bg};
-    border:1px solid {blue_bd}44;
-    border-radius:10px;
-    padding:9px 14px;
-    font-size:0.78rem;
-    color:{blue_txt};
-    font-weight:500;
-    margin-bottom:14px;
-    display:flex;
-    align-items:center;
-    gap:7px;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-}}
-
-.lp-demo-hint {{
-    background:{amber_bg};
-    border:1px solid {amber_bd}44;
-    border-radius:14px;
-    padding:13px 16px;
-    margin:10px 0 0;
-    font-size:0.76rem;
-    line-height:1.65;
-    backdrop-filter:blur(8px);
-    -webkit-backdrop-filter:blur(8px);
-}}
-
-.lp-demo-row {{ 
-    color:{amber_txt};
-    margin-bottom:3px; 
-}}
-
-.lp-demo-row strong {{ 
-    font-weight:700; 
-}}
-
-.lp-verified {{
-    background:{green_bg};
-    border:1px solid {green_bd}44;
-    border-radius:12px;
-    padding:11px 15px;
-    font-size:0.80rem;
-    color:{green_txt};
-    font-weight:600;
-    margin:10px 0;
-    display:flex;
-    align-items:center;
-    gap:8px;
-    animation:lp-slide-in 0.28s ease both;
-}}
-
-.lp-warn {{
-    background:{amber_bg};
-    border:1px solid {amber_bd}44;
-    border-radius:12px;
-    padding:11px 15px;
-    font-size:0.78rem;
-    color:{amber_txt};
-    font-weight:500;
-    margin:10px 0;
-}}
-
-.lp-info {{
-    background:{blue_bg};
-    border:1px solid {blue_bd}44;
-    border-radius:12px;
-    padding:12px 15px;
-    font-size:0.80rem;
-    color:{blue_txt};
-    font-weight:500;
-    margin:10px 0;
-    display:flex;
-    align-items:flex-start;
-    gap:8px;
-    line-height:1.6;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   NATIVE STREAMLIT ALERTS — restyle
-══════════════════════════════════════════════════════════════ */
+/* ── ALERTS ───────────────────────────────────────────────── */
 .stAlert {{
-    border-radius:14px!important;
-    backdrop-filter:blur(8px)!important;
-    -webkit-backdrop-filter:blur(8px)!important;
+    border-radius:13px!important;
+    font-family:'Plus Jakarta Sans',sans-serif!important;
+    font-size:0.83rem!important;
     border-width:1px!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.84rem!important;
 }}
 
-/* ══════════════════════════════════════════════════════════════
-   NATIVE STREAMLIT TABS (register/login)
-══════════════════════════════════════════════════════════════ */
-.stTabs [data-baseweb="tab-list"] {{
-    background:{CARD_BG}!important;
-    border:1px solid {CARD_BD}!important;
-    border-radius:18px!important;
-    padding:5px!important;
-    gap:4px!important;
-    backdrop-filter:blur(20px)!important;
-    -webkit-backdrop-filter:blur(20px)!important;
-    box-shadow:0 4px 16px rgba(0,0,0,0.10)!important;
+/* ── ANIMATIONS ───────────────────────────────────────────── */
+@keyframes slide-in {{
+    from{{opacity:0;transform:translateX(-8px);}}
+    to{{opacity:1;transform:translateX(0);}}
+}}
+@keyframes fade-up {{
+    from{{opacity:0;transform:translateY(20px);}}
+    to{{opacity:1;transform:translateY(0);}}
 }}
 
-.stTabs [data-baseweb="tab"] {{
-    border-radius:12px!important;
-    font-family:'Outfit',sans-serif!important;
-    font-size:0.84rem!important;
-    font-weight:600!important;
-    color:{SUB}!important;
-    padding:10px 18px!important;
-    border:none!important;
-    transition:all 0.20s ease!important;
-    min-height:40px!important;
-}}
-
-.stTabs [aria-selected="true"] {{
-    background:linear-gradient(135deg,{accent},{accent2})!important;
-    color:#fff!important;
-    box-shadow:0 4px 16px {accent}40!important;
-}}
-
-.stTabs [data-baseweb="tab-panel"] {{
-    background:transparent!important;
-    padding:18px 0 0!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   ANIMATIONS
-══════════════════════════════════════════════════════════════ */
-@keyframes lp-fade-up {{
-    from{{ opacity:0; transform:translateY(20px); }}
-    to  {{ opacity:1; transform:translateY(0); }}
-}}
-
-@keyframes lp-slide-in {{
-    from{{ opacity:0; transform:translateX(-8px); }}
-    to  {{ opacity:1; transform:translateX(0); }}
-}}
-
-.lp-card, .lp-hero {{
-    animation:lp-fade-up 0.38s cubic-bezier(0.22,1,0.36,1) both;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   MOBILE RESPONSIVE DESIGN
-══════════════════════════════════════════════════════════════ */
-@media(max-width:768px) {{
-    .main .block-container {{
-        padding:1.5rem 1rem 3rem!important;
-        max-width:100%!important;
-    }}
-    
-    .lp-hero {{
-        padding:2rem 1.5rem 1.8rem;
-        border-radius:22px;
-        margin-bottom:1rem;
-    }}
-    
-    .lp-hero-icon {{
-        font-size:2.5rem;
-        margin-bottom:10px;
-    }}
-    
-    .lp-hero-title {{
-        font-size:1.45rem;
-        margin-bottom:4px;
-    }}
-    
-    .lp-hero-sub {{
-        font-size:0.80rem;
-    }}
-    
-    .lp-card {{
-        padding:22px 18px 18px;
-        border-radius:20px;
-        margin-bottom:8px;
-    }}
-    
-    .stButton > button {{
-        padding:11px 16px!important;
-        font-size:0.82rem!important;
-        min-height:42px!important;
-    }}
-    
-    [data-testid="stFormSubmitButton"] > button {{
-        padding:11px 16px!important;
-        font-size:0.82rem!important;
-        min-height:42px!important;
-    }}
-    
-    .lp-otp-code {{
-        font-size:1.5rem;
-        letter-spacing:5px;
-    }}
-    
-    .lp-tabs {{
-        gap:3px;
-        padding:4px;
-    }}
-    
-    .lp-step-wrap {{
-        margin-bottom:16px;
-    }}
-    
-    .lp-step-dot {{
-        width:32px;
-        height:32px;
-        font-size:0.75rem;
-    }}
-    
-    .stTabs [data-baseweb="tab"] {{
-        padding:8px 14px!important;
-        font-size:0.78rem!important;
-    }}
-}}
-
-@media(max-width:480px) {{
-    .main .block-container {{
-        padding:1.2rem 0.9rem 2.5rem!important;
-    }}
-    
-    .lp-hero {{
-        padding:1.6rem 1.2rem 1.4rem;
-        border-radius:18px;
-        margin-bottom:0.8rem;
-    }}
-    
-    .lp-hero-icon {{
-        font-size:2rem;
-        margin-bottom:8px;
-    }}
-    
-    .lp-hero-title {{
-        font-size:1.25rem;
-    }}
-    
-    .lp-hero-sub {{
-        font-size:0.75rem;
-    }}
-    
-    .lp-card {{
-        padding:18px 14px 14px;
-        border-radius:16px;
-    }}
-    
-    .stButton > button {{
-        padding:10px 14px!important;
-        font-size:0.78rem!important;
-        min-height:40px!important;
-    }}
-    
-    [data-testid="stFormSubmitButton"] > button {{
-        padding:10px 14px!important;
-        font-size:0.78rem!important;
-    }}
-    
-    .lp-card-label {{
-        font-size:0.65rem;
-        margin-bottom:14px;
-    }}
-    
-    .lp-tabs {{
-        gap:2px;
-        padding:3px;
-        border-radius:14px;
-    }}
-    
-    .lp-step-dot {{
-        width:28px;
-        height:28px;
-        font-size:0.70rem;
-    }}
-    
-    .lp-step-lbl {{
-        font-size:0.58rem;
-    }}
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   ACCESSIBILITY
-══════════════════════════════════════════════════════════════ */
-.stButton > button:disabled {{
-    opacity:0.5!important;
-    cursor:not-allowed!important;
-    transform:none!important;
-}}
-
-.stButton > button:focus-visible {{
-    outline:2px solid {accent}!important;
-    outline-offset:2px!important;
-}}
-
-/* ══════════════════════════════════════════════════════════════
-   MISC
-══════════════════════════════════════════════════════════════ */
-p, span, div, label, small {{ color:{TXT}; }}
-.stMarkdown p {{ color:{TXT}!important; }}
-
-::-webkit-scrollbar {{ width:6px; }}
+/* ── SCROLLBAR ────────────────────────────────────────────── */
+::-webkit-scrollbar {{ width:5px; }}
 ::-webkit-scrollbar-track {{ background:transparent; }}
-::-webkit-scrollbar-thumb {{ 
-    background:{accent}44;
+::-webkit-scrollbar-thumb {{
+    background:rgba({ar},{ag},{ab},0.28);
     border-radius:99px;
-    transition:background 0.2s ease;
 }}
-::-webkit-scrollbar-thumb:hover {{ background:{accent}66; }}
+::-webkit-scrollbar-thumb:hover {{
+    background:rgba({ar},{ag},{ab},0.48);
+}}
+
+/* ── MOBILE ───────────────────────────────────────────────── */
+@media(max-width:900px) {{
+    .auth-left {{ display:none!important; }}
+    .auth-right {{ padding:1.5rem 1rem 3rem!important; }}
+    .ar-card {{ padding:22px 18px 18px!important; }}
+    .ar-page-icon {{ width:52px;height:52px;font-size:1.3rem; }}
+    .ar-page-h1 {{ font-size:1.35rem; }}
+}}
+@media(max-width:480px) {{
+    .ar-page-h1 {{ font-size:1.15rem; }}
+    .ar-card {{ padding:18px 14px 14px!important;border-radius:18px!important; }}
+    .stButton > button {{ min-height:42px!important;font-size:0.82rem!important; }}
+    [data-testid="stFormSubmitButton"] > button {{ min-height:42px!important;font-size:0.82rem!important; }}
+    .lp-otp-code {{ font-size:1.5rem;letter-spacing:6px; }}
+}}
+
+/* ── MISC ─────────────────────────────────────────────────── */
+p,span,div,label,small {{ color:#0F172A; }}
+.stMarkdown p {{ color:#0F172A!important; }}
 </style>
 
-<!-- floating orbs -->
-<div class='lp-scene'>
-  <div class='lp-orb lp-orb-1'></div>
-  <div class='lp-orb lp-orb-2'></div>
-  <div class='lp-orb lp-orb-3'></div>
+<!-- animated background -->
+<div class='auth-bg'></div>
+"""
+
+
+def _left_panel(icon="🏛️", title="Jan Seva Portal", subtitle="Citizen Grievance & Services", accent="#6366F1", accent2="#8B5CF6"):
+    """Renders the branding left panel HTML."""
+    return f"""
+<div class='auth-left'>
+    <div class='al-logo'>
+        <div class='al-logo-icon'>{icon}</div>
+        <div>
+            <div class='al-logo-name'>{title}</div>
+            <div class='al-logo-tag'>Government Portal</div>
+        </div>
+    </div>
+
+    <div class='al-hero'>
+        <div class='al-hero-eyebrow'>
+            <span class='al-hero-eyebrow-dot'></span>
+            Serving Citizens Since 2024
+        </div>
+        <div class='al-hero-title'>
+            Your voice,<br><span>our priority.</span>
+        </div>
+        <div class='al-hero-sub'>
+            File grievances, track resolutions, and access government
+            schemes — all from one secure platform.
+        </div>
+        <div class='al-stats'>
+            <div class='al-stat'>
+                <div class='al-stat-num'>48K+</div>
+                <div class='al-stat-lbl'>Complaints<br>Resolved</div>
+            </div>
+            <div class='al-stat'>
+                <div class='al-stat-num'>98%</div>
+                <div class='al-stat-lbl'>Resolution<br>Rate</div>
+            </div>
+            <div class='al-stat'>
+                <div class='al-stat-num'>4.9★</div>
+                <div class='al-stat-lbl'>Citizen<br>Rating</div>
+            </div>
+        </div>
+        <div class='al-pills'>
+            <div class='al-pill'>⚡ Instant OTP Login</div>
+            <div class='al-pill'>🔒 Bank-grade Security</div>
+            <div class='al-pill'>🌐 Hindi + English</div>
+            <div class='al-pill'>📱 Mobile Ready</div>
+        </div>
+    </div>
+
+    <div class='al-footer'>© 2024 Jan Seva Portal · Government of Madhya Pradesh</div>
 </div>
 """
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# ROLE SELECTION PAGE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def pg_login_type():
+    dark = st.session_state.get("dark_mode", False)
+    st.markdown(_login_css(dark, "#6366F1", "#8B5CF6"), unsafe_allow_html=True)
+
+    # Full-width outer layout via columns trick
+    L, R = st.columns([1, 1], gap="large")
+
+    with L:
+        st.markdown(_left_panel(), unsafe_allow_html=True)
+
+    with R:
+        st.markdown("""
+<div style='min-height:100vh;display:flex;align-items:center;
+     justify-content:center;padding:2rem 1rem;'>
+<div style='width:100%;max-width:440px;animation:fade-up 0.42s cubic-bezier(0.22,1,0.36,1) both;'>
+""", unsafe_allow_html=True)
+
+        st.markdown("""
+<div style='text-align:center;margin-bottom:2rem;'>
+    <div style='font-size:0.70rem;font-weight:800;text-transform:uppercase;
+        letter-spacing:0.14em;color:#6366F1;margin-bottom:10px;'>
+        Welcome back
+    </div>
+    <div style='font-size:1.8rem;font-weight:900;color:#0F172A;
+        letter-spacing:-0.04em;margin-bottom:8px;'>
+        Choose your role
+    </div>
+    <div style='font-size:0.85rem;color:#64748B;font-weight:400;'>
+        Select how you'd like to access the portal
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+        # Role cards
+        roles = [
+            ("citizen",  "👤", "Citizen",  "#6366F1", "#8B5CF6",
+             "File complaints, track status & access government schemes",
+             "Login as Citizen", "user_login"),
+            ("official", "🏢", "Official", "#0EA5E9", "#6366F1",
+             "Manage & resolve complaints for your department",
+             "Login as Official", "official_login"),
+            ("admin",    "👑", "Admin",    "#F59E0B", "#EF4444",
+             "System management, analytics & oversight",
+             "Login as Admin", "admin_login"),
+        ]
+
+        for role_id, icon, title, c1, c2, desc, btn_lbl, screen in roles:
+            ar2,ag2,ab2 = int(c1[1:3],16),int(c1[3:5],16),int(c1[5:7],16)
+            st.markdown(f"""
+<div style='
+    background:rgba(255,255,255,0.80);
+    border:1.5px solid rgba(255,255,255,0.95);
+    border-radius:20px;padding:20px 22px 16px;
+    margin-bottom:12px;
+    box-shadow:0 4px 16px rgba(15,23,42,0.07);
+    backdrop-filter:blur(20px);
+    position:relative;overflow:hidden;
+    transition:transform 0.20s,box-shadow 0.20s;
+'>
+<div style='position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,{c1},{c2});
+    border-radius:20px 20px 0 0;'></div>
+<div style='display:flex;align-items:center;gap:14px;margin-bottom:10px;'>
+    <div style='width:46px;height:46px;border-radius:14px;flex-shrink:0;
+        background:linear-gradient(135deg,{c1},{c2});
+        display:flex;align-items:center;justify-content:center;
+        font-size:1.3rem;
+        box-shadow:0 6px 18px rgba({ar2},{ag2},{ab2},0.34);'>
+        {icon}
+    </div>
+    <div>
+        <div style='font-size:1.0rem;font-weight:800;color:#0F172A;
+            letter-spacing:-0.02em;margin-bottom:3px;'>{title}</div>
+        <div style='font-size:0.74rem;color:#64748B;line-height:1.5;'>{desc}</div>
+    </div>
+</div>
+</div>
+""", unsafe_allow_html=True)
+
+            st.markdown(_login_css(dark, c1, c2), unsafe_allow_html=True)
+            if st.button(f"→  {btn_lbl}", key=f"{role_id}_role_btn", use_container_width=True):
+                st.session_state.screen = screen
+                st.rerun()
+            st.markdown("<div style='height:2px'></div>", unsafe_allow_html=True)
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
+        st.markdown(_login_css(dark, "#6366F1", "#8B5CF6"), unsafe_allow_html=True)
+        if st.button("🌐  Change Language", key="lt_lang", use_container_width=True):
+            st.session_state.screen = "language"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("</div></div>", unsafe_allow_html=True)
+
+
 # ═══════════════════════════════════════════════════════════════════════════════
 # CITIZEN LOGIN
 # ═══════════════════════════════════════════════════════════════════════════════
+
 def pg_user_login():
     dark = st.session_state.get("dark_mode", False)
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    st.markdown(_login_css(dark, accent="#6366F1", accent2="#8B5CF6"), unsafe_allow_html=True)
+    st.markdown(_login_css(dark, "#6366F1", "#8B5CF6"), unsafe_allow_html=True)
 
     for k, v in [("otp_sent", False), ("login_phone", ""), ("demo_otp", "")]:
         if k not in st.session_state:
             st.session_state[k] = v
 
-    # ── Hero ──────────────────────────────────────────────────────────────────
-    st.markdown(
-        "<div class='lp-hero' style='"
-        "background:linear-gradient(135deg,#1e1b4b 0%,#4338CA 45%,#0c4a6e 100%);'>"
-        "<span class='lp-hero-icon'>👤</span>"
-        "<div class='lp-hero-title'>Welcome back</div>"
-        "<div class='lp-hero-sub'>File complaints · track status · access government schemes</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+    L, R = st.columns([1, 1], gap="large")
 
-    tab1, tab2 = st.tabs(["🔐  Login", "📝  Register"])
+    with L:
+        st.markdown(_left_panel(
+            icon="👤", title="Citizen Portal",
+            subtitle="Login to file & track your complaints",
+            accent="#6366F1", accent2="#8B5CF6"
+        ), unsafe_allow_html=True)
 
-    # ── LOGIN ─────────────────────────────────────────────────────────────────
-    with tab1:
-        st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
+    with R:
+        st.markdown("""
+<div style='min-height:100vh;display:flex;align-items:center;
+     justify-content:center;padding:2rem 1rem;'>
+<div style='width:100%;max-width:420px;'>
+""", unsafe_allow_html=True)
 
-        if not st.session_state.otp_sent:
-            st.markdown("<div class='lp-card-label'>Phone Verification</div>", unsafe_allow_html=True)
-            phone = st.text_input(
-                "Mobile number",
-                placeholder="Enter 10-digit number",
-                key="login_phone_input",
-            )
-            st.caption("📞 A one-time password will be sent to your number")
+        st.markdown("""
+<div style='text-align:center;margin-bottom:1.75rem;'>
+    <div style='width:60px;height:60px;border-radius:18px;
+        background:linear-gradient(135deg,#6366F1,#8B5CF6);
+        display:flex;align-items:center;justify-content:center;
+        font-size:1.6rem;margin:0 auto 14px;
+        box-shadow:0 12px 32px rgba(99,102,241,0.35);
+        animation:icon-float 4s ease-in-out infinite;'>👤</div>
+    <div style='font-size:1.55rem;font-weight:800;color:#0F172A;
+        letter-spacing:-0.04em;margin-bottom:5px;'>Welcome back</div>
+    <div style='font-size:0.82rem;color:#64748B;'>
+        Sign in to access your grievances & services
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
-            if st.button("📲  Send OTP", key="send_otp_btn", use_container_width=True):
-                p = phone.strip()
-                if not p:
-                    st.error("Please enter your phone number.")
-                elif len(p) != 10 or not p.isdigit():
-                    st.error("Enter a valid 10-digit number (digits only).")
-                else:
-                    with st.spinner("Sending OTP…"):
-                        resp = api("post", "/auth/user/send-otp", json={"phone": p})
-                    if resp.get("success"):
-                        st.session_state.otp_sent    = True
-                        st.session_state.login_phone = p
-                        st.session_state.demo_otp    = resp.get("otp", "123456")
-                        st.rerun()
+        tab1, tab2 = st.tabs(["🔐  Login", "📝  Register"])
+
+        with tab1:
+            st.markdown("<div class='ar-card'>", unsafe_allow_html=True)
+
+            if not st.session_state.otp_sent:
+                st.markdown("<div class='lp-card-label'>Phone Verification</div>", unsafe_allow_html=True)
+                phone = st.text_input(
+                    "Mobile number", placeholder="Enter 10-digit number",
+                    key="login_phone_input",
+                )
+                st.caption("📞 A one-time password will be sent to your number")
+                if st.button("📲  Send OTP", key="send_otp_btn", use_container_width=True):
+                    p = phone.strip()
+                    if not p:
+                        st.error("Please enter your phone number.")
+                    elif len(p) != 10 or not p.isdigit():
+                        st.error("Enter a valid 10-digit number (digits only).")
                     else:
-                        st.error(resp.get("detail", "Failed to send OTP. Try again."))
-        else:
-            st.markdown("<div class='lp-card-label'>Enter OTP</div>", unsafe_allow_html=True)
-            st.markdown(
-                f"<div class='lp-phone-badge'>📱 Code sent to +91 {st.session_state.login_phone}</div>",
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                f"<div class='lp-otp-box'>"
-                f"<span class='lp-otp-icon'>🔑</span>"
-                f"<div>"
-                f"<div class='lp-otp-label'>Demo OTP</div>"
-                f"<span class='lp-otp-code'>{st.session_state.demo_otp}</span>"
-                f"</div></div>",
-                unsafe_allow_html=True,
-            )
-            otp = st.text_input(
-                "OTP",
-                placeholder="6-digit code",
-                key="temp_otp",
-                type="password",
-            )
+                        with st.spinner("Sending OTP…"):
+                            resp = api("post", "/auth/user/send-otp", json={"phone": p})
+                        if resp.get("success"):
+                            st.session_state.otp_sent    = True
+                            st.session_state.login_phone = p
+                            st.session_state.demo_otp    = resp.get("otp", "123456")
+                            st.rerun()
+                        else:
+                            st.error(resp.get("detail", "Failed to send OTP. Try again."))
+            else:
+                st.markdown("<div class='lp-card-label'>Enter OTP</div>", unsafe_allow_html=True)
+                st.markdown(
+                    f"<div class='lp-phone-badge'>📱 Code sent to +91 {st.session_state.login_phone}</div>",
+                    unsafe_allow_html=True,
+                )
+                st.markdown(
+                    f"<div class='lp-otp-box'>"
+                    f"<span class='lp-otp-icon'>🔑</span>"
+                    f"<div><div class='lp-otp-label'>Demo OTP</div>"
+                    f"<span class='lp-otp-code'>{st.session_state.demo_otp}</span>"
+                    f"</div></div>",
+                    unsafe_allow_html=True,
+                )
+                otp = st.text_input("OTP", placeholder="6-digit code",
+                                    key="temp_otp", type="password")
+                if st.button("✅  Verify & Sign in", key="verify_otp_btn", use_container_width=True):
+                    if not otp:
+                        st.error("Please enter the OTP.")
+                    else:
+                        with st.spinner("Verifying…"):
+                            resp = api("post", "/auth/user/verify-otp",
+                                       json={"phone": st.session_state.login_phone, "otp": otp})
+                        if resp.get("success"):
+                            st.session_state.user     = resp
+                            st.session_state.role     = "user"
+                            st.session_state.otp_sent = False
+                            st.session_state.demo_otp = ""
+                            st.session_state.screen   = "user_dashboard"
+                            st.rerun()
+                        else:
+                            st.error(resp.get("detail", "Invalid OTP. Please try again."))
 
-            if st.button("✅  Verify & Sign in", key="verify_otp_btn", use_container_width=True):
-                if not otp:
-                    st.error("Please enter the OTP.")
-                else:
-                    with st.spinner("Verifying…"):
-                        resp = api("post", "/auth/user/verify-otp",
-                                   json={"phone": st.session_state.login_phone, "otp": otp})
-                    if resp.get("success"):
-                        st.session_state.user     = resp
-                        st.session_state.role     = "user"
+                st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+                ra, rb = st.columns(2)
+                with ra:
+                    if st.button("🔄  Resend OTP", key="resend_otp_btn", use_container_width=True):
+                        with st.spinner("Resending…"):
+                            resp = api("post", "/auth/user/send-otp",
+                                       json={"phone": st.session_state.login_phone})
+                        if resp.get("success"):
+                            st.session_state.demo_otp = resp.get("otp", "123456")
+                            st.success("New OTP sent!")
+                            st.rerun()
+                        else:
+                            st.error("Failed to resend OTP.")
+                with rb:
+                    st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
+                    if st.button("← Cancel", key="cancel_otp_btn", use_container_width=True):
                         st.session_state.otp_sent = False
                         st.session_state.demo_otp = ""
-                        st.session_state.screen   = "user_dashboard"
                         st.rerun()
-                    else:
-                        st.error(resp.get("detail", "Invalid OTP. Please try again."))
+                    st.markdown("</div>", unsafe_allow_html=True)
 
-            st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
-            ra, rb = st.columns(2)
-            with ra:
-                if st.button("🔄  Resend OTP", key="resend_otp_btn", use_container_width=True):
-                    with st.spinner("Resending…"):
-                        resp = api("post", "/auth/user/send-otp",
-                                   json={"phone": st.session_state.login_phone})
-                    if resp.get("success"):
-                        st.session_state.demo_otp = resp.get("otp", "123456")
-                        st.success("New OTP sent!")
-                        st.rerun()
-                    else:
-                        st.error("Failed to resend OTP.")
-            with rb:
-                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
-                if st.button("← Cancel", key="cancel_otp_btn", use_container_width=True):
-                    st.session_state.otp_sent = False
-                    st.session_state.demo_otp = ""
-                    st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-        
-        st.markdown("</div>", unsafe_allow_html=True)   # .lp-card
-
-    # ── REGISTER ──────────────────────────────────────────────────────────────
-    with tab2:
-        with st.container(border=True):
+        with tab2:
+            st.markdown("<div class='ar-card'>", unsafe_allow_html=True)
             st.markdown("<div class='lp-card-label'>Create account</div>", unsafe_allow_html=True)
             with st.form(key="register_form", clear_on_submit=True):
-                r_name    = st.text_input("Full name *",       placeholder="Your full name",        key="reg_name")
-                r_phone   = st.text_input("Phone number *",    placeholder="10-digit number",       key="reg_phone")
-                r_address = st.text_area ("Address *",         placeholder="Your complete address", key="reg_address", height=90)
+                r_name    = st.text_input("Full name *",    placeholder="Your full name",        key="reg_name")
+                r_phone   = st.text_input("Phone number *", placeholder="10-digit number",       key="reg_phone")
+                r_address = st.text_area ("Address *",      placeholder="Your complete address", key="reg_address", height=88)
                 submitted = st.form_submit_button("📝  Create Account", use_container_width=True)
-
             if submitted:
                 if not r_name:
                     st.error("Please enter your full name.")
@@ -2564,25 +2720,26 @@ def pg_user_login():
                             "❌ Phone already registered — please login."
                             if "already" in em.lower() else f"❌ {em}"
                         )
+            st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Back ──────────────────────────────────────────────────────────────────
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
-    if st.button("← Back to Role Selection", key="back_to_role", use_container_width=True):
-        st.session_state.otp_sent = False
-        st.session_state.demo_otp = ""
-        st.session_state.screen   = "login_type"
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
+        if st.button("← Back to Role Selection", key="back_to_role", use_container_width=True):
+            st.session_state.otp_sent = False
+            st.session_state.demo_otp = ""
+            st.session_state.screen   = "login_type"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # OFFICIAL LOGIN
 # ═══════════════════════════════════════════════════════════════════════════════
+
 def pg_official_login():
     dark = st.session_state.get("dark_mode", False)
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    st.markdown(_login_css(dark, accent="#0EA5E9", accent2="#6366F1"), unsafe_allow_html=True)
+    st.markdown(_login_css(dark, "#0EA5E9", "#6366F1"), unsafe_allow_html=True)
 
     for k, v in [
         ("off_active_tab", "login"), ("off_step", 1), ("off_data", {}),
@@ -2592,50 +2749,72 @@ def pg_official_login():
         if k not in st.session_state:
             st.session_state[k] = v
 
-    # ── Hero ─────────────────────────────────────────────���────────────────────
-    st.markdown(
-        "<div class='lp-hero' style='"
-        "background:linear-gradient(135deg,#0c1a3a 0%,#0369a1 45%,#1e1b4b 100%);'>"
-        "<span class='lp-hero-icon'>🏢</span>"
-        "<div class='lp-hero-title'>Official Portal</div>"
-        "<div class='lp-hero-sub'>Department management &amp; complaint resolution</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+    L, R = st.columns([1, 1], gap="large")
 
-    # ── Custom pill tabs ───────────────────────────────────────────────────────
-    st.markdown("<div class='lp-tabs'>", unsafe_allow_html=True)
-    tc1, tc2 = st.columns(2)
-    with tc1:
-        cls = "lp-tab-active" if st.session_state.off_active_tab == "login" else "lp-tab-idle"
-        st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
-        if st.button("🔐  Login", key="tab_login_btn", use_container_width=True):
-            st.session_state.off_active_tab = "login"
-            st.session_state.show_forgot = False
-            st.rerun()
+    with L:
+        st.markdown(_left_panel(
+            icon="🏢", title="Official Portal",
+            subtitle="Department management & resolution",
+            accent="#0EA5E9", accent2="#6366F1"
+        ), unsafe_allow_html=True)
+
+    with R:
+        st.markdown("""
+<div style='min-height:100vh;display:flex;align-items:center;
+     justify-content:center;padding:2rem 1rem;'>
+<div style='width:100%;max-width:420px;'>
+""", unsafe_allow_html=True)
+
+        # reapply accent for this page's buttons
+        st.markdown(_login_css(dark, "#0EA5E9", "#6366F1"), unsafe_allow_html=True)
+
+        st.markdown("""
+<div style='text-align:center;margin-bottom:1.75rem;'>
+    <div style='width:60px;height:60px;border-radius:18px;
+        background:linear-gradient(135deg,#0EA5E9,#6366F1);
+        display:flex;align-items:center;justify-content:center;
+        font-size:1.6rem;margin:0 auto 14px;
+        box-shadow:0 12px 32px rgba(14,165,233,0.35);
+        animation:icon-float 4s ease-in-out infinite;'>🏢</div>
+    <div style='font-size:1.55rem;font-weight:800;color:#0F172A;
+        letter-spacing:-0.04em;margin-bottom:5px;'>Official Portal</div>
+    <div style='font-size:0.82rem;color:#64748B;'>
+        Department management &amp; complaint resolution
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+        # Custom pill tabs
+        st.markdown("<div style='display:flex;gap:4px;background:rgba(241,245,249,0.85);border:1px solid #E2E8F4;border-radius:16px;padding:4px;margin-bottom:20px;'>", unsafe_allow_html=True)
+        tc1, tc2 = st.columns(2)
+        with tc1:
+            cls = "lp-tab-active" if st.session_state.off_active_tab == "login" else "lp-tab-idle"
+            st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+            if st.button("🔐  Login", key="tab_login_btn", use_container_width=True):
+                st.session_state.off_active_tab = "login"
+                st.session_state.show_forgot = False
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
+        with tc2:
+            cls = "lp-tab-active" if st.session_state.off_active_tab == "request" else "lp-tab-idle"
+            st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+            if st.button("📝  Request Access", key="tab_request_btn", use_container_width=True):
+                st.session_state.off_active_tab = "request"
+                st.session_state.show_forgot = False
+                st.rerun()
+            st.markdown("</div>", unsafe_allow_html=True)
         st.markdown("</div>", unsafe_allow_html=True)
-    with tc2:
-        cls = "lp-tab-active" if st.session_state.off_active_tab == "request" else "lp-tab-idle"
-        st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
-        if st.button("📝  Request Access", key="tab_request_btn", use_container_width=True):
-            st.session_state.off_active_tab = "request"
-            st.session_state.show_forgot = False
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
 
-    # ══════════════════ LOGIN + FORGOT PASSWORD ════════════════════════════════
-    if st.session_state.off_active_tab == "login":
+        # ── LOGIN / FORGOT ──────────────────────────────────────────
+        if st.session_state.off_active_tab == "login":
 
-        if not st.session_state.show_forgot:
-            # Normal login
-            with st.container(border=True):
+            if not st.session_state.show_forgot:
+                st.markdown("<div class='ar-card'>", unsafe_allow_html=True)
                 st.markdown("<div class='lp-card-label'>Official credentials</div>", unsafe_allow_html=True)
                 with st.form(key="official_login_form", clear_on_submit=False):
                     email    = st.text_input("Email address", placeholder="official@department.gov.in", key="official_email")
-                    password = st.text_input("Password",      placeholder="Your password",              key="official_password", type="password")
+                    password = st.text_input("Password",      placeholder="Your password", key="official_password", type="password")
                     submitted = st.form_submit_button("🔑  Sign In", use_container_width=True)
-
                 if submitted:
                     if not email or not password:
                         st.error("Please enter both email and password.")
@@ -2651,18 +2830,18 @@ def pg_official_login():
                         else:
                             st.error(resp.get("detail", "Invalid email or password."))
 
-                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
                 if st.button("🔒  Forgot password?", key="forgot_pwd_btn", use_container_width=False):
-                    st.session_state.show_forgot          = True
-                    st.session_state.forgot_step          = 1
-                    st.session_state.forgot_otp_verified  = False
-                    st.session_state.forgot_email         = ""
+                    st.session_state.show_forgot         = True
+                    st.session_state.forgot_step         = 1
+                    st.session_state.forgot_otp_verified = False
+                    st.session_state.forgot_email        = ""
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
 
-        else:
-            # Forgot password flow
-            with st.container(border=True):
+            else:
+                st.markdown("<div class='ar-card'>", unsafe_allow_html=True)
                 st.markdown("<div class='lp-card-label'>Reset password</div>", unsafe_allow_html=True)
                 step = st.session_state.forgot_step
 
@@ -2672,7 +2851,7 @@ def pg_official_login():
                         if not forgot_email:
                             st.error("Please enter your email.")
                         elif "@" not in forgot_email or "." not in forgot_email.split("@")[-1]:
-                            st.error("Please enter a valid email (e.g. name@example.com).")
+                            st.error("Please enter a valid email.")
                         else:
                             st.session_state.forgot_email = forgot_email
                             st.session_state.forgot_step  = 2
@@ -2699,10 +2878,7 @@ def pg_official_login():
                             st.success("Demo OTP resent (still 123456).")
 
                 else:
-                    st.markdown(
-                        "<div class='lp-verified'>✅ Email verified — set your new password</div>",
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown("<div class='lp-verified'>✅ Email verified — set your new password</div>", unsafe_allow_html=True)
                     new_password     = st.text_input("New password",         type="password", key="new_pwd")
                     confirm_password = st.text_input("Confirm new password", type="password", key="confirm_pwd")
                     if st.button("🔐  Reset Password", use_container_width=True):
@@ -2720,36 +2896,35 @@ def pg_official_login():
                                 })
                             if resp.get("success"):
                                 st.success("✅ Password reset! Please sign in.")
-                                for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
+                                for key in ["show_forgot","forgot_step","forgot_email","forgot_otp_verified"]:
                                     st.session_state.pop(key, None)
                                 st.rerun()
                             else:
-                                st.error(f"Reset failed: {resp.get('detail', 'Unknown error')}")
+                                st.error(f"Reset failed: {resp.get('detail','Unknown error')}")
 
-                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                st.markdown("<div class='btn-secondary' style='margin-top:10px;'>", unsafe_allow_html=True)
                 if st.button("← Back to login", use_container_width=True, key="back_to_login_from_forgot"):
-                    for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
+                    for key in ["show_forgot","forgot_step","forgot_email","forgot_otp_verified"]:
                         st.session_state.pop(key, None)
                     st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
+                st.markdown("</div></div>", unsafe_allow_html=True)
 
-    # ══════════════════ REQUEST ACCESS ════════════════════════════════════════
-    else:
-        with st.container(border=True):
+        # ── REQUEST ACCESS ──────────────────────────────────────────
+        else:
+            st.markdown("<div class='ar-card'>", unsafe_allow_html=True)
             step = st.session_state.off_step
 
-            # Step indicator
             st.markdown(
                 f"<div class='lp-step-wrap'>"
-                f"  <div class='lp-step-col'>"
-                f"    <div class='lp-step-dot {'active' if step==1 else 'done'}'>{'1' if step==1 else '✓'}</div>"
-                f"    <div class='lp-step-lbl {'active' if step==1 else 'idle'}'>Details</div>"
-                f"  </div>"
-                f"  <div class='lp-step-line'></div>"
-                f"  <div class='lp-step-col'>"
-                f"    <div class='lp-step-dot {'active' if step==2 else 'idle'}'>2</div>"
-                f"    <div class='lp-step-lbl {'active' if step==2 else 'idle'}'>Verify</div>"
-                f"  </div>"
+                f"<div class='lp-step-col'>"
+                f"<div class='lp-step-dot {'active' if step==1 else 'done'}'>{'1' if step==1 else '✓'}</div>"
+                f"<div class='lp-step-lbl {'active' if step==1 else 'idle'}'>Details</div>"
+                f"</div>"
+                f"<div class='lp-step-line'></div>"
+                f"<div class='lp-step-col'>"
+                f"<div class='lp-step-dot {'active' if step==2 else 'idle'}'>2</div>"
+                f"<div class='lp-step-lbl {'active' if step==2 else 'idle'}'>Verify</div>"
+                f"</div>"
                 f"</div>",
                 unsafe_allow_html=True,
             )
@@ -2757,16 +2932,15 @@ def pg_official_login():
             if step == 1:
                 st.markdown("<div class='lp-card-label'>Your details</div>", unsafe_allow_html=True)
                 d  = st.session_state.off_data
-                nm = st.text_input("Full name *",               value=d.get("name",""),      key="off_name")
-                em = st.text_input("Email address *",           value=d.get("email",""),     key="off_email")
-                ph = st.text_input("Phone number * (10 digits)",value=d.get("phone",""),     key="off_phone")
-                pw = st.text_input("Password * (min 6 chars)",  value=d.get("password",""),  key="off_pass",  type="password")
-                dc = st.text_input("Department code *",         value=d.get("dept_code",""), key="off_dept",
+                nm = st.text_input("Full name *",                value=d.get("name",""),      key="off_name")
+                em = st.text_input("Email address *",            value=d.get("email",""),     key="off_email")
+                ph = st.text_input("Phone number * (10 digits)", value=d.get("phone",""),     key="off_phone")
+                pw = st.text_input("Password * (min 6 chars)",   value=d.get("password",""),  key="off_pass", type="password")
+                dc = st.text_input("Department code *",          value=d.get("dept_code",""), key="off_dept",
                                    help="Contact your department admin for this code")
                 st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-
                 if st.button("📲  Continue & Send OTP", use_container_width=True, key="off_send_otp"):
-                    errs = [f for f, v in [("Name",nm),("Email",em),("Phone",ph),("Password",pw),("Dept Code",dc)] if not v]
+                    errs = [f for f,v in [("Name",nm),("Email",em),("Phone",ph),("Password",pw),("Dept Code",dc)] if not v]
                     if errs:
                         st.error("Missing: " + ", ".join(errs))
                     elif len(ph) != 10 or not ph.isdigit():
@@ -2785,16 +2959,10 @@ def pg_official_login():
                     f"<div class='lp-info'>📱 OTP sent to <strong>{masked}</strong> — use demo code <strong>123456</strong></div>",
                     unsafe_allow_html=True,
                 )
-                otp = st.text_input(
-                    "OTP", type="password", placeholder="6-digit code",
-                    key="off_otp_input", max_chars=6, label_visibility="collapsed",
-                )
-
+                otp = st.text_input("OTP", type="password", placeholder="6-digit code",
+                                    key="off_otp_input", max_chars=6, label_visibility="collapsed")
                 if st.session_state.off_otp_verified:
-                    st.markdown(
-                        "<div class='lp-verified'>✅ Phone verified — ready to submit!</div>",
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown("<div class='lp-verified'>✅ Phone verified — ready to submit!</div>", unsafe_allow_html=True)
 
                 oc1, oc2 = st.columns(2)
                 with oc1:
@@ -2816,66 +2984,129 @@ def pg_official_login():
                             resp = api("post", "/auth/official/signup", json=st.session_state.off_data)
                         if resp.get("success"):
                             st.success("✅ Request submitted! Awaiting admin approval.")
-                            for k in ("off_step", "off_data", "off_otp_verified"):
+                            for k in ("off_step","off_data","off_otp_verified"):
                                 st.session_state.pop(k, None)
                             st.session_state.off_active_tab = "login"
                             st.balloons()
                             st.rerun()
                         else:
-                            em2 = resp.get("detail", "Unknown error")
+                            em2 = resp.get("detail","Unknown error")
                             st.error(
                                 "❌ Email already registered — try logging in."
                                 if "already" in em2.lower() else f"❌ {em2}"
                             )
                 else:
-                    st.markdown(
-                        "<div class='lp-warn'>🔐 Verify your OTP above before submitting.</div>",
-                        unsafe_allow_html=True,
-                    )
+                    st.markdown("<div class='lp-warn'>🔐 Verify your OTP above before submitting.</div>", unsafe_allow_html=True)
 
                 st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
                 if st.button("← Edit details", use_container_width=True, key="off_back_step1"):
                     st.session_state.off_step         = 1
                     st.session_state.off_otp_verified = False
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
 
-    # ── Back ──────────────────────────────────────────────────────────────────
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
-    if st.button("← Back to Role Selection", key="official_back", use_container_width=True):
-        for k in ("off_step","off_data","off_otp_verified","off_active_tab",
-                  "show_forgot","forgot_step","forgot_email","forgot_otp_verified"):
-            st.session_state.pop(k, None)
-        st.session_state.screen = "login_type"
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
+        if st.button("← Back to Role Selection", key="official_back", use_container_width=True):
+            for k in ("off_step","off_data","off_otp_verified","off_active_tab",
+                      "show_forgot","forgot_step","forgot_email","forgot_otp_verified"):
+                st.session_state.pop(k, None)
+            st.session_state.screen = "login_type"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # ADMIN LOGIN
-# ═════════════════════════════════════════════��═════════════════════════════════
+# ═══════════════════════════════════════════════════════════════════════════════
+
 def pg_admin_login():
     dark = st.session_state.get("dark_mode", False)
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    st.markdown(_login_css(dark, accent="#F59E0B", accent2="#EF4444"), unsafe_allow_html=True)
+    st.markdown(_login_css(dark, "#F59E0B", "#EF4444"), unsafe_allow_html=True)
 
-    st.markdown(
-        "<div class='lp-hero' style='"
-        "background:linear-gradient(135deg,#3b1a00 0%,#78350f 45%,#1c1917 100%);'>"
-        "<span class='lp-hero-icon'>👑</span>"
-        "<div class='lp-hero-title'>Admin Panel</div>"
-        "<div class='lp-hero-sub'>System administration · analytics · oversight</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
+    L, R = st.columns([1, 1], gap="large")
 
-    with st.container(border=True):
+    with L:
+        st.markdown("""
+<div class='auth-left' style='background:linear-gradient(145deg,#1c1917 0%,#78350f 40%,#7c2d12 75%,#1c1917 100%);'>
+    <div class='al-logo'>
+        <div class='al-logo-icon'>👑</div>
+        <div>
+            <div class='al-logo-name'>Admin Console</div>
+            <div class='al-logo-tag'>Jan Seva Portal</div>
+        </div>
+    </div>
+    <div class='al-hero'>
+        <div class='al-hero-eyebrow'>
+            <span class='al-hero-eyebrow-dot'></span>
+            Restricted Access
+        </div>
+        <div class='al-hero-title'>
+            System<br><span style='background:linear-gradient(90deg,#FCD34D,#FB923C);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;'>
+            Administration
+            </span>
+        </div>
+        <div class='al-hero-sub'>
+            Full oversight of the grievance system —
+            analytics, user management, and department control.
+        </div>
+        <div class='al-stats'>
+            <div class='al-stat'>
+                <div class='al-stat-num'>7</div>
+                <div class='al-stat-lbl'>Departments<br>Managed</div>
+            </div>
+            <div class='al-stat'>
+                <div class='al-stat-num'>24/7</div>
+                <div class='al-stat-lbl'>System<br>Uptime</div>
+            </div>
+            <div class='al-stat'>
+                <div class='al-stat-num'>100%</div>
+                <div class='al-stat-lbl'>Data<br>Security</div>
+            </div>
+        </div>
+        <div class='al-pills'>
+            <div class='al-pill'>📊 Full Analytics</div>
+            <div class='al-pill'>👥 User Management</div>
+            <div class='al-pill'>🔐 Audit Logs</div>
+        </div>
+    </div>
+    <div class='al-footer'>© 2024 Jan Seva Portal · Authorised Personnel Only</div>
+</div>
+""", unsafe_allow_html=True)
+
+    with R:
+        st.markdown("""
+<div style='min-height:100vh;display:flex;align-items:center;
+     justify-content:center;padding:2rem 1rem;'>
+<div style='width:100%;max-width:420px;'>
+""", unsafe_allow_html=True)
+
+        st.markdown("""
+<div style='text-align:center;margin-bottom:1.75rem;'>
+    <div style='width:60px;height:60px;border-radius:18px;
+        background:linear-gradient(135deg,#F59E0B,#EF4444);
+        display:flex;align-items:center;justify-content:center;
+        font-size:1.6rem;margin:0 auto 14px;
+        box-shadow:0 12px 32px rgba(245,158,11,0.38);
+        animation:icon-float 4s ease-in-out infinite;'>👑</div>
+    <div style='font-size:1.55rem;font-weight:800;color:#0F172A;
+        letter-spacing:-0.04em;margin-bottom:5px;'>Admin Panel</div>
+    <div style='font-size:0.82rem;color:#64748B;'>
+        System administration · analytics · oversight
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+        st.markdown("<div class='ar-card'>", unsafe_allow_html=True)
         st.markdown("<div class='lp-card-label'>Administrator credentials</div>", unsafe_allow_html=True)
+
         with st.form(key="admin_login_form", clear_on_submit=False):
-            username = st.text_input("Username", placeholder="Enter your username",  key="admin_username")
-            password = st.text_input("Password", placeholder="Enter your password",  key="admin_password", type="password")
+            username  = st.text_input("Username", placeholder="Enter your username",  key="admin_username")
+            password  = st.text_input("Password", placeholder="Enter your password",  key="admin_password", type="password")
             submitted = st.form_submit_button("👑  Login to Admin Panel", use_container_width=True)
 
         if submitted:
@@ -2897,19 +3128,20 @@ def pg_admin_login():
 
         st.markdown(
             "<div class='lp-demo-hint'>"
-            "<div class='lp-demo-row'><strong>Default credentials:</strong> admin / admin123</div>"
+            "<div class='lp-demo-row'><strong>Default credentials:</strong></div>"
+            "<div class='lp-demo-row'>Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin123</strong></div>"
             "</div>",
             unsafe_allow_html=True,
         )
+        st.markdown("</div>", unsafe_allow_html=True)
 
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
-    if st.button("← Back to Role Selection", key="admin_back", use_container_width=True):
-        st.session_state.screen = "login_type"
-        st.rerun()
-    st.markdown("</div>", unsafe_allow_html=True)
-
-
+        st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+        st.markdown("<div class='btn-secondary'>", unsafe_allow_html=True)
+        if st.button("← Back to Role Selection", key="admin_back", use_container_width=True):
+            st.session_state.screen = "login_type"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("</div></div>", unsafe_allow_html=True)
 # ═════════════════════════════════════════════════════════════════════════════
 # USER DASHBOARD
 # ═════════════════════════════════════════════════════════════════════════════
