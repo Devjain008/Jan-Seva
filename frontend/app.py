@@ -180,978 +180,466 @@ def stars_html(avg, count=0):
 # ═════════════════════════════════════════════════════════════════════════════
 # SIDEBAR
 # ═════════════════════════════════════════════════════════════════════════════
-import streamlit as st
-
-
 def render_sidebar():
-    """
-    Ultra-Premium Sidebar Navigation for Jan Seva Portal
-    Inspired by: Linear · Notion · Vercel · Stripe · Discord · Revolut
-    """
+    import streamlit as st
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # PREMIUM CSS — Glassmorphism + Modern SaaS Design System
-    # ═══════════════════════════════════════════════════════════════════════
-    st.markdown("""
+    role = st.session_state.get("role")
+    dark = st.session_state.get("dark_mode", True)
+
+    if not role:
+        return
+
+    # ─────────────────────────────────────────────────────
+    # COLORS — Refined light-first SaaS palette
+    # ─────────────────────────────────────────────────────
+    if dark:
+        BG = "#0B1120"
+        CARD = "rgba(15,23,42,0.75)"
+        BORDER = "rgba(255,255,255,0.08)"
+        TEXT = "#F8FAFC"
+        SUB = "#94A3B8"
+        HOVER_BG = "rgba(99,102,241,0.12)"
+        ACTIVE_BG = "rgba(99,102,241,0.18)"
+        DIVIDER = "rgba(255,255,255,0.06)"
+    else:
+        # Linear / Stripe / Vercel inspired light palette
+        BG = "#FFFFFF"
+        CARD = "#FAFAFA"
+        BORDER = "#EAECEF"
+        TEXT = "#1F2328"
+        SUB = "#6B7280"
+        HOVER_BG = "#F4F4F5"
+        ACTIVE_BG = "#EEF2FF"
+        DIVIDER = "#F1F2F4"
+
+    ACCENT = "#6366F1"
+
+    # ─────────────────────────────────────────────────────
+    # CSS — Premium SaaS styling
+    # ─────────────────────────────────────────────────────
+    st.markdown(f"""
     <style>
-    /* ──────────────────────────────────────────────────────────────
-       FONTS — Premium typography stack
-    ────────────────────────────────────────────────────────────── */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
 
-    /* ──────────────────────────────────────────────────────────────
-       DESIGN TOKENS
-    ────────────────────────────────────────────────────────────── */
-    :root {
-        --sb-bg            : #FAFBFF;
-        --sb-bg-elevated   : #FFFFFF;
-        --sb-border        : #ECEEF5;
-        --sb-border-hover  : #E0E7FF;
-        --sb-text          : #0F172A;
-        --sb-text-muted    : #64748B;
-        --sb-text-subtle   : #94A3B8;
-        --sb-primary       : #6366F1;
-        --sb-primary-dark  : #4F46E5;
-        --sb-secondary     : #8B5CF6;
-        --sb-accent        : #06B6D4;
-        --sb-success       : #10B981;
-        --sb-danger        : #EF4444;
-        --sb-warning       : #F59E0B;
-        --sb-grad-primary  : linear-gradient(135deg, #6366F1 0%, #8B5CF6 50%, #06B6D4 100%);
-        --sb-grad-active   : linear-gradient(90deg, rgba(99,102,241,0.10) 0%, rgba(139,92,246,0.06) 100%);
-        --sb-shadow-sm     : 0 1px 2px rgba(15,23,42,0.04);
-        --sb-shadow-md     : 0 4px 12px rgba(15,23,42,0.06), 0 1px 3px rgba(15,23,42,0.04);
-        --sb-shadow-lg     : 0 12px 32px rgba(99,102,241,0.12), 0 4px 12px rgba(15,23,42,0.04);
-        --sb-shadow-glow   : 0 0 24px rgba(99,102,241,0.18);
-        --sb-radius        : 10px;
-        --sb-radius-lg     : 14px;
-        --sb-ease          : cubic-bezier(0.4, 0, 0.2, 1);
-        --sb-ease-bounce   : cubic-bezier(0.34, 1.56, 0.64, 1);
-    }
+    /* ===== Sidebar container ===== */
+    section[data-testid="stSidebar"] {{
+        width: 272px !important;
+        min-width: 272px !important;
+        background: {BG} !important;
+        border-right: 1px solid {BORDER} !important;
+        box-shadow: none !important;
+    }}
+    .sb-active button {{
+        background: #EEF2FF !important;
+        color: #4F46E5 !important;
+        border: 1px solid #C7D2FE !important;
+        font-weight: 600 !important;
+    }}
+    section[data-testid="stSidebar"] > div {{
+        background: {BG};
+        padding-top: 0.5rem;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       HIDE DEFAULT STREAMLIT ELEMENTS
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] nav,
-    div[data-testid="stSidebarNav"],
-    ul[data-testid="stSidebarNavItems"],
-    button[data-testid="baseButton-header"] { display: none !important; }
-    #MainMenu { visibility: hidden; }
-    footer { visibility: hidden; }
-    header[data-testid="stHeader"] { background: transparent !important; }
+    /* Hide default Streamlit sidebar chrome noise */
+    section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {{
+        display: none;
+    }}
+    section[data-testid="stSidebar"] hr {{
+        display: none;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       FLOATING TOGGLE BUTTON — Premium glass pill
-    ────────────────────────────────────────────────────────────── */
-    button[data-testid="stSidebarCollapseButton"],
-    button[kind="header"],
-    [data-testid="collapsedControl"] {
-        background: rgba(255,255,255,0.85) !important;
-        backdrop-filter: blur(20px) saturate(180%) !important;
-        -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-        border-radius: 12px !important;
-        width: 42px !important;
-        height: 42px !important;
-        box-shadow: 0 8px 24px rgba(15,23,42,0.08),
-                    0 2px 6px rgba(15,23,42,0.04),
-                    inset 0 1px 0 rgba(255,255,255,0.8) !important;
-        border: 1px solid rgba(236,238,245,0.8) !important;
-        transition: all 0.25s var(--sb-ease-bounce) !important;
-        z-index: 999999 !important;
-    }
-    button[data-testid="stSidebarCollapseButton"]:hover,
-    button[kind="header"]:hover {
-        background: rgba(255,255,255,0.95) !important;
-        transform: scale(1.08) rotate(-3deg) !important;
-        box-shadow: 0 12px 32px rgba(99,102,241,0.18),
-                    0 4px 12px rgba(15,23,42,0.06) !important;
-        border-color: rgba(99,102,241,0.3) !important;
-    }
-    button[data-testid="stSidebarCollapseButton"] svg,
-    button[kind="header"] svg {
-        color: var(--sb-primary) !important;
-        stroke: var(--sb-primary) !important;
-        width: 18px !important;
-        height: 18px !important;
-        stroke-width: 2.5 !important;
-    }
+    /* Ensure sidebar always shows (fix: hidden after login) */
+    section[data-testid="stSidebar"][aria-expanded="true"] {{
+        transform: none !important;
+        visibility: visible !important;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       SIDEBAR SHELL — Premium glass surface
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] {
-        background: var(--sb-bg) !important;
-        background-image:
-            radial-gradient(at 0% 0%, rgba(99,102,241,0.04) 0px, transparent 50%),
-            radial-gradient(at 100% 100%, rgba(139,92,246,0.03) 0px, transparent 50%) !important;
-        border-right: 1px solid var(--sb-border) !important;
-        box-shadow: 4px 0 24px rgba(15,23,42,0.02) !important;
-        min-width: 280px !important;
-        max-width: 296px !important;
-        font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, sans-serif !important;
-    }
-    section[data-testid="stSidebar"] > div:first-child {
-        padding: 0 !important;
-        background: transparent !important;
-    }
-    section[data-testid="stSidebar"] * {
-        font-family: 'Inter', 'Plus Jakarta Sans', sans-serif !important;
-    }
+    .sb-wrap {{
+        padding: 0.25rem 0.75rem 1.5rem;
+    }}
 
-    /* Custom scrollbar */
-    section[data-testid="stSidebar"] ::-webkit-scrollbar { width: 6px !important; }
-    section[data-testid="stSidebar"] ::-webkit-scrollbar-track { background: transparent !important; }
-    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {
-        background: linear-gradient(180deg, #CBD5E1, #94A3B8) !important;
-        border-radius: 10px !important;
-    }
-    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(180deg, var(--sb-primary), var(--sb-secondary)) !important;
-    }
-
-    /* Reset block container spacing */
-    section[data-testid="stSidebar"] .block-container,
-    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0 !important;
-        padding-top: 0 !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] > div {
-        gap: 2px !important;
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-       LOGO HEADER — Premium gradient brand
-    ────────────────────────────────────────────────────────────── */
-    .sb-logo {
-        padding: 22px 18px 18px;
-        display: flex;
-        align-items: center;
-        gap: 13px;
-        background: linear-gradient(180deg, #FFFFFF 0%, rgba(255,255,255,0.6) 100%);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--sb-border);
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-    .sb-logo-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
-        background: var(--sb-grad-primary);
-        background-size: 200% 200%;
-        animation: gradient-shift 8s ease infinite;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.35rem;
-        flex-shrink: 0;
-        box-shadow: 0 8px 20px rgba(99,102,241,0.35),
-                    inset 0 1px 0 rgba(255,255,255,0.3),
-                    inset 0 -1px 0 rgba(0,0,0,0.1);
-        position: relative;
-    }
-    .sb-logo-icon::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 12px;
-        background: linear-gradient(135deg, rgba(255,255,255,0.25), transparent 50%);
-        pointer-events: none;
-    }
-    @keyframes gradient-shift {
-        0%, 100% { background-position: 0% 50%; }
-        50% { background-position: 100% 50%; }
-    }
-    .sb-logo-text { flex: 1; min-width: 0; }
-    .sb-logo-title {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-size: 1.05rem;
-        font-weight: 800;
-        color: var(--sb-text);
-        letter-spacing: -0.03em;
-        line-height: 1.15;
-        background: linear-gradient(135deg, #0F172A 0%, #4F46E5 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .sb-logo-sub {
-        font-size: 0.7rem;
-        color: var(--sb-text-subtle);
-        margin-top: 3px;
-        font-weight: 600;
-        letter-spacing: 0.01em;
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-       PROFILE CARD — Glassmorphism premium card
-    ────────────────────────────────────────────────────────────── */
-    .sb-profile {
-        margin: 14px 12px 10px;
-        padding: 13px 13px;
-        background: rgba(255,255,255,0.75);
-        backdrop-filter: blur(20px) saturate(180%);
-        -webkit-backdrop-filter: blur(20px) saturate(180%);
-        border: 1px solid rgba(236,238,245,0.9);
-        border-radius: var(--sb-radius-lg);
-        transition: all 0.3s var(--sb-ease);
-        box-shadow: var(--sb-shadow-sm);
+    /* ===== Brand ===== */
+    .sb-brand {{
+        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
+        border-radius: 14px;
+        padding: 1rem 1.1rem;
+        color: white;
+        margin-bottom: 1.25rem;
+        box-shadow: 0 1px 2px rgba(99,102,241,0.08),
+                    0 4px 12px rgba(99,102,241,0.18);
         position: relative;
         overflow: hidden;
-    }
-    .sb-profile::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--sb-grad-primary);
-        opacity: 0;
-        transition: opacity 0.3s var(--sb-ease);
-    }
-    .sb-profile:hover {
-        border-color: var(--sb-border-hover);
-        box-shadow: var(--sb-shadow-lg);
-        transform: translateY(-2px);
-    }
-    .sb-profile:hover::before { opacity: 1; }
+    }}
 
-    .sb-profile-inner {
+    .sb-brand::after {{
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(120% 80% at 100% 0%,
+                    rgba(255,255,255,0.18), transparent 60%);
+        pointer-events: none;
+    }}
+
+    .sb-brand-icon {{
+        font-size: 1.5rem;
+        line-height: 1;
+        margin-bottom: 0.5rem;
+    }}
+
+    .sb-brand-title {{
+        font-size: 1.02rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        margin-top: 0.2rem;
+    }}
+
+    .sb-brand-sub {{
+        font-size: 0.72rem;
+        opacity: 0.9;
+        margin-top: 0.15rem;
+        font-weight: 500;
+    }}
+
+    /* ===== User card ===== */
+    .sb-user {{
+        background: {CARD};
+        border: 1px solid {BORDER};
+        border-radius: 12px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        transition: border-color 0.15s ease;
+    }}
+
+    .sb-user:hover {{
+        border-color: #D4D7DC;
+    }}
+
+    .sb-user-top {{
         display: flex;
         align-items: center;
-        gap: 12px;
-    }
-    .sb-profile-avatar {
-        width: 40px;
-        height: 40px;
-        border-radius: 11px;
-        background: var(--sb-grad-primary);
+        gap: 10px;
+    }}
+
+    .sb-avatar {{
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        border-radius: 10px;
+        background: linear-gradient(135deg,#6366F1,#8B5CF6);
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 0.9rem;
-        flex-shrink: 0;
-        color: #fff;
+        color: white;
         font-weight: 700;
-        letter-spacing: -0.02em;
-        box-shadow: 0 6px 14px rgba(99,102,241,0.32),
-                    inset 0 1px 0 rgba(255,255,255,0.25);
-        position: relative;
-    }
-    .sb-profile-avatar::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        border-radius: 11px;
-        background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent 60%);
-    }
-    .sb-profile-info { flex: 1; min-width: 0; }
-    .sb-profile-name {
-        font-size: 0.87rem;
-        font-weight: 700;
-        color: var(--sb-text);
-        letter-spacing: -0.02em;
-        line-height: 1.25;
+        font-size: 0.82rem;
+        letter-spacing: 0.02em;
+        box-shadow: 0 1px 2px rgba(99,102,241,0.25);
+    }}
+
+    .sb-user-info {{
+        min-width: 0;
+        flex: 1;
+    }}
+
+    .sb-user-name {{
+        color: {TEXT};
+        font-size: 0.86rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-    }
-    .sb-profile-sub {
+    }}
+
+    .sb-user-role {{
+        color: {SUB};
         font-size: 0.72rem;
-        color: var(--sb-text-muted);
-        margin-top: 4px;
+        margin-top: 1px;
         font-weight: 500;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-        white-space: nowrap;
-        overflow: hidden;
-    }
-    .sb-role-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 2px 7px;
-        border-radius: 6px;
-        font-size: 0.62rem;
-        font-weight: 700;
+    }}
+
+    /* ===== Section labels ===== */
+    .sb-section {{
+        margin-top: 1.1rem;
+        margin-bottom: 0.35rem;
+        padding-left: 0.6rem;
+        color: {SUB};
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
         text-transform: uppercase;
-        letter-spacing: 0.05em;
-        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(139,92,246,0.08));
-        color: var(--sb-primary-dark);
-        border: 1px solid rgba(99,102,241,0.15);
-    }
-    .sb-profile-status {
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background: var(--sb-success);
-        box-shadow: 0 0 0 2px rgba(16,185,129,0.2),
-                    0 0 10px rgba(16,185,129,0.5);
-        animation: pulse-status 2s ease-in-out infinite;
-        flex-shrink: 0;
-    }
-    @keyframes pulse-status {
-        0%, 100% {
-            box-shadow: 0 0 0 2px rgba(16,185,129,0.2), 0 0 10px rgba(16,185,129,0.5);
-        }
-        50% {
-            box-shadow: 0 0 0 4px rgba(16,185,129,0.3), 0 0 16px rgba(16,185,129,0.7);
-        }
-    }
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       SECTION LABELS — Modern uppercase headers
-    ────────────────────────────────────────────────────────────── */
-    .sb-section-label {
-        font-size: 0.66rem;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        color: var(--sb-text-subtle);
-        padding: 18px 20px 8px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-    .sb-section-label::after {
-        content: '';
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(90deg, var(--sb-border), transparent);
-        margin-left: 4px;
-    }
+    /* ===== Navigation buttons ===== */
+    div.stButton {{
+        margin-bottom: 2px;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       NAV BUTTONS — Premium hover with active glow
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] .stButton { margin: 0 !important; }
-
-    section[data-testid="stSidebar"] .stButton > button {
-        background: transparent !important;
-        border: 1px solid transparent !important;
-        box-shadow: none !important;
-        border-radius: var(--sb-radius) !important;
-        padding: 10px 13px !important;
-        font-size: 0.875rem !important;
-        font-weight: 500 !important;
-        color: var(--sb-text-muted) !important;
-        text-align: left !important;
-        justify-content: flex-start !important;
+    div.stButton > button {{
         width: 100% !important;
-        min-height: 40px !important;
-        height: 40px !important;
-        transition: all 0.18s var(--sb-ease) !important;
-        letter-spacing: -0.01em !important;
-        position: relative !important;
-        line-height: 1.2 !important;
-        overflow: hidden !important;
-    }
-    section[data-testid="stSidebar"] .stButton > button::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(90deg, transparent, rgba(99,102,241,0.06), transparent);
-        transform: translateX(-100%);
-        transition: transform 0.5s var(--sb-ease);
-    }
-    section[data-testid="stSidebar"] .stButton > button:hover {
-        background: rgba(99,102,241,0.06) !important;
-        color: var(--sb-text) !important;
-        border-color: rgba(99,102,241,0.1) !important;
-        transform: translateX(2px) !important;
-    }
-    section[data-testid="stSidebar"] .stButton > button:hover::before {
-        transform: translateX(100%);
-    }
-    section[data-testid="stSidebar"] .stButton > button:active {
-        transform: translateX(2px) scale(0.98) !important;
-    }
-    section[data-testid="stSidebar"] .stButton > button:focus {
+        border-radius: 8px !important;
+        height: 38px !important;
+        min-height: 38px !important;
+        border: 1px solid transparent !important;
+        background: transparent !important;
+        color: {TEXT} !important;
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+        text-align: left !important;
+        padding: 0 12px !important;
+        letter-spacing: -0.005em !important;
+        transition: background-color 0.12s ease, color 0.12s ease !important;
+        box-shadow: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+    }}
+
+    div.stButton > button p {{
+        font-weight: 500 !important;
+        font-size: 0.875rem !important;
+        margin: 0 !important;
+    }}
+
+    div.stButton > button:hover {{
+        background: {HOVER_BG} !important;
+        color: {TEXT} !important;
+        border-color: transparent !important;
+        transform: none !important;
+        box-shadow: none !important;
+    }}
+
+    div.stButton > button:focus {{
+        background: {HOVER_BG} !important;
+        color: {TEXT} !important;
         box-shadow: none !important;
         outline: none !important;
-    }
+    }}
 
-    /* ── ACTIVE NAV — Premium gradient with glow indicator ── */
-    section[data-testid="stSidebar"] .sb-active .stButton > button {
-        background: var(--sb-grad-active) !important;
-        color: var(--sb-primary-dark) !important;
-        font-weight: 600 !important;
-        border: 1px solid rgba(99,102,241,0.18) !important;
-        box-shadow: 0 2px 8px rgba(99,102,241,0.1),
-                    inset 0 1px 0 rgba(255,255,255,0.6) !important;
-    }
-    section[data-testid="stSidebar"] .sb-active .stButton > button::after {
-        content: '';
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 3px;
-        height: 22px;
-        background: var(--sb-grad-primary);
-        border-radius: 0 4px 4px 0;
-        box-shadow: 0 0 12px rgba(99,102,241,0.6);
-        animation: glow-pulse 2s ease-in-out infinite;
-    }
-    @keyframes glow-pulse {
-        0%, 100% { box-shadow: 0 0 12px rgba(99,102,241,0.5); }
-        50% { box-shadow: 0 0 20px rgba(99,102,241,0.8); }
-    }
-    section[data-testid="stSidebar"] .sb-active .stButton > button:hover {
-        background: linear-gradient(90deg, rgba(99,102,241,0.15), rgba(139,92,246,0.10)) !important;
-        transform: translateX(2px) !important;
-    }
+    div.stButton > button:active {{
+        background: {ACTIVE_BG} !important;
+        color: {ACCENT} !important;
+        transform: none !important;
+    }}
 
-    /* ── NAV ITEM WRAPPER ── */
-    .sb-nav-item { padding: 1px 10px; }
+    /* Logout button — subtle danger accent on hover */
+    div.stButton > button[kind="secondary"]:hover,
+    button[data-testid="baseButton-secondary"]:hover {{
+        background: #FEF2F2 !important;
+        color: #DC2626 !important;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       UTILITY BUTTONS (language, etc.)
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] .sb-util .stButton > button {
-        background: rgba(255,255,255,0.7) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 1px solid var(--sb-border) !important;
-        border-radius: var(--sb-radius) !important;
-        color: var(--sb-text-muted) !important;
-        font-size: 0.82rem !important;
-        font-weight: 600 !important;
-        justify-content: center !important;
-        text-align: center !important;
-        min-height: 40px !important;
-        height: 40px !important;
-        box-shadow: var(--sb-shadow-sm) !important;
-    }
-    section[data-testid="stSidebar"] .sb-util .stButton > button:hover {
-        background: rgba(255,255,255,0.95) !important;
-        border-color: var(--sb-primary) !important;
-        color: var(--sb-primary-dark) !important;
-        box-shadow: 0 4px 12px rgba(99,102,241,0.15) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-       LOGOUT BUTTON — Elegant danger style
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] .sb-logout .stButton > button {
-        background: rgba(255,255,255,0.7) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 1px solid rgba(239,68,68,0.2) !important;
-        border-radius: var(--sb-radius) !important;
-        color: var(--sb-danger) !important;
-        font-weight: 600 !important;
-        justify-content: center !important;
-        text-align: center !important;
-        font-size: 0.84rem !important;
-        min-height: 40px !important;
-        height: 40px !important;
-        box-shadow: 0 1px 3px rgba(239,68,68,0.04) !important;
-    }
-    section[data-testid="stSidebar"] .sb-logout .stButton > button:hover {
-        background: linear-gradient(135deg, #FEF2F2, #FEE2E2) !important;
-        color: #B91C1C !important;
-        border-color: #FCA5A5 !important;
-        box-shadow: 0 6px 16px rgba(239,68,68,0.18) !important;
-        transform: translateY(-1px) !important;
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-       LOGIN BUTTONS
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] .sb-login .stButton > button {
-        background: rgba(255,255,255,0.8) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 1px solid var(--sb-border) !important;
-        border-radius: 11px !important;
-        color: var(--sb-text) !important;
-        font-weight: 600 !important;
-        justify-content: center !important;
-        text-align: center !important;
-        font-size: 0.83rem !important;
-        min-height: 44px !important;
-        height: 44px !important;
-        box-shadow: var(--sb-shadow-sm) !important;
-    }
-    section[data-testid="stSidebar"] .sb-login .stButton > button:hover {
-        background: rgba(255,255,255,1) !important;
-        border-color: var(--sb-primary) !important;
-        color: var(--sb-primary-dark) !important;
-        box-shadow: 0 8px 20px rgba(99,102,241,0.18) !important;
-        transform: translateY(-2px) !important;
-    }
-    section[data-testid="stSidebar"] .sb-login-primary .stButton > button {
-        background: var(--sb-grad-primary) !important;
-        background-size: 200% 200% !important;
-        border: 1px solid transparent !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 6px 16px rgba(99,102,241,0.35),
-                    inset 0 1px 0 rgba(255,255,255,0.2) !important;
-    }
-    section[data-testid="stSidebar"] .sb-login-primary .stButton > button:hover {
-        background-position: 100% 50% !important;
-        color: #FFFFFF !important;
-        box-shadow: 0 12px 28px rgba(99,102,241,0.5),
-                    inset 0 1px 0 rgba(255,255,255,0.3) !important;
-        transform: translateY(-2px) !important;
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-       EXPANDER (admin groups)
-    ────────────────────────────────────────────────────────────── */
-    section[data-testid="stSidebar"] .streamlit-expanderHeader,
-    section[data-testid="stSidebar"] details summary {
-        background: transparent !important;
-        border: none !important;
-        font-size: 0.68rem !important;
-        font-weight: 800 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.12em !important;
-        color: var(--sb-text-subtle) !important;
-        padding: 12px 16px !important;
-        border-radius: 8px !important;
-        transition: all 0.2s var(--sb-ease) !important;
-        margin: 4px 10px !important;
-    }
-    section[data-testid="stSidebar"] .streamlit-expanderHeader:hover,
-    section[data-testid="stSidebar"] details summary:hover {
-        color: var(--sb-primary) !important;
-        background: rgba(99,102,241,0.05) !important;
-    }
-    section[data-testid="stSidebar"] [data-testid="stExpander"] {
-        border: none !important;
-        background: transparent !important;
-        box-shadow: none !important;
-    }
-
-    /* ──────────────────────────────────────────────────────────────
-       WELCOME CARD (logged-out)
-    ────────────────────────────────────────────────────────────── */
-    .sb-welcome {
-        margin: 14px 12px 16px;
-        padding: 22px 18px;
-        background: linear-gradient(135deg,
-                    rgba(99,102,241,0.06) 0%,
-                    rgba(139,92,246,0.04) 50%,
-                    rgba(6,182,212,0.05) 100%);
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(99,102,241,0.15);
-        border-radius: 16px;
+    /* ===== Footer ===== */
+    .sb-footer {{
+        margin-top: 1.5rem;
+        padding: 0.75rem 0.9rem;
+        border-radius: 10px;
+        background: {CARD};
+        border: 1px solid {BORDER};
+        color: {SUB};
+        font-size: 0.7rem;
         text-align: center;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 8px 24px rgba(99,102,241,0.08);
-    }
-    .sb-welcome::before {
-        content: '';
-        position: absolute;
-        top: -60%;
-        right: -30%;
-        width: 180px;
-        height: 180px;
-        background: radial-gradient(circle, rgba(139,92,246,0.18), transparent 70%);
-        border-radius: 50%;
-        animation: float-orb 8s ease-in-out infinite;
-    }
-    .sb-welcome::after {
-        content: '';
-        position: absolute;
-        bottom: -50%;
-        left: -20%;
-        width: 140px;
-        height: 140px;
-        background: radial-gradient(circle, rgba(6,182,212,0.15), transparent 70%);
-        border-radius: 50%;
-        animation: float-orb 10s ease-in-out infinite reverse;
-    }
-    @keyframes float-orb {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        50% { transform: translate(10px, -10px) scale(1.1); }
-    }
-    .sb-welcome-icon {
-        font-size: 2rem;
-        display: inline-block;
-        margin-bottom: 8px;
-        animation: wave 2.5s ease-in-out infinite;
-        transform-origin: 70% 70%;
-        position: relative;
-        z-index: 1;
-    }
-    @keyframes wave {
-        0%, 100% { transform: rotate(0deg); }
-        20% { transform: rotate(14deg); }
-        40% { transform: rotate(-8deg); }
-        60% { transform: rotate(10deg); }
-        80% { transform: rotate(-4deg); }
-    }
-    .sb-welcome-text {
-        font-family: 'Plus Jakarta Sans', sans-serif !important;
-        font-weight: 800;
-        background: var(--sb-grad-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        font-size: 1rem;
-        display: block;
-        margin-bottom: 6px;
-        letter-spacing: -0.02em;
-        position: relative;
-        z-index: 1;
-    }
-    .sb-welcome-sub {
-        font-size: 0.76rem;
-        color: var(--sb-text-muted);
         line-height: 1.5;
         font-weight: 500;
-        position: relative;
-        z-index: 1;
-    }
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       DIVIDER
-    ────────────────────────────────────────────────────────────── */
-    .sb-divider {
-        height: 1px;
-        background: linear-gradient(90deg, transparent, var(--sb-border), transparent);
-        margin: 14px 18px;
-    }
+    .sb-footer strong {{
+        color: {TEXT};
+        font-weight: 600;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       FOOTER
-    ────────────────────────────────────────────────────────────── */
-    .sb-footer {
-        padding: 16px 18px 20px;
-        font-size: 0.68rem;
-        color: var(--sb-text-subtle);
-        text-align: center;
-        line-height: 1.7;
-        border-top: 1px solid var(--sb-border);
-        margin-top: 14px;
-        font-weight: 500;
-        background: linear-gradient(180deg, transparent, rgba(255,255,255,0.5));
-    }
-    .sb-footer strong {
-        color: var(--sb-text);
-        font-weight: 700;
-        background: var(--sb-grad-primary);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-    }
-    .sb-footer-version {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        background: linear-gradient(135deg, rgba(99,102,241,0.1), rgba(139,92,246,0.08));
-        color: var(--sb-primary-dark);
-        font-size: 0.62rem;
-        font-weight: 700;
-        padding: 4px 10px;
-        border-radius: 20px;
-        margin-bottom: 8px;
-        letter-spacing: 0.03em;
-        border: 1px solid rgba(99,102,241,0.15);
-    }
-    .sb-footer-version::before {
-        content: '';
+    /* ===== Scrollbar polish ===== */
+    section[data-testid="stSidebar"] ::-webkit-scrollbar {{
         width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: var(--sb-success);
-        box-shadow: 0 0 6px rgba(16,185,129,0.6);
-    }
-    .sb-footer-heart {
-        display: inline-block;
-        animation: heartbeat 1.5s ease-in-out infinite;
-        color: #EF4444;
-    }
-    @keyframes heartbeat {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.2); }
-    }
+    }}
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb {{
+        background: {BORDER};
+        border-radius: 3px;
+    }}
+    section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover {{
+        background: #D4D7DC;
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       BOTTOM CONTROLS
-    ────────────────────────────────────────────────────────────── */
-    .sb-bottom { padding: 0 12px; }
-
-    /* ──────────────────────────────────────────────────────────────
-       RESPONSIVE
-    ────────────────────────────────────────────────────────────── */
-    @media (max-width: 768px) {
-        section[data-testid="stSidebar"] {
+    /* ===== Responsive ===== */
+    @media (max-width: 992px) {{
+        section[data-testid="stSidebar"] {{
+            width: 260px !important;
             min-width: 260px !important;
-            max-width: 280px !important;
-        }
-        .sb-logo { padding: 18px 14px 14px; }
-        .sb-logo-icon { width: 38px; height: 38px; font-size: 1.15rem; }
-        .sb-logo-title { font-size: 0.95rem; }
-    }
+        }}
+    }}
 
-    /* ──────────────────────────────────────────────────────────────
-       ENTRANCE ANIMATION
-    ────────────────────────────────────────────────────────────── */
-    @keyframes fade-slide-in {
-        from { opacity: 0; transform: translateX(-8px); }
-        to { opacity: 1; transform: translateX(0); }
-    }
-    .sb-nav-item, .sb-profile, .sb-welcome, .sb-logo {
-        animation: fade-slide-in 0.4s var(--sb-ease) backwards;
-    }
-    .sb-nav-item:nth-child(1) { animation-delay: 0.05s; }
-    .sb-nav-item:nth-child(2) { animation-delay: 0.10s; }
-    .sb-nav-item:nth-child(3) { animation-delay: 0.15s; }
-    .sb-nav-item:nth-child(4) { animation-delay: 0.20s; }
-    .sb-nav-item:nth-child(5) { animation-delay: 0.25s; }
-    .sb-nav-item:nth-child(6) { animation-delay: 0.30s; }
+    @media (max-width: 768px) {{
+        section[data-testid="stSidebar"] {{
+            width: 85% !important;
+            min-width: 260px !important;
+            max-width: 320px !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
+        }}
+
+        .sb-wrap {{
+            padding: 0.25rem 0.6rem 1.25rem;
+        }}
+
+        .sb-brand {{
+            padding: 0.9rem 1rem;
+            border-radius: 12px;
+        }}
+
+        .sb-brand-title {{
+            font-size: 0.98rem;
+        }}
+
+        div.stButton > button {{
+            height: 42px !important;
+            min-height: 42px !important;
+            font-size: 0.9rem !important;
+        }}
+    }}
+
+    @media (max-width: 480px) {{
+        .sb-brand-sub {{
+            font-size: 0.7rem;
+        }}
+        .sb-user-name {{
+            font-size: 0.84rem;
+        }}
+    }}
+
     </style>
     """, unsafe_allow_html=True)
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # SESSION STATE
-    # ═══════════════════════════════════════════════════════════════════════
-    role = st.session_state.get("role")
-    lang = st.session_state.get("language", "en")
+    # ─────────────────────────────────────────────────────
+    # USER DATA
+    # ─────────────────────────────────────────────────────
+    user_data = (
+        st.session_state.get(role)
+        or st.session_state.get("user")
+        or {}
+    )
 
-    def _(key):
-        try:
-            return t(key)
-        except Exception:
-            return key.replace("_", " ").title()
+    name = (
+        user_data.get("name")
+        or user_data.get("username")
+        or "User"
+    )
 
-    # ── Unread notification count ──
-    unread_count = 0
-    if role == "user":
-        uid = (st.session_state.get("user") or {}).get("user_id")
-        if uid:
-            try:
-                notifs = api("get", f"/schemes/user/notifications/{uid}")
-                if isinstance(notifs, list):
-                    unread_count = sum(1 for n in notifs if not n.get("is_read"))
-            except Exception:
-                pass
+    initials = name[:2].upper()
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # SIDEBAR RENDER
-    # ═══════════════════════════════════════════════════════════════════════
+    # ─────────────────────────────────────────────────────
+    # SIDEBAR UI
+    # ─────────────────────────────────────────────────────
     with st.sidebar:
 
-        # ── LOGO ──
         st.markdown("""
-        <div class="sb-logo">
-            <div class="sb-logo-icon">🏛️</div>
-            <div class="sb-logo-text">
-                <div class="sb-logo-title">Jan Seva Portal</div>
-                <div class="sb-logo-sub">जन सेवा • Citizen Services</div>
+        <div class="sb-wrap">
+        """, unsafe_allow_html=True)
+
+        # BRAND
+        st.markdown("""
+        <div class="sb-brand">
+            <div class="sb-brand-icon">🏛️</div>
+            <div class="sb-brand-title">Jan Seva Portal</div>
+            <div class="sb-brand-sub">
+                Smart Government Platform
             </div>
         </div>
         """, unsafe_allow_html=True)
 
-        # ── PROFILE CARD ──
-        if role == "user":
-            u = st.session_state.get("user") or {}
-            name = u.get("name", "Citizen")
-            phone = u.get("phone", "")
-            inits = "".join(p[0].upper() for p in name.split()[:2]) or "U"
-            st.markdown(f"""
-            <div class="sb-profile">
-                <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar">{inits}</div>
-                    <div class="sb-profile-info">
-                        <div class="sb-profile-name">{name}</div>
-                        <div class="sb-profile-sub">
-                            <span class="sb-profile-status"></span>
-                            <span>{phone or "Citizen"}</span>
-                            <span class="sb-role-badge">User</span>
-                        </div>
+        # USER CARD
+        st.markdown(f"""
+        <div class="sb-user">
+            <div class="sb-user-top">
+                <div class="sb-avatar">{initials}</div>
+                <div class="sb-user-info">
+                    <div class="sb-user-name">{name}</div>
+                    <div class="sb-user-role">
+                        {role.title()}
                     </div>
                 </div>
             </div>
-            """, unsafe_allow_html=True)
+        </div>
+        """, unsafe_allow_html=True)
+
+        # MENU
+        st.markdown("""
+        <div class="sb-section">Navigation</div>
+        """, unsafe_allow_html=True)
+
+        menu_items = []
+
+        if role == "user":
+            menu_items = [
+                ("🏠 Dashboard", "user_dashboard"),
+                ("📝 Complaints", "user_complaints"),
+                ("📢 Schemes", "schemes"),
+                ("🤖 AI Assistant", "ai"),
+                ("⚙️ Settings", "settings"),
+            ]
 
         elif role == "official":
-            o = st.session_state.get("official") or {}
-            name = o.get("name", "Official")
-            dept = o.get("department", "Department")
-            inits = "".join(p[0].upper() for p in name.split()[:2]) or "O"
-            st.markdown(f"""
-            <div class="sb-profile">
-                <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar" style="background:linear-gradient(135deg,#10B981,#059669,#06B6D4);">{inits}</div>
-                    <div class="sb-profile-info">
-                        <div class="sb-profile-name">{name}</div>
-                        <div class="sb-profile-sub">
-                            <span class="sb-profile-status"></span>
-                            <span>{dept}</span>
-                            <span class="sb-role-badge" style="background:linear-gradient(135deg,rgba(16,185,129,0.15),rgba(6,182,212,0.10));color:#047857;border-color:rgba(16,185,129,0.2);">Officer</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            menu_items = [
+                ("🏠 Dashboard", "official_dashboard"),
+                ("📂 Complaints", "official_complaints"),
+                ("📊 Analytics", "analytics"),
+                ("🔔 Notifications", "notifications"),
+                ("⚙️ Settings", "settings"),
+            ]
 
         elif role == "admin":
-            st.markdown("""
-            <div class="sb-profile">
-                <div class="sb-profile-inner">
-                    <div class="sb-profile-avatar" style="background:linear-gradient(135deg,#F59E0B,#EF4444,#EC4899);">👑</div>
-                    <div class="sb-profile-info">
-                        <div class="sb-profile-name">System Admin</div>
-                        <div class="sb-profile-sub">
-                            <span class="sb-profile-status"></span>
-                            <span>Super User</span>
-                            <span class="sb-role-badge" style="background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(239,68,68,0.10));color:#B45309;border-color:rgba(245,158,11,0.25);">Admin</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
+            menu_items = [
+                ("🏠 Dashboard", "admin_dashboard"),
+                ("👥 Users", "users"),
+                ("🏢 Departments", "departments"),
+                ("📈 Analytics", "analytics"),
+                ("⚙️ Settings", "settings"),
+            ]
 
-        # ── HELPER: Navigation button ──
-        def _nav_btn(icon: str, label: str, screen: str, badge: str = ""):
-            is_active = st.session_state.get("screen") == screen
-            full_label = f"{icon}   {label}"
-            if badge:
-                full_label += f"   • {badge}"
-            wrap_cls = "sb-active" if is_active else ""
-            st.markdown(f'<div class="sb-nav-item {wrap_cls}">', unsafe_allow_html=True)
-            if st.button(full_label, key=f"sb_{screen}", use_container_width=True):
+        current_screen = st.session_state.get("screen")
+
+        for label, screen in menu_items:
+
+            active = current_screen == screen
+
+            if active:
+                st.markdown(
+                    '<div class="sb-active">',
+                    unsafe_allow_html=True
+                )
+
+            if st.button(label, key=f"sb_{screen}"):
+
                 st.session_state.screen = screen
                 st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
 
-        # ═══════════════════════════════════════════════════════════════════
-        # USER NAVIGATION
-        # ═══════════════════════════════════════════════════════════════════
-        if role == "user":
-            st.markdown('<div class="sb-section-label">Workspace</div>', unsafe_allow_html=True)
-            _nav_btn("🏠", _("dashboard"),        "user_dashboard")
-            _nav_btn("📢", _("file_complaint"),   "file_complaint")
-            _nav_btn("🔍", _("track_complaint"),  "tracking")
+            if active:
+                st.markdown(
+                    '</div>',
+                    unsafe_allow_html=True
+                )
 
-            st.markdown('<div class="sb-section-label">Services</div>', unsafe_allow_html=True)
-            _nav_btn("📜", _("govt_schemes"),     "schemes")
-            _nav_btn("🤖", _("ai_assistant"),     "assistant")
-            notif_badge = f"{unread_count}" if unread_count else ""
-            _nav_btn("🔔", _("notifications"),    "notifications", badge=notif_badge)
+        st.markdown("""
+        <div class="sb-section">Account</div>
+        """, unsafe_allow_html=True)
 
-        # ═══════════════════════════════════════════════════════════════════
-        # OFFICIAL NAVIGATION
-        # ═══════════════════════════════════════════════════════════════════
-        elif role == "official":
-            st.markdown('<div class="sb-section-label">Workspace</div>', unsafe_allow_html=True)
-            _nav_btn("📊", _("dashboard"),       "official_dashboard")
-            _nav_btn("📋", _("complaints"),      "official_complaints")
+        if st.button("🚪 Logout", key="sidebar_logout"):
+            for k in [
+                "user",
+                "official",
+                "admin",
+                "role"
+            ]:
+                st.session_state.pop(k, None)
 
-            st.markdown('<div class="sb-section-label">Insights</div>', unsafe_allow_html=True)
-            _nav_btn("🏆", _("leaderboard"),     "official_leaderboard")
-            _nav_btn("📜", _("govt_schemes"),    "schemes")
-
-        # ═══════════════════════════════════════════════════════════════════
-        # ADMIN NAVIGATION
-        # ═══════════════════════════════════════════════════════════════════
-        elif role == "admin":
-            def _admin_group(group_label: str, items: list, expanded: bool = False):
-                with st.expander(group_label, expanded=expanded):
-                    for icon, label, screen in items:
-                        _nav_btn(icon, label, screen)
-
-            _admin_group("⚡  Overview", [
-                ("📊", _("dashboard"),      "admin_dashboard"),
-                ("🏢", _("departments"),    "admin_departments"),
-                ("👥", _("officials"),      "admin_officials"),
-                ("📢", _("all_complaints"), "admin_complaints"),
-            ], expanded=True)
-
-            _admin_group("🚀  Performance", [
-                ("🏆", _("leaderboard"),   "admin_leaderboard"),
-                ("🔮", "Predictive AI",    "predictive_analytics"),
-                ("⏱️", "SLA Tracking",     "sla_management"),
-            ])
-
-            _admin_group("🌆  City Analytics", [
-                ("🏙️", "City Health Score", "city_health_score"),
-            ])
-
-            _admin_group("📡  Live Monitoring", [
-                ("📈", "Live Dashboard", "live_dashboard"),
-            ])
-
-            _admin_group("📦  Content", [
-                ("📜", _("schemes"),  "admin_schemes"),
-                ("🗺️", "Heatmap",    "admin_heatmap"),
-            ])
-
-        # ═══════════════════════════════════════════════════════════════════
-        # LOGGED-OUT STATE
-        # ═══════════════════════════════════════════════════════════════════
-        else:
-            st.markdown("""
-            <div class="sb-welcome">
-                <span class="sb-welcome-icon">👋</span>
-                <span class="sb-welcome-text">Welcome Back!</span>
-                <span class="sb-welcome-sub">Sign in to access your<br>citizen services dashboard</span>
-            </div>
-            """, unsafe_allow_html=True)
-
-            st.markdown('<div class="sb-section-label">Sign In As</div>', unsafe_allow_html=True)
-
-            c1, c2 = st.columns(2)
-            with c1:
-                st.markdown('<div class="sb-nav-item sb-login sb-login-primary">', unsafe_allow_html=True)
-                if st.button("👤 Citizen", key="login_citizen", use_container_width=True):
-                    st.session_state.screen = "user_login"
-                    st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
-            with c2:
-                st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
-                if st.button("🏢 Officer", key="login_official", use_container_width=True):
-                    st.session_state.screen = "official_login"
-                    st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
-
-            st.markdown('<div style="height:8px"></div>', unsafe_allow_html=True)
-            st.markdown('<div class="sb-nav-item sb-login">', unsafe_allow_html=True)
-            if st.button("👑 Administrator", key="login_admin", use_container_width=True):
-                st.session_state.screen = "admin_login"
-                st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        # ═══════════════════════════════════════════════════════════════════
-        # BOTTOM CONTROLS — Language + Logout
-        # ═══════════════════════════════════════════════════════════════════
-        st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
-
-        lang_label = "🌐  हिंदी" if lang == "en" else "🌐  English"
-        st.markdown('<div class="sb-util sb-bottom">', unsafe_allow_html=True)
-        if st.button(lang_label, key="sb_lang", use_container_width=True):
-            st.session_state.language = "hi" if lang == "en" else "en"
+            st.session_state.screen = "login_type"
             st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
 
-        if role:
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="sb-logout sb-bottom">', unsafe_allow_html=True)
-            if st.button("🚪  Sign Out", key="sb_logout", use_container_width=True):
-                try:
-                    logout()
-                except Exception:
-                    for k in ["role", "user", "official", "screen"]:
-                        st.session_state.pop(k, None)
-                    st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
-
-        # ── FOOTER ──
         st.markdown("""
         <div class="sb-footer">
-            <span class="sb-footer-version">v2.0 • Live</span><br>
             <strong>Jan Seva Portal</strong><br>
-            Made with <span class="sb-footer-heart">❤</span> in 🇮🇳
+            Modern Government System
         </div>
         """, unsafe_allow_html=True)
+
+        st.markdown("</div>", unsafe_allow_html=True)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # ROUTER
