@@ -2209,7 +2209,7 @@ def pg_login_type():
 def pg_user_login():
     import streamlit as st
  
-    st.markdown(_base_css(), unsafe_allow_html=True)
+    
     st.markdown(_login_css(accent="#6366F1", accent2="#8B5CF6"),
                 unsafe_allow_html=True)
     st.markdown("""
