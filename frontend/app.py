@@ -634,530 +634,677 @@ def analyze_sentiment(rating, comment=""):
 # PUBLIC SCREENS
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_language():
-    _apply_layout("auth")          
-    
+    _apply_layout("auth")
+
     st.markdown("""
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
-    
-    * {
-        font-family: 'Inter', sans-serif;
+    @import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap');
+
+    /* ── RESET & BASE ── */
+    html, body, [class*="css"] {
+        font-family: 'DM Sans', sans-serif !important;
     }
-    
-    .main-container {
-        max-width: 1200px;
+
+    .stApp {
+        background: #060c18 !important;
+        color: #fff !important;
+    }
+
+    /* Hide streamlit default elements */
+    #MainMenu, footer, header { visibility: hidden; }
+    .block-container {
+        padding: 0 !important;
+        max-width: 100% !important;
+    }
+
+    /* ── BACKGROUND ── */
+    .jsv-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background:
+            linear-gradient(180deg, rgba(6,12,24,0.6) 0%, rgba(6,12,24,0.85) 60%, #060c18 100%),
+            url('https://upload.wikimedia.org/wikipedia/commons/thumb/3/3e/Taj_Mahal%2C_Agra%2C_India_edit3.jpg/1280px-Taj_Mahal%2C_Agra%2C_India_edit3.jpg') center/cover no-repeat;
+        pointer-events: none;
+    }
+
+    .jsv-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-image:
+            linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+        background-size: 60px 60px;
+        pointer-events: none;
+    }
+
+    /* ── WRAPPER ── */
+    .jsv-wrap {
+        position: relative;
+        z-index: 1;
+        max-width: 900px;
         margin: 0 auto;
-        padding: 1rem;
-    }
-    
-    .hero-section {
-        background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 50%, #10B981 100%);
-        border-radius: 24px;
-        padding: 2.5rem 2rem;
+        padding: 60px 24px 40px;
         text-align: center;
-        margin-bottom: 2rem;
-        position: relative;
-        overflow: hidden;
     }
-    
-    .hero-section::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -20%;
-        width: 80%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-        border-radius: 50%;
-    }
-    
-    .hero-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .hero-title {
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 0.5rem;
-        position: relative;
-        z-index: 1;
-    }
-    
-    .hero-subtitle {
-        font-size: 1rem;
-        color: rgba(255,255,255,0.9);
-        position: relative;
-        z-index: 1;
-    }
-    
-    .hero-badge {
-        display: inline-block;
-        background: rgba(255,255,255,0.2);
-        padding: 0.3rem 1.2rem;
+
+    /* ── BADGE ── */
+    .jsv-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(0,200,255,0.08);
+        border: 1px solid rgba(0,200,255,0.2);
         border-radius: 50px;
-        font-size: 0.75rem;
-        margin-top: 1rem;
-        position: relative;
-        z-index: 1;
-        color: white;
+        padding: 7px 20px;
+        font-size: 12px;
+        font-weight: 500;
+        color: #00c8ff;
+        letter-spacing: 0.4px;
+        margin-bottom: 24px;
+        animation: fadeUp 0.6s ease both;
     }
-    
-    .section-header {
+
+    .jsv-dot {
+        width: 7px; height: 7px;
+        border-radius: 50%;
+        background: #00c8ff;
+        box-shadow: 0 0 8px #00c8ff;
+        animation: pulse 2s infinite;
+        display: inline-block;
+    }
+
+    /* ── HERO TITLE ── */
+    .jsv-title {
+        font-family: 'Syne', sans-serif !important;
+        font-size: clamp(2rem, 5vw, 3.6rem);
+        font-weight: 800;
+        line-height: 1.06;
+        letter-spacing: -1px;
+        color: #fff;
+        margin-bottom: 16px;
+        animation: fadeUp 0.6s 0.1s ease both;
+    }
+
+    .jsv-title .accent { color: #00c8ff; }
+
+    .jsv-sub {
+        font-size: 15px;
+        font-weight: 300;
+        color: rgba(255,255,255,0.5);
+        max-width: 520px;
+        margin: 0 auto 16px;
+        line-height: 1.7;
+        animation: fadeUp 0.6s 0.2s ease both;
+    }
+
+    .jsv-india-badge {
+        display: inline-block;
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 50px;
+        padding: 6px 18px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+        margin-bottom: 48px;
+        animation: fadeUp 0.6s 0.25s ease both;
+    }
+
+    /* ── STATS BAR ── */
+    .jsv-stats {
+        display: flex;
+        justify-content: center;
+        gap: 0;
+        flex-wrap: wrap;
+        padding: 32px 0;
+        border-top: 1px solid rgba(255,255,255,0.07);
+        border-bottom: 1px solid rgba(255,255,255,0.07);
+        margin-bottom: 56px;
+        animation: fadeUp 0.6s 0.3s ease both;
+    }
+
+    .jsv-stat {
+        flex: 1;
+        min-width: 110px;
         text-align: center;
-        margin: 2rem 0 1rem 0;
-    }
-    
-    .section-title {
-        font-size: 1.5rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #0EA5E9 0%, #06B6D4 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
-    
-    .section-subtitle {
-        font-size: 0.9rem;
-        color: #6B7280;
-    }
-    
-    .lang-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-        gap: 1.5rem;
-        margin: 1.5rem 0;
-    }
-    
-    .lang-card {
-        background: white;
-        border-radius: 24px;
-        padding: 1.8rem;
-        text-align: center;
-        transition: all 0.3s ease;
-        border: 2px solid #E5E7EB;
-        cursor: pointer;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    
-    .lang-card:hover {
-        transform: translateY(-4px);
-        border-color: #0EA5E9;
-        box-shadow: 0 16px 30px -10px rgba(14, 165, 233, 0.25);
-    }
-    
-    .lang-flag {
-        font-size: 3rem;
-        margin-bottom: 0.75rem;
-    }
-    
-    .lang-name {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #1F2937;
-        margin-bottom: 0.25rem;
-    }
-    
-    .lang-native {
-        font-size: 0.85rem;
-        color: #6B7280;
-    }
-    
-    .guide-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1.5rem;
-        margin: 1.5rem 0;
-    }
-    
-    .guide-card {
-        background: white;
-        border-radius: 20px;
-        padding: 1.5rem;
-        transition: all 0.3s ease;
-        border: 1px solid #E5E7EB;
+        padding: 0 20px;
         position: relative;
-        overflow: hidden;
     }
-    
-    .guide-card::before {
+
+    .jsv-stat + .jsv-stat::before {
         content: '';
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 4px;
-        height: 100%;
-        background: linear-gradient(135deg, #0EA5E9, #06B6D4);
+        left: 0; top: 15%; bottom: 15%;
+        width: 1px;
+        background: rgba(255,255,255,0.08);
     }
-    
-    .guide-card:hover {
-        transform: translateX(5px);
-        box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1);
+
+    .jsv-stat-num {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: #00c8ff;
+        line-height: 1;
     }
-    
-    .guide-icon {
-        font-size: 2rem;
-        margin-bottom: 0.75rem;
+
+    .jsv-stat-lbl {
+        font-size: 10px;
+        color: rgba(255,255,255,0.35);
+        margin-top: 5px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
-    
-    .guide-number {
+
+    /* ── SECTION HEADER ── */
+    .jsv-section-label {
         display: inline-block;
-        background: #0EA5E9;
-        color: white;
-        font-size: 0.7rem;
+        font-size: 10px;
         font-weight: 600;
-        padding: 0.25rem 0.75rem;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        color: #00c8ff;
+        margin-bottom: 8px;
+    }
+
+    .jsv-section-title {
+        font-family: 'Syne', sans-serif !important;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 6px;
+        letter-spacing: -0.3px;
+    }
+
+    .jsv-section-sub {
+        font-size: 13px;
+        color: rgba(255,255,255,0.4);
+        margin-bottom: 36px;
+    }
+
+    /* ── LANGUAGE CARDS ── */
+    .jsv-lang-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        max-width: 560px;
+        margin: 0 auto 16px;
+    }
+
+    .jsv-lang-card {
+        background: rgba(255,255,255,0.04);
+        border: 2px solid rgba(255,255,255,0.08);
         border-radius: 20px;
-        margin-bottom: 0.5rem;
-    }
-    
-    .guide-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        color: #1F2937;
-        margin-bottom: 0.5rem;
-    }
-    
-    .guide-desc {
-        font-size: 0.8rem;
-        color: #6B7280;
-        line-height: 1.5;
-    }
-    
-    .scheme-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 1rem;
-        margin: 1.5rem 0;
-    }
-    
-    .scheme-card {
-        background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-        border-radius: 16px;
-        padding: 1rem;
-        transition: all 0.3s ease;
-        border: 1px solid #bbf7d0;
-    }
-    
-    .scheme-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px -5px rgba(34,197,94,0.2);
-    }
-    
-    .scheme-icon {
-        font-size: 1.8rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .scheme-name {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #166534;
-    }
-    
-    .scheme-desc {
-        font-size: 0.7rem;
-        color: #4B5563;
-        margin-top: 0.25rem;
-        line-height: 1.4;
-    }
-    
-    .feature-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        gap: 1rem;
-        margin: 1.5rem 0;
+        padding: 28px 20px 20px;
         text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
     }
-    
-    .feature-item {
-        background: #F9FAFB;
-        border-radius: 16px;
-        padding: 1rem;
+
+    .jsv-lang-card:hover {
+        border-color: #00c8ff;
+        background: rgba(0,200,255,0.05);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0,200,255,0.15);
+    }
+
+    .jsv-lang-flag { font-size: 2.8rem; margin-bottom: 12px; }
+
+    .jsv-lang-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+
+    .jsv-lang-native {
+        font-size: 12px;
+        color: rgba(255,255,255,0.4);
+    }
+
+    /* ── STREAMLIT BUTTON OVERRIDES ── */
+    .stButton > button {
+        font-family: 'DM Sans', sans-serif !important;
+        border-radius: 10px !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+        padding: 12px 24px !important;
+        transition: all 0.22s ease !important;
+        border: 1.5px solid rgba(0,200,255,0.45) !important;
+        background: transparent !important;
+        color: #00c8ff !important;
+        width: 100% !important;
+    }
+
+    .stButton > button:hover {
+        background: rgba(0,200,255,0.1) !important;
+        border-color: #00c8ff !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(0,200,255,0.2) !important;
+    }
+
+    /* Primary button (Register) */
+    div[data-testid="column"]:nth-child(2) .stButton > button {
+        background: linear-gradient(135deg, #00c8ff, #00e5c8) !important;
+        color: #060c18 !important;
+        font-weight: 700 !important;
+        border: none !important;
+        box-shadow: 0 4px 20px rgba(0,200,255,0.3) !important;
+    }
+
+    div[data-testid="column"]:nth-child(2) .stButton > button:hover {
+        box-shadow: 0 8px 32px rgba(0,200,255,0.45) !important;
+    }
+
+    /* Transparency portal button */
+    .jsv-portal-btn .stButton > button {
+        background: rgba(255,255,255,0.06) !important;
+        border: 1.5px solid rgba(255,255,255,0.12) !important;
+        color: rgba(255,255,255,0.7) !important;
+    }
+
+    .jsv-portal-btn .stButton > button:hover {
+        background: rgba(255,255,255,0.1) !important;
+    }
+
+    /* ── HOW IT WORKS CARDS ── */
+    .jsv-steps {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 20px;
+        text-align: left;
+        margin-bottom: 16px;
+    }
+
+    .jsv-step {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 24px 20px;
+        position: relative;
+        overflow: hidden;
         transition: all 0.3s ease;
     }
-    
-    .feature-item:hover {
-        background: white;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        transform: translateY(-3px);
+
+    .jsv-step::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, #00c8ff, #00e5c8);
     }
-    
-    .feature-icon {
-        font-size: 1.8rem;
-        margin-bottom: 0.5rem;
+
+    .jsv-step:hover {
+        border-color: rgba(0,200,255,0.25);
+        transform: translateY(-4px);
+        background: rgba(0,200,255,0.04);
     }
-    
-    .feature-text {
-        font-size: 0.8rem;
-        font-weight: 600;
-        color: #374151;
+
+    .jsv-step-num {
+        font-size: 10px;
+        font-weight: 700;
+        color: #00c8ff;
+        letter-spacing: 1.5px;
+        text-transform: uppercase;
+        margin-bottom: 12px;
     }
-    
-    .feature-sub {
-        font-size: 0.65rem;
-        color: #9CA3AF;
+
+    .jsv-step-icon { font-size: 1.8rem; margin-bottom: 10px; }
+
+    .jsv-step-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 8px;
     }
-    
-    .stat-grid {
+
+    .jsv-step-desc {
+        font-size: 12px;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.6;
+    }
+
+    /* ── FEATURES GRID ── */
+    .jsv-feat-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        margin: 1.5rem 0;
+        gap: 14px;
+        margin-bottom: 16px;
     }
-    
-    .stat-card {
-        background: white;
-        border-radius: 16px;
-        padding: 1rem;
+
+    .jsv-feat {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 14px;
+        padding: 18px 12px;
         text-align: center;
-        border: 1px solid #E5E7EB;
+        transition: all 0.3s ease;
     }
-    
-    .stat-number {
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: #0EA5E9;
+
+    .jsv-feat:hover {
+        border-color: rgba(0,200,255,0.2);
+        background: rgba(0,200,255,0.04);
+        transform: translateY(-3px);
     }
-    
-    .stat-label {
-        font-size: 0.7rem;
-        color: #6B7280;
+
+    .jsv-feat-icon { font-size: 1.6rem; margin-bottom: 8px; }
+
+    .jsv-feat-name {
+        font-size: 12px;
+        font-weight: 500;
+        color: #fff;
+        margin-bottom: 3px;
     }
-    
-    .testimonial-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 1rem;
-        margin: 1.5rem 0;
+
+    .jsv-feat-sub {
+        font-size: 10px;
+        color: rgba(255,255,255,0.35);
     }
-    
-    .testimonial-card {
-        background: #FFFBEB;
-        border-radius: 16px;
-        padding: 1rem;
-        border-left: 4px solid #F59E0B;
-    }
-    
-    .testimonial-text {
-        font-size: 0.8rem;
-        color: #374151;
-        line-height: 1.5;
-        font-style: italic;
-    }
-    
-    .testimonial-author {
-        font-size: 0.7rem;
-        color: #9CA3AF;
-        margin-top: 0.5rem;
-    }
-    
-    .footer {
+
+    /* ── CONTACT BOX ── */
+    .jsv-contact {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 28px;
         text-align: center;
-        padding: 1.5rem;
-        margin-top: 2rem;
-        border-top: 1px solid #E5E7EB;
-        font-size: 0.7rem;
-        color: #9CA3AF;
+        max-width: 520px;
+        margin: 0 auto 16px;
     }
-    
-    .help-box {
-        background: #F3F4F6;
-        border-radius: 20px;
-        padding: 1rem;
+
+    .jsv-contact-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 10px;
+    }
+
+    .jsv-contact-detail {
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.9;
+    }
+
+    .jsv-contact-detail strong { color: #00c8ff; }
+
+    /* ── DIVIDER ── */
+    .jsv-divider {
+        border: none;
+        height: 1px;
+        background: rgba(255,255,255,0.07);
+        margin: 40px auto;
+        max-width: 900px;
+    }
+
+    /* ── FOOTER ── */
+    .jsv-footer {
         text-align: center;
-        margin: 1rem 0;
+        padding: 24px;
+        font-size: 11px;
+        color: rgba(255,255,255,0.2);
+        border-top: 1px solid rgba(255,255,255,0.06);
+        margin-top: 20px;
+        line-height: 1.8;
     }
-    
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
     }
-    
-    .fade-up {
-        animation: fadeInUp 0.6s ease forwards;
+
+    @keyframes pulse {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.4; transform: scale(0.75); }
     }
-    
+
+    /* ── RESPONSIVE ── */
     @media (max-width: 768px) {
-        .stat-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        .hero-title {
-            font-size: 1.6rem;
-        }
-        .section-title {
-            font-size: 1.3rem;
-        }
+        .jsv-steps { grid-template-columns: 1fr !important; }
+        .jsv-feat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        .jsv-lang-grid { grid-template-columns: 1fr !important; }
+        .jsv-stats { flex-direction: column; gap: 16px; }
+        .jsv-stat + .jsv-stat::before { display: none; }
+        .jsv-title { font-size: 1.8rem !important; }
+        .jsv-wrap { padding: 40px 16px 32px; }
+    }
+
+    @media (max-width: 480px) {
+        .jsv-feat-grid { grid-template-columns: repeat(2, 1fr) !important; }
+        .jsv-lang-grid { max-width: 300px !important; }
     }
     </style>
-    
-    <div class="main-container">
-        <div class="hero-section fade-up">
-            <div class="hero-icon">🏛️</div>
-            <div class="hero-title">Jan Seva Portal</div>
-            <div class="hero-subtitle">AI-Powered Citizen Grievance Management System</div>
-            <div class="hero-badge">🇮🇳 Digital India | Smart Governance</div>
+
+    <!-- BACKGROUNDS -->
+    <div class="jsv-bg"></div>
+    <div class="jsv-grid"></div>
+
+    <div class="jsv-wrap">
+
+        <!-- HERO -->
+        <div class="jsv-badge">
+            <span class="jsv-dot"></span>
+            Digital India &nbsp;·&nbsp; Smart Governance
         </div>
-        
-        
+
+        <div class="jsv-title">
+            <span class="accent">AI-Powered</span> Grievance<br>Management System
+        </div>
+
+        <div class="jsv-sub">
+            Empowering citizens through AI-driven analytics and smart redressal for transparent governance.
+        </div>
+
+        <div class="jsv-india-badge">🇮🇳 Jan Seva Portal &nbsp;|&nbsp; Version 2.0</div>
+
+        <!-- STATS -->
+        <div class="jsv-stats">
+            <div class="jsv-stat">
+                <div class="jsv-stat-num">50K+</div>
+                <div class="jsv-stat-lbl">Complaints Resolved</div>
+            </div>
+            <div class="jsv-stat">
+                <div class="jsv-stat-num">94%</div>
+                <div class="jsv-stat-lbl">Resolution Rate</div>
+            </div>
+            <div class="jsv-stat">
+                <div class="jsv-stat-num">2.4d</div>
+                <div class="jsv-stat-lbl">Avg. Resolution</div>
+            </div>
+            <div class="jsv-stat">
+                <div class="jsv-stat-num">28</div>
+                <div class="jsv-stat-lbl">Departments</div>
+            </div>
+        </div>
+
+    </div>
     """, unsafe_allow_html=True)
-    
-    # ============================================================
-    # LANGUAGE SELECTION
-    # ============================================================
-    st.markdown('<div class="section-header"><div class="section-title">🌐 Choose Your Language</div><div class="section-subtitle">अपनी भाषा चुनें | Select your preferred language</div></div>', unsafe_allow_html=True)
-    
-    col1, col2 = st.columns(2, gap="large")
-    
+
+    # ── HERO BUTTONS ──
+    st.markdown('<div style="max-width:900px;margin:0 auto;padding:0 24px;">', unsafe_allow_html=True)
+    col1, col2, col3 = st.columns(3, gap="small")
     with col1:
-        st.markdown("""
-        <div class="lang-card">
-            <div class="lang-flag">🇬🇧</div>
-            <div class="lang-name">English</div>
-            <div class="lang-native">International Language</div>
+        if st.button("🔐 Login as User", key="btn_login", use_container_width=True):
+            st.session_state.screen = "login"
+            st.rerun()
+    with col2:
+        if st.button("✨ Register as User", key="btn_register", use_container_width=True):
+            st.session_state.screen = "register"
+            st.rerun()
+    with col3:
+        if st.button("🛡️ Admin Login", key="btn_admin", use_container_width=True):
+            st.session_state.screen = "admin_login"
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
+
+    # ── LANGUAGE SELECTION ──
+    st.markdown("""
+    <div class="jsv-wrap" style="padding-top:48px;">
+        <hr class="jsv-divider">
+        <div class="jsv-section-label">Accessibility</div>
+        <div class="jsv-section-title">🌐 Choose Your Language</div>
+        <div class="jsv-section-sub">अपनी भाषा चुनें &nbsp;·&nbsp; Select your preferred language</div>
+
+        <div class="jsv-lang-grid">
+            <div class="jsv-lang-card">
+                <div class="jsv-lang-flag">🇬🇧</div>
+                <div class="jsv-lang-name">English</div>
+                <div class="jsv-lang-native">International Language</div>
+            </div>
+            <div class="jsv-lang-card">
+                <div class="jsv-lang-flag">🇮🇳</div>
+                <div class="jsv-lang-name">हिंदी</div>
+                <div class="jsv-lang-native">भारत की राष्ट्रीय भाषा</div>
+            </div>
         </div>
-        """, unsafe_allow_html=True)
+    </div>
+    """, unsafe_allow_html=True)
+
+    col_a, col_b, col_c = st.columns([1, 2, 1])
+    with col_a:
         if st.button("🌐 Continue in English", key="lang_en", use_container_width=True):
             st.session_state.language = "en"
             st.session_state.screen = "login_type"
             st.rerun()
-    
-    with col2:
-        st.markdown("""
-        <div class="lang-card">
-            <div class="lang-flag">🇮🇳</div>
-            <div class="lang-name">हिंदी</div>
-            <div class="lang-native">भारत की राष्ट्रीय भाषा</div>
-        </div>
-        """, unsafe_allow_html=True)
+    with col_b:
+        st.markdown('<div class="jsv-portal-btn">', unsafe_allow_html=True)
+        if st.button("📊 View Public Transparency Portal", key="btn_transparency", use_container_width=True):
+            st.session_state.screen = "public_transparency"
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+    with col_c:
         if st.button("🇮🇳 हिंदी में जारी रखें", key="lang_hi", use_container_width=True):
             st.session_state.language = "hi"
             st.session_state.screen = "login_type"
             st.rerun()
-    
-    st.markdown("---")
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
-        if st.button("📊 View Public Transparency Portal", use_container_width=True):
-            st.session_state.screen = "public_transparency"
-            st.rerun()
 
-    # ============================================================
-    # HOW IT WORKS - USER GUIDE
-    # ============================================================
-    st.markdown('<div class="section-header"><div class="section-title">📚 How It Works</div><div class="section-subtitle">Simple 3-step process to get your issues resolved</div></div>', unsafe_allow_html=True)
-    
+    # ── HOW IT WORKS ──
     st.markdown("""
-    <div class="guide-grid">
-        <div class="guide-card">
-            <div class="guide-number">STEP 01</div>
-            <div class="guide-icon">📝</div>
-            <div class="guide-title">File a Complaint</div>
-            <div class="guide-desc">Describe your issue in text or voice, add location and photos. Our AI automatically categorizes and assigns it to the right department.</div>
-        </div>
-        
-       
-    """, unsafe_allow_html=True)
-    
-    # ============================================================
-    # GOVERNMENT SCHEMES
-    # ============================================================
-   
-    
-    # ============================================================
-    # KEY FEATURES
-    # ============================================================
-    st.markdown('<div class="section-header"><div class="section-title">✨ Key Features</div><div class="section-subtitle">What makes our platform special</div></div>', unsafe_allow_html=True)
-    
-    st.markdown("""
-    <div class="feature-grid">
-        <div class="feature-item">
-            <div class="feature-icon">🤖</div>
-            <div class="feature-text">AI-Powered</div>
-            <div class="feature-sub">Smart categorization</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">🎤</div>
-            <div class="feature-text">Voice Input</div>
-            <div class="feature-sub">Speak your complaint</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">📍</div>
-            <div class="feature-text">GPS Location</div>
-            <div class="feature-sub">Auto-detect address</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">🔔</div>
-            <div class="feature-text">Real-time Alerts</div>
-            <div class="feature-sub">Instant notifications</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">⏱️</div>
-            <div class="feature-text">SLA Tracking</div>
-            <div class="feature-sub">Time-bound resolution</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">📊</div>
-            <div class="feature-text">Analytics</div>
-            <div class="feature-sub">Data-driven insights</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">🌙</div>
-            <div class="feature-text">Dark Mode</div>
-            <div class="feature-sub">Eye-friendly interface</div>
-        </div>
-        <div class="feature-item">
-            <div class="feature-icon">🔒</div>
-            <div class="feature-text">Secure & Private</div>
-            <div class="feature-sub">Data encryption</div>
+    <div class="jsv-wrap" style="padding-top:48px;">
+        <hr class="jsv-divider">
+        <div class="jsv-section-label">Process</div>
+        <div class="jsv-section-title">📚 How It Works</div>
+        <div class="jsv-section-sub">Simple 3-step process to get your issues resolved</div>
+
+        <div class="jsv-steps">
+            <div class="jsv-step">
+                <div class="jsv-step-num">STEP 01</div>
+                <div class="jsv-step-icon">📝</div>
+                <div class="jsv-step-title">File a Complaint</div>
+                <div class="jsv-step-desc">Describe your issue in text or voice, add location and photos. Our AI automatically categorizes and assigns it to the right department.</div>
+            </div>
+            <div class="jsv-step">
+                <div class="jsv-step-num">STEP 02</div>
+                <div class="jsv-step-icon">🤖</div>
+                <div class="jsv-step-title">AI Processing</div>
+                <div class="jsv-step-desc">Our intelligent system analyzes your complaint, assigns priority, routes it to the correct officer, and sends you a tracking ID instantly.</div>
+            </div>
+            <div class="jsv-step">
+                <div class="jsv-step-num">STEP 03</div>
+                <div class="jsv-step-icon">✅</div>
+                <div class="jsv-step-title">Get Resolution</div>
+                <div class="jsv-step-desc">Track your complaint in real-time. Receive updates and get resolution within the SLA timeframe with full transparency and accountability.</div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # ============================================================
-    # CONTACT & SUPPORT
-    # ============================================================
+
+    # ── KEY FEATURES ──
     st.markdown("""
-    <div class="help-box">
-        <div style="font-size: 1rem; font-weight: 600; color: #1F2937;">📞 Need Help?</div>
-        <div style="font-size: 0.8rem; color: #6B7280; margin-top: 0.5rem;">
-            Toll-Free Helpline: <strong>1800-XXX-XXXX</strong> | Email: <strong>support@janseva.gov.in</strong>
-        </div>
-        <div style="font-size: 0.7rem; color: #9CA3AF; margin-top: 0.5rem;">
-            Working Hours: Monday - Saturday, 9:00 AM to 6:00 PM
+    <div class="jsv-wrap" style="padding-top:48px;">
+        <hr class="jsv-divider">
+        <div class="jsv-section-label">Platform</div>
+        <div class="jsv-section-title">✨ Key Features</div>
+        <div class="jsv-section-sub">What makes our platform special</div>
+
+        <div class="jsv-feat-grid">
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">🤖</div>
+                <div class="jsv-feat-name">AI-Powered</div>
+                <div class="jsv-feat-sub">Smart categorization</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">🎤</div>
+                <div class="jsv-feat-name">Voice Input</div>
+                <div class="jsv-feat-sub">Speak your complaint</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">📍</div>
+                <div class="jsv-feat-name">GPS Location</div>
+                <div class="jsv-feat-sub">Auto-detect address</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">🔔</div>
+                <div class="jsv-feat-name">Real-time Alerts</div>
+                <div class="jsv-feat-sub">Instant notifications</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">⏱️</div>
+                <div class="jsv-feat-name">SLA Tracking</div>
+                <div class="jsv-feat-sub">Time-bound resolution</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">📊</div>
+                <div class="jsv-feat-name">Analytics</div>
+                <div class="jsv-feat-sub">Data-driven insights</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">👁️</div>
+                <div class="jsv-feat-name">Transparency</div>
+                <div class="jsv-feat-sub">Public portal access</div>
+            </div>
+            <div class="jsv-feat">
+                <div class="jsv-feat-icon">🔒</div>
+                <div class="jsv-feat-name">Secure & Private</div>
+                <div class="jsv-feat-sub">Data encryption</div>
+            </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # ============================================================
-    # FOOTER
-    # ============================================================
+
+    # ── CONTACT & SUPPORT ──
     st.markdown("""
-    <div class="footer">
-        © 2024 Jan Seva Portal | An Initiative by Government of India | Version 2.0<br>
-        Empowering Citizens | Ensuring Accountability | Enhancing Governance
+    <div class="jsv-wrap" style="padding-top:48px;">
+        <hr class="jsv-divider">
+        <div class="jsv-section-label">Support</div>
+        <div class="jsv-section-title">📞 Need Help?</div>
+        <div class="jsv-section-sub">We're here for you</div>
+
+        <div class="jsv-contact">
+            <div class="jsv-contact-title">Contact Us</div>
+            <div class="jsv-contact-detail">
+                Toll-Free Helpline: <strong>1800-XXX-XXXX</strong><br>
+                Email: <strong>support@janseva.gov.in</strong><br>
+                <span style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:6px;display:block;">
+                    Working Hours: Monday – Saturday, 9:00 AM to 6:00 PM
+                </span>
+            </div>
+        </div>
     </div>
     """, unsafe_allow_html=True)
-    
-    # Voice Greeting
+
+    # ── FOOTER ──
+    st.markdown("""
+    <div class="jsv-footer">
+        © 2024 Jan Seva Portal &nbsp;|&nbsp; An Initiative by Government of India &nbsp;|&nbsp; Version 2.0<br>
+        Empowering Citizens · Ensuring Accountability · Enhancing Governance
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── VOICE GREETING ──
     st.components.v1.html("""
     <script>
     setTimeout(function() {
-        var msg = new SpeechSynthesisUtterance("Welcome to Jan Seva Portal. Citizen Grievance Management System. Please select your language to continue.");
+        var msg = new SpeechSynthesisUtterance(
+            "Welcome to Jan Seva Portal. AI-Powered Citizen Grievance Management System. Please select your language to continue."
+        );
         msg.lang = 'en-IN';
         msg.rate = 0.85;
         window.speechSynthesis.speak(msg);
-    }, 500);
+    }, 600);
     </script>
     """, height=0)
 
