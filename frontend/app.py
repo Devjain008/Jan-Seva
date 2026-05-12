@@ -1545,24 +1545,17 @@ def pg_language():
     """, height=0)
 
  
-import streamlit as st
- 
-def t(key: str, fallback: str = "") -> str:
-    lang = st.session_state.get("language", "en")
-    return TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, fallback or key)
- 
- 
-# ═══════════════════════════════════════════════════════════════════════════════
-#  Extra login-specific translations not in config (extend here cleanly)
-# ═══════════════════════════════════════════════════════════════════════════════
  
 _LOGIN_EXTRA = {
     "en": {
-        # Role selection
+        # ── Role selection ───────────────────────────────────────────────────
         "choose_role":          "Choose your role",
         "choose_role_sub":      "Select how you'd like to access the Jan Seva Portal",
+        "citizen_title":        "Citizen",
         "citizen_desc":         "File complaints, track status & access government schemes",
+        "official_title":       "Official",
         "official_desc":        "Manage & resolve complaints for your department",
+        "admin_title":          "Admin",
         "admin_desc":           "System management, analytics & oversight",
         "continue_citizen":     "Continue as Citizen",
         "continue_official":    "Continue as Official",
@@ -1570,8 +1563,9 @@ _LOGIN_EXTRA = {
         "change_language":      "← Change Language",
         "secure_trusted":       "Secure · Trusted · Government of India",
         "govt_india":           "Government of India Initiative",
-        "secure_badge":         "● Secure",
-        # Citizen login
+        "secure_badge":         "● SECURE",
+ 
+        # ── Citizen login ────────────────────────────────────────────────────
         "welcome_back":         "Welcome back",
         "citizen_hero_sub":     "File complaints · track status · access schemes",
         "sign_in":              "Sign In",
@@ -1608,11 +1602,14 @@ _LOGIN_EXTRA = {
         "invalid_phone2_err":   "Enter a valid 10-digit phone number.",
         "enter_address_err":    "Please enter your address.",
         "account_created":      "✅ Account created! Switch to Sign In to continue.",
-        # Official login
+ 
+        # ── Official login ───────────────────────────────────────────────────
         "official_hero":        "Official Portal",
         "official_hero_sub":    "Department management & complaint resolution",
         "official_creds":       "Official credentials",
+        "email_label":          "Email address",
         "email_placeholder":    "official@department.gov.in",
+        "password_label":       "Password",
         "password_ph":          "Your password",
         "sign_in_arrow":        "Sign In →",
         "request_access":       "Request Access",
@@ -1627,7 +1624,7 @@ _LOGIN_EXTRA = {
         "reset_arrow":          "Reset Password →",
         "back_sign_in":         "← Back to sign in",
         "your_details":         "Your details",
-        "phone_verify":         "Phone verification",
+        "phone_verify_label":   "Phone Verification",
         "full_name_req":        "Full name *",
         "email_req":            "Email address *",
         "phone_req":            "Phone (10 digits) *",
@@ -1637,7 +1634,6 @@ _LOGIN_EXTRA = {
         "continue_arrow":       "Continue →",
         "submit_request":       "Submit Request →",
         "edit_details":         "← Edit details",
-        "otp_sent_demo":        "OTP sent to {masked} — use demo code 123456",
         "demo_otp_sent":        "Demo OTP sent — use **123456**",
         "otp_resent":           "Demo OTP resent — still 123456.",
         "phone_verified":       "Phone verified — ready to submit!",
@@ -1657,13 +1653,14 @@ _LOGIN_EXTRA = {
         "reset_failed":         "Reset failed: ",
         "invalid_otp_123":      "Invalid OTP — use 123456.",
         "code_sent_to":         "Code sent to {email} — use 123456",
-        # Admin login
+        "otp_still_123":        "OTP resent (still 123456).",
+ 
+        # ── Admin login ──────────────────────────────────────────────────────
         "admin_hero":           "Admin Panel",
         "admin_hero_sub":       "System administration · analytics · oversight",
         "admin_creds":          "Administrator credentials",
         "username_label":       "Username",
         "username_ph":          "Enter your username",
-        "password_label":       "Password",
         "password_ph2":         "Enter your password",
         "sign_in_admin":        "Sign In to Admin Panel →",
         "default_creds":        "Default credentials",
@@ -1671,16 +1668,21 @@ _LOGIN_EXTRA = {
         "enter_username_err":   "Please enter your username.",
         "enter_password_err":   "Please enter your password.",
         "invalid_creds_err":    "Invalid username or password.",
-        # Step labels
+ 
+        # ── Step labels ──────────────────────────────────────────────────────
         "step_details":         "Details",
         "step_verify":          "Verify",
     },
+ 
     "hi": {
-        # Role selection
+        # ── Role selection ───────────────────────────────────────────────────
         "choose_role":          "अपनी भूमिका चुनें",
         "choose_role_sub":      "जन सेवा पोर्टल तक पहुंचने का तरीका चुनें",
+        "citizen_title":        "नागरिक",
         "citizen_desc":         "शिकायत दर्ज करें, स्थिति ट्रैक करें और सरकारी योजनाओं तक पहुंचें",
+        "official_title":       "अधिकारी",
         "official_desc":        "अपने विभाग की शिकायतें प्रबंधित करें और हल करें",
+        "admin_title":          "एडमिन",
         "admin_desc":           "सिस्टम प्रबंधन, विश्लेषण और निगरानी",
         "continue_citizen":     "नागरिक के रूप में जारी रखें",
         "continue_official":    "अधिकारी के रूप में जारी रखें",
@@ -1689,7 +1691,8 @@ _LOGIN_EXTRA = {
         "secure_trusted":       "सुरक्षित · विश्वसनीय · भारत सरकार",
         "govt_india":           "भारत सरकार की पहल",
         "secure_badge":         "● सुरक्षित",
-        # Citizen login
+ 
+        # ── Citizen login ────────────────────────────────────────────────────
         "welcome_back":         "वापस स्वागत है",
         "citizen_hero_sub":     "शिकायत दर्ज · स्थिति ट्रैक · योजनाएं देखें",
         "sign_in":              "साइन इन",
@@ -1725,12 +1728,15 @@ _LOGIN_EXTRA = {
         "enter_name_err":       "कृपया अपना पूरा नाम दर्ज करें।",
         "invalid_phone2_err":   "10 अंकों का मान्य फ़ोन नंबर दर्ज करें।",
         "enter_address_err":    "कृपया अपना पता दर्ज करें।",
-        "account_created":      "✅ खाता बनाया गया! साइन इन पर जाएं।",
-        # Official login
+        "account_created":      "✅ खाता बनाया गया! साइन इन टैब पर जाएं।",
+ 
+        # ── Official login ───────────────────────────────────────────────────
         "official_hero":        "अधिकारी पोर्टल",
         "official_hero_sub":    "विभाग प्रबंधन और शिकायत समाधान",
         "official_creds":       "अधिकारी प्रमाण पत्र",
+        "email_label":          "ईमेल पता",
         "email_placeholder":    "official@department.gov.in",
+        "password_label":       "पासवर्ड",
         "password_ph":          "आपका पासवर्ड",
         "sign_in_arrow":        "साइन इन करें →",
         "request_access":       "एक्सेस अनुरोध",
@@ -1745,7 +1751,7 @@ _LOGIN_EXTRA = {
         "reset_arrow":          "पासवर्ड रीसेट करें →",
         "back_sign_in":         "← साइन इन पर वापस",
         "your_details":         "आपकी जानकारी",
-        "phone_verify":         "फ़ोन सत्यापन",
+        "phone_verify_label":   "फ़ोन सत्यापन",
         "full_name_req":        "पूरा नाम *",
         "email_req":            "ईमेल पता *",
         "phone_req":            "फ़ोन (10 अंक) *",
@@ -1755,7 +1761,6 @@ _LOGIN_EXTRA = {
         "continue_arrow":       "आगे बढ़ें →",
         "submit_request":       "अनुरोध जमा करें →",
         "edit_details":         "← जानकारी संपादित करें",
-        "otp_sent_demo":        "OTP भेजा {masked} पर — डेमो कोड 123456 उपयोग करें",
         "demo_otp_sent":        "डेमो OTP भेजा — **123456** उपयोग करें",
         "otp_resent":           "डेमो OTP दोबारा भेजा — अभी भी 123456।",
         "phone_verified":       "फ़ोन सत्यापित — जमा करने के लिए तैयार!",
@@ -1775,13 +1780,14 @@ _LOGIN_EXTRA = {
         "reset_failed":         "रीसेट विफल: ",
         "invalid_otp_123":      "अमान्य OTP — 123456 उपयोग करें।",
         "code_sent_to":         "कोड {email} पर भेजा — 123456 उपयोग करें",
-        # Admin login
+        "otp_still_123":        "OTP दोबारा भेजा (अभी भी 123456)।",
+ 
+        # ── Admin login ──────────────────────────────────────────────────────
         "admin_hero":           "एडमिन पैनल",
         "admin_hero_sub":       "सिस्टम प्रशासन · विश्लेषण · निगरानी",
         "admin_creds":          "प्रशासक प्रमाण पत्र",
         "username_label":       "उपयोगकर्ता नाम",
         "username_ph":          "अपना उपयोगकर्ता नाम दर्ज करें",
-        "password_label":       "पासवर्ड",
         "password_ph2":         "अपना पासवर्ड दर्ज करें",
         "sign_in_admin":        "एडमिन पैनल में साइन इन →",
         "default_creds":        "डिफ़ॉल्ट प्रमाण पत्र",
@@ -1789,7 +1795,8 @@ _LOGIN_EXTRA = {
         "enter_username_err":   "कृपया उपयोगकर्ता नाम दर्ज करें।",
         "enter_password_err":   "कृपया पासवर्ड दर्ज करें।",
         "invalid_creds_err":    "अमान्य उपयोगकर्ता नाम या पासवर्ड।",
-        # Step labels
+ 
+        # ── Step labels ──────────────────────────────────────────────────────
         "step_details":         "जानकारी",
         "step_verify":          "सत्यापन",
     }
@@ -1797,43 +1804,37 @@ _LOGIN_EXTRA = {
  
  
 def tx(key: str, fallback: str = "") -> str:
-    """Translate from login-specific dictionary first, fall back to config TRANSLATIONS."""
+    """
+    Translate a login-specific key for the currently selected language.
+    Falls back to English if the key is missing in Hindi dict.
+    """
+    import streamlit as st
     lang = st.session_state.get("language", "en")
-    val = _LOGIN_EXTRA.get(lang, _LOGIN_EXTRA["en"]).get(key)
+    val  = _LOGIN_EXTRA.get(lang, _LOGIN_EXTRA["en"]).get(key)
     if val:
         return val
-    # fall back to config.py TRANSLATIONS
-    return TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, fallback or key)
+    # fallback to English
+    val = _LOGIN_EXTRA["en"].get(key)
+    if val:
+        return val
+    return fallback or key
+ 
  
 # ─────────────────────────────────────────────────────────────────────────────
-#  Shared base CSS  (inject once via get_css() in your real app)
+#  SHARED CSS HELPERS
 # ─────────────────────────────────────────────────────────────────────────────
  
 def _base_css() -> str:
     return """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Sora:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=Sora:wght@600;700;800&display=swap');
  
-/* ── Reset & base ─────────────────────────────────────────────────── */
-html, body, [class*="css"] {
-    font-family: 'DM Sans', sans-serif !important;
-}
-.stApp {
-    background: #F5F3EF !important;
-}
-.block-container {
-    padding-top: 0 !important;
-    max-width: 860px !important;
-}
- 
-/* ── Hide Streamlit chrome ────────────────────────────────────────── */
+html, body, [class*="css"] { font-family: 'DM Sans', sans-serif !important; }
+.stApp { background: #F5F3EF !important; }
+.block-container { padding-top: 0 !important; max-width: 860px !important; }
 #MainMenu, footer, header { visibility: hidden; }
  
-/* ── Streamlit button override ────────────────────────────────────── */
-
-
- 
-/* ── Inputs ───────────────────────────────────────────────────────── */
+/* ── Inputs ── */
 .stTextInput > div > div > input,
 .stTextArea > div > div > textarea {
     font-family: 'DM Sans', sans-serif !important;
@@ -1854,10 +1855,9 @@ html, body, [class*="css"] {
     font-size: 12px !important;
     font-weight: 500 !important;
     color: #374151 !important;
-    font-family: 'DM Sans', sans-serif !important;
 }
  
-/* ── Tabs ─────────────────────────────────────────────────────────── */
+/* ── Tabs ── */
 .stTabs [data-baseweb="tab-list"] {
     background: #F3F4F6 !important;
     border-radius: 10px !important;
@@ -1865,11 +1865,14 @@ html, body, [class*="css"] {
     gap: 4px !important;
     border-bottom: none !important;
 }
-
-
 .stTabs [data-baseweb="tab-highlight"] { display: none !important; }
+.stTabs [aria-selected="true"] {
+    background: white !important;
+    border-radius: 8px !important;
+    font-weight: 600 !important;
+}
  
-/* ── Form submit button ───────────────────────────────────────────── */
+/* ── Form submit button ── */
 .stFormSubmitButton > button {
     font-family: 'DM Sans', sans-serif !important;
     font-size: 14px !important;
@@ -1881,25 +1884,22 @@ html, body, [class*="css"] {
     width: 100% !important;
 }
  
-/* ── Alerts ───────────────────────────────────────────────────────── */
+/* ── Alerts ── */
 .stAlert {
     border-radius: 10px !important;
     font-size: 13px !important;
-    font-family: 'DM Sans', sans-serif !important;
     border-left-width: 3px !important;
 }
  
-/* ── Spinner ──────────────────────────────────────────────────────── */
+/* ── Spinner ── */
 .stSpinner > div { border-color: #6366F1 transparent transparent !important; }
 </style>
 """
  
  
 def _login_css(accent: str = "#6366F1", accent2: str = "#8B5CF6") -> str:
-    """Per-page accent colours injected on top of base."""
     return f"""
 <style>
-/* Primary CTA button (accent coloured) */
 div[data-testid="stForm"] .stFormSubmitButton > button,
 .primary-btn .stButton > button {{
     background: linear-gradient(135deg, {accent}, {accent2}) !important;
@@ -1911,8 +1911,6 @@ div[data-testid="stForm"] .stFormSubmitButton > button:hover,
 .primary-btn .stButton > button:hover {{
     filter: brightness(1.08) !important;
 }}
- 
-/* Ghost back button */
 .ghost-btn .stButton > button {{
     background: transparent !important;
     border: 1.5px solid #E5E7EB !important;
@@ -1927,46 +1925,28 @@ div[data-testid="stForm"] .stFormSubmitButton > button:hover,
 """
  
  
-# ─────────────────────────────────────────────────────────────────────────────
-#  HTML building blocks
-# ─────────────────────────────────────────────────────────────────────────────
- 
 def _topbar() -> str:
-    return """
+    return f"""
 <div style="
-    background:#1A1A1A;
-    padding:10px 28px;
-    border-radius:0 0 16px 16px;
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-    margin-bottom:32px;
+    background:#1A1A1A;padding:10px 28px;border-radius:0 0 16px 16px;
+    display:flex;align-items:center;justify-content:space-between;margin-bottom:32px;
 ">
     <div style="display:flex;align-items:center;gap:12px;">
-        <div style="
-            width:38px;height:38px;
-            background:#E8660A;
-            border-radius:9px;
-            display:flex;align-items:center;justify-content:center;
-            font-size:20px;
-        ">🏛️</div>
+        <div style="width:38px;height:38px;background:#E8660A;border-radius:9px;
+            display:flex;align-items:center;justify-content:center;font-size:20px;">🏛️</div>
         <div>
-            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:-0.3px;">
+            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#fff;">
                 Jan Seva Portal
             </div>
-            <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:300;">
-                Government of India Initiative
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);">
+                {tx("govt_india")}
             </div>
         </div>
     </div>
-    <div style="
-        background:rgba(232,102,10,0.15);
-        border:1px solid rgba(232,102,10,0.35);
-        color:#E8660A;
-        font-size:11px;font-weight:500;
-        padding:4px 12px;border-radius:20px;
-        letter-spacing:0.5px;
-    ">● SECURE</div>
+    <div style="background:rgba(232,102,10,0.15);border:1px solid rgba(232,102,10,0.35);
+        color:#E8660A;font-size:11px;font-weight:500;padding:4px 12px;border-radius:20px;">
+        {tx("secure_badge")}
+    </div>
 </div>
 """
  
@@ -1974,39 +1954,29 @@ def _topbar() -> str:
 def _hero(icon: str, title: str, subtitle: str, gradient: str) -> str:
     return f"""
 <div style="
-    background:{gradient};
-    border-radius:20px;
-    padding:36px 28px 30px;
-    text-align:center;
-    margin-bottom:20px;
-    position:relative;
-    overflow:hidden;
+    background:{gradient};border-radius:20px;padding:36px 28px 30px;
+    text-align:center;margin-bottom:20px;position:relative;overflow:hidden;
 ">
-    <div style="
-        position:absolute;top:-40px;right:-40px;
-        width:150px;height:150px;
-        background:rgba(255,255,255,0.04);
-        border-radius:50%;
-    "></div>
-    <div style="font-size:2.6rem;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25));">{icon}</div>
-    <div style="font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.4px;margin-bottom:6px;">
-        {title}
-    </div>
+    <div style="position:absolute;top:-40px;right:-40px;width:150px;height:150px;
+        border-radius:50%;background:rgba(255,255,255,0.04);"></div>
+    <div style="font-size:2.6rem;margin-bottom:14px;
+        filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25));">{icon}</div>
+    <div style="font-family:'Sora',sans-serif;font-size:22px;font-weight:700;
+        color:#fff;letter-spacing:-0.4px;margin-bottom:6px;">{title}</div>
     <div style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:300;">{subtitle}</div>
 </div>
 """
  
  
 def _card_open(label: str = "") -> str:
-    label_html = f'<div style="font-size: 23.5px;font-weight: 490;color: rgb(44 65 100);letter-spacing: 3.1px;text-transform: uppercase;margin-bottom: -5px;">{label}</div>' if label else ""
+    label_html = (
+        f'<div style="font-size:10px;font-weight:700;letter-spacing:1.2px;'
+        f'text-transform:uppercase;color:#9CA3AF;margin-bottom:16px;">{label}</div>'
+        if label else ""
+    )
     return f"""
-<div style="
-    background:#fff;
-    border:1.5px solid #E5E7EB;
-    border-radius:16px;
-    padding:12px;
-    margin-bottom:13px;
-">
+<div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:16px;
+    padding:24px;margin-bottom:13px;">
 {label_html}
 """
  
@@ -2015,61 +1985,33 @@ def _card_close() -> str:
     return "</div>"
  
  
-def _role_tile(css_class: str, icon: str, title: str, desc: str, gradient: str) -> str:
+def _role_tile(icon: str, title: str, desc: str, gradient: str) -> str:
     return f"""
-<div style="
-    background:#fff;
-    border:1.5px solid #E5E7EB;
-    border-radius:16px;
-    padding:28px 18px 22px;
-    text-align:center;
-    position:relative;
-    overflow:hidden;
-    transition:all 0.2s ease;
-">
-    <div style="
-        position:absolute;top:0;left:0;right:0;
-        height:3px;
-        background:{gradient};
-        border-radius:16px 16px 0 0;
-    "></div>
+<div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:16px;
+    padding:28px 18px 22px;text-align:center;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:0;left:0;right:0;height:3px;
+        background:{gradient};border-radius:16px 16px 0 0;"></div>
     <div style="font-size:2rem;margin-bottom:12px;">{icon}</div>
-    <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:#111827;margin-bottom:6px;">
-        {title}
-    </div>
-    <div style="font-size:12px;color:#6B7280;line-height:1.55;margin-bottom:18px;font-weight:300;">
-        {desc}
-    </div>
+    <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;
+        color:#111827;margin-bottom:6px;">{title}</div>
+    <div style="font-size:12px;color:#6B7280;line-height:1.55;margin-bottom:18px;
+        font-weight:300;">{desc}</div>
 </div>
 """
  
  
 def _otp_badge(phone: str, otp: str) -> str:
     return f"""
-<div style="
-    background:#F8FAFC;
-    border:1px solid #E5E7EB;
-    border-radius:12px;
-    padding:14px 16px;
-    margin-bottom:16px;
-    display:flex;
-    align-items:center;
-    gap:10px;
-">
+<div style="background:#F8FAFC;border:1px solid #E5E7EB;border-radius:12px;
+    padding:14px 16px;margin-bottom:16px;display:flex;align-items:center;gap:10px;">
     <span style="font-size:1.1rem;">📱</span>
     <div>
-        <div style="font-size:11px;color:#9CA3AF;font-weight:400;margin-bottom:2px;">OTP sent to</div>
+        <div style="font-size:11px;color:#9CA3AF;margin-bottom:2px;">{tx("otp_sent_to")}</div>
         <div style="font-size:13.5px;color:#111827;font-weight:500;">+91 {phone}</div>
     </div>
-    <div style="
-        margin-left:auto;
-        background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
-        border:1px solid #BBF7D0;
-        border-radius:8px;
-        padding:6px 12px;
-        text-align:center;
-    ">
-        <div style="font-size:10px;color:#6B7280;font-weight:400;">Demo OTP</div>
+    <div style="margin-left:auto;background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+        border:1px solid #BBF7D0;border-radius:8px;padding:6px 12px;text-align:center;">
+        <div style="font-size:10px;color:#6B7280;">{tx("demo_otp_label")}</div>
         <div style="font-size:18px;font-weight:700;color:#16A34A;letter-spacing:3px;">{otp}</div>
     </div>
 </div>
@@ -2077,9 +2019,11 @@ def _otp_badge(phone: str, otp: str) -> str:
  
  
 def _step_indicator(step: int) -> str:
+    s1_lbl = tx("step_details")
+    s2_lbl = tx("step_verify")
+    s1_txt = "1" if step == 1 else "✓"
     s1_cls = "active" if step == 1 else "done"
     s2_cls = "active" if step == 2 else "idle"
-    s1_txt = "1" if step == 1 else "✓"
  
     def dot(cls, txt):
         if cls == "active":
@@ -2088,31 +2032,31 @@ def _step_indicator(step: int) -> str:
             bg, color, border = "#ECFDF5", "#16A34A", "#16A34A"
         else:
             bg, color, border = "#F3F4F6", "#9CA3AF", "#E5E7EB"
-        return f"""
-        <div style="
-            width:30px;height:30px;
-            border-radius:50%;
-            background:{bg};
-            border:2px solid {border};
-            color:{color};
-            font-size:12px;font-weight:600;
-            display:flex;align-items:center;justify-content:center;
-        ">{txt}</div>"""
+        return (
+            f'<div style="width:30px;height:30px;border-radius:50%;'
+            f'background:{bg};border:2px solid {border};color:{color};'
+            f'font-size:12px;font-weight:600;display:flex;align-items:center;'
+            f'justify-content:center;">{txt}</div>'
+        )
  
     def lbl(cls, text):
         color = "#111827" if cls in ("active", "done") else "#9CA3AF"
-        return f'<div style="font-size:11px;color:{color};font-weight:{"500" if cls=="active" else "400"};margin-top:4px;">{text}</div>'
+        weight = "500" if cls == "active" else "400"
+        return f'<div style="font-size:11px;color:{color};font-weight:{weight};margin-top:4px;">{text}</div>'
+ 
+    line_color = "#6366F1" if step == 2 else "#E5E7EB"
  
     return f"""
 <div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px;">
     <div style="text-align:center;">
         {dot(s1_cls, s1_txt)}
-        {lbl(s1_cls, "Details")}
+        {lbl(s1_cls, s1_lbl)}
     </div>
-    <div style="flex:1;max-width:80px;height:2px;background:{'#6366F1' if step==2 else '#E5E7EB'};margin:0 12px;margin-bottom:18px;border-radius:2px;"></div>
+    <div style="flex:1;max-width:80px;height:2px;background:{line_color};
+        margin:0 12px;margin-bottom:18px;border-radius:2px;"></div>
     <div style="text-align:center;">
         {dot(s2_cls, "2")}
-        {lbl(s2_cls, "Verify")}
+        {lbl(s2_cls, s2_lbl)}
     </div>
 </div>
 """
@@ -2120,12 +2064,9 @@ def _step_indicator(step: int) -> str:
  
 def _info_box(text: str, icon: str = "ℹ️") -> str:
     return f"""
-<div style="
-    background:#EFF6FF;border:1px solid #BFDBFE;
-    border-radius:10px;padding:12px 14px;
-    font-size:13px;color:#1D4ED8;
-    margin-bottom:14px;display:flex;align-items:center;gap:8px;
-">
+<div style="background:#EFF6FF;border:1px solid #BFDBFE;border-radius:10px;
+    padding:12px 14px;font-size:13px;color:#1D4ED8;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;">
     <span>{icon}</span><span>{text}</span>
 </div>
 """
@@ -2133,12 +2074,9 @@ def _info_box(text: str, icon: str = "ℹ️") -> str:
  
 def _warn_box(text: str) -> str:
     return f"""
-<div style="
-    background:#FFFBEB;border:1px solid #FDE68A;
-    border-radius:10px;padding:12px 14px;
-    font-size:13px;color:#92400E;
-    margin-bottom:14px;display:flex;align-items:center;gap:8px;
-">
+<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;
+    padding:12px 14px;font-size:13px;color:#92400E;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;">
     <span>⚠️</span><span>{text}</span>
 </div>
 """
@@ -2146,12 +2084,9 @@ def _warn_box(text: str) -> str:
  
 def _verified_box(text: str) -> str:
     return f"""
-<div style="
-    background:#F0FDF4;border:1px solid #BBF7D0;
-    border-radius:10px;padding:12px 14px;
-    font-size:13px;color:#16A34A;font-weight:500;
-    margin-bottom:14px;display:flex;align-items:center;gap:8px;
-">
+<div style="background:#F0FDF4;border:1px solid #BBF7D0;border-radius:10px;
+    padding:12px 14px;font-size:13px;color:#16A34A;font-weight:500;margin-bottom:14px;
+    display:flex;align-items:center;gap:8px;">
     <span>✅</span><span>{text}</span>
 </div>
 """
@@ -2161,74 +2096,51 @@ def _divider() -> str:
     return '<div style="height:14px;"></div>'
  
  
-def _footer(text: str = "Secure · Trusted · Government of India") -> str:
+def _footer(text: str = "") -> str:
+    if not text:
+        text = tx("secure_trusted")
     return f"""
-<div style="
-    text-align:center;
-    font-size:11.5px;
-    color:#9CA3AF;
-    font-weight:300;
-    letter-spacing:0.5px;
-    margin-top:8px;
-    padding-bottom:24px;
-">
-    {text}
-</div>
+<div style="text-align:center;font-size:11.5px;color:#9CA3AF;font-weight:300;
+    letter-spacing:0.5px;margin-top:8px;padding-bottom:24px;">{text}</div>
 """
  
  
 # ─────────────────────────────────────────────────────────────────────────────
-#  Primary accent button helper
-#  Wraps a st.button in a <div class="primary-btn"> so CSS can colour it
-# ─────────────────────────────────────────────────────────────────────────────
- 
-def _primary_btn(label: str, key: str, accent: str = "#6366F1", accent2: str = "#8B5CF6") -> bool:
-    st.markdown(f"""
-    <style>
-    div[data-testid="stButton"][id="{key}"] > button,
-    #btn_{key} .stButton > button {{
-        background: linear-gradient(135deg, {accent}, {accent2}) !important;
-        border: none !important;
-        color: #fff !important;
-        box-shadow: 0 2px 10px {accent}44 !important;
-        width: 100% !important;
-        padding: 11px 16px !important;
-        font-size: 14px !important;
-    }}
-    </style>
-    <div id="btn_{key}">
-    """, unsafe_allow_html=True)
-    clicked = st.button(label, key=key, use_container_width=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-    return clicked
- 
- 
-# ─────────────────────────────────────────────────────────────────────────────
-#  pg_login_type  — Role selection screen
+#  PAGE 1 — Role selection  (pg_login_type)
 # ─────────────────────────────────────────────────────────────────────────────
  
 def pg_login_type():
-    st.markdown(_base_css(), unsafe_allow_html=True)
+    import streamlit as st
  
-    # Role-specific CTA colours
+    st.markdown(_base_css(), unsafe_allow_html=True)
     st.markdown("""
     <style>
-    .btn-citizen  .stButton > button { background: linear-gradient(135deg,#6366F1,#8B5CF6) !important; border:none!important; color:#fff!important; font-size:13.5px!important; }
-    .btn-official .stButton > button { background: linear-gradient(135deg,#0EA5E9,#6366F1) !important; border:none!important; color:#fff!important; font-size:13.5px!important; }
-    .btn-admin    .stButton > button { background: linear-gradient(135deg,#E8660A,#EF4444) !important; border:none!important; color:#fff!important; font-size:13.5px!important; }
+    .btn-citizen  .stButton > button {
+        background: linear-gradient(135deg,#6366F1,#8B5CF6) !important;
+        border:none!important; color:#fff!important; font-size:13.5px!important;
+    }
+    .btn-official .stButton > button {
+        background: linear-gradient(135deg,#0EA5E9,#6366F1) !important;
+        border:none!important; color:#fff!important; font-size:13.5px!important;
+    }
+    .btn-admin    .stButton > button {
+        background: linear-gradient(135deg,#E8660A,#EF4444) !important;
+        border:none!important; color:#fff!important; font-size:13.5px!important;
+    }
     </style>
     """, unsafe_allow_html=True)
  
     st.markdown(_topbar(), unsafe_allow_html=True)
  
     # Page header
-    st.markdown("""
+    st.markdown(f"""
     <div style="text-align:center;margin-bottom:32px;">
-        <div style="font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:#111827;letter-spacing:-0.5px;margin-bottom:8px;">
-            Choose your role
+        <div style="font-family:'Sora',sans-serif;font-size:26px;font-weight:700;
+            color:#111827;letter-spacing:-0.5px;margin-bottom:8px;">
+            {tx("choose_role")}
         </div>
         <div style="font-size:14px;color:#6B7280;font-weight:300;">
-            Select how you'd like to access the Jan Seva Portal
+            {tx("choose_role_sub")}
         </div>
     </div>
     """, unsafe_allow_html=True)
@@ -2237,57 +2149,69 @@ def pg_login_type():
  
     with r1:
         st.markdown(_role_tile(
-            "citizen", "👤", "Citizen",
-            "File complaints, track status, access government schemes",
+            "👤",
+            tx("citizen_title"),
+            tx("citizen_desc"),
             "linear-gradient(90deg,#6366F1,#8B5CF6)"
         ), unsafe_allow_html=True)
         st.markdown('<div class="btn-citizen">', unsafe_allow_html=True)
-        if st.button("Continue as Citizen", key="citizen_role_btn", use_container_width=True):
-            st.session_state.screen = "user_login"; st.rerun()
+        if st.button(tx("continue_citizen"), key="citizen_role_btn",
+                     use_container_width=True):
+            st.session_state.screen = "user_login"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
  
     with r2:
         st.markdown(_role_tile(
-            "official", "🏢", "Official",
-            "Manage & resolve complaints for your department",
+            "🏢",
+            tx("official_title"),
+            tx("official_desc"),
             "linear-gradient(90deg,#0EA5E9,#6366F1)"
         ), unsafe_allow_html=True)
         st.markdown('<div class="btn-official">', unsafe_allow_html=True)
-        if st.button("Continue as Official", key="official_role_btn", use_container_width=True):
-            st.session_state.screen = "official_login"; st.rerun()
+        if st.button(tx("continue_official"), key="official_role_btn",
+                     use_container_width=True):
+            st.session_state.screen = "official_login"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
  
     with r3:
         st.markdown(_role_tile(
-            "admin", "👑", "Admin",
-            "System management, analytics & oversight",
+            "👑",
+            tx("admin_title"),
+            tx("admin_desc"),
             "linear-gradient(90deg,#E8660A,#EF4444)"
         ), unsafe_allow_html=True)
         st.markdown('<div class="btn-admin">', unsafe_allow_html=True)
-        if st.button("Continue as Admin", key="admin_role_btn", use_container_width=True):
-            st.session_state.screen = "admin_login"; st.rerun()
+        if st.button(tx("continue_admin"), key="admin_role_btn",
+                     use_container_width=True):
+            st.session_state.screen = "admin_login"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
  
     st.markdown("<br>", unsafe_allow_html=True)
     _, bc, _ = st.columns([1, 2, 1])
     with bc:
         st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-        if st.button("← Change Language", key="lt_lang", use_container_width=True):
-            st.session_state.screen = "language"; st.rerun()
+        if st.button(tx("change_language"), key="lt_lang",
+                     use_container_width=True):
+            st.session_state.screen = "language"
+            st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
  
     st.markdown(_footer(), unsafe_allow_html=True)
  
  
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_user_login  — Citizen OTP login
+#  PAGE 2 — Citizen OTP login  (pg_user_login)
 # ─────────────────────────────────────────────────────────────────────────────
  
 def pg_user_login():
-    st.markdown(_base_css(), unsafe_allow_html=True)
-    st.markdown(_login_css(accent="#6366F1", accent2="#8B5CF6"), unsafe_allow_html=True)
+    import streamlit as st
  
-    # Additional: colour the primary CTA inside form
+    st.markdown(_base_css(), unsafe_allow_html=True)
+    st.markdown(_login_css(accent="#6366F1", accent2="#8B5CF6"),
+                unsafe_allow_html=True)
     st.markdown("""
     <style>
     .primary-btn .stButton > button {
@@ -2299,60 +2223,84 @@ def pg_user_login():
     </style>
     """, unsafe_allow_html=True)
  
+    # Session defaults
     for k, v in [("otp_sent", False), ("login_phone", ""), ("demo_otp", "")]:
         if k not in st.session_state:
             st.session_state[k] = v
  
     st.markdown(_topbar(), unsafe_allow_html=True)
     st.markdown(_hero(
-        "👤", "Welcome back",
-        "File complaints · track status · access schemes",
+        "👤",
+        tx("welcome_back"),
+        tx("citizen_hero_sub"),
         "linear-gradient(135deg,#1e1b4b 0%,#4338CA 50%,#0c4a6e 100%)"
     ), unsafe_allow_html=True)
  
-    tab1, tab2 = st.tabs(["Sign In", "Create Account"])
+    tab1, tab2 = st.tabs([tx("sign_in"), tx("create_account")])
  
-    # ── SIGN IN ──────────────────────────────────────────────────────────────
+    # ── SIGN IN ───────────────────────────────────────────────────────────────
     with tab1:
-        st.markdown(_card_open("Phone Verification"), unsafe_allow_html=True)
+        st.markdown(_card_open(tx("phone_verification")), unsafe_allow_html=True)
  
         if not st.session_state.otp_sent:
-            phone = st.text_input("Mobile number", placeholder="Enter your 10-digit number", key="login_phone_input")
-            st.markdown('<p style="font-size:11.5px;color:#9CA3AF;margin-top:-6px;font-weight:300;">We\'ll send a one-time password to verify your number.</p>', unsafe_allow_html=True)
+            phone = st.text_input(
+                tx("mobile_number"),
+                placeholder=tx("mobile_placeholder"),
+                key="login_phone_input"
+            )
+            st.markdown(
+                f'<p style="font-size:11.5px;color:#9CA3AF;margin-top:-6px;'
+                f'font-weight:300;">{tx("otp_hint")}</p>',
+                unsafe_allow_html=True
+            )
             st.markdown(_divider(), unsafe_allow_html=True)
  
             st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-            if st.button("Send OTP →", key="send_otp_btn", use_container_width=True):
+            if st.button(tx("send_otp_arrow"), key="send_otp_btn",
+                         use_container_width=True):
                 p = phone.strip()
                 if not p:
-                    st.error("Please enter your phone number.")
+                    st.error(tx("enter_phone_err"))
                 elif len(p) != 10 or not p.isdigit():
-                    st.error("Enter a valid 10-digit number (digits only).")
+                    st.error(tx("invalid_phone_err"))
                 else:
                     with st.spinner("Sending OTP…"):
-                        resp = api("post", "/auth/user/send-otp", json={"phone": p})
+                        resp = api("post", "/auth/user/send-otp",
+                                   json={"phone": p})
                     if resp.get("success"):
                         st.session_state.otp_sent    = True
                         st.session_state.login_phone = p
                         st.session_state.demo_otp    = resp.get("otp", "123456")
                         st.rerun()
                     else:
-                        st.error(resp.get("detail", "Failed to send OTP. Try again."))
+                        st.error(resp.get("detail", tx("reg_failed")))
             st.markdown("</div>", unsafe_allow_html=True)
  
         else:
-            st.markdown(_otp_badge(st.session_state.login_phone, st.session_state.demo_otp), unsafe_allow_html=True)
-            otp = st.text_input("Enter OTP", placeholder="6-digit code", key="temp_otp", type="password")
+            st.markdown(
+                _otp_badge(st.session_state.login_phone,
+                           st.session_state.demo_otp),
+                unsafe_allow_html=True
+            )
+            otp = st.text_input(
+                tx("enter_otp"),
+                placeholder=tx("otp_placeholder"),
+                key="temp_otp",
+                type="password"
+            )
             st.markdown(_divider(), unsafe_allow_html=True)
  
             st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-            if st.button("Verify & Sign In →", key="verify_otp_btn", use_container_width=True):
+            if st.button(tx("verify_sign_in"), key="verify_otp_btn",
+                         use_container_width=True):
                 if not otp:
-                    st.error("Please enter the OTP.")
+                    st.error(tx("enter_otp_err"))
                 else:
                     with st.spinner("Verifying…"):
-                        resp = api("post", "/auth/user/verify-otp",
-                                   json={"phone": st.session_state.login_phone, "otp": otp})
+                        resp = api("post", "/auth/user/verify-otp", json={
+                            "phone": st.session_state.login_phone,
+                            "otp":   otp
+                        })
                     if resp.get("success"):
                         st.session_state.user     = resp
                         st.session_state.role     = "user"
@@ -2361,24 +2309,28 @@ def pg_user_login():
                         st.session_state.screen   = "user_dashboard"
                         st.rerun()
                     else:
-                        st.error(resp.get("detail", "Invalid OTP. Please try again."))
+                        st.error(resp.get("detail", tx("invalid_otp_err")))
             st.markdown("</div>", unsafe_allow_html=True)
  
             st.markdown(_divider(), unsafe_allow_html=True)
             ra, rb = st.columns(2)
             with ra:
-                if st.button("🔄 Resend OTP", key="resend_otp_btn", use_container_width=True):
+                if st.button(tx("resend_otp"), key="resend_otp_btn",
+                             use_container_width=True):
                     with st.spinner("Resending…"):
-                        resp = api("post", "/auth/user/send-otp", json={"phone": st.session_state.login_phone})
+                        resp = api("post", "/auth/user/send-otp", json={
+                            "phone": st.session_state.login_phone
+                        })
                     if resp.get("success"):
                         st.session_state.demo_otp = resp.get("otp", "123456")
-                        st.success("New OTP sent!")
+                        st.success(tx("otp_sent_success"))
                         st.rerun()
                     else:
                         st.error("Failed to resend OTP.")
             with rb:
                 st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-                if st.button("← Change number", key="cancel_otp_btn", use_container_width=True):
+                if st.button(tx("change_number"), key="cancel_otp_btn",
+                             use_container_width=True):
                     st.session_state.otp_sent = False
                     st.session_state.demo_otp = ""
                     st.rerun()
@@ -2386,22 +2338,23 @@ def pg_user_login():
  
         st.markdown(_card_close(), unsafe_allow_html=True)
  
-    # ── CREATE ACCOUNT ───────────────────────────────────────────────────────
+    # ── CREATE ACCOUNT ────────────────────────────────────────────────────────
     with tab2:
-        st.markdown(_card_open("Create your account"), unsafe_allow_html=True)
+        st.markdown(_card_open(tx("create_account")), unsafe_allow_html=True)
         with st.form(key="register_form", clear_on_submit=True):
-            r_name    = st.text_input("Full name *",    placeholder="Your full name",        key="reg_name")
-            r_phone   = st.text_input("Phone number *", placeholder="10-digit number",       key="reg_phone")
-            r_address = st.text_area("Address *",       placeholder="Your complete address", key="reg_address", height=85)
-            submitted = st.form_submit_button("Create Account →", use_container_width=True)
+            r_name    = st.text_input(tx("full_name"),    placeholder=tx("full_name_ph"),    key="reg_name")
+            r_phone   = st.text_input(tx("phone_star"),   placeholder=tx("phone_ph"),         key="reg_phone")
+            r_address = st.text_area( tx("address_star"), placeholder=tx("address_ph"),       key="reg_address", height=85)
+            submitted = st.form_submit_button(tx("create_account_arrow"),
+                                              use_container_width=True)
  
         if submitted:
             if not r_name:
-                st.error("Please enter your full name.")
+                st.error(tx("enter_name_err"))
             elif not r_phone or len(r_phone.strip()) != 10 or not r_phone.strip().isdigit():
-                st.error("Enter a valid 10-digit phone number.")
+                st.error(tx("invalid_phone2_err"))
             elif not r_address:
-                st.error("Please enter your address.")
+                st.error(tx("enter_address_err"))
             else:
                 with st.spinner("Creating account…"):
                     resp = api("post", "/auth/user/signup", json={
@@ -2411,34 +2364,38 @@ def pg_user_login():
                         "language": st.session_state.get("language", "en"),
                     })
                 if resp.get("success"):
-                    st.success("✅ Account created! Switch to Sign In to continue.")
+                    st.success(tx("account_created"))
                     st.balloons()
                 else:
-                    em = resp.get("detail", "Registration failed.")
+                    em = resp.get("detail", tx("reg_failed"))
                     st.error(
-                        "❌ Phone already registered — please sign in."
-                        if "already" in em.lower() else f"❌ {em}"
+                        "❌ " + tx("already_registered")
+                        if "already" in em.lower()
+                        else f"❌ {em}"
                     )
         st.markdown(_card_close(), unsafe_allow_html=True)
  
     st.markdown(_divider(), unsafe_allow_html=True)
     st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-    if st.button("← Back to role selection", key="back_to_role", use_container_width=True):
+    if st.button(tx("back_role"), key="back_to_role", use_container_width=True):
         st.session_state.otp_sent = False
         st.session_state.demo_otp = ""
         st.session_state.screen   = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown(_footer("By continuing you agree to our Terms of Service"), unsafe_allow_html=True)
+    st.markdown(_footer(tx("terms")), unsafe_allow_html=True)
  
  
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_official_login  — Official login + request access
+#  PAGE 3 — Official login  (pg_official_login)
 # ─────────────────────────────────────────────────────────────────────────────
  
 def pg_official_login():
+    import streamlit as st
+ 
     st.markdown(_base_css(), unsafe_allow_html=True)
-    st.markdown(_login_css(accent="#0EA5E9", accent2="#6366F1"), unsafe_allow_html=True)
+    st.markdown(_login_css(accent="#0EA5E9", accent2="#6366F1"),
+                unsafe_allow_html=True)
     st.markdown("""
     <style>
     .primary-btn .stButton > button {
@@ -2447,27 +2404,6 @@ def pg_official_login():
         box-shadow: 0 2px 10px rgba(14,165,233,0.30) !important;
         font-size: 14px !important;
     }
-    </style>
-    """, unsafe_allow_html=True)
- 
-    for k, v in [
-        ("off_active_tab", "login"), ("off_step", 1), ("off_data", {}),
-        ("off_otp_verified", False), ("forgot_step", 1), ("forgot_email", ""),
-        ("forgot_otp_verified", False), ("show_forgot", False),
-    ]:
-        if k not in st.session_state:
-            st.session_state[k] = v
- 
-    st.markdown(_topbar(), unsafe_allow_html=True)
-    st.markdown(_hero(
-        "🏢", "Official Portal",
-        "Department management & complaint resolution",
-        "linear-gradient(135deg,#0c1a3a 0%,#0369a1 50%,#1e1b4b 100%)"
-    ), unsafe_allow_html=True)
- 
-    # Custom pill tabs
-    st.markdown("""
-    <style>
     .pill-tab-active .stButton > button {
         background: #0EA5E9 !important; color: #fff !important;
         border: none !important; font-weight: 500 !important;
@@ -2480,11 +2416,30 @@ def pg_official_login():
     </style>
     """, unsafe_allow_html=True)
  
+    # Session defaults
+    for k, v in [
+        ("off_active_tab", "login"), ("off_step", 1), ("off_data", {}),
+        ("off_otp_verified", False), ("forgot_step", 1), ("forgot_email", ""),
+        ("forgot_otp_verified", False), ("show_forgot", False),
+    ]:
+        if k not in st.session_state:
+            st.session_state[k] = v
+ 
+    st.markdown(_topbar(), unsafe_allow_html=True)
+    st.markdown(_hero(
+        "🏢",
+        tx("official_hero"),
+        tx("official_hero_sub"),
+        "linear-gradient(135deg,#0c1a3a 0%,#0369a1 50%,#1e1b4b 100%)"
+    ), unsafe_allow_html=True)
+ 
+    # ── Tab switcher ──────────────────────────────────────────────────────────
     tc1, tc2 = st.columns(2, gap="small")
     with tc1:
         cls = "pill-tab-active" if st.session_state.off_active_tab == "login" else "pill-tab-idle"
         st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-        if st.button("Sign In", key="tab_login_btn", use_container_width=True):
+        if st.button(tx("sign_in_arrow").replace(" →", ""), key="tab_login_btn",
+                     use_container_width=True):
             st.session_state.off_active_tab = "login"
             st.session_state.show_forgot    = False
             st.rerun()
@@ -2492,7 +2447,8 @@ def pg_official_login():
     with tc2:
         cls = "pill-tab-active" if st.session_state.off_active_tab == "request" else "pill-tab-idle"
         st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
-        if st.button("Request Access", key="tab_request_btn", use_container_width=True):
+        if st.button(tx("request_access"), key="tab_request_btn",
+                     use_container_width=True):
             st.session_state.off_active_tab = "request"
             st.session_state.show_forgot    = False
             st.rerun()
@@ -2500,33 +2456,38 @@ def pg_official_login():
  
     st.markdown(_divider(), unsafe_allow_html=True)
  
-    # ── SIGN IN / FORGOT ─────────────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════════════════
+    #  SIGN IN TAB
+    # ══════════════════════════════════════════════════════════════════════════
     if st.session_state.off_active_tab == "login":
  
         if not st.session_state.show_forgot:
-            st.markdown(_card_open("Official credentials"), unsafe_allow_html=True)
+            # ── Normal sign-in ────────────────────────────────────────────────
+            st.markdown(_card_open(tx("official_creds")), unsafe_allow_html=True)
             with st.form(key="official_login_form", clear_on_submit=False):
-                email    = st.text_input("Email address", placeholder="official@department.gov.in", key="official_email")
-                password = st.text_input("Password",      placeholder="Your password", key="official_password", type="password")
-                submitted = st.form_submit_button("Sign In →", use_container_width=True)
+                email    = st.text_input(tx("email_label"),    placeholder=tx("email_placeholder"),  key="official_email")
+                password = st.text_input(tx("password_label"), placeholder=tx("password_ph"),         key="official_password", type="password")
+                submitted = st.form_submit_button(tx("sign_in_arrow"), use_container_width=True)
  
             if submitted:
                 if not email or not password:
-                    st.error("Please enter both email and password.")
+                    st.error(tx("enter_both_err"))
                 else:
                     with st.spinner("Signing in…"):
-                        resp = api("post", "/auth/official/login", json={"email": email, "password": password})
+                        resp = api("post", "/auth/official/login",
+                                   json={"email": email, "password": password})
                     if resp.get("success"):
                         st.session_state.official = resp
                         st.session_state.role     = "official"
                         st.session_state.screen   = "official_dashboard"
                         st.rerun()
                     else:
-                        st.error(resp.get("detail", "Invalid email or password."))
+                        st.error(resp.get("detail", tx("invalid_creds_err")))
  
             st.markdown(_divider(), unsafe_allow_html=True)
             st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-            if st.button("Forgot password?", key="forgot_pwd_btn", use_container_width=True):
+            if st.button(tx("forgot_password"), key="forgot_pwd_btn",
+                         use_container_width=True):
                 st.session_state.show_forgot         = True
                 st.session_state.forgot_step         = 1
                 st.session_state.forgot_otp_verified = False
@@ -2536,141 +2497,187 @@ def pg_official_login():
             st.markdown(_card_close(), unsafe_allow_html=True)
  
         else:
-            # ── FORGOT PASSWORD ──────────────────────────────────────────────
-            st.markdown(_card_open("Reset password"), unsafe_allow_html=True)
+            # ── Forgot password flow ──────────────────────────────────────────
+            st.markdown(_card_open(tx("reset_password")), unsafe_allow_html=True)
             step = st.session_state.forgot_step
  
             if step == 1:
-                fe = st.text_input("Registered email address", key="forgot_email_input")
+                fe = st.text_input(tx("reg_email"), key="forgot_email_input")
                 st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-                if st.button("Send Reset OTP →", key="send_reset_otp", use_container_width=True):
+                if st.button(tx("send_reset_otp"), key="send_reset_otp",
+                             use_container_width=True):
                     if not fe:
-                        st.error("Please enter your email.")
+                        st.error(tx("enter_email_err"))
                     elif "@" not in fe or "." not in fe.split("@")[-1]:
-                        st.error("Enter a valid email address.")
+                        st.error(tx("invalid_email_err"))
                     else:
                         st.session_state.forgot_email = fe
                         st.session_state.forgot_step  = 2
-                        st.success("Demo OTP sent — use **123456**")
+                        st.success(tx("demo_otp_sent"))
                         st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
  
             elif step == 2:
-                st.markdown(_info_box(f"Code sent to <strong>{st.session_state.forgot_email}</strong> — use <strong>123456</strong>", "📧"), unsafe_allow_html=True)
-                otp = st.text_input("Enter OTP", type="password", placeholder="123456", key="reset_otp")
+                st.markdown(
+                    _info_box(
+                        tx("code_sent_to").format(email=st.session_state.forgot_email),
+                        "📧"
+                    ),
+                    unsafe_allow_html=True
+                )
+                otp = st.text_input(tx("enter_otp"), type="password",
+                                    placeholder="123456", key="reset_otp")
                 c1, c2 = st.columns(2)
                 with c1:
                     st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-                    if st.button("Verify OTP →", use_container_width=True, key="verify_reset"):
+                    if st.button(tx("verify_otp_arrow"), use_container_width=True,
+                                 key="verify_reset"):
                         if otp == "123456":
                             st.session_state.forgot_otp_verified = True
                             st.session_state.forgot_step         = 3
                             st.rerun()
                         else:
-                            st.error("Invalid OTP — use 123456.")
+                            st.error(tx("invalid_otp_123"))
                     st.markdown("</div>", unsafe_allow_html=True)
                 with c2:
-                    if st.button("Resend", use_container_width=True, key="resend_reset"):
-                        st.info("OTP resent (still 123456).")
+                    if st.button(tx("resend"), use_container_width=True,
+                                 key="resend_reset"):
+                        st.info(tx("otp_still_123"))
  
             else:
-                st.markdown(_verified_box("Email verified — set your new password"), unsafe_allow_html=True)
-                new_pwd     = st.text_input("New password",         type="password", key="new_pwd")
-                confirm_pwd = st.text_input("Confirm new password", type="password", key="confirm_pwd")
+                st.markdown(_verified_box(tx("email_verified")), unsafe_allow_html=True)
+                new_pwd     = st.text_input(tx("new_password"),     type="password", key="new_pwd")
+                confirm_pwd = st.text_input(tx("confirm_password"), type="password", key="confirm_pwd")
                 st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-                if st.button("Reset Password →", use_container_width=True, key="do_reset"):
+                if st.button(tx("reset_arrow"), use_container_width=True, key="do_reset"):
                     if not new_pwd or not confirm_pwd:
-                        st.error("Please fill both fields.")
+                        st.error(tx("fill_both_err"))
                     elif len(new_pwd) < 6:
-                        st.error("Password must be at least 6 characters.")
+                        st.error(tx("pass_6_err"))
                     elif new_pwd != confirm_pwd:
-                        st.error("Passwords do not match.")
+                        st.error(tx("pass_mismatch_err"))
                     else:
                         with st.spinner("Updating…"):
                             resp = api("post", "/auth/official/reset-password",
-                                       json={"email": st.session_state.forgot_email, "new_password": new_pwd})
+                                       json={"email": st.session_state.forgot_email,
+                                             "new_password": new_pwd})
                         if resp.get("success"):
-                            st.success("✅ Password reset! Please sign in.")
-                            for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
+                            st.success(tx("reset_success"))
+                            for key in ["show_forgot", "forgot_step",
+                                        "forgot_email", "forgot_otp_verified"]:
                                 st.session_state.pop(key, None)
                             st.rerun()
                         else:
-                            st.error(f"Reset failed: {resp.get('detail','Unknown error')}")
+                            st.error(tx("reset_failed") + resp.get("detail", "Unknown error"))
                 st.markdown("</div>", unsafe_allow_html=True)
  
             st.markdown(_divider(), unsafe_allow_html=True)
             st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-            if st.button("← Back to sign in", use_container_width=True, key="back_from_forgot"):
-                for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
+            if st.button(tx("back_sign_in"), use_container_width=True,
+                         key="back_from_forgot"):
+                for key in ["show_forgot", "forgot_step",
+                            "forgot_email", "forgot_otp_verified"]:
                     st.session_state.pop(key, None)
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
             st.markdown(_card_close(), unsafe_allow_html=True)
  
-    # ── REQUEST ACCESS ────────────────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════════════════
+    #  REQUEST ACCESS TAB
+    # ══════════════════════════════════════════════════════════════════════════
     else:
         st.markdown(_card_open(), unsafe_allow_html=True)
         step = st.session_state.off_step
         st.markdown(_step_indicator(step), unsafe_allow_html=True)
  
         if step == 1:
-            st.markdown('<p style="font-size:10.5px;font-weight:600;color:#9CA3AF;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:16px;">Your details</p>', unsafe_allow_html=True)
+            st.markdown(
+                f'<p style="font-size:10.5px;font-weight:600;color:#9CA3AF;'
+                f'letter-spacing:1.1px;text-transform:uppercase;margin-bottom:16px;">'
+                f'{tx("your_details")}</p>',
+                unsafe_allow_html=True
+            )
             d  = st.session_state.off_data
-            nm = st.text_input("Full name *",               value=d.get("name", ""),      key="off_name")
-            em = st.text_input("Email address *",           value=d.get("email", ""),     key="off_email")
-            ph = st.text_input("Phone (10 digits) *",       value=d.get("phone", ""),     key="off_phone")
-            pw = st.text_input("Password (min 6 chars) *",  value=d.get("password", ""),  key="off_pass",  type="password")
-            dc = st.text_input("Department code *",         value=d.get("dept_code", ""), key="off_dept",
-                               help="Get this from your department admin")
+            nm = st.text_input(tx("full_name_req"),  value=d.get("name", ""),      key="off_name")
+            em = st.text_input(tx("email_req"),       value=d.get("email", ""),     key="off_email")
+            ph = st.text_input(tx("phone_req"),       value=d.get("phone", ""),     key="off_phone")
+            pw = st.text_input(tx("pass_req"),        value=d.get("password", ""),  key="off_pass", type="password")
+            dc = st.text_input(tx("dept_code_req"),   value=d.get("dept_code", ""), key="off_dept",
+                               help=tx("dept_code_help"))
             st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-            if st.button("Continue →", use_container_width=True, key="off_send_otp"):
-                errs = [f for f, v in [("Name", nm), ("Email", em), ("Phone", ph), ("Password", pw), ("Dept Code", dc)] if not v]
+            if st.button(tx("continue_arrow"), use_container_width=True,
+                         key="off_send_otp"):
+                errs = [f for f, v in [
+                    (tx("full_name_req"), nm),
+                    (tx("email_req"), em),
+                    (tx("phone_req"), ph),
+                    (tx("pass_req"), pw),
+                    (tx("dept_code_req"), dc)
+                ] if not v]
                 if errs:
-                    st.error("Missing: " + ", ".join(errs))
+                    st.error(tx("missing_fields") + ", ".join(errs))
                 elif len(ph) != 10 or not ph.isdigit():
-                    st.error("Phone must be exactly 10 digits.")
+                    st.error(tx("phone_10_err"))
                 elif len(pw) < 6:
-                    st.error("Password must be at least 6 characters.")
+                    st.error(tx("pass_6_err"))
                 else:
-                    st.session_state.off_data = {"name": nm, "email": em, "phone": ph, "password": pw, "dept_code": dc}
-                    st.session_state.off_step = 2
+                    st.session_state.off_data = {
+                        "name": nm, "email": em, "phone": ph,
+                        "password": pw, "dept_code": dc
+                    }
+                    st.session_state.off_step         = 2
                     st.session_state.off_otp_verified = False
                     st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
  
         else:
             masked = "×" * 6 + st.session_state.off_data.get("phone", "")[-4:]
-            st.markdown(_info_box(f"OTP sent to <strong>{masked}</strong> — use demo code <strong>123456</strong>", "📱"), unsafe_allow_html=True)
+            st.markdown(
+                _info_box(
+                    f"OTP sent to <strong>{masked}</strong> — use demo code <strong>123456</strong>",
+                    "📱"
+                ),
+                unsafe_allow_html=True
+            )
  
-            otp = st.text_input("OTP", type="password", placeholder="6-digit code",
-                                key="off_otp_input", max_chars=6, label_visibility="collapsed")
+            otp = st.text_input(
+                tx("enter_otp"), type="password",
+                placeholder=tx("otp_placeholder"),
+                key="off_otp_input", max_chars=6,
+                label_visibility="collapsed"
+            )
  
             if st.session_state.off_otp_verified:
-                st.markdown(_verified_box("Phone verified — ready to submit!"), unsafe_allow_html=True)
+                st.markdown(_verified_box(tx("phone_verified")),
+                            unsafe_allow_html=True)
  
             oc1, oc2 = st.columns(2)
             with oc1:
                 st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-                if st.button("Verify OTP →", use_container_width=True, key="off_verify_otp"):
+                if st.button(tx("verify_otp_arrow"), use_container_width=True,
+                             key="off_verify_otp"):
                     if otp and otp.strip() == "123456":
                         st.session_state.off_otp_verified = True
                         st.rerun()
                     else:
-                        st.error("Invalid OTP — use 123456.")
+                        st.error(tx("invalid_otp_123"))
                 st.markdown("</div>", unsafe_allow_html=True)
             with oc2:
-                if st.button("Resend", use_container_width=True, key="off_resend_otp"):
-                    st.info("Demo OTP resent — still 123456.")
+                if st.button(tx("resend"), use_container_width=True,
+                             key="off_resend_otp"):
+                    st.info(tx("otp_resent"))
  
             st.markdown(_divider(), unsafe_allow_html=True)
  
             if st.session_state.off_otp_verified:
                 st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-                if st.button("Submit Request →", use_container_width=True, key="off_submit_request"):
+                if st.button(tx("submit_request"), use_container_width=True,
+                             key="off_submit_request"):
                     with st.spinner("Submitting…"):
-                        resp = api("post", "/auth/official/signup", json=st.session_state.off_data)
+                        resp = api("post", "/auth/official/signup",
+                                   json=st.session_state.off_data)
                     if resp.get("success"):
-                        st.success("✅ Request submitted! Awaiting admin approval.")
+                        st.success(tx("request_submitted"))
                         for k in ("off_step", "off_data", "off_otp_verified"):
                             st.session_state.pop(k, None)
                         st.session_state.off_active_tab = "login"
@@ -2678,14 +2685,19 @@ def pg_official_login():
                         st.rerun()
                     else:
                         em2 = resp.get("detail", "Unknown error")
-                        st.error("❌ Email already registered — try signing in." if "already" in em2.lower() else f"❌ {em2}")
+                        st.error(
+                            "❌ " + tx("already_registered2")
+                            if "already" in em2.lower()
+                            else f"❌ {em2}"
+                        )
                 st.markdown("</div>", unsafe_allow_html=True)
             else:
-                st.markdown(_warn_box("Verify your OTP above before submitting."), unsafe_allow_html=True)
+                st.markdown(_warn_box(tx("verify_first")), unsafe_allow_html=True)
  
             st.markdown(_divider(), unsafe_allow_html=True)
             st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-            if st.button("← Edit details", use_container_width=True, key="off_back_step1"):
+            if st.button(tx("edit_details"), use_container_width=True,
+                         key="off_back_step1"):
                 st.session_state.off_step         = 1
                 st.session_state.off_otp_verified = False
                 st.rerun()
@@ -2695,7 +2707,7 @@ def pg_official_login():
  
     st.markdown(_divider(), unsafe_allow_html=True)
     st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-    if st.button("← Back to role selection", key="official_back", use_container_width=True):
+    if st.button(tx("back_role"), key="official_back", use_container_width=True):
         for k in ("off_step", "off_data", "off_otp_verified", "off_active_tab",
                   "show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"):
             st.session_state.pop(k, None)
@@ -2706,55 +2718,57 @@ def pg_official_login():
  
  
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_admin_login  — Admin login
+#  PAGE 4 — Admin login  (pg_admin_login)
 # ─────────────────────────────────────────────────────────────────────────────
  
 def pg_admin_login():
+    import streamlit as st
+ 
     st.markdown(_base_css(), unsafe_allow_html=True)
-    st.markdown(_login_css(accent="#E8660A", accent2="#EF4444"), unsafe_allow_html=True)
+    st.markdown(_login_css(accent="#E8660A", accent2="#EF4444"),
+                unsafe_allow_html=True)
  
     st.markdown(_topbar(), unsafe_allow_html=True)
     st.markdown(_hero(
-        "👑", "Admin Panel",
-        "System administration · analytics · oversight",
+        "👑",
+        tx("admin_hero"),
+        tx("admin_hero_sub"),
         "linear-gradient(135deg,#3b1a00 0%,#78350f 50%,#1c1917 100%)"
     ), unsafe_allow_html=True)
  
-    st.markdown(_card_open("Administrator credentials"), unsafe_allow_html=True)
+    st.markdown(_card_open(tx("admin_creds")), unsafe_allow_html=True)
  
     with st.form(key="admin_login_form", clear_on_submit=False):
-        username  = st.text_input("Username", placeholder="Enter your username",  key="admin_username")
-        password  = st.text_input("Password", placeholder="Enter your password",  key="admin_password", type="password")
-        submitted = st.form_submit_button("Sign In to Admin Panel →", use_container_width=True)
+        username  = st.text_input(tx("username_label"),
+                                  placeholder=tx("username_ph"), key="admin_username")
+        password  = st.text_input(tx("password_label"),
+                                  placeholder=tx("password_ph2"), key="admin_password",
+                                  type="password")
+        submitted = st.form_submit_button(tx("sign_in_admin"), use_container_width=True)
  
     if submitted:
         if not username:
-            st.error("Please enter your username.")
+            st.error(tx("enter_username_err"))
         elif not password:
-            st.error("Please enter your password.")
+            st.error(tx("enter_password_err"))
         else:
             with st.spinner("Authenticating…"):
-                resp = api("post", "/auth/admin/login", json={"username": username, "password": password})
+                resp = api("post", "/auth/admin/login",
+                           json={"username": username, "password": password})
             if resp.get("success"):
                 st.session_state.admin  = resp
                 st.session_state.role   = "admin"
                 st.session_state.screen = "admin_dashboard"
                 st.rerun()
             else:
-                st.error(resp.get("detail", "Invalid username or password."))
+                st.error(resp.get("detail", tx("invalid_creds_err")))
  
-    st.markdown("""
-    <div style="
-        background:#FFF7ED;
-        border:1px solid #FED7AA;
-        border-radius:10px;
-        padding:14px 16px;
-        margin-top:16px;
-        font-size:13px;
-        color:#92400E;
-    ">
-        <div style="font-weight:600;margin-bottom:4px;">Default credentials</div>
-        <div style="font-weight:300;">Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin123</strong></div>
+    # Default credentials hint box — bilingual
+    st.markdown(f"""
+    <div style="background:#FFF7ED;border:1px solid #FED7AA;border-radius:10px;
+        padding:14px 16px;margin-top:16px;font-size:13px;color:#92400E;">
+        <div style="font-weight:600;margin-bottom:4px;">{tx("default_creds")}</div>
+        <div style="font-weight:300;">{tx("default_creds_val")}</div>
     </div>
     """, unsafe_allow_html=True)
  
@@ -2762,13 +2776,12 @@ def pg_admin_login():
  
     st.markdown(_divider(), unsafe_allow_html=True)
     st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
-    if st.button("← Back to role selection", key="admin_back", use_container_width=True):
+    if st.button(tx("back_role"), key="admin_back", use_container_width=True):
         st.session_state.screen = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown(_footer(), unsafe_allow_html=True)
-
-
+ 
 # ═════════════════════════════════════════════════════════════════════════════
 # USER DASHBOARD
 # ═════════════════════════════════════════════════════════════════════════════
