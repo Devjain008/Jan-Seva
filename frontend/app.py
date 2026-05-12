@@ -3673,7 +3673,7 @@ _PRIORITY_META = {
 # RENDER SECTIONS
 # ═══════════════════════════════════════════════════════════════════════════
  
-def _render_hero(user, comps, lang):
+def _render_heros(user, comps, lang):
     """FIX: was called _dashboard_render_hero() — correct name is _render_hero()"""
     hour = datetime.now().hour
     greet_map = [(12,"Good Morning","सुप्रभात","☀️"),
@@ -4116,7 +4116,7 @@ def pg_user_dashboard():
     }
  
     # 5. Render — _render_hero is the correct name
-    _render_hero(user, comps, lang)
+    _render_heros(user, comps, lang)
     _render_quick_actions(lang)
     _render_notification_banner(notifs, lang)
     _render_feedback_section(comps, lang)
