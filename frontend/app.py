@@ -2768,6 +2768,20 @@ def pg_admin_login():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown(_footer(), unsafe_allow_html=True)
 
+def api(method, path, **kwargs):
+    return {"success": False, "detail": "API not connected in demo mode."}
+ 
+if "screen" not in st.session_state:
+    st.session_state.screen = "login_type"
+if "language" not in st.session_state:
+    st.session_state.language = "en"
+ 
+{
+    "login_type":     pg_login_type,
+    "user_login":     pg_user_login,
+    "official_login": pg_official_login,
+    "admin_login":    pg_admin_login,
+}.get(st.session_state.screen, pg_login_type)()
 # ═════════════════════════════════════════════════════════════════════════════
 # USER DASHBOARD
 # ═════════════════════════════════════════════════════════════════════════════
