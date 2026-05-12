@@ -1740,7 +1740,7 @@ def _hero(icon: str, title: str, subtitle: str, gradient: str) -> str:
  
  
 def _card_open(label: str = "") -> str:
-    label_html = f'<div style="font-size:10.5px;font-weight:600;color:#9CA3AF;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:20px;">{label}</div>' if label else ""
+    label_html = f'<div style="font-size: 23.5px;font-weight: 490;color: rgb(44 65 100);letter-spacing: 3.1px;text-transform: uppercase;margin-bottom: -5px;">{label}</div>' if label else ""
     return f"""
 <div style="
     background:#fff;
