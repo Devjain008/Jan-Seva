@@ -181,57 +181,64 @@ def render_sidebar():
     import streamlit as st
 
     role = st.session_state.get("role")
-    dark = st.session_state.get("dark_mode", True)
+    dark = st.session_state.get("dark_mode", False)
+    current_screen = st.session_state.get("screen", "")
 
     if not role:
         return
 
     # ─────────────────────────────────────────────────────
-    # COLORS — Refined light-first SaaS palette
+    # COLORS — NagarSeva inspired (warm orange + neutrals)
     # ─────────────────────────────────────────────────────
     if dark:
-        BG = "#0B1120"
-        CARD = "rgba(15,23,42,0.75)"
+        BG = "#0F1115"
+        CARD = "#1A1D24"
         BORDER = "rgba(255,255,255,0.08)"
-        TEXT = "#F8FAFC"
-        SUB = "#94A3B8"
-        HOVER_BG = "rgba(99,102,241,0.12)"
-        ACTIVE_BG = "rgba(99,102,241,0.18)"
-        DIVIDER = "rgba(255,255,255,0.06)"
+        TEXT = "#F5F5F4"
+        SUB = "#A8A29E"
+        HOVER_BG = "rgba(249,115,22,0.10)"
+        ACTIVE_BG = "rgba(249,115,22,0.18)"
+        ACTIVE_TEXT = "#FB923C"
+        DANGER_BG = "rgba(220,38,38,0.12)"
+        DANGER_TEXT = "#F87171"
     else:
-        # Linear / Stripe / Vercel inspired light palette
+        # Warm light palette inspired by reference
         BG = "#FFFFFF"
-        CARD = "#FAFAFA"
-        BORDER = "#EAECEF"
-        TEXT = "#1F2328"
-        SUB = "#6B7280"
-        HOVER_BG = "#F4F4F5"
-        ACTIVE_BG = "#EEF2FF"
-        DIVIDER = "#F1F2F4"
+        CARD = "#FFF7ED"           # warm cream like reference
+        BORDER = "#F1E9DD"
+        TEXT = "#1C1917"           # near-black, fully visible
+        SUB = "#78716C"
+        HOVER_BG = "#FFF1E0"
+        ACTIVE_BG = "#FFEDD5"
+        ACTIVE_TEXT = "#EA580C"
+        DANGER_BG = "#FEF2F2"
+        DANGER_TEXT = "#DC2626"
 
-    ACCENT = "#6366F1"
+    ACCENT = "#F97316"             # NagarSeva orange
+    ACCENT_2 = "#FB923C"
+    GRADIENT = f"linear-gradient(135deg, {ACCENT} 0%, {ACCENT_2} 100%)"
 
     # ─────────────────────────────────────────────────────
-    # CSS — Premium SaaS styling
+    # CSS — Stronger specificity to survive Streamlit reruns
     # ─────────────────────────────────────────────────────
     st.markdown(f"""
     <style>
 
     /* ===== Sidebar container ===== */
     section[data-testid="stSidebar"] {{
-        width: 272px !important;
-        min-width: 272px !important;
+        width: 280px !important;
+        min-width: 280px !important;
         background: {BG} !important;
         border-right: 1px solid {BORDER} !important;
         box-shadow: none !important;
     }}
 
     section[data-testid="stSidebar"] > div {{
-        background: {BG};
+        background: {BG} !important;
         padding-top: 0.5rem;
     }}
 
-    /* Hide default Streamlit sidebar chrome noise */
+    /* Hide default Streamlit chrome */
     section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {{
         display: none;
     }}
@@ -239,25 +246,26 @@ def render_sidebar():
         display: none;
     }}
 
-    /* Ensure sidebar always shows (fix: hidden after login) */
+    /* Force sidebar visible after login */
     section[data-testid="stSidebar"][aria-expanded="true"] {{
         transform: none !important;
         visibility: visible !important;
+        opacity: 1 !important;
     }}
 
     .sb-wrap {{
-        padding: 0.25rem 0.75rem 1.5rem;
+        padding: 0.25rem 0.85rem 1.5rem;
     }}
 
-    /* ===== Brand ===== */
+    /* ===== Brand card ===== */
     .sb-brand {{
-        background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 100%);
-        border-radius: 14px;
+        background: {GRADIENT};
+        border-radius: 16px;
         padding: 1rem 1.1rem;
         color: white;
-        margin-bottom: 1.25rem;
-        box-shadow: 0 1px 2px rgba(99,102,241,0.08),
-                    0 4px 12px rgba(99,102,241,0.18);
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 2px rgba(249,115,22,0.10),
+                    0 8px 20px rgba(249,115,22,0.22);
         position: relative;
         overflow: hidden;
     }}
@@ -267,28 +275,53 @@ def render_sidebar():
         position: absolute;
         inset: 0;
         background: radial-gradient(120% 80% at 100% 0%,
-                    rgba(255,255,255,0.18), transparent 60%);
+                    rgba(255,255,255,0.22), transparent 60%);
         pointer-events: none;
     }}
 
-    .sb-brand-icon {{
-        font-size: 1.5rem;
-        line-height: 1;
-        margin-bottom: 0.5rem;
+    .sb-brand-row {{
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        position: relative;
+        z-index: 1;
+    }}
+
+    .sb-brand-logo {{
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.20);
+        backdrop-filter: blur(8px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        border: 1px solid rgba(255,255,255,0.25);
+    }}
+
+    .sb-brand-text {{
+        line-height: 1.1;
     }}
 
     .sb-brand-title {{
-        font-size: 1.02rem;
+        font-size: 1.05rem;
         font-weight: 700;
         letter-spacing: -0.01em;
-        margin-top: 0.2rem;
+    }}
+
+    .sb-brand-title span {{
+        opacity: 0.92;
+        font-weight: 600;
     }}
 
     .sb-brand-sub {{
-        font-size: 0.72rem;
-        opacity: 0.9;
-        margin-top: 0.15rem;
+        font-size: 0.7rem;
+        opacity: 0.92;
+        margin-top: 0.2rem;
         font-weight: 500;
+        position: relative;
+        z-index: 1;
     }}
 
     /* ===== User card ===== */
@@ -296,13 +329,14 @@ def render_sidebar():
         background: {CARD};
         border: 1px solid {BORDER};
         border-radius: 12px;
-        padding: 0.75rem;
+        padding: 0.7rem 0.8rem;
         margin-bottom: 1rem;
-        transition: border-color 0.15s ease;
+        transition: all 0.15s ease;
     }}
 
     .sb-user:hover {{
-        border-color: #D4D7DC;
+        border-color: {ACCENT};
+        box-shadow: 0 2px 8px rgba(249,115,22,0.08);
     }}
 
     .sb-user-top {{
@@ -312,19 +346,19 @@ def render_sidebar():
     }}
 
     .sb-avatar {{
-        width: 36px;
-        height: 36px;
-        min-width: 36px;
+        width: 38px;
+        height: 38px;
+        min-width: 38px;
         border-radius: 10px;
-        background: linear-gradient(135deg,#6366F1,#8B5CF6);
+        background: {GRADIENT};
         display: flex;
         align-items: center;
         justify-content: center;
-        color: white;
+        color: white !important;
         font-weight: 700;
-        font-size: 0.82rem;
+        font-size: 0.85rem;
         letter-spacing: 0.02em;
-        box-shadow: 0 1px 2px rgba(99,102,241,0.25);
+        box-shadow: 0 2px 6px rgba(249,115,22,0.28);
     }}
 
     .sb-user-info {{
@@ -333,8 +367,8 @@ def render_sidebar():
     }}
 
     .sb-user-name {{
-        color: {TEXT};
-        font-size: 0.86rem;
+        color: {TEXT} !important;
+        font-size: 0.88rem;
         font-weight: 600;
         letter-spacing: -0.01em;
         white-space: nowrap;
@@ -343,103 +377,160 @@ def render_sidebar():
     }}
 
     .sb-user-role {{
-        color: {SUB};
-        font-size: 0.72rem;
-        margin-top: 1px;
+        color: {SUB} !important;
+        font-size: 0.7rem;
+        margin-top: 2px;
         font-weight: 500;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }}
+
+    .sb-user-role::before {{
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 0 2px rgba(16,185,129,0.15);
     }}
 
     /* ===== Section labels ===== */
     .sb-section {{
-        margin-top: 1.1rem;
-        margin-bottom: 0.35rem;
-        padding-left: 0.6rem;
-        color: {SUB};
-        font-size: 0.68rem;
-        font-weight: 600;
-        letter-spacing: 0.08em;
+        margin-top: 1rem;
+        margin-bottom: 0.4rem;
+        padding-left: 0.7rem;
+        color: {SUB} !important;
+        font-size: 0.66rem;
+        font-weight: 700;
+        letter-spacing: 0.10em;
         text-transform: uppercase;
     }}
 
-    /* ===== Navigation buttons ===== */
-    div.stButton {{
-        margin-bottom: 2px;
+    /* ===== Navigation buttons (STRONG specificity) ===== */
+    section[data-testid="stSidebar"] div.stButton {{
+        margin-bottom: 3px;
     }}
 
-    div.stButton > button {{
+    section[data-testid="stSidebar"] div.stButton > button {{
         width: 100% !important;
-        border-radius: 8px !important;
-        height: 38px !important;
-        min-height: 38px !important;
+        border-radius: 10px !important;
+        height: 40px !important;
+        min-height: 40px !important;
         border: 1px solid transparent !important;
         background: transparent !important;
+        background-color: transparent !important;
         color: {TEXT} !important;
         font-weight: 500 !important;
-        font-size: 0.875rem !important;
+        font-size: 0.88rem !important;
         text-align: left !important;
         padding: 0 12px !important;
         letter-spacing: -0.005em !important;
-        transition: background-color 0.12s ease, color 0.12s ease !important;
+        transition: background-color 0.15s ease, color 0.15s ease, transform 0.1s ease !important;
         box-shadow: none !important;
         display: flex !important;
         align-items: center !important;
         justify-content: flex-start !important;
     }}
 
-    div.stButton > button p {{
+    section[data-testid="stSidebar"] div.stButton > button p,
+    section[data-testid="stSidebar"] div.stButton > button div,
+    section[data-testid="stSidebar"] div.stButton > button span {{
+        color: {TEXT} !important;
         font-weight: 500 !important;
-        font-size: 0.875rem !important;
+        font-size: 0.88rem !important;
         margin: 0 !important;
     }}
 
-    div.stButton > button:hover {{
+    section[data-testid="stSidebar"] div.stButton > button:hover {{
         background: {HOVER_BG} !important;
-        color: {TEXT} !important;
+        background-color: {HOVER_BG} !important;
+        color: {ACTIVE_TEXT} !important;
         border-color: transparent !important;
-        transform: none !important;
+        transform: translateX(2px) !important;
         box-shadow: none !important;
     }}
 
-    div.stButton > button:focus {{
+    section[data-testid="stSidebar"] div.stButton > button:hover p,
+    section[data-testid="stSidebar"] div.stButton > button:hover div,
+    section[data-testid="stSidebar"] div.stButton > button:hover span {{
+        color: {ACTIVE_TEXT} !important;
+    }}
+
+    section[data-testid="stSidebar"] div.stButton > button:focus {{
         background: {HOVER_BG} !important;
         color: {TEXT} !important;
         box-shadow: none !important;
         outline: none !important;
     }}
 
-    div.stButton > button:active {{
+    section[data-testid="stSidebar"] div.stButton > button:active {{
         background: {ACTIVE_BG} !important;
-        color: {ACCENT} !important;
-        transform: none !important;
+        color: {ACTIVE_TEXT} !important;
+        transform: translateX(2px) !important;
     }}
 
-    /* Logout button — subtle danger accent on hover */
-    div.stButton > button[kind="secondary"]:hover,
-    button[data-testid="baseButton-secondary"]:hover {{
-        background: #FEF2F2 !important;
-        color: #DC2626 !important;
+    /* ===== Active nav item ===== */
+    section[data-testid="stSidebar"] .nav-active div.stButton > button {{
+        background: {ACTIVE_BG} !important;
+        background-color: {ACTIVE_BG} !important;
+        color: {ACTIVE_TEXT} !important;
+        font-weight: 600 !important;
+        border-left: 3px solid {ACCENT} !important;
+        padding-left: 9px !important;
+    }}
+
+    section[data-testid="stSidebar"] .nav-active div.stButton > button p,
+    section[data-testid="stSidebar"] .nav-active div.stButton > button div,
+    section[data-testid="stSidebar"] .nav-active div.stButton > button span {{
+        color: {ACTIVE_TEXT} !important;
+        font-weight: 600 !important;
+    }}
+
+    /* ===== Logout button — danger style ===== */
+    section[data-testid="stSidebar"] .nav-logout div.stButton > button:hover {{
+        background: {DANGER_BG} !important;
+        background-color: {DANGER_BG} !important;
+        color: {DANGER_TEXT} !important;
+    }}
+
+    section[data-testid="stSidebar"] .nav-logout div.stButton > button:hover p,
+    section[data-testid="stSidebar"] .nav-logout div.stButton > button:hover div,
+    section[data-testid="stSidebar"] .nav-logout div.stButton > button:hover span {{
+        color: {DANGER_TEXT} !important;
     }}
 
     /* ===== Footer ===== */
     .sb-footer {{
-        margin-top: 1.5rem;
-        padding: 0.75rem 0.9rem;
-        border-radius: 10px;
+        margin-top: 1.25rem;
+        padding: 0.8rem 0.9rem;
+        border-radius: 12px;
         background: {CARD};
         border: 1px solid {BORDER};
-        color: {SUB};
+        color: {SUB} !important;
         font-size: 0.7rem;
         text-align: center;
-        line-height: 1.5;
+        line-height: 1.55;
         font-weight: 500;
     }}
 
     .sb-footer strong {{
-        color: {TEXT};
-        font-weight: 600;
+        color: {ACTIVE_TEXT} !important;
+        font-weight: 700;
     }}
 
-    /* ===== Scrollbar polish ===== */
+    .sb-footer-dot {{
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        background: #10B981;
+        border-radius: 50%;
+        margin-right: 5px;
+        vertical-align: middle;
+        box-shadow: 0 0 0 2px rgba(16,185,129,0.15);
+    }}
+
+    /* ===== Scrollbar ===== */
     section[data-testid="stSidebar"] ::-webkit-scrollbar {{
         width: 6px;
     }}
@@ -448,14 +539,14 @@ def render_sidebar():
         border-radius: 3px;
     }}
     section[data-testid="stSidebar"] ::-webkit-scrollbar-thumb:hover {{
-        background: #D4D7DC;
+        background: {ACCENT_2};
     }}
 
     /* ===== Responsive ===== */
     @media (max-width: 992px) {{
         section[data-testid="stSidebar"] {{
-            width: 260px !important;
-            min-width: 260px !important;
+            width: 264px !important;
+            min-width: 264px !important;
         }}
     }}
 
@@ -464,35 +555,26 @@ def render_sidebar():
             width: 85% !important;
             min-width: 260px !important;
             max-width: 320px !important;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.08) !important;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.10) !important;
         }}
 
         .sb-wrap {{
-            padding: 0.25rem 0.6rem 1.25rem;
+            padding: 0.25rem 0.7rem 1.25rem;
         }}
 
-        .sb-brand {{
-            padding: 0.9rem 1rem;
-            border-radius: 12px;
-        }}
-
-        .sb-brand-title {{
-            font-size: 0.98rem;
-        }}
-
-        div.stButton > button {{
-            height: 42px !important;
-            min-height: 42px !important;
-            font-size: 0.9rem !important;
+        section[data-testid="stSidebar"] div.stButton > button {{
+            height: 44px !important;
+            min-height: 44px !important;
+            font-size: 0.92rem !important;
         }}
     }}
 
     @media (max-width: 480px) {{
-        .sb-brand-sub {{
-            font-size: 0.7rem;
+        .sb-brand-title {{
+            font-size: 1rem;
         }}
         .sb-user-name {{
-            font-size: 0.84rem;
+            font-size: 0.85rem;
         }}
     }}
 
@@ -521,17 +603,17 @@ def render_sidebar():
     # ─────────────────────────────────────────────────────
     with st.sidebar:
 
-        st.markdown("""
-        <div class="sb-wrap">
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="sb-wrap">', unsafe_allow_html=True)
 
         # BRAND
         st.markdown("""
         <div class="sb-brand">
-            <div class="sb-brand-icon">🏛️</div>
-            <div class="sb-brand-title">Jan Seva Portal</div>
-            <div class="sb-brand-sub">
-                Smart Government Platform
+            <div class="sb-brand-row">
+                <div class="sb-brand-logo">🏛️</div>
+                <div class="sb-brand-text">
+                    <div class="sb-brand-title">Jan<span>Seva</span></div>
+                    <div class="sb-brand-sub">Smart Government Platform</div>
+                </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
@@ -543,73 +625,67 @@ def render_sidebar():
                 <div class="sb-avatar">{initials}</div>
                 <div class="sb-user-info">
                     <div class="sb-user-name">{name}</div>
-                    <div class="sb-user-role">
-                        {role.title()}
-                    </div>
+                    <div class="sb-user-role">{role.title()} · Online</div>
                 </div>
             </div>
         </div>
         """, unsafe_allow_html=True)
 
         # MENU
-        st.markdown("""
-        <div class="sb-section">Navigation</div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="sb-section">Navigation</div>', unsafe_allow_html=True)
 
         menu_items = []
 
         if role == "user":
             menu_items = [
-                ("🏠 Dashboard", "user_dashboard"),
-                ("📝 Complaints", "user_complaints"),
-                ("📢 Schemes", "schemes"),
-                ("🤖 AI Assistant", "ai"),
-                ("⚙️ Settings", "settings"),
+                ("🏠  Dashboard", "user_dashboard"),
+                ("📝  Complaints", "user_complaints"),
+                ("📢  Schemes", "schemes"),
+                ("🤖  AI Assistant", "ai"),
+                ("⚙️  Settings", "settings"),
             ]
-
         elif role == "official":
             menu_items = [
-                ("🏠 Dashboard", "official_dashboard"),
-                ("📂 Complaints", "official_complaints"),
-                ("📊 Analytics", "analytics"),
-                ("🔔 Notifications", "notifications"),
-                ("⚙️ Settings", "settings"),
+                ("🏠  Dashboard", "official_dashboard"),
+                ("📂  Complaints", "official_complaints"),
+                ("📊  Analytics", "analytics"),
+                ("🔔  Notifications", "notifications"),
+                ("⚙️  Settings", "settings"),
             ]
-
         elif role == "admin":
             menu_items = [
-                ("🏠 Dashboard", "admin_dashboard"),
-                ("👥 Users", "users"),
-                ("🏢 Departments", "departments"),
-                ("📈 Analytics", "analytics"),
-                ("⚙️ Settings", "settings"),
+                ("🏠  Dashboard", "admin_dashboard"),
+                ("👥  Users", "users"),
+                ("🏢  Departments", "departments"),
+                ("📈  Analytics", "analytics"),
+                ("⚙️  Settings", "settings"),
             ]
 
         for label, screen in menu_items:
-            if st.button(label, key=f"sb_{screen}"):
+            is_active = (current_screen == screen)
+            wrapper_class = "nav-active" if is_active else "nav-item"
+            st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
+            if st.button(label, key=f"sb_{screen}", use_container_width=True):
                 st.session_state.screen = screen
                 st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
-        st.markdown("""
-        <div class="sb-section">Account</div>
-        """, unsafe_allow_html=True)
+        # ACCOUNT
+        st.markdown('<div class="sb-section">Account</div>', unsafe_allow_html=True)
 
-        if st.button("🚪 Logout", key="sidebar_logout"):
-            for k in [
-                "user",
-                "official",
-                "admin",
-                "role"
-            ]:
+        st.markdown('<div class="nav-logout">', unsafe_allow_html=True)
+        if st.button("🚪  Logout", key="sidebar_logout", use_container_width=True):
+            for k in ["user", "official", "admin", "role"]:
                 st.session_state.pop(k, None)
-
             st.session_state.screen = "login_type"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
+        # FOOTER
         st.markdown("""
         <div class="sb-footer">
-            <strong>Jan Seva Portal</strong><br>
-            Modern Government System
+            <span class="sb-footer-dot"></span><strong>Jan Seva Portal</strong><br>
+            Modern Government System · v2.0
         </div>
         """, unsafe_allow_html=True)
 
