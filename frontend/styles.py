@@ -233,13 +233,13 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
 .stTextInput>div>div>input,
 .stTextArea>div>div>textarea,
 .stSelectbox>div>div>div{{
-    background:{input_bg}!important;
+    background:{"#FFCFA8"}!important;
     border:1.5px solid {border}!important;
     border-radius:var(--r-md)!important;
     color:{text}!important;
     font-family:'Inter','Noto Sans Devanagari',sans-serif!important;
     font-size:0.875rem!important;
-    padding:10px 14px!important;
+    padding:5px 14px!important;
     transition:border-color var(--t-fast),box-shadow var(--t-fast)!important;
     box-shadow:0 1px 3px rgba(26,20,10,0.04)!important;
 }}

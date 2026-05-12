@@ -403,7 +403,7 @@ def _inject_sidebar_css():
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
 
-/* ── HIDE STREAMLIT PAGE NAV (the keyboard_doub file list) ── */
+/* ── HIDE STREAMLIT PAGE NAV ── */
 section[data-testid="stSidebarNav"],
 section[data-testid="stSidebarNavItems"],
 div[data-testid="stSidebarNavSeparator"],
@@ -416,11 +416,532 @@ section[data-testid="stSidebar"] nav {
     overflow: hidden !important;
 }
 
-/* ── SIDEBAR SHELL ── */
+/* ══════════════════════════════════════
+   SIDEBAR SHELL — glassmorphism + gradient border
+══════════════════════════════════════ */
+section[data-testid="stSidebar"] {
+    background: linear-gradient(180deg, #FAFAFF 0%, #F2F4FC 40%, #EDF0FA 100%) !important;
+    border-right: none !important;
+    box-shadow:
+        1px 0 0 0 rgba(99,102,241,0.12),
+        3px 0 0 0 rgba(99,102,241,0.04),
+        6px 0 20px -4px rgba(99,102,241,0.08),
+        12px 0 40px -8px rgba(139,92,246,0.06) !important;
+    min-width: 274px !important;
+    max-width: 274px !important;
+    position: relative !important;
+}
+/* Gradient accent border — blue to purple */
+section[data-testid="stSidebar"]::after {
+    content: '';
+    position: absolute;
+    top: 0; right: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg,
+        #6366F1 0%, #818CF8 25%, #A78BFA 50%, #8B5CF6 75%, #6366F1 100%) !important;
+    opacity: 0.45;
+    z-index: 999;
+}
+section[data-testid="stSidebar"] > div:first-child {
+    padding: 0 !important;
+    backdrop-filter: blur(16px) !important;
+    -webkit-backdrop-filter: blur(16px) !important;
+}
+section[data-testid="stSidebar"] * {
+    font-family: 'Sora', sans-serif !important;
+}
+
+/* ── LOCK DOWN ALL INTERNAL SPACING ── */
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    gap: 0 !important;
+    padding: 0 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+section[data-testid="stSidebar"] .block-container {
+    padding: 0 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+section[data-testid="stSidebar"] .element-container {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
+    gap: 0.35rem !important;
+}
+section[data-testid="stSidebar"] [data-testid="column"] {
+    padding: 0 !important;
+}
+
+/* ── SCROLLBAR — subtle ── */
+section[data-testid="stSidebar"]::-webkit-scrollbar { width: 3px; }
+section[data-testid="stSidebar"]::-webkit-scrollbar-track { background: transparent; }
+section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25));
+    border-radius: 4px;
+}
+
+/* ══════════════════════════════════════
+   BRAND HEADER — premium gradient
+══════════════════════════════════════ */
+.sb-brand {
+    background: linear-gradient(135deg, #0B1F45 0%, #162D5A 40%, #1A56DB 100%);
+    padding: 1.5rem 1.2rem 1.25rem;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    border-bottom: none;
+}
+.sb-brand::before {
+    content: '';
+    position: absolute; inset: 0; pointer-events: none;
+    background: radial-gradient(circle at 85% 20%, rgba(99,149,255,.25) 0%, transparent 50%),
+                radial-gradient(circle at 15% 80%, rgba(255,153,51,.12) 0%, transparent 45%);
+}
+.sb-brand::after {
+    content: '';
+    position: absolute; bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.15) 50%, transparent 95%);
+}
+.sb-brand-icon {
+    width: 50px; height: 50px;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.22);
+    border-radius: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
+    position: relative; z-index: 1;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+.sb-brand-name {
+    font-size: 1.05rem; font-weight: 800;
+    color: #FFFFFF; letter-spacing: -0.3px;
+    position: relative; z-index: 1;
+    line-height: 1.2;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+}
+.sb-brand-hi {
+    font-family: 'Noto Sans Devanagari', sans-serif !important;
+    font-size: 0.68rem; font-weight: 600;
+    color: rgba(255,255,255,0.55);
+    position: relative; z-index: 1;
+    margin-top: 0.15rem;
+}
+.sb-tricolor {
+    height: 2.5px;
+    background: linear-gradient(90deg,
+        #FF9933 0%, #FF9933 33.3%,
+        #FFFFFF 33.3%, #FFFFFF 66.6%,
+        #138808 66.6%, #138808 100%);
+    opacity: 0.6;
+    margin-top: 1rem;
+    border-radius: 2px;
+    position: relative; z-index: 1;
+}
+
+/* ══════════════════════════════════════
+   PROFILE CARD — frosted glass
+══════════════════════════════════════ */
+.sb-profile {
+    display: flex; align-items: center; gap: 0.7rem;
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 0.75rem 0.9rem;
+    margin: 0.75rem 0.75rem 0.5rem;
+    border: 1px solid rgba(221,227,240,0.7);
+    box-shadow: 0 2px 8px rgba(11,31,69,0.04);
+    transition: box-shadow 0.2s, border-color 0.2s;
+}
+.sb-profile:hover {
+    box-shadow: 0 4px 14px rgba(11,31,69,0.08);
+    border-color: rgba(26,86,219,0.2);
+}
+.sb-profile-avatar {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, #1A56DB, #0D9488);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.95rem; flex-shrink: 0;
+    border: 1.5px solid rgba(255,255,255,0.8);
+    box-shadow: 0 2px 6px rgba(26,86,219,0.2);
+}
+.sb-profile-name {
+    font-size: 0.78rem; font-weight: 700; color: #0B1F45;
+    line-height: 1.25;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.sb-profile-sub {
+    font-size: 0.6rem; color: #8A95B0; font-weight: 400;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    margin-top: 1px;
+}
+
+/* ══════════════════════════════════════
+   SECTION LABEL
+══════════════════════════════════════ */
+.sb-section {
+    font-size: 0.56rem; font-weight: 700; letter-spacing: 1.2px;
+    text-transform: uppercase; color: #94A3B8;
+    padding: 0.65rem 1rem 0.25rem;
+}
+
+/* ══════════════════════════════════════
+   NAV BUTTONS — bordered & separated
+══════════════════════════════════════ */
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    width: 100% !important;
+    background: rgba(255,255,255,0.4) !important;
+    border: 1px solid rgba(226,232,240,0.5) !important;
+    border-radius: 10px !important;
+    padding: 0.55rem 0.85rem !important;
+    text-align: left !important;
+    font-size: 0.78rem !important;
+    font-weight: 500 !important;
+    color: #475569 !important;
+    transition: all 0.18s ease !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+    margin: 3.5px 0.5rem !important;
+    justify-content: flex-start !important;
+    line-height: 1.4 !important;
+}
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+    background: rgba(251,146,60,0.08) !important;
+    color: #C2410C !important;
+    border-color: rgba(251,146,60,0.25) !important;
+    transform: translateX(2px) !important;
+}
+
+/* ── ACTIVE NAV — light orange background ── */
+.sb-nav-active div[data-testid="stButton"] > button {
+    background: linear-gradient(90deg,
+        rgba(251,146,60,0.12) 0%,
+        rgba(249,115,22,0.06) 70%,
+        rgba(255,237,213,0.3) 100%) !important;
+    color: #C2410C !important;
+    font-weight: 700 !important;
+    border: 1px solid rgba(251,146,60,0.3) !important;
+    border-left: 3px solid #F97316 !important;
+    border-radius: 0 10px 10px 0 !important;
+    padding-left: 0.7rem !important;
+    box-shadow: inset 3px 0 12px -4px rgba(249,115,22,0.12),
+                0 2px 6px rgba(249,115,22,0.08) !important;
+}
+
+/* ══════════════════════════════════════
+   DIVIDER — gradient shimmer line
+══════════════════════════════════════ */
+.sb-divider {
+    height: 1px;
+    background: linear-gradient(90deg,
+        transparent 5%,
+        rgba(99,102,241,0.08) 20%,
+        rgba(139,92,246,0.12) 50%,
+        rgba(99,102,241,0.08) 80%,
+        transparent 95%);
+    margin: 0.55rem 0.9rem;
+}
+
+/* ══════════════════════════════════════
+   LOGOUT BUTTON
+══════════════════════════════════════ */
+.sb-logout div[data-testid="stButton"] > button {
+    background: rgba(254,226,226,0.5) !important;
+    color: #DC2626 !important;
+    border: 1px solid rgba(252,165,165,0.4) !important;
+    border-radius: 10px !important;
+    font-weight: 600 !important;
+    font-size: 0.76rem !important;
+    margin: 0 0.5rem !important;
+    transition: all 0.18s ease !important;
+}
+.sb-logout div[data-testid="stButton"] > button:hover {
+    background: rgba(254,226,226,0.8) !important;
+    border-color: rgba(252,165,165,0.7) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ══════════════════════════════════════
+   PREF BUTTONS — clean pill style
+══════════════════════════════════════ */
+.sb-pref div[data-testid="stButton"] > button {
+    background: rgba(255,255,255,0.6) !important;
+    border: 1px solid rgba(221,227,240,0.7) !important;
+    border-radius: 10px !important;
+    color: #475569 !important;
+    font-size: 0.73rem !important;
+    font-weight: 600 !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    transition: all 0.18s ease !important;
+}
+.sb-pref div[data-testid="stButton"] > button:hover {
+    background: rgba(238,243,255,0.8) !important;
+    color: #1A56DB !important;
+    border-color: rgba(184,203,245,0.6) !important;
+    transform: translateY(-1px) !important;
+}
+
+
+
+/* ══════════════════════════════════════
+   LOGIN BUTTONS — logged-out state
+══════════════════════════════════════ */
+.sb-login-btns div[data-testid="stButton"] > button {
+    background: rgba(255,255,255,0.65) !important;
+    border: 1px solid rgba(221,227,240,0.7) !important;
+    border-radius: 10px !important;
+    color: #0B1F45 !important;
+    font-size: 0.76rem !important;
+    font-weight: 600 !important;
+    backdrop-filter: blur(6px) !important;
+    -webkit-backdrop-filter: blur(6px) !important;
+    transition: all 0.18s ease !important;
+}
+.sb-login-btns div[data-testid="stButton"] > button:hover {
+    background: rgba(238,243,255,0.8) !important;
+    border-color: rgba(184,203,245,0.6) !important;
+    color: #1A56DB !important;
+    transform: translateY(-1px) !important;
+}
+.sb-login-admin div[data-testid="stButton"] > button {
+    background: linear-gradient(135deg, #0B1F45, #1A56DB) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 0.76rem !important;
+    font-weight: 600 !important;
+    margin: 0 0.5rem !important;
+    box-shadow: 0 3px 10px rgba(26,86,219,0.22) !important;
+    transition: all 0.2s ease !important;
+}
+.sb-login-admin div[data-testid="stButton"] > button:hover {
+    box-shadow: 0 5px 16px rgba(26,86,219,0.32) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* ══════════════════════════════════════
+   SIDEBAR COLLAPSE BUTTON
+══════════════════════════════════════ */
+button[data-testid="stSidebarCollapseButton"],
+button[kind="headerNoPadding"] {
+    color: #475569 !important;
+    background: rgba(255,255,255,0.7) !important;
+    border: 1px solid rgba(221,227,240,0.5) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+    transition: all 0.18s ease !important;
+}
+button[data-testid="stSidebarCollapseButton"]:hover,
+button[kind="headerNoPadding"]:hover {
+    background: #EEF3FF !important;
+    color: #1A56DB !important;
+    border-color: rgba(26,86,219,0.15) !important;
+}
+button[data-testid="stSidebarCollapseButton"] svg,
+button[kind="headerNoPadding"] svg {
+    fill: currentColor !important;
+    stroke: currentColor !important;
+}
+
+/* ══════════════════════════════════════
+   ROLE INDICATOR TABS
+══════════════════════════════════════ */
+.sb-role-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 0 0.75rem;
+    margin: 0.4rem 0 0.15rem;
+}
+.sb-role-idle {
+    flex: 1;
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 600;
+    padding: 0.35rem 0.3rem;
+    border-radius: 8px;
+    background: rgba(241,245,249,0.8);
+    color: #94A3B8;
+    border: 1px solid rgba(226,232,240,0.6);
+    cursor: default;
+    transition: all 0.15s ease;
+}
+.sb-role-active {
+    flex: 1;
+    text-align: center;
+    font-size: 0.62rem;
+    font-weight: 700;
+    padding: 0.35rem 0.3rem;
+    border-radius: 8px;
+    background: linear-gradient(135deg, #4F46E5, #6366F1);
+    color: #fff;
+    border: 1px solid rgba(99,102,241,0.3);
+    box-shadow: 0 2px 8px rgba(99,102,241,0.25);
+    cursor: default;
+}
+
+/* ══════════════════════════════════════
+   AI POWERED BADGE
+══════════════════════════════════════ */
+.sb-ai-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: linear-gradient(135deg, #EEF2FF 0%, #F0FDFA 100%);
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 12px;
+    padding: 0.6rem 0.8rem;
+    margin: 0.55rem 0.75rem 0.25rem;
+    box-shadow: 0 1px 4px rgba(99,102,241,0.06);
+}
+.sb-ai-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, #6366F1, #8B5CF6);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(99,102,241,0.2);
+}
+.sb-ai-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #1E293B;
+    line-height: 1.2;
+}
+.sb-ai-sub {
+    font-size: 0.6rem;
+    color: #64748B;
+    font-weight: 400;
+    margin-top: 1px;
+}
+
+/* ══════════════════════════════════════
+   WELCOME CARD (logged out)
+══════════════════════════════════════ */
+.sb-welcome-card {
+    background: linear-gradient(135deg, #F8FAFF, #F0F4FF);
+    border: 1px solid rgba(221,227,240,0.7);
+    border-radius: 14px;
+    padding: 1.1rem 0.85rem;
+    margin: 0.9rem 0.75rem 0.6rem;
+    text-align: center;
+    box-shadow: 0 1px 6px rgba(11,31,69,0.04);
+}
+.sb-welcome-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #0B1F45;
+    margin-bottom: 0.18rem;
+}
+.sb-welcome-sub {
+    font-size: 0.68rem;
+    color: #8A95B0;
+    line-height: 1.4;
+}
+
+/* ══════════════════════════════════════
+   PROFILE — welcome line
+══════════════════════════════════════ */
+.sb-profile-welcome {
+    font-size: 0.58rem;
+    color: #94A3B8;
+    font-weight: 400;
+    line-height: 1;
+    margin-bottom: 1px;
+}
+
+/* ══════════════════════════════════════
+   FOOTER — Digital India
+══════════════════════════════════════ */
+.sb-footer {
+    text-align: center;
+    font-size: 0.58rem; color: #94A3B8;
+    padding: 0.75rem 0.9rem 0.7rem;
+    line-height: 1.8;
+    border-top: 1px solid rgba(226,232,240,0.6);
+    margin-top: 0.5rem;
+    letter-spacing: 0.2px;
+}
+.sb-footer-logo {
+    font-size: 1.2rem;
+    margin-bottom: 0.25rem;
+}
+</style>
+""", unsafe_allow_html=True)
+def _sb_profile_card(avatar_emoji, name, subtitle, role_label=None):
+    """Profile card for sidebar (role_label not used but kept for compatibility)."""
+    st.markdown(f"""
+<div class="sb-profile">
+    <div class="sb-profile-avatar">{avatar_emoji}</div>
+    <div style="overflow:hidden;">
+        <div class="sb-profile-name">{name}</div>
+        <div class="sb-profile-sub">{subtitle}</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+def _sb_section(label):
+    st.markdown(f'<div class="sb-section">{label}</div>', unsafe_allow_html=True)
+
+def _sb_divider():
+    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+
+def _nav_button(icon, label, screen, badge=0):
+    """Render a sidebar nav button. Highlights if current screen matches."""
+    is_active = st.session_state.get("screen") == screen
+    display_label = f"{icon}  {label}"
+    if badge:
+        display_label += f"  🔴 {badge}"
+    btn_key = f"nav_{screen}"
+    if is_active:
+        st.markdown('<div class="sb-nav-active">', unsafe_allow_html=True)
+    if st.button(display_label, key=btn_key, use_container_width=True):
+        st.session_state.screen = screen
+        st.rerun()
+    if is_active:
+        st.markdown('</div>', unsafe_allow_html=True)
+
+def _inject_sidebar_css():
+    """Clean, modern sidebar CSS – stable buttons, active page animation only."""
+    st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
+
+/* ──────────────────────────────────────────────────────────
+   HIDE STREAMLIT DEFAULT NAVIGATION
+   ────────────────────────────────────────────────────────── */
+section[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNavItems"],
+div[data-testid="stSidebarNavSeparator"],
+[data-testid="stSidebarNavLink"],
+section[data-testid="stSidebar"] ul,
+section[data-testid="stSidebar"] nav {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   SIDEBAR SHELL
+   ────────────────────────────────────────────────────────── */
 section[data-testid="stSidebar"] {
     background: #FFFFFF !important;
-    border-right: 2px solid #C7D4F0 !important;
-    box-shadow: 4px 0 20px rgba(11,31,69,0.08) !important;
+    border-right: 1px solid #E2E8F0 !important;
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02) !important;
     min-width: 268px !important;
     max-width: 268px !important;
 }
@@ -431,194 +952,217 @@ section[data-testid="stSidebar"] * {
     font-family: 'Sora', sans-serif !important;
 }
 
-/* ── SCROLLBAR ── */
+/* scrollbar – clean */
 section[data-testid="stSidebar"]::-webkit-scrollbar { width: 3px; }
 section[data-testid="stSidebar"]::-webkit-scrollbar-track { background: transparent; }
 section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-    background: #C7D4F0; border-radius: 3px;
+    background: #CBD5E1; border-radius: 3px;
 }
 
-/* ── BRAND BLOCK ── */
+/* ──────────────────────────────────────────────────────────
+   BRAND HEADER – ROUNDED CARD
+   ────────────────────────────────────────────────────────── */
 .sb-brand {
     background: linear-gradient(135deg, #0B1F45 0%, #1A3A6E 55%, #1A56DB 100%);
-    padding: 1.6rem 1rem 1.3rem;
+    padding: 1.4rem 1rem 1.2rem;
     text-align: center;
+    margin: 0.9rem 0.8rem 0.8rem 0.8rem;
+    border-radius: 20px;
     position: relative;
     overflow: hidden;
-    border-bottom: 1px solid rgba(255,255,255,0.08);
-}
-.sb-brand::before {
-    content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(circle at 80% 15%, rgba(59,158,255,.28) 0%, transparent 55%),
-                radial-gradient(circle at 10% 85%, rgba(255,107,43,.16) 0%, transparent 50%);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
 }
 .sb-brand-icon {
-    width: 54px; height: 54px;
-    background: rgba(255,255,255,0.13);
-    border: 2px solid rgba(255,255,255,0.24);
-    border-radius: 16px;
+    width: 48px; height: 48px;
+    background: rgba(255,255,255,0.12);
+    border: 1.5px solid rgba(255,255,255,0.25);
+    border-radius: 14px;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 1.75rem;
-    margin-bottom: 0.65rem;
-    position: relative; z-index: 1;
+    font-size: 1.6rem;
+    margin-bottom: 0.6rem;
 }
 .sb-brand-name {
-    font-size: 1.08rem; font-weight: 800;
+    font-size: 1rem; font-weight: 800;
     color: #FFFFFF; letter-spacing: -0.3px;
-    position: relative; z-index: 1;
-    line-height: 1.15;
+    line-height: 1.2;
 }
 .sb-brand-hi {
-    font-family: 'Noto Sans Devanagari', sans-serif !important;
-    font-size: 0.7rem; font-weight: 600;
-    color: rgba(255,255,255,0.58);
-    position: relative; z-index: 1;
-    margin-top: 0.18rem;
+    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-size: 0.66rem; font-weight: 500;
+    color: rgba(255,255,255,0.6);
+    margin-top: 0.2rem;
 }
 .sb-tricolor {
-    height: 3px;
-    background: linear-gradient(90deg,
-        #FF9933 0%, #FF9933 33.3%,
-        #fff    33.3%, #fff    66.6%,
-        #138808 66.6%, #138808 100%);
-    opacity: 0.55;
-    margin-top: 1.1rem;
+    height: 2px;
+    background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.3%, #fff 33.3%, #fff 66.6%, #138808 66.6%, #138808 100%);
+    opacity: 0.5;
+    width: 70%;
+    margin: 0.8rem auto 0;
     border-radius: 2px;
-    position: relative; z-index: 1;
 }
 
-/* ── PROFILE CARD ── */
+/* ──────────────────────────────────────────────────────────
+   PROFILE CARD
+   ────────────────────────────────────────────────────────── */
 .sb-profile {
-    display: flex; align-items: center; gap: 0.65rem;
-    background: #F4F7FF;
-    border-radius: 14px;
-    padding: 0.72rem 0.85rem;
-    margin: 0.9rem 0.7rem 0.45rem;
-    border: 1px solid #DDE3F0;
+    display: flex; align-items: center; gap: 0.7rem;
+    background: #F8FAFC;
+    border-radius: 16px;
+    padding: 0.65rem 0.85rem;
+    margin: 0.8rem;
+    border: 1px solid #E2E8F0;
 }
 .sb-profile-avatar {
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 36px; height: 36px; border-radius: 12px;
     background: linear-gradient(135deg, #1A56DB, #0D9488);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; flex-shrink: 0;
-    border: 2px solid #fff;
-    box-shadow: 0 2px 8px rgba(26,86,219,0.22);
+    font-size: 0.95rem;
+    color: white;
+    flex-shrink: 0;
 }
 .sb-profile-name {
-    font-size: 0.8rem; font-weight: 700; color: #0B1F45;
-    line-height: 1.25;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.78rem; font-weight: 700; color: #0F172A;
+    line-height: 1.3;
 }
 .sb-profile-sub {
-    font-size: 0.62rem; color: #8A95B0;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.6rem; color: #64748B;
 }
 
-/* ── SECTION LABEL ── */
+/* ──────────────────────────────────────────────────────────
+   AI BADGE
+   ────────────────────────────────────────────────────────── */
+.sb-ai-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    background: #F1F5F9;
+    border-radius: 14px;
+    padding: 0.5rem 0.8rem;
+    margin: 0.6rem 0.8rem;
+    border: 1px solid #E2E8F0;
+}
+.sb-ai-icon {
+    font-size: 1.1rem;
+}
+.sb-ai-title {
+    font-size: 0.65rem;
+    font-weight: 800;
+    color: #1E293B;
+}
+.sb-ai-sub {
+    font-size: 0.55rem;
+    color: #64748B;
+}
+
+/* ──────────────────────────────────────────────────────────
+   SECTION DIVIDER & LABEL
+   ────────────────────────────────────────────────────────── */
+.sb-divider {
+    height: 1px;
+    background: #E2E8F0;
+    margin: 0.5rem 0.8rem;
+}
 .sb-section {
-    font-size: 0.58rem; font-weight: 700; letter-spacing: 1px;
-    text-transform: uppercase; color: #A0AABF;
-    padding: 0.85rem 0.85rem 0.28rem;
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 0.8px;
+    text-transform: uppercase; color: #94A3B8;
+    padding: 0.6rem 0.8rem 0.2rem;
+    margin-top: 0.2rem;
 }
 
-/* ── NAV BUTTONS ── */
+/* ──────────────────────────────────────────────────────────
+   NAVIGATION BUTTONS – STABLE, NO MOVEMENT
+   ────────────────────────────────────────────────────────── */
 section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
     width: 100% !important;
     background: transparent !important;
     border: none !important;
-    border-radius: 10px !important;
-    padding: 0.52rem 0.85rem !important;
+    border-radius: 12px !important;
+    padding: 0.55rem 0.85rem !important;
     text-align: left !important;
-    font-size: 0.8rem !important;
+    font-size: 0.78rem !important;
     font-weight: 500 !important;
-    color: #4B5672 !important;
-    transition: background 0.15s, color 0.15s !important;
+    color: #334155 !important;
+    transition: background 0.2s ease, color 0.15s ease !important;
     box-shadow: none !important;
     margin: 1px 0.35rem !important;
     justify-content: flex-start !important;
     line-height: 1.4 !important;
 }
+/* Hover – only background color, no transform */
 section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-    background: #EEF3FF !important;
+    background: #F1F5F9 !important;
     color: #1A56DB !important;
 }
-
-/* ── ACTIVE NAV ── */
+/* Active page – smooth highlight with left border animation */
 .sb-nav-active div[data-testid="stButton"] > button {
-    background: #EEF3FF !important;
+    background: #EFF6FF !important;
     color: #1A56DB !important;
     font-weight: 700 !important;
     border-left: 3px solid #1A56DB !important;
-    border-radius: 0 10px 10px 0 !important;
+    border-radius: 0 12px 12px 0 !important;
     padding-left: 0.65rem !important;
+    transition: all 0.15s ease !important;
 }
 
-/* ── DIVIDER ── */
-.sb-divider {
-    height: 1px; background: #E8ECF5;
-    margin: 0.55rem 0.7rem;
+/* ──────────────────────────────────────────────────────────
+   PREFERENCES & LOGIN BUTTONS
+   ────────────────────────────────────────────────────────── */
+.sb-pref, .sb-login-btns {
+    margin: 0 0.7rem;
 }
-
-/* ── LOGOUT BUTTON ── */
-.sb-logout div[data-testid="stButton"] > button {
-    background: #FFF5F5 !important;
-    color: #DC2626 !important;
-    border: 1px solid #FED7D7 !important;
-    border-radius: 10px !important;
+.sb-pref div[data-testid="stButton"] > button,
+.sb-login-btns div[data-testid="stButton"] > button {
+    background: #F8FAFC !important;
+    border: 1px solid #E2E8F0 !important;
+    border-radius: 12px !important;
+    color: #334155 !important;
+    font-size: 0.74rem !important;
     font-weight: 600 !important;
-    font-size: 0.78rem !important;
-    margin: 0 0.35rem !important;
+    box-shadow: none !important;
+    transition: background 0.2s ease !important;
+}
+.sb-pref div[data-testid="stButton"] > button:hover,
+.sb-login-btns div[data-testid="stButton"] > button:hover {
+    background: #F1F5F9 !important;
+    color: #1A56DB !important;
+    border-color: #BFDBFE !important;
+}
+
+/* ──────────────────────────────────────────────────────────
+   LOGOUT BUTTON
+   ────────────────────────────────────────────────────────── */
+.sb-logout {
+    margin: 0 0.7rem;
+}
+.sb-logout div[data-testid="stButton"] > button {
+    background: #FEF2F2 !important;
+    color: #DC2626 !important;
+    border: 1px solid #FEE2E2 !important;
+    border-radius: 12px !important;
+    font-weight: 600 !important;
+    font-size: 0.74rem !important;
+    box-shadow: none !important;
 }
 .sb-logout div[data-testid="stButton"] > button:hover {
     background: #FEE2E2 !important;
     border-color: #FCA5A5 !important;
 }
 
-/* ── PREF BUTTONS ── */
-.sb-pref div[data-testid="stButton"] > button {
-    background: #F4F7FF !important;
-    border: 1px solid #DDE3F0 !important;
-    border-radius: 10px !important;
-    color: #4B5672 !important;
-    font-size: 0.75rem !important;
-    font-weight: 600 !important;
-}
-.sb-pref div[data-testid="stButton"] > button:hover {
-    background: #EEF3FF !important;
-    color: #1A56DB !important;
-    border-color: #B8CBF5 !important;
-}
-
-/* ── FOOTER ── */
+/* ──────────────────────────────────────────────────────────
+   FOOTER
+   ────────────────────────────────────────────────────────── */
 .sb-footer {
     text-align: center;
-    font-size: 0.6rem; color: #A0AABF;
-    padding: 0.85rem 0.7rem 0.7rem;
-    line-height: 1.75;
-    border-top: 1px solid #E8ECF5;
-    margin-top: 0.4rem;
+    font-size: 0.6rem; color: #94A3B8;
+    padding: 0.7rem 0.5rem 0.5rem;
+    border-top: 1px solid #E2E8F0;
+    margin: 0.4rem 0.7rem 0.7rem;
 }
-
-/* ── EXPANDER (admin) ── */
-section[data-testid="stSidebar"] details {
-    border: 1px solid #DDE3F0 !important;
-    border-radius: 12px !important;
-    margin: 0.3rem 0.7rem !important;
-    overflow: hidden;
-    background: #FAFBFF !important;
+.sb-footer-logo {
+    font-size: 1.1rem;
+    margin-bottom: 5px;
 }
-section[data-testid="stSidebar"] details summary {
-    font-size: 0.78rem !important; font-weight: 600 !important;
-    color: #0B1F45 !important; padding: 0.6rem 0.85rem !important;
-    background: transparent !important;
-}
-section[data-testid="stSidebar"] details[open] summary {
-    border-bottom: 1px solid #E8ECF5;
-}
-
-/* ── LOGIN BUTTONS (logged-out state) ── */
-.sb-login-btns div[data-testid="stButton"] > button {
+                .sb-login-btns div[data-testid="stButton"] > button {
     background: #F4F7FF !important;
     border: 1px solid #DDE3F0 !important;
     border-radius: 10px !important;
@@ -631,58 +1175,21 @@ section[data-testid="stSidebar"] details[open] summary {
     border-color: #B8CBF5 !important;
     color: #1A56DB !important;
 }
-.sb-login-admin div[data-testid="stButton"] > button {
-    background: linear-gradient(135deg, #0B1F45, #1A56DB) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 10px !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    margin: 0 0.35rem !important;
+
+/* Footer */
+.sb-footer {
+    text-align: center;
+    font-size: 0.6rem; color: #A0AABF;
+    padding: 0.85rem 0.7rem 0.7rem;
+    border-top: 1px solid #E8ECF5;
+    margin-top: 0.4rem;
+}
+.sb-footer-logo {
+    font-size: 1.2rem;
+    margin-bottom: 6px;
 }
 </style>
 """, unsafe_allow_html=True)
-
-
-def _sb_profile_card(avatar_emoji, name, subtitle):
-    st.markdown(f"""
-<div class="sb-profile">
-    <div class="sb-profile-avatar">{avatar_emoji}</div>
-    <div style="overflow:hidden;">
-        <div class="sb-profile-name">{name}</div>
-        <div class="sb-profile-sub">{subtitle}</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-
-def _sb_section(label):
-    st.markdown(f'<div class="sb-section">{label}</div>', unsafe_allow_html=True)
-
-
-def _sb_divider():
-    st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
-
-
-def _nav_button(icon, label, screen, badge=0):
-    """Render a sidebar nav button. Highlights if current screen matches."""
-    is_active = st.session_state.get("screen") == screen
-    display_label = f"{icon}  {label}"
-    if badge:
-        display_label += f"  🔴 {badge}"
-
-    btn_key = f"nav_{screen}"
-    # Wrap in active class when selected
-    if is_active:
-        st.markdown('<div class="sb-nav-active">', unsafe_allow_html=True)
-
-    if st.button(display_label, key=btn_key, use_container_width=True):
-        st.session_state.screen = screen
-        st.rerun()
-
-    if is_active:
-        st.markdown('</div>', unsafe_allow_html=True)
-
 
 def render_sidebar():
     _inject_sidebar_css()
@@ -691,7 +1198,7 @@ def render_sidebar():
     lang     = st.session_state.get("language", "en")
 
     def _(key):
-        return t(key)  # your existing translation function
+        return t(key)
 
     # ── Unread notification count ──────────────────────────────────────────
     unread_count = 0
@@ -703,8 +1210,7 @@ def render_sidebar():
                 unread_count = len([n for n in notifs if not n.get("is_read")])
 
     with st.sidebar:
-
-        # ── BRAND ────────────────────────────────────────────────────────────
+        # ── BRAND HEADER ─────────────────────────────────────────────────────
         st.markdown("""
 <div class="sb-brand">
     <div class="sb-brand-icon">🏛️</div>
@@ -714,23 +1220,32 @@ def render_sidebar():
 </div>
 """, unsafe_allow_html=True)
 
-        # ── PROFILE CARD ──────────────────────────────────────────────────────
+        # ── PROFILE CARD ─────────────────────────────────────────────────────
         if role == "user":
             u = st.session_state.get("user") or {}
             _sb_profile_card("👤", u.get("name", "Citizen"), f"📞 {u.get('phone', '')}")
-
         elif role == "official":
             o = st.session_state.get("official") or {}
             _sb_profile_card("🏢", o.get("name", "Official"), o.get("department", "Department"))
-
         elif role == "admin":
             _sb_profile_card("👑", "System Admin", "Administrator")
+
+        # ── AI BADGE ─────────────────────────────────────────────────────────
+        st.markdown("""
+<div class="sb-ai-badge">
+    <div class="sb-ai-icon">🤖</div>
+    <div>
+        <div class="sb-ai-title">AI Powered</div>
+        <div class="sb-ai-sub">Grievance System ✨</div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
         # ── NAVIGATION ────────────────────────────────────────────────────────
         _sb_divider()
 
         if role == "user":
-            _sb_section("🧭 Main Menu")
+            _sb_section("MAIN MENU")
             _nav_button("🏠", _("dashboard"),       "user_dashboard")
             _nav_button("📢", _("file_complaint"),  "file_complaint")
             _nav_button("🔍", _("track_complaint"), "tracking")
@@ -739,78 +1254,57 @@ def render_sidebar():
             _nav_button("🔔", _("notifications"),   "notifications", badge=unread_count)
 
         elif role == "official":
-            _sb_section("🧭 Workspace")
+            _sb_section("WORKSPACE")
             _nav_button("📊", _("dashboard"),    "official_dashboard")
             _nav_button("📋", _("complaints"),   "official_complaints")
             _nav_button("🏆", _("leaderboard"),  "official_leaderboard")
-            _nav_button("📜", _("govt_schemes"), "schemes")
 
         elif role == "admin":
-            with st.expander("📊  Overview", expanded=True):
-                _nav_button("📊", _("dashboard"),      "admin_dashboard")
-                _nav_button("🏢", _("departments"),    "admin_departments")
-                _nav_button("👥", _("officials"),      "admin_officials")
-                _nav_button("📢", _("all_complaints"), "admin_complaints")
-
-            with st.expander("🏆  Performance"):
-                _nav_button("🏆", _("leaderboard"),  "admin_leaderboard")
-                _nav_button("🔮", "Predictive AI",   "predictive_analytics")
-                _nav_button("⏱️", "SLA Tracking",    "sla_management")
-
-            with st.expander("🏙️  City Analytics"):
-                _nav_button("🏆", "City Health Score", "city_health_score")
-
-            with st.expander("📡  Live Monitoring"):
-                _nav_button("📈", "Live Dashboard", "live_dashboard")
-
-            with st.expander("📜  Content"):
-                _nav_button("📜", _("schemes"), "admin_schemes")
-                _nav_button("🗺️", "Heatmap",    "admin_heatmap")
+            _sb_section("MAIN MENU")
+            _nav_button("📊", _("dashboard"),      "admin_dashboard")
+            _nav_button("🏢", _("departments"),    "admin_departments")
+            _nav_button("👥", _("officials"),      "admin_officials")
+            _nav_button("📢", _("all_complaints"), "admin_complaints")
+            _sb_divider()
+            _sb_section("PERFORMANCE")
+            _nav_button("🏆", _("leaderboard"),  "admin_leaderboard")
+            _nav_button("🔮", "Predictive AI",   "predictive_analytics")
+            _nav_button("⏱️", "SLA Tracking",    "sla_management")
+            _sb_divider()
+            _sb_section("ANALYTICS")
+            _nav_button("🏙️", "City Health Score", "city_health_score")
+            _nav_button("📈", "Live Dashboard", "live_dashboard")
+            _nav_button("🗺️", "Heatmap",    "admin_heatmap")
+            _sb_divider()
+            _sb_section("CONTENT")
+            _nav_button("📜", _("schemes"), "admin_schemes")
 
         else:
             # ── NOT LOGGED IN ──────────────────────────────────────────────
-            st.markdown("""
-<div style="
-    background:#F4F7FF; border:1px solid #DDE3F0; border-radius:14px;
-    padding:1.1rem 0.85rem; margin:0.9rem 0.7rem 0.6rem; text-align:center;
-">
-    <div style="font-size:1.6rem; margin-bottom:0.4rem;">👋</div>
-    <div style="font-size:0.82rem; font-weight:700; color:#0B1F45; margin-bottom:0.18rem;">Welcome</div>
-    <div style="font-size:0.68rem; color:#8A95B0; line-height:1.4;">Please login to access the portal</div>
-</div>
-""", unsafe_allow_html=True)
+            _sb_section("LOGIN")
             st.markdown('<div class="sb-login-btns">', unsafe_allow_html=True)
-            col1, col2 = st.columns(2)
-            with col1:
-                if st.button("👤 Citizen", key="login_citizen", use_container_width=True):
-                    st.session_state.screen = "user_login"
-                    st.rerun()
-            with col2:
-                if st.button("🏢 Official", key="login_official", use_container_width=True):
-                    st.session_state.screen = "official_login"
-                    st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
-            st.markdown('<div class="sb-login-admin">', unsafe_allow_html=True)
-            if st.button("👑 Admin Login", key="login_admin", use_container_width=True):
+            if st.button("👤  Citizen", key="login_citizen", use_container_width=True):
+                st.session_state.screen = "user_login"
+                st.rerun()
+            if st.button("🏢  Official", key="login_official", use_container_width=True):
+                st.session_state.screen = "official_login"
+                st.rerun()
+            if st.button("👑  Admin", key="login_admin", use_container_width=True):
                 st.session_state.screen = "admin_login"
                 st.rerun()
             st.markdown('</div>', unsafe_allow_html=True)
 
-        # ── PREFERENCES ───────────────────────────────────────────────────────
+        # ── OTHER SECTION ─────────────────────────────────────────────────────
         _sb_divider()
-        _sb_section("⚙️ Preferences")
-
+        _sb_section("OTHER")
         st.markdown('<div class="sb-pref">', unsafe_allow_html=True)
-        col1, col2 = st.columns(2)
-        with col1:
-            lang_label = "🇮🇳 हिंदी" if lang == "en" else "🇬🇧 English"
-            if st.button(lang_label, key="sb_lang", use_container_width=True):
-                st.session_state.language = "hi" if lang == "en" else "en"
-                st.rerun()
-        with col2:
-            if st.button("❓ Help", key="sb_help", use_container_width=True):
-                st.session_state.screen = "help"
-                st.rerun()
+        lang_label = "🌐 Hindi" if lang == "en" else "🌐  English"
+        if st.button(lang_label, key="sb_lang", use_container_width=True):
+            st.session_state.language = "hi" if lang == "en" else "en"
+            st.rerun()
+        if st.button("❓  Help & Support", key="sb_help", use_container_width=True):
+            st.session_state.screen = "help"
+            st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
 
         # ── LOGOUT ────────────────────────────────────────────────────────────
@@ -824,9 +1318,9 @@ def render_sidebar():
         # ── FOOTER ────────────────────────────────────────────────────────────
         st.markdown("""
 <div class="sb-footer">
-    <strong>Jan Seva Portal v2.0</strong><br>
-    An Initiative by Govt. of India<br>
-    Made with ❤️ in 🇮🇳 India
+    <div class="sb-footer-logo">🇮🇳</div>
+    <strong>Digital India Initiative</strong> ✅<br>
+    Powering Smart Governance
 </div>
 """, unsafe_allow_html=True)
         
@@ -2204,13 +2698,14 @@ def _card_close() -> str:
 def _role_tile(icon: str, title: str, desc: str, gradient: str) -> str:
     return f"""
 <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:16px;
-    padding:28px 18px 22px;text-align:center;position:relative;overflow:hidden;">
+    padding:28px 18px 22px;text-align:center;position:relative;overflow:hidden;
+    display:flex;flex-direction:column;align-items:center;min-height:180px;">
     <div style="position:absolute;top:0;left:0;right:0;height:3px;
         background:{gradient};border-radius:16px 16px 0 0;"></div>
     <div style="font-size:2rem;margin-bottom:12px;">{icon}</div>
     <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;
         color:#111827;margin-bottom:6px;">{title}</div>
-    <div style="font-size:12px;color:#6B7280;line-height:1.55;margin-bottom:18px;
+    <div style="font-size:12px;color:#6B7280;line-height:1.55;flex:1;
         font-weight:300;">{desc}</div>
 </div>
 """
@@ -2343,6 +2838,19 @@ def pg_login_type():
         background: linear-gradient(135deg,#E8660A,#EF4444) !important;
         border:none!important; color:#fff!important; font-size:13.5px!important;
     }
+    /* Force equal-height columns so buttons align */
+    [data-testid="stHorizontalBlock"] {
+        align-items: stretch !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] {
+        display: flex !important;
+        flex-direction: column !important;
+    }
+    [data-testid="stHorizontalBlock"] > [data-testid="stColumn"] > div {
+        flex: 1 !important;
+        display: flex !important;
+        flex-direction: column !important;
+    }
     </style>
     """, unsafe_allow_html=True)
  
@@ -2361,6 +2869,7 @@ def pg_login_type():
     </div>
     """, unsafe_allow_html=True)
  
+    # Row 1: Cards only
     r1, r2, r3 = st.columns(3, gap="medium")
  
     with r1:
@@ -2370,12 +2879,6 @@ def pg_login_type():
             tx("citizen_desc"),
             "linear-gradient(90deg,#6366F1,#8B5CF6)"
         ), unsafe_allow_html=True)
-        st.markdown('<div class="btn-citizen">', unsafe_allow_html=True)
-        if st.button(tx("continue_citizen"), key="citizen_role_btn",
-                     use_container_width=True):
-            st.session_state.screen = "user_login"
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
  
     with r2:
         st.markdown(_role_tile(
@@ -2384,12 +2887,6 @@ def pg_login_type():
             tx("official_desc"),
             "linear-gradient(90deg,#0EA5E9,#6366F1)"
         ), unsafe_allow_html=True)
-        st.markdown('<div class="btn-official">', unsafe_allow_html=True)
-        if st.button(tx("continue_official"), key="official_role_btn",
-                     use_container_width=True):
-            st.session_state.screen = "official_login"
-            st.rerun()
-        st.markdown("</div>", unsafe_allow_html=True)
  
     with r3:
         st.markdown(_role_tile(
@@ -2398,6 +2895,27 @@ def pg_login_type():
             tx("admin_desc"),
             "linear-gradient(90deg,#E8660A,#EF4444)"
         ), unsafe_allow_html=True)
+
+    # Row 2: Buttons aligned on same line
+    b1, b2, b3 = st.columns(3, gap="medium")
+ 
+    with b1:
+        st.markdown('<div class="btn-citizen">', unsafe_allow_html=True)
+        if st.button(tx("continue_citizen"), key="citizen_role_btn",
+                     use_container_width=True):
+            st.session_state.screen = "user_login"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+ 
+    with b2:
+        st.markdown('<div class="btn-official">', unsafe_allow_html=True)
+        if st.button(tx("continue_official"), key="official_role_btn",
+                     use_container_width=True):
+            st.session_state.screen = "official_login"
+            st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
+ 
+    with b3:
         st.markdown('<div class="btn-admin">', unsafe_allow_html=True)
         if st.button(tx("continue_admin"), key="admin_role_btn",
                      use_container_width=True):
@@ -2543,13 +3061,11 @@ def pg_user_login():
                     else:
                         st.error("Failed to resend OTP.")
             with rb:
-                st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
                 if st.button(tx("change_number"), key="cancel_otp_btn",
                              use_container_width=True):
                     st.session_state.otp_sent = False
                     st.session_state.demo_otp = ""
                     st.rerun()
-                st.markdown("</div>", unsafe_allow_html=True)
  
         st.markdown(_card_close(), unsafe_allow_html=True)
  
@@ -2944,6 +3460,19 @@ def pg_official_login():
                         tx("pass_6_err")
                     )
 
+                else:
+                    # All validation passed — save data and move to OTP step
+                    st.session_state.off_data = {
+                        "name": nm.strip(),
+                        "email": em.strip(),
+                        "phone": ph.strip(),
+                        "password": pw,
+                        "dept_code": dc.strip(),
+                    }
+                    st.session_state.off_step = 2
+                    st.session_state.off_otp_verified = False
+                    st.rerun()
+
         else:
             masked = "×" * 6 + st.session_state.off_data.get("phone", "")[-4:]
             st.markdown(
@@ -2967,7 +3496,6 @@ def pg_official_login():
  
             oc1, oc2 = st.columns(2)
             with oc1:
-                st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
                 if st.button(tx("verify_otp_arrow"), use_container_width=True,
                              key="off_verify_otp"):
                     if otp and otp.strip() == "123456":
@@ -2975,7 +3503,6 @@ def pg_official_login():
                         st.rerun()
                     else:
                         st.error(tx("invalid_otp_123"))
-                st.markdown("</div>", unsafe_allow_html=True)
             with oc2:
                 if st.button(tx("resend"), use_container_width=True,
                              key="off_resend_otp"):
@@ -3804,16 +4331,29 @@ p,span,label,small{color:var(--d-text);}
 .bl-emg    {border-left:3px solid #DC2626;padding-left:12px;margin-bottom:4px;}
 .bl-default{border-left:3px solid var(--d-a1);padding-left:12px;margin-bottom:4px;}
  
-/* Expander — clean white */
-.streamlit-expanderHeader{background:#FFFFFF!important;
-    border:1px solid var(--d-border-lt)!important;border-radius:12px!important;
-    color:var(--d-text)!important;font-weight:700!important;font-size:.875rem!important;
+/* Expander — light orange (old + new Streamlit) */
+.streamlit-expanderHeader{background:#FFF7ED!important;
+    border:1.5px solid #FDEAD7!important;border-radius:14px!important;
+    color:#0F172A!important;font-weight:700!important;font-size:.875rem!important;
     padding:12px 16px!important;transition:border-color .18s,box-shadow .18s!important;}
-.streamlit-expanderHeader:hover{border-color:var(--d-a1)!important;
-    box-shadow:0 0 0 3px var(--d-a1-soft)!important;}
-.streamlit-expanderContent{background:#FFFFFF!important;
-    border:1px solid var(--d-border-lt)!important;border-top:none!important;
-    border-radius:0 0 12px 12px!important;padding:14px 16px!important;}
+.streamlit-expanderHeader:hover{border-color:#F97316!important;
+    box-shadow:0 0 0 3px rgba(249,115,22,0.10)!important;color:#EA580C!important;}
+.streamlit-expanderContent{background:#FFFBF5!important;
+    border:1.5px solid #FDEAD7!important;border-top:none!important;
+    border-radius:0 0 14px 14px!important;padding:14px 16px!important;}
+/* New Streamlit details/summary */
+.main details{background:#FFFFFF!important;border:1.5px solid #FDEAD7!important;
+    border-radius:14px!important;margin-bottom:8px!important;overflow:hidden!important;}
+.main details[open]{border-color:#F97316!important;
+    box-shadow:0 4px 16px rgba(249,115,22,0.10)!important;}
+.main details summary{background:#FFF7ED!important;color:#0F172A!important;
+    font-weight:700!important;font-size:.875rem!important;padding:12px 16px!important;
+    border-radius:14px!important;border:none!important;cursor:pointer!important;}
+.main details[open] summary{border-radius:14px 14px 0 0!important;
+    background:#FFF1E0!important;border-bottom:1px solid #FDEAD7!important;}
+.main details summary:hover{background:#FFEDD5!important;color:#EA580C!important;}
+.main details > div{background:#FFFBF5!important;padding:14px 16px!important;}
+.main details p,.main details span,.main details div{color:#0F172A!important;}
  
 /* Evidence box */
 .evidence-box{background:var(--d-a1-soft);border:1.5px solid rgba(232,89,12,0.16);
@@ -6545,153 +7085,408 @@ def pg_file_complaint() -> None:
 # TRACKING
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_tracking():
-    _apply_layout("user")  
+    _apply_layout("user")
+
     lang = st.session_state.language
     uid  = (st.session_state.user or {}).get("user_id")
+    dark = st.session_state.get("dark_mode", False)
 
     def t(en, hi):
-        return en if lang == "en" else hi
+        return hi if lang == "hi" else en
 
-    dark  = st.session_state.get("dark_mode", False)
-    _CARD = "#10161F" if dark else "#FFFFFF"
-    _BG2  = "#080C14" if dark else "#F4F6FB"
-    _BOR  = "#1E2A3D" if dark else "#E2E8F4"
-    _TXT  = "#F0F4FF" if dark else "#0F172A"
-    _SUB  = "#8896B0" if dark else "#64748B"
-    _A1   = "#6366F1"
-    _A2   = "#8B5CF6"
+    st.markdown(get_css(dark_mode=False), unsafe_allow_html=True)
 
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
+    # ══════════════════════════════════════════════════════════════════════
+    #  CSS  — clean, modern, light-theme
+    # ══════════════════════════════════════════════════════════════════════
+    st.markdown("""
+<style>
+/* ── page background ── */
+.trk-page { background: #F7F8FA; }
 
-    # ── PREMIUM CSS ────────────────────────────────────────────────────────────
-    css = (
-        "<style>"
+/* ── search input pill ── */
+.trk-search-wrap .stTextInput > div > div > input {
+    border-radius : 10px !important;
+    padding       : 10px 16px !important;
+    font-size     : 0.875rem !important;
+    border        : 1.5px solid #D1D5DB !important;
+    background    : #FFFFFF !important;
+    color         : #111827 !important;
+    transition    : border-color .15s, box-shadow .15s !important;
+    box-shadow    : 0 1px 2px rgba(0,0,0,0.04) !important;
+}
+.trk-search-wrap .stTextInput > div > div > input:focus {
+    border-color : #6366F1 !important;
+    box-shadow   : 0 0 0 3px rgba(99,102,241,.12) !important;
+}
+.trk-search-wrap .stTextInput > div > div > input::placeholder {
+    color: #9CA3AF !important;
+}
 
-        ".trk-search-wrap .stTextInput>div>div>input{"
-        "border-radius:30px!important;padding:12px 20px!important;"
-        "font-size:.88rem!important;border:1.5px solid " + _BOR + "!important;"
-        "background:" + _CARD + "!important;"
-        "transition:border-color .18s,box-shadow .18s!important;}"
-        ".trk-search-wrap .stTextInput>div>div>input:focus{"
-        "border-color:#6366F1!important;"
-        "box-shadow:0 0 0 3px rgba(99,102,241,.12)!important;}"
+/* ── selectbox dropdown ── */
+.trk-filter .stSelectbox > div > div {
+    background    : #FFFFFF !important;
+    border        : 1.5px solid #D1D5DB !important;
+    border-radius : 10px !important;
+    color         : #111827 !important;
+    min-height    : 42px !important;
+    transition    : border-color .15s, box-shadow .15s !important;
+}
+.trk-filter .stSelectbox > div > div:hover {
+    border-color: #9CA3AF !important;
+}
+.trk-filter .stSelectbox > div > div:focus-within {
+    border-color : #6366F1 !important;
+    box-shadow   : 0 0 0 3px rgba(99,102,241,.12) !important;
+}
+.trk-filter .stSelectbox [data-baseweb="select"] span,
+.trk-filter .stSelectbox [data-baseweb="select"] div,
+.trk-filter .stSelectbox [data-baseweb="select"] p {
+    color: #111827 !important;
+    font-size: 0.875rem !important;
+}
+.trk-filter label {
+    font-size     : 0.72rem !important;
+    font-weight   : 600 !important;
+    color         : #6B7280 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.06em !important;
+}
 
-        ".trk-chips{display:flex;gap:8px;flex-wrap:wrap;padding:4px 0;margin-bottom:2px;}"
-        ".trk-chip{padding:7px 16px;border-radius:30px;font-size:.76rem;font-weight:700;"
-        "border:1.5px solid " + _BOR + ";background:" + _CARD + ";color:" + _SUB + ";"
-        "white-space:nowrap;pointer-events:none;transition:all .18s;}"
-        ".trk-chip.on{background:linear-gradient(135deg,#6366F1,#8B5CF6);"
-        "color:#fff;border-color:transparent;"
-        "box-shadow:0 4px 12px rgba(99,102,241,.28);}"
+/* ── dropdown portal (popover) ── */
+div[data-baseweb="popover"],
+div[data-baseweb="menu"],
+ul[data-testid="stWidgetDropdownList"] {
+    background    : #FFFFFF !important;
+    border        : 1.5px solid #E5E7EB !important;
+    border-radius : 12px !important;
+    box-shadow    : 0 4px 24px rgba(0,0,0,0.10) !important;
+    overflow      : hidden !important;
+}
+div[data-baseweb="option"],
+li[role="option"] {
+    background    : #FFFFFF !important;
+    color         : #111827 !important;
+    font-size     : 0.875rem !important;
+    padding       : 10px 14px !important;
+    border-radius : 8px !important;
+    margin        : 2px 4px !important;
+    transition    : background .12s !important;
+}
+div[data-baseweb="option"]:hover,
+li[role="option"]:hover {
+    background: #F5F3FF !important;
+    color     : #4338CA !important;
+}
+div[data-baseweb="option"][aria-selected="true"],
+li[role="option"][aria-selected="true"] {
+    background : #EEF2FF !important;
+    color      : #4338CA !important;
+    font-weight: 600 !important;
+}
 
-        "div[data-testid='stRadio']>div>label>div:first-child{display:none!important;}"
-        "div[data-testid='stRadio']>div{gap:4px!important;}"
-        "div[data-testid='stRadio']>div>label{"
-        "height:0!important;overflow:hidden!important;"
-        "opacity:0!important;padding:0!important;margin:0!important;"
-        "min-height:0!important;pointer-events:auto!important;}"
+/* ── section label ── */
+.trk-section {
+    font-size     : 0.68rem;
+    font-weight   : 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+    color         : #9CA3AF;
+    margin        : 22px 0 10px;
+    display       : flex;
+    align-items   : center;
+    gap           : 10px;
+}
+.trk-section::before {
+    content      : '';
+    width        : 3px;
+    height       : 14px;
+    background   : linear-gradient(180deg,#6366F1,#8B5CF6);
+    border-radius: 99px;
+    flex-shrink  : 0;
+}
+.trk-section::after {
+    content   : '';
+    flex      : 1;
+    height    : 1px;
+    background: #F3F4F6;
+}
 
-        ".trk-flabel{font-size:.70rem;font-weight:700;text-transform:uppercase;"
-        "letter-spacing:.09em;color:" + _SUB + ";margin:18px 0 8px;"
-        "display:flex;align-items:center;gap:8px;}"
-        ".trk-flabel::before{content:'';width:3px;height:14px;"
-        "background:linear-gradient(180deg,#6366F1,#8B5CF6);"
-        "border-radius:99px;flex-shrink:0;}"
-        ".trk-flabel::after{content:'';flex:1;height:1px;"
-        "background:linear-gradient(to right," + _BOR + ",transparent);}"
+/* ── result count pill ── */
+.trk-count-row {
+    display        : flex;
+    align-items    : center;
+    justify-content: space-between;
+    flex-wrap      : wrap;
+    gap            : 8px;
+    margin         : 14px 0 10px;
+}
+.trk-count-pill {
+    background   : #EEF2FF;
+    color        : #4338CA;
+    border       : 1.5px solid #C7D2FE;
+    border-radius: 20px;
+    padding      : 5px 16px;
+    font-size    : 0.78rem;
+    font-weight  : 700;
+}
+.trk-count-hidden {
+    font-size  : 0.72rem;
+    color      : #9CA3AF;
+    font-weight: 600;
+}
 
-        ".trk-count{font-size:.75rem;color:" + _SUB + ";font-weight:600;"
-        "text-align:right;margin:8px 0 12px;}"
+/* ── complaint card ── */
+.trk-card {
+    background   : #FFFFFF;
+    border       : 1.5px solid #E5E7EB;
+    border-left  : 4px solid #6366F1;
+    border-radius: 14px;
+    padding      : 18px 20px;
+    margin-bottom: 10px;
+    box-shadow   : 0 1px 4px rgba(0,0,0,0.05);
+    transition   : transform .18s ease, box-shadow .18s ease, border-color .18s;
+}
+.trk-card:hover {
+    transform    : translateX(4px);
+    box-shadow   : 0 4px 18px rgba(99,102,241,0.12);
+    border-color : #6366F1;
+}
+.trk-card-top {
+    display    : flex;
+    align-items: center;
+    flex-wrap  : wrap;
+    gap        : 8px;
+    margin-bottom: 10px;
+}
+.trk-cid {
+    font-family : 'DM Mono','Courier New',monospace;
+    font-size   : 0.72rem;
+    font-weight : 700;
+    background  : #EEF2FF;
+    color       : #4338CA;
+    padding     : 3px 10px;
+    border-radius: 8px;
+    border      : 1px solid #C7D2FE;
+    display     : inline-block;
+}
+.trk-badge {
+    border-radius: 20px;
+    padding      : 3px 11px;
+    font-size    : 0.70rem;
+    font-weight  : 700;
+    display      : inline-flex;
+    align-items  : center;
+    gap          : 3px;
+}
+.trk-category {
+    font-size    : 0.68rem;
+    font-weight  : 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color        : #6366F1;
+    margin-bottom: 5px;
+}
+.trk-title {
+    font-size    : 0.92rem;
+    font-weight  : 700;
+    color        : #111827;
+    margin-bottom: 5px;
+    line-height  : 1.4;
+    letter-spacing: -0.01em;
+}
+.trk-desc {
+    font-size  : 0.825rem;
+    color      : #6B7280;
+    line-height: 1.65;
+    margin-bottom: 10px;
+}
+.trk-meta {
+    display   : flex;
+    gap       : 14px;
+    flex-wrap : wrap;
+    font-size : 0.72rem;
+    color     : #9CA3AF;
+    padding-top: 10px;
+    border-top: 1px solid #F3F4F6;
+}
 
-        ".trk-card{background:" + _CARD + ";border:1px solid " + _BOR + ";"
-        "border-left:4px solid;border-radius:18px;"
-        "padding:18px 20px;margin-bottom:4px;"
-        "box-shadow:0 2px 10px rgba(15,23,42,.06);"
-        "transition:transform .20s,box-shadow .20s;}"
-        ".trk-card:hover{transform:translateX(4px);"
-        "box-shadow:0 8px 28px rgba(99,102,241,.10);}"
-        ".trk-cid{font-family:'Courier New',monospace;font-size:.70rem;font-weight:700;"
-        "background:rgba(99,102,241,.10);color:#6366F1;"
-        "padding:3px 10px;border-radius:8px;display:inline-block;margin-bottom:8px;}"
-        ".trk-badge{border-radius:20px;padding:3px 12px;font-size:.68rem;"
-        "font-weight:700;display:inline-block;margin-right:5px;}"
-        ".trk-title{font-size:.92rem;font-weight:800;color:" + _TXT + ";"
-        "margin:8px 0 4px;}"
-        ".trk-desc{font-size:.80rem;color:" + _SUB + ";line-height:1.65;"
-        "margin-bottom:10px;}"
-        ".trk-meta{display:flex;gap:14px;flex-wrap:wrap;font-size:.71rem;color:" + _SUB + ";"
-        "padding-top:10px;border-top:1px solid " + _BOR + ";}"
+/* ── timeline ── */
+.tl-wrap {
+    margin-top   : 14px;
+    padding      : 14px 16px;
+    background   : #F9FAFB;
+    border-radius: 12px;
+    border       : 1px solid #F3F4F6;
+}
+.tl-row {
+    display    : flex;
+    gap        : 12px;
+    align-items: flex-start;
+}
+.tl-col {
+    display       : flex;
+    flex-direction: column;
+    align-items   : center;
+}
+.tl-dot {
+    width         : 26px;
+    height        : 26px;
+    border-radius : 50%;
+    display       : flex;
+    align-items   : center;
+    justify-content: center;
+    font-size     : 0.62rem;
+    font-weight   : 800;
+    flex-shrink   : 0;
+}
+.tl-dot.done {
+    background: #6366F1;
+    color     : #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.15);
+}
+.tl-dot.active {
+    background: linear-gradient(135deg,#8B5CF6,#EC4899);
+    color     : #FFFFFF;
+    box-shadow: 0 0 0 3px rgba(139,92,246,.20);
+    animation : tl-pulse 2s ease infinite;
+}
+.tl-dot.idle {
+    background: #F3F4F6;
+    color     : #9CA3AF;
+    border    : 2px solid #E5E7EB;
+}
+@keyframes tl-pulse {
+    0%  { box-shadow: 0 0 0 0   rgba(139,92,246,.50); }
+    70% { box-shadow: 0 0 0 10px rgba(139,92,246,0);  }
+    100%{ box-shadow: 0 0 0 0   rgba(139,92,246,0);   }
+}
+.tl-line {
+    width        : 2px;
+    min-height   : 16px;
+    border-radius: 2px;
+    margin       : 2px 0;
+    flex         : 1;
+}
+.tl-line.done { background: linear-gradient(to bottom,#6366F1,#E5E7EB); }
+.tl-line.idle { background: #E5E7EB; }
+.tl-info { padding: 3px 0 18px; }
+.tl-lbl  { font-size: 0.80rem; font-weight: 600; color: #374151; }
+.tl-time { font-size: 0.68rem; color: #9CA3AF; margin-top: 2px; }
 
-        ".tl-wrap{margin-top:14px;padding:14px 16px;"
-        "background:" + _BG2 + ";border-radius:14px;"
-        "border:1px solid " + _BOR + ";}"
-        ".tl-row{display:flex;gap:12px;align-items:flex-start;}"
-        ".tl-col{display:flex;flex-direction:column;align-items:center;}"
-        ".tl-dot{width:24px;height:24px;border-radius:50%;"
-        "display:flex;align-items:center;justify-content:center;"
-        "font-size:.60rem;font-weight:800;flex-shrink:0;transition:all .18s;}"
-        ".tl-dot.done{background:linear-gradient(135deg,#6366F1,#8B5CF6);"
-        "color:#fff;box-shadow:0 0 0 4px rgba(99,102,241,.15);}"
-        ".tl-dot.active{background:linear-gradient(135deg,#8B5CF6,#EC4899);"
-        "color:#fff;box-shadow:0 0 0 4px rgba(139,92,246,.20);"
-        "animation:prem-pulse-ring 2s infinite;}"
-        ".tl-dot.idle{background:" + _BOR + ";color:" + _SUB + ";"
-        "border:2px solid " + _BOR + ";}"
-        ".tl-line{width:2px;min-height:16px;border-radius:2px;margin:2px 0;flex:1;}"
-        ".tl-line.done{background:linear-gradient(to bottom,#6366F1," + _BOR + ");}"
-        ".tl-line.idle{background:" + _BOR + ";}"
-        ".tl-info{padding:2px 0 16px;}"
-        ".tl-lbl{font-size:.78rem;font-weight:600;color:" + _TXT + ";}"
+/* ── SLA boxes ── */
+.sla-ok {
+    background   : #EFF6FF;
+    border       : 1.5px solid #BFDBFE;
+    border-radius: 10px;
+    padding      : 10px 14px;
+    font-size    : 0.78rem;
+    color        : #1D4ED8;
+    margin-top   : 12px;
+    display      : flex;
+    gap          : 8px;
+    align-items  : center;
+    font-weight  : 600;
+}
+.sla-late {
+    background   : #FFF1F2;
+    border       : 1.5px solid #FECDD3;
+    border-radius: 10px;
+    padding      : 10px 14px;
+    font-size    : 0.78rem;
+    color        : #BE123C;
+    margin-top   : 12px;
+    display      : flex;
+    gap          : 8px;
+    align-items  : center;
+    font-weight  : 600;
+}
 
-        ".sla-ok{background:" + ("#080F1C" if dark else "#EFF6FF") + ";"
-        "border:1.5px solid " + ("#1E3A5F" if dark else "#BFDBFE") + ";"
-        "border-radius:12px;padding:10px 16px;font-size:.76rem;"
-        "color:" + ("#60A5FA" if dark else "#1D4ED8") + ";"
-        "margin-top:12px;display:flex;gap:8px;align-items:center;"
-        "font-weight:600;}"
-        ".sla-late{background:" + ("#1C0808" if dark else "#FFF1F2") + ";"
-        "border:1.5px solid " + ("#7F1D1D" if dark else "#FECDD3") + ";"
-        "border-radius:12px;padding:10px 16px;font-size:.76rem;"
-        "color:" + ("#F87171" if dark else "#BE123C") + ";"
-        "margin-top:12px;display:flex;gap:8px;align-items:center;"
-        "font-weight:600;}"
+/* ── empty state ── */
+.trk-empty {
+    text-align   : center;
+    padding      : 3rem 2rem;
+    background   : #FFFFFF;
+    border-radius: 16px;
+    border       : 1.5px dashed #E5E7EB;
+    margin       : 1rem 0;
+}
+.trk-empty-icon  { font-size: 3rem; opacity: .5; display: block; margin-bottom: 12px; }
+.trk-empty-title { font-size: .95rem; font-weight: 700; color: #111827; margin-bottom: 6px; }
+.trk-empty-sub   { font-size: .80rem; color: #6B7280; line-height: 1.6; }
 
-        ".trk-empty{text-align:center;padding:3rem 2rem;"
-        "background:" + _CARD + ";border-radius:22px;"
-        "border:1.5px dashed " + _BOR + ";margin:1rem 0;}"
-        ".trk-empty-icon{font-size:3.2rem;opacity:.55;display:block;margin-bottom:14px;}"
-        ".trk-empty-title{font-size:.98rem;font-weight:700;color:" + _TXT + ";margin-bottom:8px;}"
-        ".trk-empty-sub{font-size:.79rem;color:" + _SUB + ";line-height:1.6;}"
+/* ── active filter bar ── */
+.trk-active-filters {
+    display      : flex;
+    flex-wrap    : wrap;
+    gap          : 6px;
+    align-items  : center;
+    padding      : 8px 0 4px;
+}
+.trk-filter-tag {
+    background   : #EEF2FF;
+    color        : #4338CA;
+    border       : 1px solid #C7D2FE;
+    border-radius: 20px;
+    padding      : 3px 10px;
+    font-size    : 0.72rem;
+    font-weight  : 600;
+}
 
-        "@media(max-width:600px){"
-        ".trk-meta{flex-direction:column;gap:4px;}"
-        ".trk-chips{gap:5px;}"
-        ".trk-chip{padding:5px 11px;font-size:.68rem;}}"
-        "</style>"
-    )
-    st.markdown(css, unsafe_allow_html=True)
+/* ── responsive ── */
+@media (max-width: 640px) {
+    .trk-meta    { flex-direction: column; gap: 4px; }
+    .trk-card    { padding: 14px 14px; border-radius: 12px; }
+    .trk-card-top{ gap: 5px; }
+}
+@media (max-width: 480px) {
+    .trk-title   { font-size: 0.875rem; }
+    .trk-desc    { font-size: 0.800rem; }
+}
+</style>
+""", unsafe_allow_html=True)
 
-    # ── SHARED LOOKUPS ─────────────────────────────────────────────────────────
-    STATUS_D = {
-        "pending":     ("⏳", t("Pending",     "लंबित"),       "#FFFBEB", "#B45309"),
-        "in_progress": ("🔄", t("In Progress", "प्रगति"),      "#EFF6FF", "#1D4ED8"),
-        "resolved":    ("✅", t("Resolved",    "समाधान"),      "#F0FDF4", "#15803D"),
-        "closed":      ("🔒", t("Closed",      "बंद"),          "#F1F5F9", "#475569"),
-        "rejected":    ("❌", t("Rejected",    "अस्वीकृत"),    "#FFF1F2", "#BE123C"),
+    # ══════════════════════════════════════════════════════════════════════
+    #  STATUS / PRIORITY CONFIG
+    # ══════════════════════════════════════════════════════════════════════
+    STATUS_CFG = {
+        "pending":     (t("⏳ Pending",     "⏳ लंबित"),      "#FFFBEB", "#B45309", "#F59E0B"),
+        "in_progress": (t("🔄 In Progress", "🔄 प्रगति"),     "#EFF6FF", "#1D4ED8", "#3B82F6"),
+        "resolved":    (t("✅ Resolved",    "✅ समाधान"),     "#F0FDF4", "#15803D", "#22C55E"),
+        "closed":      (t("🔒 Closed",      "🔒 बंद"),        "#F9FAFB", "#475569", "#6B7280"),
+        "rejected":    (t("❌ Rejected",    "❌ अस्वीकृत"),   "#FFF1F2", "#BE123C", "#EF4444"),
     }
-    PRIORITY_D = {
-        "high":   ("🔴", t("High",   "उच्च"),   "#FFF1F2", "#BE123C", "#EF4444"),
-        "medium": ("🟡", t("Medium", "मध्यम"),  "#FFFBEB", "#B45309", "#F59E0B"),
-        "low":    ("🟢", t("Low",    "निम्न"),  "#F0FDF4", "#15803D", "#22C55E"),
+    PRIORITY_CFG = {
+        "high":   (t("🔴 High",   "🔴 उच्च"),   "#FFF1F2", "#BE123C", "#EF4444"),
+        "medium": (t("🟡 Medium", "🟡 मध्यम"),  "#FFFBEB", "#B45309", "#F59E0B"),
+        "low":    (t("🟢 Low",    "🟢 निम्न"),  "#F0FDF4", "#15803D", "#22C55E"),
     }
 
-    # ── BUILD TIMELINE ────────────────────────────────────────────────────────
+    # dropdown options including "All"
+    STATUS_OPTIONS = {
+        t("All Statuses", "सभी स्थितियां"): "all",
+        t("⏳ Pending",     "⏳ लंबित"):     "pending",
+        t("🔄 In Progress", "🔄 प्रगति"):    "in_progress",
+        t("✅ Resolved",    "✅ समाधान"):    "resolved",
+        t("🔒 Closed",      "🔒 बंद"):       "closed",
+        t("❌ Rejected",    "❌ अस्वीकृत"):  "rejected",
+    }
+    PRIORITY_OPTIONS = {
+        t("All Priorities", "सभी प्राथमिकताएं"): "all",
+        t("🔴 High",   "🔴 उच्च"):  "high",
+        t("🟡 Medium", "🟡 मध्यम"): "medium",
+        t("🟢 Low",    "🟢 निम्न"): "low",
+    }
+
+    # ══════════════════════════════════════════════════════════════════════
+    #  TIMELINE BUILDER
+    # ══════════════════════════════════════════════════════════════════════
     def build_tl(status: str) -> str:
         steps = [
-            t("Submitted",  "सबमिट"),
-            t("In Review",  "समीक्षा"),
-            t("In Progress","प्रगति"),
-            t("Resolved",   "समाधान"),
+            t("Submitted",   "सबमिट"),
+            t("In Review",   "समीक्षा"),
+            t("In Progress", "प्रगति"),
+            t("Resolved",    "समाधान"),
         ]
         status_map = {
             "pending":     0,
@@ -6699,172 +7494,182 @@ def pg_tracking():
             "in_progress": 2,
             "resolved":    3,
             "closed":      3,
+            "rejected":    1,
         }
         current = status_map.get(str(status).lower(), 0)
 
-        html = "<div class='prem-timeline'>"
+        out = "<div class='tl-wrap'><div style='display:flex;gap:0;'>"
         for i, label in enumerate(steps):
-            if i < current:
-                cls  = "done"
-                icon = "✓"
-            elif i == current:
-                cls  = "active"
-                icon = "●"
-            else:
-                cls  = "idle"
-                icon = "○"
-
-            html += (
-                "<div class='prem-tl-item'>"
-                "<div class='prem-tl-dot " + cls + "'>" + icon + "</div>"
-                "<div class='prem-tl-info'>"
-                "<div class='prem-tl-label'>" + label + "</div>"
-                "</div></div>"
+            cls  = "done" if i < current else ("active" if i == current else "idle")
+            icon = "✓"   if i < current else ("●"      if i == current else str(i + 1))
+            out += (
+                f"<div style='flex:1;text-align:center;position:relative;'>"
+                f"<div class='tl-dot {cls}' style='margin:0 auto 6px;'>{icon}</div>"
+                f"<div style='font-size:.65rem;font-weight:600;"
+                f"color:{'#6366F1' if cls in ('done','active') else '#9CA3AF'};'>"
+                f"{label}</div></div>"
             )
             if i < len(steps) - 1:
-                html += "<div class='prem-tl-line " + cls + "'></div>"
+                line_col = "#6366F1" if i < current else "#E5E7EB"
+                out += (
+                    f"<div style='flex:0 0 20px;display:flex;align-items:flex-start;"
+                    f"padding-top:13px;'>"
+                    f"<div style='height:2px;width:100%;background:{line_col};"
+                    f"border-radius:2px;'></div></div>"
+                )
+        out += "</div></div>"
+        return out
 
-        html += "</div>"
-        return html
-
-    # ── BUILD SLA ─────────────────────────────────────────────────────────────
-    # FIX: build_sla was accidentally removed when build_tl was rewritten.
-    # Restored here — render_card references it.
+    # ══════════════════════════════════════════════════════════════════════
+    #  SLA BUILDER
+    # ══════════════════════════════════════════════════════════════════════
     def build_sla(comp: dict) -> str:
         sla = comp.get("sla_deadline")
         if not sla:
             return ""
         if comp.get("is_overdue"):
             return (
-                "<div class='sla-late'>⏰&nbsp;<span><strong>"
-                + t("OVERDUE!", "समय सीमा समाप्त!") + "</strong> "
-                + t("Expected by", "अपेक्षित") + ": " + str(sla) + "</span></div>"
+                f"<div class='sla-late'>⏰&nbsp;<span>"
+                f"<strong>{t('OVERDUE!','समय सीमा समाप्त!')}</strong>"
+                f" {t('Expected by','अपेक्षित')}: {sla}</span></div>"
             )
         return (
-            "<div class='sla-ok'>⏱&nbsp;<span>"
-            + t("Expected by", "अपेक्षित")
-            + ": <strong>" + str(sla) + "</strong></span></div>"
+            f"<div class='sla-ok'>⏱&nbsp;<span>"
+            f"{t('Expected by','अपेक्षित')}: <strong>{sla}</strong></span></div>"
         )
 
-    # ─────────────────────────────────────────────────────────────────────────
-    # render_card — FIX: idx parameter added
-    #
-    # ROOT CAUSE of StreamlitDuplicateElementKey:
-    #   Streamlit renders ALL tab contents in a single pass.
-    #   Tab 1 called render_card(found) and Tab 2's loop also called
-    #   render_card(same_complaint) — both produced key="trk_v_GR4B5Q2G3J".
-    #   Streamlit sees two widgets with the same key → crash.
-    #
-    # FIX:
-    #   Every widget key inside render_card now includes BOTH the cid AND
-    #   the `idx` (loop counter / call-site discriminator).
-    #   Tab 1 always passes idx=0 (only one card rendered there).
-    #   Tab 2 passes the enumerate() index.
-    #   Even if the same complaint appears in both tabs, the keys differ:
-    #     Tab1: "trk_v_GR4B5Q2G3J_t1"
-    #     Tab2: "trk_v_GR4B5Q2G3J_0", "trk_v_GR4B5Q2G3J_1", ...
-    # ─────────────────────────────────────────────────────────────────────────
+    # ══════════════════════════════════════════════════════════════════════
+    #  CARD RENDERER
+    # ══════════════════════════════════════════════════════════════════════
     def render_card(comp: dict, expanded: bool = False, idx: int = 0,
                     id_prefix: str = "t2") -> None:
-        """
-        Parameters
-        ----------
-        comp      : complaint dict
-        expanded  : whether expander starts open
-        idx       : position in the calling loop (0-based).
-                    Used to guarantee unique widget keys.
-        id_prefix : extra namespace — "t1" for Tab-1 search result,
-                    "t2" for Tab-2 list items.  Prevents key collision
-                    when the same complaint appears in both tabs.
-        """
         cid      = comp.get("complaint_id") or comp.get("id") or "N/A"
         status   = comp.get("status",   "pending")
         priority = comp.get("priority", "medium")
         cat      = comp.get("category", "other").title()
         desc     = comp.get("description", "")
-        loc      = comp.get("location",  "—")
+        loc      = comp.get("location", "—")
         date     = comp.get("created_at", "—")
-        emg      = comp.get("is_emergency", False)
+        emg      = bool(comp.get("is_emergency", False))
 
-        si, sl, sb, sf       = STATUS_D.get(status,   ("", "", _BOR, _SUB))
-        pi, pl, pb, pf, bcol = PRIORITY_D.get(priority, ("", "", _BOR, _SUB, _A1))
-        if emg:
-            bcol = "#DC2626"
-
-        exp_lbl  = ("🚨 " if emg else "") + "#" + str(cid) + "  ·  " + cat + "  ·  " + si + " " + sl
-        emg_html = (
-            '<span class="trk-badge" style="background:#DC2626;color:#fff;">🚨 EMERGENCY</span>'
-            if emg else ""
+        slbl, sbg, sfg, bord_col = (
+            STATUS_CFG.get(status, (status.title(), "#F9FAFB", "#475569", "#6B7280"))[:4]
         )
+        plbl, pbg, pfg = (
+            PRIORITY_CFG.get(priority, (priority.title(), "#F9FAFB", "#475569"))[:3]
+        )
+        if emg:
+            bord_col = "#DC2626"
 
-        # Unique key base — combines prefix + cid + loop index
-        # Safe against: None cid, duplicate cids, same card in two tabs
         _k = f"{id_prefix}_{str(cid)}_{idx}"
 
-        with st.expander(exp_lbl, expanded=expanded):
+        cat_icons = {
+            "water":"💧","electricity":"⚡","road":"🛣️","waste":"🗑️",
+            "drainage":"🌊","health":"🏥","other":"📋",
+        }
+        cat_icon = cat_icons.get(cat.lower(), "📋")
 
-            # ── Listen / voice button ──────────────────────────────────────
-            if st.button("🔊 " + t("Listen", "सुनें"), key="trk_v_" + _k):
-                speak_text("Complaint " + str(cid) + ": " + desc, lang)
+        exp_title = (
+            f"{'🚨 ' if emg else ''}#{cid}  ·  {cat}  ·  {slbl}"
+        )
 
-            # ── Card HTML ─────────────────────────────────────────────────
+        with st.expander(exp_title, expanded=expanded):
+            # listen button
+            if st.button(
+                f"🔊 {t('Listen','सुनें')}",
+                key=f"trk_v_{_k}",
+                use_container_width=False,
+            ):
+                speak_text(f"Complaint {cid}: {desc}", lang)
+
+            # card html
+            emg_badge = (
+                '<span class="trk-badge" '
+                'style="background:#DC2626;color:#fff;margin-left:4px;">'
+                '🚨 EMERGENCY</span>'
+            ) if emg else ""
+
             st.markdown(
-                "<div class='trk-card' style='border-left-color:" + bcol + ";'>"
+                f"<div class='trk-card' style='border-left-color:{bord_col};margin-top:8px;'>"
 
-                "<div style='display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:10px;'>"
-                "<span class='trk-cid'>#" + str(cid) + "</span>"
-                "<span class='trk-badge' style='background:" + sb + ";color:" + sf + ";'>" + si + " " + sl + "</span>"
-                "<span class='trk-badge' style='background:" + pb + ";color:" + pf + ";'>" + pi + " " + pl + "</span>"
-                + emg_html +
-                "</div>"
+                # top row: ID + status + priority + emergency
+                f"<div class='trk-card-top'>"
+                f"<span class='trk-cid'>#{cid}</span>"
+                f"<span class='trk-badge' style='background:{sbg};color:{sfg};'>{slbl}</span>"
+                f"<span class='trk-badge' style='background:{pbg};color:{pfg};'>{plbl}</span>"
+                f"{emg_badge}"
+                f"</div>"
 
-                "<div class='trk-title'>" + cat + "</div>"
-                "<div class='trk-desc'>" + html.escape(desc[:200]) + ("…" if len(desc) > 200 else "") + "</div>"
+                # category + description
+                f"<div class='trk-category'>{cat_icon} {html.escape(cat)}</div>"
+                f"<div class='trk-desc'>"
+                f"{html.escape(desc[:220])}{'…' if len(desc) > 220 else ''}"
+                f"</div>"
 
-                "<div class='trk-meta'>"
-                "<span>📍 " + html.escape(str(loc)) + "</span>"
-                "<span>📅 " + str(date) + "</span>"
-                "</div>"
-                "</div>"
-
-                "<div class='trk-flabel' style='margin-top:16px;'>"
-                + t("Progress Timeline", "प्रगति टाइमलाइन") + "</div>"
-                + build_tl(status)
-                + build_sla(comp),
+                # meta
+                f"<div class='trk-meta'>"
+                f"<span>📍 {html.escape(str(loc))}</span>"
+                f"<span>📅 {html.escape(str(date))}</span>"
+                f"</div>"
+                f"</div>",
 
                 unsafe_allow_html=True,
             )
 
-    # ════════════════════════════════════════════════════════
-    # HERO
-    # ════════════════════════════════════════════════════════
+            # timeline
+            st.markdown(
+                f"<div style='font-size:.70rem;font-weight:700;text-transform:uppercase;"
+                f"letter-spacing:.08em;color:#9CA3AF;margin:16px 0 8px;"
+                f"display:flex;align-items:center;gap:8px;'>"
+                f"<span style='width:3px;height:12px;background:linear-gradient("
+                f"180deg,#6366F1,#8B5CF6);border-radius:3px;display:inline-block;"
+                f"flex-shrink:0;'></span>"
+                f"{t('Progress Timeline','प्रगति टाइमलाइन')}</div>"
+                + build_tl(status)
+                + build_sla(comp),
+                unsafe_allow_html=True,
+            )
+
+    # ══════════════════════════════════════════════════════════════════════
+    #  HERO
+    # ══════════════════════════════════════════════════════════════════════
     st.markdown(
-        "<div class='prem-hero' style='padding:28px 28px 24px;margin-bottom:0;'>"
-        "<div class='prem-hero-avatar'>🔍</div>"
-        "<div class='prem-hero-title'>" + t("Track Complaint", "शिकायत ट्रैक करें") + "</div>"
-        "<p class='prem-hero-sub'>" + t("Check real-time status of your complaints", "अपनी शिकायत की स्थिति जानें") + "</p>"
-        "<div class='prem-hero-stats'>"
-        "<div class='prem-hstat h-blue'><div class='prem-hstat-num'>🔎</div><div class='prem-hstat-lbl'>" + t("Track by ID", "ID से ट्रैक") + "</div></div>"
-        "<div class='prem-hstat h-amber'><div class='prem-hstat-num'>📋</div><div class='prem-hstat-lbl'>" + t("My Complaints", "मेरी शिकायतें") + "</div></div>"
-        "<div class='prem-hstat h-green'><div class='prem-hstat-num'>⏱</div><div class='prem-hstat-lbl'>" + t("Live Status", "लाइव स्थिति") + "</div></div>"
-        "<div class='prem-hstat h-red'><div class='prem-hstat-num'>🚨</div><div class='prem-hstat-lbl'>" + t("Emergency", "आपातकाल") + "</div></div>"
-        "</div></div>",
+        f"<div class='prem-hero' style='padding:28px 28px 24px;margin-bottom:0;'>"
+        f"<div class='prem-hero-avatar'>🔍</div>"
+        f"<div class='prem-hero-title'>{t('Track Complaint','शिकायत ट्रैक करें')}</div>"
+        f"<p class='prem-hero-sub'>"
+        f"{t('Check real-time status of your complaints','अपनी शिकायत की स्थिति जानें')}"
+        f"</p>"
+        f"<div class='prem-hero-stats'>"
+        f"<div class='prem-hstat h-blue'><div class='prem-hstat-num'>🔎</div>"
+        f"<div class='prem-hstat-lbl'>{t('Track by ID','ID से ट्रैक')}</div></div>"
+        f"<div class='prem-hstat h-amber'><div class='prem-hstat-num'>📋</div>"
+        f"<div class='prem-hstat-lbl'>{t('My Complaints','मेरी शिकायतें')}</div></div>"
+        f"<div class='prem-hstat h-green'><div class='prem-hstat-num'>⏱</div>"
+        f"<div class='prem-hstat-lbl'>{t('Live Status','लाइव स्थिति')}</div></div>"
+        f"<div class='prem-hstat h-red'><div class='prem-hstat-num'>🚨</div>"
+        f"<div class='prem-hstat-lbl'>{t('Emergency','आपातकाल')}</div></div>"
+        f"</div></div>",
         unsafe_allow_html=True,
     )
 
-    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
 
+    # ══════════════════════════════════════════════════════════════════════
+    #  TABS
+    # ══════════════════════════════════════════════════════════════════════
     tab1, tab2 = st.tabs([
-        "🔎 " + t("Track by ID",   "ID से ट्रैक करें"),
-        "📋 " + t("My Complaints", "मेरी शिकायतें"),
+        f"🔎 {t('Track by ID',   'ID से ट्रैक करें')}",
+        f"📋 {t('My Complaints', 'मेरी शिकायतें')}",
     ])
 
-    # ════════════════════════════════════════════════════════
-    # TAB 1 — Track by ID
-    # ════════════════════════════════════════════════════════
+    # ──────────────────────────────────────────────────────────────────────
+    #  TAB 1 — Track by ID
+    # ──────────────────────────────────────────────────────────────────────
     with tab1:
         st.markdown(
-            "<div class='prem-section-header'>🔎 " + t("Enter Complaint ID", "शिकायत ID दर्ज करें") + "</div>",
+            f"<div class='trk-section'>"
+            f"🔎 {t('Search by Complaint ID','शिकायत ID से खोजें')}</div>",
             unsafe_allow_html=True,
         )
 
@@ -6872,23 +7677,37 @@ def pg_tracking():
         with sc1:
             st.markdown('<div class="trk-search-wrap">', unsafe_allow_html=True)
             search_id = st.text_input(
-                "tid",
+                "search_label",
                 label_visibility="collapsed",
-                placeholder=t("Enter Complaint ID  e.g. CMP-0041", "शिकायत ID दर्ज करें जैसे CMP-0041"),
+                placeholder=t(
+                    "Enter complaint ID e.g. CMP-0041",
+                    "शिकायत ID दर्ज करें जैसे CMP-0041",
+                ),
                 key="trk_search_id",
             )
             st.markdown("</div>", unsafe_allow_html=True)
         with sc2:
-            search_btn = st.button(t("🔍 Track", "🔍 ट्रैक"), key="trk_btn", use_container_width=True)
+            search_btn = st.button(
+                t("🔍 Track", "🔍 ट्रैक"),
+                key="trk_btn",
+                use_container_width=True,
+            )
 
         if search_btn:
-            sid = search_id.strip()
+            sid = (search_id or "").strip()
             if not sid:
-                st.warning(t("Please enter a complaint ID.", "कृपया शिकायत ID दर्ज करें।"))
+                st.warning(t(
+                    "Please enter a complaint ID.",
+                    "कृपया शिकायत ID दर्ज करें।",
+                ))
             elif not uid:
-                st.warning(t("Please login to track complaints.", "लॉगिन करें।"))
+                st.warning(t(
+                    "Please login to track complaints.",
+                    "शिकायतें ट्रैक करने के लिए लॉगिन करें।",
+                ))
             else:
-                raw = api("get", "/complaints/user/" + str(uid))
+                with st.spinner(t("Searching…", "खोज रहे हैं…")):
+                    raw = api("get", f"/complaints/user/{uid}")
                 if isinstance(raw, list):
                     found = next(
                         (c for c in raw
@@ -6897,49 +7716,54 @@ def pg_tracking():
                     )
                     if found:
                         st.success(t("✅ Complaint found!", "✅ शिकायत मिली!"))
-                        # FIX: id_prefix="t1" ensures Tab-1 keys never clash with Tab-2 keys
                         render_card(found, expanded=True, idx=0, id_prefix="t1")
                     else:
                         st.markdown(
-                            "<div class='trk-empty'>"
-                            "<span class='trk-empty-icon'>❌</span>"
-                            "<div class='trk-empty-title'>"
-                            + t("Complaint not found", "शिकायत नहीं मिली") +
-                            "</div>"
-                            "<div class='trk-empty-sub'>"
-                            + t("Check the ID and ensure you are logged into the correct account.",
-                                "ID जाँचें या सुनिश्चित करें सही खाते में हैं।") +
-                            "</div></div>",
+                            f"<div class='trk-empty'>"
+                            f"<span class='trk-empty-icon'>❌</span>"
+                            f"<div class='trk-empty-title'>"
+                            f"{t('Complaint not found','शिकायत नहीं मिली')}</div>"
+                            f"<div class='trk-empty-sub'>"
+                            f"{t('Check the ID and ensure you are logged into the correct account.','ID जाँचें या सुनिश्चित करें कि सही खाते में हैं।')}"
+                            f"</div></div>",
                             unsafe_allow_html=True,
                         )
                 else:
-                    st.error(t("Unable to fetch. Please try again.", "डेटा प्राप्त नहीं हुआ। पुनः प्रयास करें।"))
+                    st.error(t(
+                        "Unable to fetch data. Please try again.",
+                        "डेटा प्राप्त नहीं हुआ। पुनः प्रयास करें।",
+                    ))
 
-    # ════════════════════════════════════════════════════════
-    # TAB 2 — My Complaints
-    # ════════════════════════════════════════════════════════
+    # ──────────────────────────────────────────────────────────────────────
+    #  TAB 2 — My Complaints
+    # ──────────────────────────────────────────────────────────────────────
     with tab2:
         if not uid:
             st.markdown(
-                "<div class='trk-empty'>"
-                "<span class='trk-empty-icon'>🔒</span>"
-                "<div class='trk-empty-title'>" + t("Login Required", "लॉगिन आवश्यक") + "</div>"
-                "<div class='trk-empty-sub'>" + t("Please login to view your complaints.", "लॉगिन करें।") + "</div>"
-                "</div>",
+                f"<div class='trk-empty'>"
+                f"<span class='trk-empty-icon'>🔒</span>"
+                f"<div class='trk-empty-title'>{t('Login Required','लॉगिन आवश्यक')}</div>"
+                f"<div class='trk-empty-sub'>"
+                f"{t('Please login to view your complaints.','अपनी शिकायतें देखने के लिए लॉगिन करें।')}"
+                f"</div></div>",
                 unsafe_allow_html=True,
             )
             return
 
-        all_comps = api("get", "/complaints/user/" + str(uid))
+        # ── fetch ────────────────────────────────────────────────────────
+        with st.spinner(t("Loading complaints…", "शिकायतें लोड हो रही हैं…")):
+            all_comps = api("get", f"/complaints/user/{uid}")
         all_comps = all_comps if isinstance(all_comps, list) else []
 
         if not all_comps:
             st.markdown(
-                "<div class='trk-empty'>"
-                "<span class='trk-empty-icon'>📭</span>"
-                "<div class='trk-empty-title'>" + t("No complaints yet", "कोई शिकायत नहीं") + "</div>"
-                "<div class='trk-empty-sub'>" + t("File your first complaint to get started.", "पहली शिकायत दर्ज करें।") + "</div>"
-                "</div>",
+                f"<div class='trk-empty'>"
+                f"<span class='trk-empty-icon'>📭</span>"
+                f"<div class='trk-empty-title'>"
+                f"{t('No complaints yet','अभी कोई शिकायत नहीं')}</div>"
+                f"<div class='trk-empty-sub'>"
+                f"{t('File your first complaint to get started.','पहली शिकायत दर्ज करके शुरू करें।')}"
+                f"</div></div>",
                 unsafe_allow_html=True,
             )
             ec1, ec2, ec3 = st.columns([1, 2, 1])
@@ -6953,21 +7777,25 @@ def pg_tracking():
                     st.rerun()
             return
 
-        # ── Filter state defaults ──────────────────────────────────────────
-        for k, v in [("trk_sf", "all"), ("trk_pf", "all"), ("trk_q", "")]:
-            if k not in st.session_state:
-                st.session_state[k] = v
+        # ── session defaults ──────────────────────────────────────────────
+        st.session_state.setdefault("trk_sf", list(STATUS_OPTIONS.values())[0])
+        st.session_state.setdefault("trk_pf", list(PRIORITY_OPTIONS.values())[0])
+        st.session_state.setdefault("trk_q",  "")
 
-        # ── Search bar ────────────────────────────────────────────────────
+        # ── search bar ────────────────────────────────────────────────────
         st.markdown(
-            "<div class='prem-section-header'>🔍 " + t("Filter & Search", "खोजें और फ़िल्टर") + "</div>",
+            f"<div class='trk-section'>"
+            f"🔍 {t('Filter & Search','खोजें और फ़िल्टर करें')}</div>",
             unsafe_allow_html=True,
         )
         st.markdown('<div class="trk-search-wrap">', unsafe_allow_html=True)
         srch = st.text_input(
-            "tsrch",
+            "search_label_2",
             label_visibility="collapsed",
-            placeholder="🔍 " + t("Search by ID, category, location…", "ID, श्रेणी, स्थान से खोजें…"),
+            placeholder=t(
+                "🔍  Search by ID, category, location…",
+                "🔍  ID, श्रेणी, स्थान से खोजें…",
+            ),
             value=st.session_state.trk_q,
             key="trk_search_q",
         )
@@ -6976,108 +7804,106 @@ def pg_tracking():
             st.session_state.trk_q = srch
             st.rerun()
 
-        # ── Status filter ─────────────────────────────────────────────────
-        SF = [
-            ("all",         t("All",         "सभी"),          "📋"),
-            ("pending",     t("Pending",      "लंबित"),        "⏳"),
-            ("in_progress", t("In Progress",  "प्रगति"),       "🔄"),
-            ("resolved",    t("Resolved",     "समाधान"),       "✅"),
-            ("closed",      t("Closed",       "बंद"),           "🔒"),
-            ("rejected",    t("Rejected",     "अस्वीकृत"),     "❌"),
-        ]
-        st.markdown("<div class='trk-flabel'>" + t("Status", "स्थिति") + "</div>", unsafe_allow_html=True)
-        st.markdown(
-            "<div class='trk-chips'>"
-            + "".join(
-                "<span class='trk-chip" + (" on" if st.session_state.trk_sf == v else "") + "'>"
-                + ic + " " + lb + "</span>"
-                for v, lb, ic in SF
-            )
-            + "</div>",
-            unsafe_allow_html=True,
-        )
-        sf_choice = st.radio(
-            "sf_radio",
-            label_visibility="collapsed",
-            options=[v for v, lb, ic in SF],
-            format_func=lambda v: next(ic + " " + lb for fv, lb, ic in SF if fv == v),
-            index=next(i for i, (v, lb, ic) in enumerate(SF) if v == st.session_state.trk_sf),
-            horizontal=True,
-            key="trk_sf_radio",
-        )
-        if sf_choice != st.session_state.trk_sf:
-            st.session_state.trk_sf = sf_choice
-            st.rerun()
+        # ── dropdown filters (Status + Priority) ─────────────────────────
+        st.markdown('<div class="trk-filter">', unsafe_allow_html=True)
+        fd1, fd2 = st.columns(2)
 
-        # ── Priority filter ───────────────────────────────────────────────
-        PF = [
-            ("all",    t("All",    "सभी"),     "🔘"),
-            ("high",   t("High",   "उच्च"),    "🔴"),
-            ("medium", t("Medium", "मध्यम"),   "🟡"),
-            ("low",    t("Low",    "निम्न"),   "🟢"),
-        ]
-        st.markdown("<div class='trk-flabel'>" + t("Priority", "प्राथमिकता") + "</div>", unsafe_allow_html=True)
-        st.markdown(
-            "<div class='trk-chips'>"
-            + "".join(
-                "<span class='trk-chip" + (" on" if st.session_state.trk_pf == v else "") + "'>"
-                + ic + " " + lb + "</span>"
-                for v, lb, ic in PF
+        with fd1:
+            status_label = t("Status", "स्थिति")
+            # map current value back to its display label
+            sf_current_label = next(
+                (lbl for lbl, val in STATUS_OPTIONS.items()
+                 if val == st.session_state.trk_sf),
+                list(STATUS_OPTIONS.keys())[0],
             )
-            + "</div>",
-            unsafe_allow_html=True,
-        )
-        pf_choice = st.radio(
-            "pf_radio",
-            label_visibility="collapsed",
-            options=[v for v, lb, ic in PF],
-            format_func=lambda v: next(ic + " " + lb for fv, lb, ic in PF if fv == v),
-            index=next(i for i, (v, lb, ic) in enumerate(PF) if v == st.session_state.trk_pf),
-            horizontal=True,
-            key="trk_pf_radio",
-        )
-        if pf_choice != st.session_state.trk_pf:
-            st.session_state.trk_pf = pf_choice
-            st.rerun()
+            sf_chosen_label = st.selectbox(
+                status_label,
+                options=list(STATUS_OPTIONS.keys()),
+                index=list(STATUS_OPTIONS.keys()).index(sf_current_label),
+                key="trk_sf_select",
+            )
+            new_sf = STATUS_OPTIONS[sf_chosen_label]
+            if new_sf != st.session_state.trk_sf:
+                st.session_state.trk_sf = new_sf
+                st.rerun()
 
-        # ── Apply filters ─────────────────────────────────────────────────
-        filtered = all_comps
+        with fd2:
+            priority_label = t("Priority", "प्राथमिकता")
+            pf_current_label = next(
+                (lbl for lbl, val in PRIORITY_OPTIONS.items()
+                 if val == st.session_state.trk_pf),
+                list(PRIORITY_OPTIONS.keys())[0],
+            )
+            pf_chosen_label = st.selectbox(
+                priority_label,
+                options=list(PRIORITY_OPTIONS.keys()),
+                index=list(PRIORITY_OPTIONS.keys()).index(pf_current_label),
+                key="trk_pf_select",
+            )
+            new_pf = PRIORITY_OPTIONS[pf_chosen_label]
+            if new_pf != st.session_state.trk_pf:
+                st.session_state.trk_pf = new_pf
+                st.rerun()
+
+        st.markdown("</div>", unsafe_allow_html=True)
+
+        # ── active filter tags ────────────────────────────────────────────
+        active_tags = []
         if st.session_state.trk_sf != "all":
-            filtered = [c for c in filtered if c.get("status", "") == st.session_state.trk_sf]
+            active_tags.append(sf_chosen_label)
         if st.session_state.trk_pf != "all":
-            filtered = [c for c in filtered if c.get("priority", "") == st.session_state.trk_pf]
+            active_tags.append(pf_chosen_label)
+        if st.session_state.trk_q:
+            active_tags.append(f'"{st.session_state.trk_q}"')
+
+        if active_tags:
+            tags_html = "".join(
+                f"<span class='trk-filter-tag'>{tag}</span>"
+                for tag in active_tags
+            )
+            st.markdown(
+                f"<div class='trk-active-filters'>"
+                f"<span style='font-size:.72rem;color:#9CA3AF;font-weight:600;'>"
+                f"{t('Active:','सक्रिय:')}</span>{tags_html}</div>",
+                unsafe_allow_html=True,
+            )
+
+        # ── apply filters ─────────────────────────────────────────────────
+        filtered = all_comps[:]
+        if st.session_state.trk_sf != "all":
+            filtered = [c for c in filtered
+                        if c.get("status","") == st.session_state.trk_sf]
+        if st.session_state.trk_pf != "all":
+            filtered = [c for c in filtered
+                        if c.get("priority","") == st.session_state.trk_pf]
         if st.session_state.trk_q:
             term = st.session_state.trk_q.strip().lower()
             filtered = [
                 c for c in filtered
-                if term in c.get("complaint_id", "").lower()
-                or term in c.get("category",     "").lower()
-                or term in c.get("location",     "").lower()
-                or term in c.get("description",  "").lower()
+                if term in c.get("complaint_id","").lower()
+                or term in c.get("category","").lower()
+                or term in c.get("location","").lower()
+                or term in c.get("description","").lower()
             ]
 
-        # ── Results summary ───────────────────────────────────────────────
+        # ── results summary row ───────────────────────────────────────────
+        hidden = len(all_comps) - len(filtered)
         st.markdown(
-            "<div style='display:flex;align-items:center;justify-content:space-between;"
-            "flex-wrap:wrap;gap:8px;margin:14px 0 8px;'>"
-            "<span style='background:rgba(99,102,241,.09);color:#6366F1;"
-            "border:1.5px solid rgba(99,102,241,.20);border-radius:20px;"
-            "padding:5px 16px;font-size:.78rem;font-weight:800;'>"
-            + t("Showing", "दिखा रहे हैं") + " <strong>" + str(len(filtered)) + "</strong> "
-            + t("of", "में से") + " <strong>" + str(len(all_comps)) + "</strong> "
-            + t("complaints", "शिकायतें") + "</span>"
-            "<span style='font-size:.72rem;color:#94A3B8;font-weight:600;'>"
-            + str(len(all_comps) - len(filtered)) + " " + t("hidden", "छिपे") + "</span>"
-            "</div>",
+            f"<div class='trk-count-row'>"
+            f"<span class='trk-count-pill'>"
+            f"{t('Showing','दिखा रहे हैं')} "
+            f"<strong>{len(filtered)}</strong> "
+            f"{t('of','में से')} "
+            f"<strong>{len(all_comps)}</strong> "
+            f"{t('complaints','शिकायतें')}"
+            f"</span>"
+            f"{'<span class=\"trk-count-hidden\">' + str(hidden) + ' ' + t('hidden','छिपे') + '</span>' if hidden else ''}"
+            f"</div>",
             unsafe_allow_html=True,
         )
 
-        any_active = (
-            st.session_state.trk_sf != "all"
-            or st.session_state.trk_pf != "all"
-            or st.session_state.trk_q
-        )
-        if any_active:
+        # ── clear filters button ──────────────────────────────────────────
+        if active_tags:
             cl1, cl2, cl3 = st.columns([1, 2, 1])
             with cl2:
                 if st.button(
@@ -7090,31 +7916,33 @@ def pg_tracking():
                     st.session_state.trk_q  = ""
                     st.rerun()
 
+        # ── no results ────────────────────────────────────────────────────
         if not filtered:
             st.markdown(
-                "<div class='trk-empty'>"
-                "<span class='trk-empty-icon'>🔍</span>"
-                "<div class='trk-empty-title'>"
-                + t("No complaints match your filters", "कोई शिकायत मेल नहीं खाती") +
-                "</div>"
-                "<div class='trk-empty-sub'>"
-                + t("Try adjusting the filters above.", "ऊपर फ़िल्टर बदलें।") +
-                "</div></div>",
+                f"<div class='trk-empty'>"
+                f"<span class='trk-empty-icon'>🔍</span>"
+                f"<div class='trk-empty-title'>"
+                f"{t('No complaints match your filters','कोई शिकायत मेल नहीं खाती')}"
+                f"</div>"
+                f"<div class='trk-empty-sub'>"
+                f"{t('Try adjusting the filters above.','ऊपर फ़िल्टर बदलकर देखें।')}"
+                f"</div></div>",
                 unsafe_allow_html=True,
             )
             return
 
-        # ── Render cards
-        # FIX: enumerate() provides `idx` for each card.
-        # id_prefix="t2" namespaces Tab-2 keys away from Tab-1.
-        # Even if Tab-1 searched for and rendered complaint #3,
-        # Tab-2 keys are "t2_CMP-0003_2" vs Tab-1's "t1_CMP-0003_0" → no clash.
+        # ── render complaint cards ────────────────────────────────────────
+        st.markdown(
+            f"<div class='trk-section'>"
+            f"📋 {t('Your Complaints','आपकी शिकायतें')}</div>",
+            unsafe_allow_html=True,
+        )
         for idx, comp in enumerate(filtered):
             render_card(comp, expanded=False, idx=idx, id_prefix="t2")
 
-    # ════════════════════════════════════════════════════════
-    # BACK
-    # ════════════════════════════════════════════════════════
+    # ══════════════════════════════════════════════════════════════════════
+    #  BACK BUTTON
+    # ══════════════════════════════════════════════════════════════════════
     st.markdown("<br>", unsafe_allow_html=True)
     bc1, bc2, bc3 = st.columns([1, 2, 1])
     with bc2:
@@ -7397,62 +8225,79 @@ def _show_detail(d, uid, lang):
 def pg_notifications():
     
     _apply_layout("user")  
-    import re
-    import html as _html
+   
     from datetime import datetime, timedelta
-
     lang = st.session_state.language
     uid  = (st.session_state.user or {}).get("user_id")
 
     def t(en, hi):
         return hi if lang == "hi" else en
 
-    dark  = st.session_state.get("dark_mode", False)
-    _CARD = "#0D1220" if dark else "#FFFFFF"
-    _BOR  = "#1C2540" if dark else "#E8EDF7"
-    _TXT  = "#EFF2FF" if dark else "#0B1428"
-    _SUB  = "#7C8FAC" if dark else "#5A6A85"
+    # dark  = st.session_state.get("dark_mode", False)
+    
+    # ── REFINED COLOR PALETTE ────────────────────────────────────────────────
+    _CARD =  "#FFFFFF"
+    _CARD2=  "#F8FAFC"
+    _BOR  =  "#E8EDF7"
+    _TXT  =  "#1E293B"
+    _SUB  =  "#64748B"
     _A1   = "#6366F1"
     _A2   = "#8B5CF6"
-    _UNR  = "rgba(99,102,241,0.10)" if dark else "rgba(99,102,241,0.06)"
-    _GRN  = "#4ADE80" if dark else "#166534"
-    _GRN_BG = "rgba(74,222,128,0.10)" if dark else "#F0FDF4"
-    _GRN_BD = "rgba(74,222,128,0.25)" if dark else "#86EFAC"
-    _RED_BG = "rgba(239,68,68,0.10)" if dark else "#FEF2F2"
-    _RED_BD = "rgba(239,68,68,0.25)" if dark else "#FECACA"
-    _RED    = "#FCA5A5" if dark else "#991B1B"
+    _UNR  =  "rgba(99,102,241,0.05)"
+    
+    # Red palette for delete (FIXED - no more black!)
+    _RED       = "#EF4444"
+    _RED_BG    =  "#FEF2F2"
+    _RED_BG_H  =  "#FEE2E2"
+    _RED_BD    =  "#FCA5A5"
+    _RED_TXT   =  "#B91C1C"
+    
+    # Blue palette for read
+    _BLU_BG    =  "#EEF2FF"
+    _BLU_BG_H  =  "#E0E7FF"
+    _BLU_BD    =  "#C7D2FE"
+    _BLU_TXT   =  "#4338CA"
 
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
+    # st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
     st.markdown(f"""
 <style>
 /* ── notification card ── */
 .nc{{
     background:{_CARD};border:1.5px solid {_BOR};border-radius:18px;
-    padding:18px 20px;margin:8px 0;position:relative;
+    padding:18px 20px;margin:8px 0 0 0;position:relative;
     transition:transform .18s,box-shadow .18s,border-color .18s;
     font-family:'DM Sans','Noto Sans Devanagari',system-ui,sans-serif;
 }}
-.nc:hover{{transform:translateX(5px);box-shadow:0 8px 28px rgba(99,102,241,.13);border-color:{_A1}55;}}
+.nc:hover{{transform:translateX(4px);box-shadow:0 8px 28px rgba(99,102,241,.15);border-color:{_A1}66;}}
 .nc.unread{{border-left:4px solid {_A1};background:{_UNR};}}
-.nc.dimmed{{opacity:.72;}}
+.nc.dimmed{{opacity:.78;}}
 .nc-inner{{display:flex;gap:14px;align-items:flex-start;}}
-.nc-icon{{font-size:1.75rem;min-width:44px;text-align:center;flex-shrink:0;margin-top:2px;}}
+.nc-icon{{font-size:1.75rem;min-width:44px;text-align:center;flex-shrink:0;margin-top:2px;
+    background:linear-gradient(135deg,{_A1}22,{_A2}22);
+    border-radius:12px;padding:6px;}}
 .nc-body{{flex:1;min-width:0;}}
-.nc-title{{font-size:.90rem;font-weight:700;color:{_TXT};margin-bottom:4px;
+.nc-title{{font-size:.92rem;font-weight:700;color:{_TXT};margin-bottom:5px;
     display:flex;align-items:center;gap:8px;flex-wrap:wrap;letter-spacing:-.01em;}}
 .nc-new{{background:linear-gradient(135deg,{_A1},{_A2});color:#fff;
     font-size:.58rem;font-weight:700;padding:2px 8px;border-radius:99px;
-    letter-spacing:.04em;text-transform:uppercase;
-    box-shadow:0 2px 8px rgba(99,102,241,.35);flex-shrink:0;}}
-.nc-msg{{font-size:.81rem;color:{_SUB};line-height:1.65;margin-bottom:7px;}}
-.nc-time{{font-size:.67rem;color:{_SUB};font-family:'DM Mono','Courier New',monospace;}}
-.nc-dot{{position:absolute;top:18px;right:18px;width:9px;height:9px;border-radius:50%;
-    background:{_A1};box-shadow:0 0 0 3px rgba(99,102,241,.22);}}
+    letter-spacing:.05em;text-transform:uppercase;
+    box-shadow:0 2px 8px rgba(99,102,241,.4);flex-shrink:0;}}
+.nc-msg{{font-size:.83rem;color:{_SUB};line-height:1.65;margin-bottom:8px;
+    word-wrap:break-word;}}
+.nc-time{{font-size:.68rem;color:{_SUB};font-family:'DM Mono','Courier New',monospace;
+    opacity:.85;}}
+.nc-dot{{position:absolute;top:18px;right:18px;width:10px;height:10px;border-radius:50%;
+    background:{_A1};box-shadow:0 0 0 4px rgba(99,102,241,.22);
+    animation:ncPulse 2s ease-in-out infinite;}}
+@keyframes ncPulse{{
+    0%,100%{{box-shadow:0 0 0 4px rgba(99,102,241,.22);}}
+    50%{{box-shadow:0 0 0 7px rgba(99,102,241,.10);}}
+}}
 
 /* ── section group label ── */
-.ng-label{{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:.10em;
-    color:{_SUB};margin:22px 0 10px;display:flex;align-items:center;gap:10px;}}
-.ng-label::before{{content:'';width:3px;height:13px;
+.ng-label{{font-size:.70rem;font-weight:800;text-transform:uppercase;letter-spacing:.12em;
+    color:{_SUB};margin:24px 0 10px;display:flex;align-items:center;gap:10px;}}
+.ng-label::before{{content:'';width:4px;height:14px;
     background:linear-gradient(180deg,{_A1},{_A2});border-radius:99px;flex-shrink:0;}}
 .ng-label::after{{content:'';flex:1;height:1px;
     background:linear-gradient(to right,{_BOR},transparent);}}
@@ -7460,58 +8305,115 @@ def pg_notifications():
 /* ── stat cards ── */
 .notif-stat-grid{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:6px;}}
 .notif-stat{{background:{_CARD};border:1px solid {_BOR};border-radius:16px;
-    padding:16px 12px;text-align:center;position:relative;overflow:hidden;
-    box-shadow:0 2px 8px rgba(15,23,42,0.06);}}
+    padding:18px 12px;text-align:center;position:relative;overflow:hidden;
+    box-shadow:0 2px 10px rgba(15,23,42,.06);
+    transition:transform .2s,box-shadow .2s;}}
+.notif-stat:hover{{transform:translateY(-2px);box-shadow:0 8px 20px rgba(15,23,42,.10);}}
 .notif-stat::before{{content:'';position:absolute;top:0;left:0;right:0;
     height:3px;border-radius:16px 16px 0 0;}}
 .notif-stat.all::before{{background:linear-gradient(90deg,{_A1},{_A2});}}
 .notif-stat.unread::before{{background:linear-gradient(90deg,#EF4444,#DC2626);}}
 .notif-stat.read::before{{background:linear-gradient(90deg,#10B981,#059669);}}
 .notif-stat-num{{font-family:'Bricolage Grotesque','DM Sans',sans-serif;
-    font-size:2rem;font-weight:800;line-height:1.1;margin-bottom:4px;}}
-.notif-stat-lbl{{font-size:.65rem;font-weight:700;text-transform:uppercase;
-    letter-spacing:.07em;color:{_SUB};}}
+    font-size:2.1rem;font-weight:800;line-height:1.1;margin-bottom:6px;}}
+.notif-stat-lbl{{font-size:.66rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.08em;color:{_SUB};}}
 
-/* ── action buttons override ── */
-div[data-testid="stButton"].notif-read-btn>button{{
-    background:{"rgba(99,102,241,0.12)" if dark else "#EEF2FF"}!important;
-    color:{_A1}!important;border:1.5px solid rgba(99,102,241,0.25)!important;
-    box-shadow:none!important;font-size:.72rem!important;padding:5px 10px!important;
-    border-radius:9px!important;
+/* ════════════════════════════════════════════════════════════════════════
+   FIX: Target buttons inside wrapper divs using :has() and direct selectors
+   The wrapper div has class notif-read-btn / notif-del-btn
+   ════════════════════════════════════════════════════════════════════════ */
+
+/* READ button — blue tinted */
+div.notif-read-btn-wrap div[data-testid="stButton"] > button,
+div.notif-read-btn-wrap button[kind="secondary"],
+div.notif-read-btn-wrap button{{
+    background:{_BLU_BG} !important;
+    color:{_BLU_TXT} !important;
+    border:1.5px solid {_BLU_BD} !important;
+    box-shadow:none !important;
+    font-size:.75rem !important;
+    font-weight:600 !important;
+    padding:6px 12px !important;
+    border-radius:10px !important;
+    min-height:32px !important;
+    transition:all .15s ease !important;
 }}
-div[data-testid="stButton"].notif-read-btn>button:hover{{
-    background:rgba(99,102,241,0.20)!important;transform:none!important;
+div.notif-read-btn-wrap div[data-testid="stButton"] > button:hover,
+div.notif-read-btn-wrap button:hover{{
+    background:{_BLU_BG_H} !important;
+    border-color:{_A1} !important;
+    color:{_BLU_TXT} !important;
+    transform:translateY(-1px) !important;
 }}
-div[data-testid="stButton"].notif-del-btn>button{{
-    background:{"rgba(239,68,68,0.08)" if dark else "#FFF1F2"}!important;
-    color:{"#FCA5A5" if dark else "#BE123C"}!important;
-    border:1.5px solid {"rgba(239,68,68,0.22)" if dark else "#FECDD3"}!important;
-    box-shadow:none!important;font-size:.72rem!important;padding:5px 10px!important;
-    border-radius:9px!important;
+
+/* DELETE button — red tinted (FIXED - no more black background!) */
+div.notif-del-btn-wrap div[data-testid="stButton"] > button,
+div.notif-del-btn-wrap button[kind="secondary"],
+div.notif-del-btn-wrap button{{
+    background:{_RED_BG} !important;
+    color:{_RED_TXT} !important;
+    border:1.5px solid {_RED_BD} !important;
+    box-shadow:none !important;
+    font-size:.75rem !important;
+    font-weight:600 !important;
+    padding:6px 12px !important;
+    border-radius:10px !important;
+    min-height:32px !important;
+    transition:all .15s ease !important;
 }}
-div[data-testid="stButton"].notif-del-btn>button:hover{{
-    background:{"rgba(239,68,68,0.18)" if dark else "#FFE4E6"}!important;
-    transform:none!important;
+div.notif-del-btn-wrap div[data-testid="stButton"] > button:hover,
+div.notif-del-btn-wrap button:hover{{
+    background:{_RED_BG_H} !important;
+    border-color:{_RED} !important;
+    color:{_RED_TXT} !important;
+    transform:translateY(-1px) !important;
+}}
+div.notif-del-btn-wrap div[data-testid="stButton"] > button:focus,
+div.notif-del-btn-wrap button:focus{{
+    background:{_RED_BG_H} !important;
+    color:{_RED_TXT} !important;
+    border-color:{_RED} !important;
+    box-shadow:0 0 0 3px {_RED_BG} !important;
+}}
+div.notif-read-btn-wrap div[data-testid="stButton"] > button:focus,
+div.notif-read-btn-wrap button:focus{{
+    background:{_BLU_BG_H} !important;
+    color:{_BLU_TXT} !important;
+    border-color:{_A1} !important;
+    box-shadow:0 0 0 3px {_BLU_BG} !important;
+}}
+
+/* Action row spacing */
+.notif-actions-row{{
+    margin-top:-2px;
+    padding:0 4px 6px 4px;
 }}
 
 /* ── tip bar ── */
-.notif-tip{{background:{_CARD};border:1px solid {_BOR};border-radius:13px;
-    padding:12px 16px;display:flex;align-items:center;gap:10px;
-    margin:14px 0;font-size:.76rem;color:{_SUB};line-height:1.55;}}
+.notif-tip{{background:linear-gradient(135deg,{_CARD},{_CARD2});
+    border:1px solid {_BOR};border-radius:14px;
+    padding:14px 18px;display:flex;align-items:center;gap:12px;
+    margin:18px 0;font-size:.78rem;color:{_SUB};line-height:1.6;
+    box-shadow:0 2px 8px rgba(15,23,42,.04);}}
 .notif-tip strong{{color:{_TXT};}}
 
 /* ── empty state ── */
-.notif-empty{{text-align:center;padding:3rem 2rem;background:{_CARD};
+.notif-empty{{text-align:center;padding:3.5rem 2rem;background:{_CARD};
     border-radius:22px;border:1.5px dashed {_BOR};}}
-.notif-empty-icon{{font-size:3rem;opacity:.5;display:block;margin-bottom:12px;}}
-.notif-empty-title{{font-size:.95rem;font-weight:700;color:{_TXT};margin-bottom:6px;}}
-.notif-empty-sub{{font-size:.78rem;color:{_SUB};line-height:1.6;}}
+.notif-empty-icon{{font-size:3.2rem;opacity:.5;display:block;margin-bottom:14px;}}
+.notif-empty-title{{font-size:1rem;font-weight:700;color:{_TXT};margin-bottom:6px;}}
+.notif-empty-sub{{font-size:.80rem;color:{_SUB};line-height:1.65;
+    max-width:380px;margin:0 auto;}}
 
 @media(max-width:600px){{
     .notif-stat-grid{{grid-template-columns:repeat(3,1fr);gap:8px;}}
-    .notif-stat-num{{font-size:1.6rem;}}
+    .notif-stat-num{{font-size:1.65rem;}}
+    .notif-stat{{padding:14px 8px;}}
     .nc{{padding:14px 15px;border-radius:14px;}}
-    .nc-icon{{font-size:1.4rem;min-width:36px;}}
+    .nc-icon{{font-size:1.4rem;min-width:38px;}}
+    .nc-title{{font-size:.86rem;}}
+    .nc-msg{{font-size:.78rem;}}
 }}
 </style>
 """, unsafe_allow_html=True)
@@ -7657,14 +8559,10 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
         return "🔔"
 
     def _clean(text: str) -> str:
-        """Strip HTML tags and normalize whitespace, then HTML-escape for safe display."""
         if not text:
             return ""
-        # unescape any existing HTML entities first
         text = _html.unescape(str(text))
-        # remove HTML tags
         text = re.sub(r"<[^>]+>", "", text)
-        # normalize whitespace
         return " ".join(text.split()).strip()
 
     # ── RENDER ONE NOTIFICATION ───────────────────────────────────────────────
@@ -7676,7 +8574,6 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
         display_t   = _fmt_time(n.get("time", ""))
         icon        = _get_icon(raw_title)
 
-        # safe — both inputs are already stripped of HTML tags
         safe_title   = _html.escape(raw_title)
         safe_message = _html.escape(raw_message)
         safe_time    = _html.escape(display_t)
@@ -7686,7 +8583,6 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
         new_badge = "<span class='nc-new'>NEW</span>" if is_unrd else ""
         dot_html  = "<div class='nc-dot'></div>" if is_unrd else ""
 
-        # Single complete HTML block — all values pre-escaped
         card_html = (
             "<div class='nc " + unrd_cls + " " + dim_cls + "'>"
             + dot_html +
@@ -7700,91 +8596,54 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
         )
         st.markdown(card_html, unsafe_allow_html=True)
 
-        # Action buttons — native Streamlit, outside any HTML block
-        if show_read_btn or True:
+        # ── Action buttons row ───────────────────────────────────────────────
+        st.markdown("<div class='notif-actions-row'>", unsafe_allow_html=True)
 
-            st.markdown(
-                "<div class='notif-actions'>",
-                unsafe_allow_html=True
-            )
+        if show_read_btn and is_unrd:
+            btn_cols = st.columns([1.3, 1.3, 5], gap="small")
 
-            btn_cols = st.columns(
-                [1.2, 1.2, 5],
-                gap="small"
-            )
-
-            btn_index = 0
-
-            # READ BUTTON
-            if show_read_btn and is_unrd:
-
-                with btn_cols[btn_index]:
-
-                    st.markdown(
-                        "<div class='notif-read-btn'>",
-                        unsafe_allow_html=True
-                    )
-
-                    if st.button(
-                        t("✓ Read","✓ पढ़ा"),
-                        key=f"notif_read_{nid}",
-                        use_container_width=True
-                    ):
-
-                        resp = api(
-                            "put",
-                            f"/schemes/notifications/{nid}/read"
-                        )
-
-                        if resp.get("success"):
-
-                            st.rerun()
-
-                    st.markdown(
-                        "</div>",
-                        unsafe_allow_html=True
-                    )
-
-                btn_index += 1
-
-            # CLEAR BUTTON
-            with btn_cols[btn_index]:
-
-                st.markdown(
-                    "<div class='notif-del-btn'>",
-                    unsafe_allow_html=True
-                )
-
+            # READ BUTTON — wrapped in styled div
+            with btn_cols[0]:
+                st.markdown("<div class='notif-read-btn-wrap'>", unsafe_allow_html=True)
                 if st.button(
-                    "🗑 Clear",
+                    t("✓ Read","✓ पढ़ा"),
+                    key=f"notif_read_{nid}",
+                    use_container_width=True
+                ):
+                    resp = api("put", f"/schemes/notifications/{nid}/read")
+                    if resp.get("success"):
+                        st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+
+            # CLEAR BUTTON — wrapped in styled div
+            with btn_cols[1]:
+                st.markdown("<div class='notif-read-btn-wrap'>", unsafe_allow_html=True)
+                if st.button(
+                    t("🗑 Clear","🗑 हटाएं"),
                     key=f"notif_del_{nid}",
                     use_container_width=True,
-                    help=t("Delete","हटाएं")
+                    
                 ):
-
-                    resp = api(
-                        "delete",
-                        f"/schemes/notifications/{nid}"
-                    )
-
+                    resp = api("delete", f"/schemes/notifications/{nid}")
                     if resp.get("success"):
-
                         st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
+        else:
+            btn_cols = st.columns([1.3, 5.6], gap="small")
+            with btn_cols[0]:
+                st.markdown("<div class='notif-read-btn-wrap'>", unsafe_allow_html=True)
+                if st.button(
+                    t("🗑 Clear","🗑 हटाएं"),
+                    key=f"notif_del_{nid}",
+                    use_container_width=True,
+                ):
+                    resp = api("delete", f"/schemes/notifications/{nid}")
+                    if resp.get("success"):
+                        st.rerun()
+                st.markdown("</div>", unsafe_allow_html=True)
 
-                st.markdown(
-                    "</div>",
-                    unsafe_allow_html=True
-                )
-
-            st.markdown(
-                "</div>",
-                unsafe_allow_html=True
-            )
-
-        st.markdown(
-            "<div style='height:4px'></div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("</div>", unsafe_allow_html=True)
+        st.markdown("<div style='height:6px'></div>", unsafe_allow_html=True)
 
     # ── UNREAD SECTION ────────────────────────────────────────────────────────
     if unread:
@@ -8926,7 +9785,524 @@ def pg_assistant():
             {len(st.session_state.chat_history)} {_('messages', 'संदेश')}
         </div>
         """, unsafe_allow_html=True)
-
+ 
+import html
+from datetime import datetime
+import streamlit as st
+ 
+# ── i18n strings ──────────────────────────────────────────────────────────────
+_T = {
+    "en": {
+        "lang_label": "🌐 Language / भाषा",
+        "session_err": "⚠️ Session missing. Please login again.",
+        "go_login": "Go to Login",
+        "no_dept": "⚠️ No department assigned. Contact admin.",
+        "my_profile": "📋 My Profile",
+        "name": "Name",
+        "email": "Email",
+        "status": "Status",
+        "approved": "Approved",
+        "refresh": "🔄 Refresh",
+        "loading": "Loading complaints…",
+        "unexpected": "Unexpected API response format",
+        "load_err": "Could not load complaints",
+        "total": "Total",
+        "pending": "Pending",
+        "in_progress": "In Progress",
+        "resolved": "Resolved",
+        "resolution_rate": "📊 Resolution Rate",
+        "remaining": "remaining",
+        "filter_status": "📌 Status",
+        "filter_priority": "⚡ Priority",
+        "search_ph": "ID, citizen, location…",
+        "all": "All",
+        "high": "High",
+        "medium": "Medium",
+        "low": "Low",
+        "complaints_hdr": "📋 Complaints",
+        "of": "of",
+        "no_match": "No matching complaints",
+        "adjust_filters": "Try adjusting your filters.",
+        "no_complaints": "No complaints yet",
+        "no_complaints_sub": "Complaints assigned to your department will appear here.",
+        "image": "📷 Image",
+        "evidence_hdr": "🖼️ Complaint Evidence",
+        "view_photo": "👁️ View Uploaded Photo",
+        "photo_caption": "Uploaded Complaint Evidence",
+        "satisfied": "👍 Citizen satisfied with resolution",
+        "not_satisfied": "⚠️ Citizen not satisfied – complaint reopened",
+        "start": "🔄 Start Processing",
+        "resolve_direct": "✅ Resolve Directly",
+        "reject": "❌ Reject",
+        "resolution_note": "📝 Resolution note",
+        "res_note_ph": "Describe how issue was fixed…",
+        "mark_resolved": "✅ Mark Resolved",
+        "update_note": "📝 Update Note",
+        "resolved_info": "✅ This complaint is resolved. It will be closed after citizen feedback.",
+        "rejected_warn": "❌ This complaint was rejected.",
+        "started": "Started!",
+        "resolved_ok": "Resolved!",
+        "rejected_ok": "Rejected",
+        "note_updated": "Note updated",
+        "active": "Active",
+        "complaint": "Complaint",
+        "emergency": "EMERGENCY",
+        "status_pending": "⏳ Pending",
+        "status_in_progress": "🔄 In Progress",
+        "status_resolved": "✅ Resolved",
+        "status_closed": "🔒 Closed",
+        "status_rejected": "❌ Rejected",
+        "pri_high": "🔴 High",
+        "pri_medium": "🟠 Medium",
+        "pri_low": "🟢 Low",
+        "pri_normal": "⚪ Normal",
+        "citizen": "Citizen",
+        "phone": "Phone",
+        "location": "Location",
+        "date": "Date",
+        "filter_all": "All",
+        "filter_pending": "Pending",
+        "filter_in_progress": "In Progress",
+        "filter_resolved": "Resolved",
+        "filter_rejected": "Rejected",
+        "tips_title": "💡 Quick Tips",
+        "tip1": "Resolve complaints within 7 days for a better score.",
+        "tip2": "Add detailed notes when resolving for citizen satisfaction.",
+        "tip3": "Mark emergencies as high priority immediately.",
+    },
+    "hi": {
+        "lang_label": "🌐 Language / भाषा",
+        "session_err": "⚠️ सत्र अनुपलब्ध। कृपया पुनः लॉगिन करें।",
+        "go_login": "लॉगिन पर जाएं",
+        "no_dept": "⚠️ कोई विभाग नहीं दिया गया। व्यवस्थापक से संपर्क करें।",
+        "my_profile": "📋 मेरी प्रोफ़ाइल",
+        "name": "नाम",
+        "email": "ईमेल",
+        "status": "स्थिति",
+        "approved": "स्वीकृत",
+        "refresh": "🔄 ताज़ा करें",
+        "loading": "शिकायतें लोड हो रही हैं…",
+        "unexpected": "अप्रत्याशित API प्रतिक्रिया प्रारूप",
+        "load_err": "शिकायतें लोड नहीं हो सकीं",
+        "total": "कुल",
+        "pending": "लंबित",
+        "in_progress": "प्रक्रियाधीन",
+        "resolved": "हल की गई",
+        "resolution_rate": "📊 समाधान दर",
+        "remaining": "शेष",
+        "filter_status": "📌 स्थिति",
+        "filter_priority": "⚡ प्राथमिकता",
+        "search_ph": "ID, नागरिक, स्थान…",
+        "all": "सभी",
+        "high": "उच्च",
+        "medium": "मध्यम",
+        "low": "निम्न",
+        "complaints_hdr": "📋 शिकायतें",
+        "of": "में से",
+        "no_match": "कोई मिलती शिकायत नहीं",
+        "adjust_filters": "फ़िल्टर बदलने का प्रयास करें।",
+        "no_complaints": "अभी कोई शिकायत नहीं",
+        "no_complaints_sub": "आपके विभाग को दी गई शिकायतें यहाँ दिखेंगी।",
+        "image": "📷 छवि",
+        "evidence_hdr": "🖼️ शिकायत साक्ष्य",
+        "view_photo": "👁️ अपलोड की गई फ़ोटो देखें",
+        "photo_caption": "अपलोड किया गया शिकायत साक्ष्य",
+        "satisfied": "👍 नागरिक समाधान से संतुष्ट है",
+        "not_satisfied": "⚠️ नागरिक असंतुष्ट – शिकायत पुनः खोली गई",
+        "start": "🔄 प्रक्रिया शुरू करें",
+        "resolve_direct": "✅ सीधे हल करें",
+        "reject": "❌ अस्वीकार करें",
+        "resolution_note": "📝 समाधान नोट",
+        "res_note_ph": "बताएं कि समस्या कैसे ठीक हुई…",
+        "mark_resolved": "✅ हल चिह्नित करें",
+        "update_note": "📝 नोट अपडेट करें",
+        "resolved_info": "✅ यह शिकायत हल हो गई है। नागरिक प्रतिक्रिया के बाद बंद होगी।",
+        "rejected_warn": "❌ यह शिकायत अस्वीकार कर दी गई थी।",
+        "started": "शुरू किया!",
+        "resolved_ok": "हल हो गया!",
+        "rejected_ok": "अस्वीकृत",
+        "note_updated": "नोट अपडेट हुआ",
+        "active": "सक्रिय",
+        "complaint": "शिकायत",
+        "emergency": "आपातकाल",
+        "status_pending": "⏳ लंबित",
+        "status_in_progress": "🔄 प्रक्रियाधीन",
+        "status_resolved": "✅ हल",
+        "status_closed": "🔒 बंद",
+        "status_rejected": "❌ अस्वीकृत",
+        "pri_high": "🔴 उच्च",
+        "pri_medium": "🟠 मध्यम",
+        "pri_low": "🟢 निम्न",
+        "pri_normal": "⚪ सामान्य",
+        "citizen": "नागरिक",
+        "phone": "फ़ोन",
+        "location": "स्थान",
+        "date": "दिनांक",
+        "filter_all": "सभी",
+        "filter_pending": "लंबित",
+        "filter_in_progress": "प्रक्रियाधीन",
+        "filter_resolved": "हल",
+        "filter_rejected": "अस्वीकृत",
+        "tips_title": "💡 त्वरित सुझाव",
+        "tip1": "बेहतर स्कोर के लिए 7 दिनों में शिकायत हल करें।",
+        "tip2": "नागरिक संतुष्टि के लिए हल करते समय विस्तृत नोट जोड़ें।",
+        "tip3": "आपातकालीन शिकायतों को तुरंत उच्च प्राथमिकता दें।",
+    },
+}
+ 
+ 
+def _t(key: str) -> str:
+    """Return translated string for current language."""
+    lang = st.session_state.get("lang", "en")
+    return _T.get(lang, _T["en"]).get(key, key)
+ 
+ 
+# ── CSS (inline — mirrors NagarSeva design tokens) ────────────────────────────
+DASHBOARD_CSS = """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Devanagari:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap');
+ 
+/* ── VARIABLES ── */
+:root {
+    --c-bg:      #FAF8F5;
+    --c-card:    #FFFFFF;
+    --c-card2:   #FDF9F6;
+    --c-text:    #1A1A1A;
+    --c-sub:     #6B7280;
+    --c-border:  #EDE8E2;
+    --c-a1:      #E8590C;
+    --c-a2:      #D4500B;
+    --c-a3:      #F07D3A;
+    --c-a1-glow: rgba(232,89,12,0.18);
+    --c-a1-soft: rgba(232,89,12,0.08);
+    --sh-sm:     0 1px 3px rgba(26,20,10,.06),0 4px 12px rgba(26,20,10,.05);
+    --sh-md:     0 4px 16px rgba(26,20,10,.08),0 12px 32px rgba(26,20,10,.06);
+    --sh-lg:     0 12px 48px rgba(26,20,10,.10),0 32px 64px rgba(26,20,10,.07);
+    --r-sm: 10px; --r-md: 14px; --r-lg: 18px; --r-xl: 22px; --r-2xl: 28px;
+    --t-fast: 0.15s cubic-bezier(.4,0,.2,1);
+    --t-base: 0.22s cubic-bezier(.4,0,.2,1);
+    /* semantic */
+    --green-bg:#F0FDF4; --green-bd:#86EFAC; --green-tx:#166534;
+    --amber-bg:#FFF7ED; --amber-bd:#FED7AA; --amber-tx:#C2410C;
+    --red-bg:  #FEF2F2; --red-bd:  #FECACA; --red-tx:  #991B1B;
+    --blue-bg: #EFF6FF; --blue-bd: #BFDBFE; --blue-tx: #1E40AF;
+}
+ 
+*, *::before, *::after { box-sizing: border-box; }
+ 
+html, body, .stApp {
+    background: var(--c-bg) !important;
+    color: var(--c-text) !important;
+    font-family: 'Inter','Noto Sans Devanagari',system-ui,sans-serif !important;
+    -webkit-font-smoothing: antialiased;
+}
+ 
+/* ── HERO ── */
+.off-hero {
+    background: linear-gradient(135deg, #2D3A1F 0%, #1E2D14 100%);
+    border-radius: var(--r-2xl);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.5rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--sh-lg);
+    animation: fadeUp .3s ease both;
+}
+.off-hero::before {
+    content:'';
+    position:absolute; top:-30%; right:-10%;
+    width:55%; height:160%;
+    background: radial-gradient(circle,rgba(232,89,12,.18) 0%,transparent 70%);
+    transform:rotate(15deg);
+    pointer-events:none;
+}
+.off-hero-avatar {
+    background: rgba(255,255,255,.12);
+    backdrop-filter: blur(10px);
+    width:68px; height:68px;
+    border-radius: var(--r-xl);
+    display:flex; align-items:center; justify-content:center;
+    font-size:2rem;
+    border:1px solid rgba(255,255,255,.2);
+    flex-shrink:0;
+}
+.off-hero-name {
+    font-family:'Bricolage Grotesque','Inter',sans-serif;
+    font-size:clamp(1.2rem,3vw,1.8rem);
+    font-weight:800; color:#fff;
+    letter-spacing:-.03em; line-height:1.2;
+}
+.off-hero-dept {
+    display:inline-block;
+    background:rgba(232,89,12,.3);
+    padding:3px 12px; border-radius:40px;
+    font-size:.75rem; color:#FED7AA; margin-top:6px;
+}
+.off-hero-email { font-size:.75rem; color:#CBD5E1; margin-top:3px; }
+.off-hero-badge {
+    background:rgba(16,185,129,.2);
+    padding:5px 14px; border-radius:40px;
+    font-size:.75rem; color:#34D399; font-weight:600;
+    white-space:nowrap;
+}
+ 
+/* ── STAT GRID ── */
+.off-stat-grid {
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:1rem; margin-bottom:1.25rem;
+}
+.off-stat-card {
+    background:var(--c-card);
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-xl);
+    padding:1.1rem 1.25rem;
+    box-shadow:var(--sh-sm);
+    transition:transform var(--t-fast),box-shadow var(--t-base),border-color var(--t-fast);
+    animation:scaleIn .28s ease both;
+}
+.off-stat-card:hover {
+    transform:translateY(-3px);
+    box-shadow:var(--sh-md);
+    border-color:var(--c-a1);
+}
+.off-stat-num {
+    font-family:'Bricolage Grotesque','Inter',sans-serif;
+    font-size:2rem; font-weight:800; line-height:1.1;
+    letter-spacing:-.04em;
+}
+.off-stat-label {
+    font-size:.68rem; font-weight:700;
+    color:var(--c-sub); text-transform:uppercase;
+    letter-spacing:.05em; margin-top:5px;
+}
+ 
+/* ── PROGRESS ── */
+.off-progress {
+    background:var(--c-card);
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-xl);
+    padding:1rem 1.25rem;
+    margin-bottom:1.25rem;
+    box-shadow:var(--sh-sm);
+    animation:fadeUp .32s ease both;
+}
+.off-progress-hdr {
+    display:flex; justify-content:space-between;
+    font-weight:700; margin-bottom:.6rem;
+    font-size:.85rem; color:var(--c-text);
+}
+.off-prog-bg {
+    height:10px; background:var(--c-border);
+    border-radius:20px; overflow:hidden;
+}
+.off-prog-fill {
+    height:100%;
+    background:linear-gradient(90deg,var(--c-a1),#10B981);
+    border-radius:20px;
+    transition:width .5s cubic-bezier(.4,0,.2,1);
+}
+.off-prog-meta {
+    display:flex; justify-content:space-between;
+    margin-top:.5rem; font-size:.68rem; color:var(--c-sub);
+}
+ 
+/* ── FILTER BAR ── */
+.off-filter-bar {
+    background:var(--c-card);
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-xl);
+    padding:.9rem 1.1rem;
+    margin-bottom:1.25rem;
+    box-shadow:var(--sh-sm);
+}
+ 
+/* ── COMPLAINT CARD ── */
+.off-comp-card {
+    background:var(--c-card);
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-xl);
+    margin-bottom:.85rem;
+    overflow:hidden;
+    box-shadow:var(--sh-sm);
+    transition:transform var(--t-fast),border-color var(--t-fast),box-shadow var(--t-base);
+    animation:fadeUp .25s ease both;
+}
+.off-comp-card:hover {
+    transform:translateX(4px);
+    border-color:var(--c-a1);
+    box-shadow:var(--sh-md);
+}
+.off-comp-card.pri-high   { border-left:4px solid var(--red-tx); }
+.off-comp-card.pri-medium { border-left:4px solid var(--amber-tx); }
+.off-comp-card.pri-low    { border-left:4px solid var(--green-tx); }
+ 
+.off-comp-body { padding:1rem 1.1rem; }
+ 
+.off-comp-hdr {
+    display:flex; justify-content:space-between;
+    align-items:center; flex-wrap:wrap; gap:.5rem;
+    margin-bottom:.75rem;
+}
+.off-comp-title {
+    font-weight:800; font-size:.9rem; color:var(--c-text);
+    letter-spacing:-.02em;
+}
+.off-comp-badges { display:flex; gap:.5rem; flex-wrap:wrap; align-items:center; }
+ 
+/* ── BADGES ── */
+.badge {
+    display:inline-flex; align-items:center; gap:3px;
+    padding:3px 10px; border-radius:30px;
+    font-size:.67rem; font-weight:700;
+}
+.badge-pending    { background:var(--amber-bg); color:var(--amber-tx); border:1px solid var(--amber-bd); }
+.badge-in_progress{ background:var(--blue-bg);  color:var(--blue-tx);  border:1px solid var(--blue-bd); }
+.badge-resolved   { background:var(--green-bg); color:var(--green-tx); border:1px solid var(--green-bd); }
+.badge-closed     { background:#F3F4F6; color:#374151; border:1px solid #D1D5DB; }
+.badge-rejected   { background:var(--red-bg);   color:var(--red-tx);   border:1px solid var(--red-bd); }
+.badge-pri-high   { background:var(--red-bg);   color:var(--red-tx);   border:1px solid var(--red-bd); }
+.badge-pri-medium { background:var(--amber-bg); color:var(--amber-tx); border:1px solid var(--amber-bd); }
+.badge-pri-low    { background:var(--green-bg); color:var(--green-tx); border:1px solid var(--green-bd); }
+.badge-img        { background:#EEF2FF; color:#6366F1; border:1px solid #C7D2FE; }
+.badge-emerg      { background:#FEF2F2; color:#991B1B; border:1px solid #FECACA;
+                    animation:pulse-ring 1.5s infinite; }
+ 
+/* ── DESC BOX ── */
+.off-desc {
+    background:var(--c-card2);
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-md);
+    padding:12px 14px; margin:10px 0;
+    font-size:.85rem; line-height:1.6;
+    color:var(--c-text);
+    white-space:pre-wrap; word-wrap:break-word;
+    max-height:180px; overflow-y:auto;
+}
+ 
+/* ── META ROW ── */
+.off-meta {
+    display:flex; gap:.9rem; flex-wrap:wrap;
+    font-size:.75rem; color:var(--c-sub); margin-bottom:.75rem;
+}
+ 
+/* ── EMPTY STATE ── */
+.off-empty {
+    text-align:center; padding:3rem 2rem;
+    background:var(--c-card);
+    border:1.5px solid var(--c-border);
+    border-radius:var(--r-2xl);
+    box-shadow:var(--sh-sm);
+    animation:fadeUp .3s ease both;
+}
+.off-empty-icon { font-size:3rem; display:block; margin-bottom:.75rem; }
+ 
+/* ── SECTION HEADER ── */
+.off-section-hdr {
+    display:flex; justify-content:space-between; align-items:center;
+    margin:1rem 0 .75rem;
+}
+.off-section-title { font-weight:700; font-size:.95rem; color:var(--c-text); }
+.off-section-badge {
+    background:var(--c-card2); border:1px solid var(--c-border);
+    padding:2px 12px; border-radius:30px;
+    font-size:.7rem; color:var(--c-sub); font-weight:600;
+}
+ 
+/* ── TIPS CARD ── */
+.off-tips {
+    background:linear-gradient(135deg,#F0F9FF,#ECFDF5);
+    border:1.5px solid #CCF0E6;
+    border-radius:var(--r-xl);
+    padding:1rem 1.25rem;
+    margin-top:1.5rem;
+}
+.off-tips-title { font-weight:800; margin-bottom:.5rem; font-size:.85rem; }
+.off-tips li { font-size:.78rem; color:var(--c-sub); margin:.3rem 0; }
+ 
+/* ── EXPANDER OVERRIDE ── */
+details {
+    background:var(--c-card) !important;
+    border:1.5px solid #FDEAD7 !important;
+    border-radius:var(--r-lg) !important;
+    margin-bottom:6px !important;
+    overflow:hidden !important;
+}
+details[open] { border-color:var(--c-a1) !important; box-shadow:0 4px 16px rgba(232,89,12,.10) !important; }
+details summary {
+    background:#FFF7ED !important; color:var(--c-text) !important;
+    font-weight:700 !important; font-size:.82rem !important;
+    padding:11px 15px !important; border-radius:var(--r-lg) !important;
+    border:none !important; cursor:pointer !important;
+    transition:all var(--t-fast) !important;
+}
+details[open] summary { border-radius:var(--r-lg) var(--r-lg) 0 0 !important; background:#FFF1E0 !important; border-bottom:1px solid #FDEAD7 !important; }
+details summary:hover { background:#FFEDD5 !important; color:#EA580C !important; }
+details > div { background:#FFFBF5 !important; padding:14px 16px !important; }
+ 
+/* ── STREAMLIT BUTTONS ── */
+.stButton > button {
+    border-radius: 40px !important;
+    font-weight: 700 !important;
+    font-size: .78rem !important;
+    letter-spacing: .01em !important;
+    transition: transform var(--t-fast), box-shadow var(--t-base) !important;
+}
+.stButton > button:hover { transform: translateY(-2px) !important; box-shadow: var(--sh-sm) !important; }
+ 
+/* ── ANIMATIONS ── */
+@keyframes fadeUp   { from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);} }
+@keyframes scaleIn  { from{opacity:0;transform:scale(.95);}to{opacity:1;transform:scale(1);} }
+@keyframes pulse-ring {
+    0%  { box-shadow:0 0 0 0 rgba(239,68,68,.4); }
+    70% { box-shadow:0 0 0 10px rgba(239,68,68,0); }
+    100%{ box-shadow:0 0 0 0 rgba(239,68,68,0); }
+}
+ 
+/* ── RESPONSIVE ── */
+@media(max-width:768px) {
+    .off-stat-grid { grid-template-columns:repeat(2,1fr); gap:.75rem; }
+    .off-hero { padding:1.25rem; border-radius:var(--r-xl); }
+    .off-hero-avatar { width:50px; height:50px; font-size:1.4rem; }
+    .off-comp-hdr { flex-direction:column; align-items:flex-start; }
+}
+@media(max-width:480px) {
+    .off-stat-grid { grid-template-columns:repeat(2,1fr); }
+    .off-stat-num { font-size:1.5rem; }
+    .off-hero-name { font-size:1.1rem; }
+}
+</style>
+"""
+ 
+# ── helpers ───────────────────────────────────────────────────────────────────
+ 
+def _badge(text: str, cls: str) -> str:
+    return f'<span class="badge {cls}">{html.escape(text)}</span>'
+ 
+ 
+def _status_badge(status: str) -> str:
+    mapping = {
+        "pending":     ("status_pending",     "badge-pending"),
+        "in_progress": ("status_in_progress", "badge-in_progress"),
+        "resolved":    ("status_resolved",    "badge-resolved"),
+        "closed":      ("status_closed",      "badge-closed"),
+        "rejected":    ("status_rejected",    "badge-rejected"),
+    }
+    key, cls = mapping.get(status, ("status_pending", "badge-pending"))
+    return _badge(_t(key), cls)
+ 
+ 
+def _priority_badge(priority: str) -> str:
+    mapping = {
+        "high":   ("pri_high",   "badge-pri-high"),
+        "medium": ("pri_medium", "badge-pri-medium"),
+        "low":    ("pri_low",    "badge-pri-low"),
+    }
+    key, cls = mapping.get(priority, ("pri_normal", "badge-pri-medium"))
+    return _badge(_t(key), cls)
+ 
+ 
+# ── main function ─────────────────────────────────────────────────────────────
 def pg_official_dashboard():
     
     _apply_layout("admin")  
@@ -9419,6 +10795,73 @@ def pg_official_dashboard():
         border: 1px solid #ccf0e6;
     }
     
+    /* ── Expander fix — light orange theme (both old + new Streamlit) ── */
+    /* New Streamlit (details/summary) */
+    details {
+        background: #FFFFFF !important;
+        border: 1.5px solid #FDEAD7 !important;
+        border-radius: 14px !important;
+        margin-bottom: 8px !important;
+        overflow: hidden !important;
+    }
+    details[open] {
+        border-color: #F97316 !important;
+        box-shadow: 0 4px 16px rgba(249,115,22,0.10) !important;
+    }
+    details summary {
+        background: #FFF7ED !important;
+        color: #0F172A !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        padding: 12px 16px !important;
+        border-radius: 14px !important;
+        border: none !important;
+        cursor: pointer !important;
+        transition: all 0.18s !important;
+    }
+    details[open] summary {
+        border-radius: 14px 14px 0 0 !important;
+        background: #FFF1E0 !important;
+        border-bottom: 1px solid #FDEAD7 !important;
+    }
+    details summary:hover {
+        background: #FFEDD5 !important;
+        color: #EA580C !important;
+    }
+    details > div {
+        background: #FFFBF5 !important;
+        padding: 14px 16px !important;
+    }
+    /* Old Streamlit classes (fallback) */
+    .streamlit-expanderHeader {
+        background: #FFF7ED !important;
+        border: 1.5px solid #FDEAD7 !important;
+        border-radius: 14px !important;
+        color: #0F172A !important;
+        font-weight: 700 !important;
+        font-size: 0.85rem !important;
+        padding: 12px 16px !important;
+    }
+    .streamlit-expanderHeader:hover {
+        border-color: #F97316 !important;
+        box-shadow: 0 0 0 3px rgba(249,115,22,0.10) !important;
+        color: #EA580C !important;
+    }
+    .streamlit-expanderContent {
+        background: #FFFBF5 !important;
+        border: 1.5px solid #FDEAD7 !important;
+        border-top: none !important;
+        border-radius: 0 0 14px 14px !important;
+        padding: 14px 16px !important;
+    }
+    /* Expander text/paragraph color fix */
+    details p, details span, details div,
+    .streamlit-expanderContent p,
+    .streamlit-expanderContent span,
+    .streamlit-expanderContent div {
+        color: #0F172A !important;
+    }
+
     @media (max-width: 768px) {
         .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
         .hero-name { font-size: 1.3rem; }
@@ -9655,8 +11098,7 @@ def pg_official_dashboard():
                 <h3>No complaints yet</h3>
                 <p>Complaints assigned to your department will appear here.</p>
             </div>
-            """, unsafe_allow_html=True)
-
+            """, unsafe_allow_html=True) 
     # ------------------- TIPS SECTION -------------------
 
 def pg_live_dashboard():
@@ -10203,13 +11645,13 @@ def pg_official_leaderboard():
     with pc3:
         st.metric("📈 Success Rate", str(success_rate) + "%")
     with pc4:
-        st.metric("⭐ Avg Rating", str(round(avg_rating, 1)),
-                  delta=str(rating_count) + " vote" + ("s" if rating_count != 1 else ""))
+        st.metric("⭐ Avg Rating", str(round(avg_rating, 1)),)
+                #   delta=str(rating_count) + " vote" + ("s" if rating_count != 1 else ""))
 
-    st.progress(
-        success_rate / 100,
-        text="📈 Resolution Rate: " + str(success_rate) + "%"
-    )
+    # st.progress(
+    #     success_rate / 100,
+    #     text="📈 Resolution Rate: " + str(success_rate) + "%"
+    # )
 
     # ── YOUR RANK CARD ─────────────────────────────────────────────────────────
     st.markdown('<div class="lb-section">Your Ranking</div>', unsafe_allow_html=True)
@@ -12787,29 +14229,67 @@ def pg_admin_complaints():
     }
 
     /* ════════════════════════════════════════════
-       EXPANDER — premium style
+       EXPANDER — light orange (old + new Streamlit)
     ════════════════════════════════════════════ */
     .streamlit-expanderHeader {
-        background: #F8FAFC !important;
-        border: 1.5px solid #E2E8F4 !important;
-        border-radius: 12px !important;
+        background: #FFF7ED !important;
+        border: 1.5px solid #FDEAD7 !important;
+        border-radius: 14px !important;
         font-weight: 700 !important;
-        color: #475569 !important;
+        color: #0F172A !important;
         font-size: 0.83rem !important;
         padding: 11px 16px !important;
         transition: all .18s !important;
     }
     .streamlit-expanderHeader:hover {
-        border-color: #6366F1 !important;
-        color: #6366F1 !important;
-        background: rgba(99,102,241,.04) !important;
+        border-color: #F97316 !important;
+        color: #EA580C !important;
+        background: #FFEDD5 !important;
     }
     .streamlit-expanderContent {
-        background: #FAFBFF !important;
-        border: 1.5px solid #E2E8F4 !important;
+        background: #FFFBF5 !important;
+        border: 1.5px solid #FDEAD7 !important;
         border-top: none !important;
-        border-radius: 0 0 12px 12px !important;
+        border-radius: 0 0 14px 14px !important;
         padding: 16px !important;
+    }
+    /* New Streamlit details/summary */
+    details {
+        background: #FFFFFF !important;
+        border: 1.5px solid #FDEAD7 !important;
+        border-radius: 14px !important;
+        margin-bottom: 8px !important;
+        overflow: hidden !important;
+    }
+    details[open] {
+        border-color: #F97316 !important;
+        box-shadow: 0 4px 16px rgba(249,115,22,0.10) !important;
+    }
+    details summary {
+        background: #FFF7ED !important;
+        color: #0F172A !important;
+        font-weight: 700 !important;
+        font-size: 0.83rem !important;
+        padding: 11px 16px !important;
+        border-radius: 14px !important;
+        border: none !important;
+        cursor: pointer !important;
+    }
+    details[open] summary {
+        border-radius: 14px 14px 0 0 !important;
+        background: #FFF1E0 !important;
+        border-bottom: 1px solid #FDEAD7 !important;
+    }
+    details summary:hover {
+        background: #FFEDD5 !important;
+        color: #EA580C !important;
+    }
+    details > div {
+        background: #FFFBF5 !important;
+        padding: 14px 16px !important;
+    }
+    details p, details span, details div {
+        color: #0F172A !important;
     }
     </style>
     """, unsafe_allow_html=True)
