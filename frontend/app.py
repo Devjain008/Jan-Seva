@@ -2768,7 +2768,6 @@ def pg_admin_login():
     st.markdown("</div>", unsafe_allow_html=True)
     st.markdown(_footer(), unsafe_allow_html=True)
 
-def api(method, path, **kwargs):
 
 # ═════════════════════════════════════════════════════════════════════════════
 # USER DASHBOARD
