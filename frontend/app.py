@@ -1400,18 +1400,7 @@ def pg_language():
     </script>
     """, height=0)
 
- """
-Jan Seva Portal — Redesigned Login Pages
-Inspired by NagarSeva aesthetic:
-  - Warm off-white background #F7F5F0
-  - Dark charcoal topbar #1C1C1A
-  - Orange accent #E8660A
-  - Clean white cards, subtle shadows
-  - Outfit + Plus Jakarta Sans typography
 
-Drop-in replacement — zero functionality changes.
-Remove the stub api() + router block at the bottom when integrating.
-"""
 
 import streamlit as st
 
