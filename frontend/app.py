@@ -1971,12 +1971,12 @@ def _hero(icon: str, title: str, subtitle: str, gradient: str) -> str:
 def _card_open(label: str = "") -> str:
     label_html = (
         f'<div style="font-size:10px;font-weight:700;letter-spacing:1.2px;'
-        f'text-transform:uppercase;color:#9CA3AF;margin-bottom:16px;">{label}</div>'
+        f'text-transform:uppercase;color:#9CA3AF;margin-bottom:1px;">{label}</div>'
         if label else ""
     )
     return f"""
 <div style="background:#fff;border:1.5px solid #E5E7EB;border-radius:16px;
-    padding:24px;margin-bottom:13px;">
+    padding:10px;margin-bottom:13px;">
 {label_html}
 """
  
