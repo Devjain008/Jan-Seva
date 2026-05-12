@@ -853,6 +853,7 @@ def route():
     elif s == "notifications"  and role == "user":  pg_notifications()
     elif s == "schemes":                            pg_schemes()
     elif s == "assistant"      and role == "user":  pg_assistant()
+    elif s == "help"           and role == "user":  pg_help()
 
     # official
     elif s in ("official_dashboard", "official_complaints") and role == "official":
@@ -1433,7 +1434,333 @@ div[data-testid="stButton"] > button {
 #             st.session_state.screen = "language"
 #             st.rerun()
 
- 
+# Add this near the bottom of the file before render_sidebar() and route() calls.
+
+def pg_help():
+    """Help & Support page – Modern, premium, fully integrated with NagarSeva design."""
+    _apply_layout("user")
+    lang = st.session_state.get("language", "en")
+
+    def t(en, hi):
+        return en if lang == "en" else hi
+
+    # ─────────────────────────────────────────────────────────────
+    # HERO SECTION
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f"""
+    <div class="prem-hero">
+        <div class="prem-hero-avatar">💬</div>
+        <div class="prem-hero-title">{t('Help & Support Center', 'सहायता और समर्थन केंद्र')}</div>
+        <div class="prem-hero-sub">
+            {t('We are here to help. Find instant answers, guides, or reach our dedicated support team.',
+               'हम मदद के लिए यहाँ हैं। तुरंत उत्तर, गाइड पाएं, या हमारी समर्पित सहायता टीम से संपर्क करें।')}
+        </div>
+        <div class="prem-hero-stats">
+            <div class="prem-hstat h-blue">
+                <div class="prem-hstat-num">24/7</div>
+                <div class="prem-hstat-lbl">{t('Availability', 'उपलब्धता')}</div>
+            </div>
+            <div class="prem-hstat h-green">
+                <div class="prem-hstat-num">48h</div>
+                <div class="prem-hstat-lbl">{t('Avg Response', 'औसत प्रतिक्रिया')}</div>
+            </div>
+            <div class="prem-hstat h-amber">
+                <div class="prem-hstat-num">98%</div>
+                <div class="prem-hstat-lbl">{t('Satisfaction', 'संतुष्टि')}</div>
+            </div>
+            <div class="prem-hstat h-red">
+                <div class="prem-hstat-num">12+</div>
+                <div class="prem-hstat-lbl">{t('Languages', 'भाषाएँ')}</div>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────
+    # VOICE ASSISTANCE BAR
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f"""
+    <div class="prem-tip-bar" style="margin-top:0;margin-bottom:1rem;">
+        <div class="prem-tip-icon">🔊</div>
+        <div class="prem-tip-text">
+            <strong>{t('Audio Help', 'ऑडियो सहायता')}</strong> — 
+            {t('Listen to a quick walkthrough of the portal in your language.',
+               'अपनी भाषा में पोर्टल का संक्षिप्त परिचय सुनें।')}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    vcol1, vcol2, vcol3 = st.columns([1, 2, 1])
+    with vcol2:
+        if st.button("🎧 " + t("Read Help Aloud", "सहायता सुनें"), use_container_width=True, key="help_voice_btn"):
+            voice_text = (
+                "Welcome to Jan Seva Portal Help. "
+                "You can file a complaint by speaking or typing, track its status, and view government schemes. "
+                "If you need assistance, call our toll free number 1800-XXX-XXXX or email support at janseva dot gov dot in. "
+                "You can also use the AI Assistant for instant answers."
+            ) if lang == "en" else (
+                "जन सेवा पोर्टल सहायता में आपका स्वागत है। "
+                "आप बोलकर या लिखकर शिकायत दर्ज कर सकते हैं, उसकी स्थिति ट्रैक कर सकते हैं, और सरकारी योजनाएं देख सकते हैं। "
+                "सहायता के लिए हमारे टोल फ्री नंबर 1800-XXX-XXXX पर कॉल करें या janseva.gov.in पर ईमेल करें।"
+            )
+            safe_text = voice_text.replace('"', '\\"').replace('\n', ' ')
+            lang_code = "hi-IN" if lang == "hi" else "en-IN"
+            st.components.v1.html(f"""
+            <script>
+            window.speechSynthesis.cancel();
+            var msg = new SpeechSynthesisUtterance("{safe_text}");
+            msg.lang = '{lang_code}';
+            msg.rate = 0.92;
+            msg.pitch = 1.0;
+            window.speechSynthesis.speak(msg);
+            </script>
+            """, height=0)
+
+    # ─────────────────────────────────────────────────────────────
+    # QUICK NAVIGATION (TOP) — Most-used actions surfaced first
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f'<div class="prem-section-header">⚡ {t("Quick Actions", "त्वरित क्रियाएँ")}</div>', unsafe_allow_html=True)
+
+    guides = [
+        ("📢", t("File Complaint", "शिकायत दर्ज करें"), t("Report an issue", "समस्या रिपोर्ट करें"), "file_complaint"),
+        ("🔍", t("Track Status", "स्थिति ट्रैक करें"), t("Check progress", "प्रगति देखें"), "tracking"),
+        ("📜", t("Govt Schemes", "सरकारी योजनाएं"), t("Explore benefits", "लाभ देखें"), "schemes"),
+        ("🤖", t("AI Assistant", "AI सहायक"), t("Instant answers", "तुरंत उत्तर"), "assistant"),
+    ]
+    gcols = st.columns(4)
+    for col, (icon, label, sub, screen) in zip(gcols, guides):
+        with col:
+            st.markdown(f"""
+            <div class="prem-action-card">
+                <div class="prem-action-icon" style="background:var(--c-a1-soft);border:1.5px solid rgba(232,89,12,0.18);">{icon}</div>
+                <div class="prem-action-label">{label}</div>
+                <div style="font-size:0.7rem;color:var(--c-sub);margin-top:4px;font-weight:500;">{sub}</div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button(t("Open", "खोलें"), key=f"help_guide_{screen}", use_container_width=True):
+                st.session_state.screen = screen
+                st.rerun()
+
+    # ─────────────────────────────────────────────────────────────
+    # FAQ SECTION
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f'<div class="prem-section-header">📖 {t("Frequently Asked Questions", "अक्सर पूछे जाने वाले प्रश्न")}</div>', unsafe_allow_html=True)
+
+    faqs = [
+        {
+            "icon": "📝",
+            "cat_en": "Complaints", "cat_hi": "शिकायतें",
+            "q_en": "How do I file a complaint?",
+            "q_hi": "शिकायत कैसे दर्ज करूं?",
+            "a_en": "Go to the **'File Complaint'** section from the sidebar. Describe your issue using text or voice (microphone 🎤), select a category, add your location (auto-detect or manual), and optionally attach a photo. Click **'Submit'** — your complaint will be instantly routed to the right department.",
+            "a_hi": "साइडबार से **'फाइल कंप्लेंट'** सेक्शन में जाएं। टेक्स्ट या आवाज़ (माइक्रोफोन 🎤) का उपयोग करके अपनी समस्या का विवरण दें, श्रेणी चुनें, अपना स्थान जोड़ें, और वैकल्पिक रूप से फ़ोटो संलग्न करें। **'सबमिट'** पर क्लिक करें — आपकी शिकायत तुरंत सही विभाग को भेज दी जाएगी।"
+        },
+        {
+            "icon": "🔍",
+            "cat_en": "Tracking", "cat_hi": "ट्रैकिंग",
+            "q_en": "How can I track my complaint status?",
+            "q_hi": "मैं अपनी शिकायत की स्थिति कैसे ट्रैक कर सकता हूं?",
+            "a_en": "Use the **'Track Complaint'** page. Enter your unique Complaint ID or view all your complaints in the **'My Complaints'** tab. Real-time status updates, SLA deadlines, and a complete timeline are shown for full transparency.",
+            "a_hi": "**'ट्रैक कंप्लेंट'** पेज का उपयोग करें। आप अपनी अनोखी शिकायत ID दर्ज कर सकते हैं या **'मेरी शिकायतें'** टैब में अपनी सभी शिकायतें देख सकते हैं। रीयल-टाइम स्थिति अपडेट, SLA समय सीमा और पूरी टाइमलाइन दिखाई जाती है।"
+        },
+        {
+            "icon": "⏱️",
+            "cat_en": "Policies", "cat_hi": "नीतियां",
+            "q_en": "What is SLA and how does it work?",
+            "q_hi": "SLA क्या है और यह कैसे काम करता है?",
+            "a_en": "**SLA (Service Level Agreement)** is the maximum time allowed to resolve a complaint. Different categories have different SLAs — e.g., water/electricity: **24h**, roads: **72h**, sanitation: **48h**. Overdue complaints are flagged in red and automatically escalated to senior officials.",
+            "a_hi": "**SLA (सेवा स्तर समझौता)** शिकायत के समाधान के लिए अधिकतम समय है। विभिन्न श्रेणियों के अलग-अलग SLA होते हैं — जैसे जल/बिजली: **24 घंटे**, सड़कें: **72 घंटे**, स्वच्छता: **48 घंटे**। ओवरड्यू शिकायतों को लाल रंग में दिखाया जाता है और स्वचालित रूप से वरिष्ठ अधिकारियों तक भेजी जाती हैं।"
+        },
+        {
+            "icon": "⭐",
+            "cat_en": "Feedback", "cat_hi": "फीडबैक",
+            "q_en": "How do I rate an official after resolution?",
+            "q_hi": "समाधान के बाद मैं अधिकारी को कैसे रेटिंग दूं?",
+            "a_en": "After your complaint is marked **'Resolved'**, you will see a feedback card on your dashboard. Confirm satisfaction, then rate the official from **1 to 5 stars** ⭐. Your honest feedback helps improve service quality and recognizes great officials.",
+            "a_hi": "आपकी शिकायत **'समाधान'** चिह्नित होने के बाद, आपके डैशबोर्ड पर एक फीडबैक कार्ड दिखाई देगा। संतुष्टि की पुष्टि करें, फिर अधिकारी को **1 से 5 स्टार** ⭐ रेटिंग दें। आपका ईमानदार फीडबैक सेवा की गुणवत्ता बेहतर बनाने में मदद करता है।"
+        },
+        {
+            "icon": "🔐",
+            "cat_en": "Account", "cat_hi": "खाता",
+            "q_en": "I forgot my password / can't login as official",
+            "q_hi": "मैं पासवर्ड भूल गया हूं / अधिकारी के रूप में लॉगिन नहीं कर सकता",
+            "a_en": "On the **Official login page**, click **'Forgot password?'**. Enter your registered email, use the demo OTP **'123456'**, and set a new password. If you haven't requested access yet, use the **'Request Access'** tab to submit a verification request.",
+            "a_hi": "**अधिकारी लॉगिन पृष्ठ** पर, **'फॉरगॉट पासवर्ड?'** पर क्लिक करें। अपना पंजीकृत ईमेल दर्ज करें, डेमो OTP **'123456'** का उपयोग करें, और एक नया पासवर्ड सेट करें। यदि आपने अभी तक एक्सेस का अनुरोध नहीं किया है, तो **'एक्सेस अनुरोध'** टैब का उपयोग करें।"
+        },
+        {
+            "icon": "📜",
+            "cat_en": "Schemes", "cat_hi": "योजनाएं",
+            "q_en": "How do I find government schemes I'm eligible for?",
+            "q_hi": "मुझे कौन सी सरकारी योजनाएं उपलब्ध हैं?",
+            "a_en": "Visit the **'Government Schemes'** page from the sidebar. Browse by category (Health, Education, Agriculture, etc.) or use the AI Assistant to find personalized scheme recommendations based on your profile.",
+            "a_hi": "साइडबार से **'सरकारी योजनाएं'** पेज पर जाएं। श्रेणी (स्वास्थ्य, शिक्षा, कृषि, आदि) के अनुसार ब्राउज़ करें या अपनी प्रोफ़ाइल के आधार पर व्यक्तिगत सिफारिशें पाने के लिए AI सहायक का उपयोग करें।"
+        },
+        {
+            "icon": "🔒",
+            "cat_en": "Privacy", "cat_hi": "गोपनीयता",
+            "q_en": "Is my personal data safe?",
+            "q_hi": "क्या मेरा व्यक्तिगत डेटा सुरक्षित है?",
+            "a_en": "Absolutely. All data is encrypted end-to-end and stored on secure government servers. We follow strict privacy guidelines and never share your information with third parties without your consent.",
+            "a_hi": "बिल्कुल। सभी डेटा एंड-टू-एंड एन्क्रिप्टेड है और सुरक्षित सरकारी सर्वर पर संग्रहित है। हम सख्त गोपनीयता दिशानिर्देशों का पालन करते हैं और आपकी सहमति के बिना आपकी जानकारी कभी साझा नहीं करते।"
+        },
+    ]
+
+    # Search box
+    search_query = st.text_input(
+        t("🔎 Search FAQs", "🔎 FAQ खोजें"),
+        placeholder=t("Type a question or keyword...", "प्रश्न या कीवर्ड टाइप करें..."),
+        key="help_faq_search",
+        label_visibility="collapsed"
+    )
+
+    # Filter
+    filtered_faqs = faqs
+    if search_query:
+        q = search_query.lower()
+        filtered_faqs = [
+            f for f in faqs
+            if q in f["q_en"].lower() or q in f["q_hi"].lower()
+            or q in f["a_en"].lower() or q in f["a_hi"].lower()
+            or q in f["cat_en"].lower() or q in f["cat_hi"].lower()
+        ]
+
+    if not filtered_faqs:
+        st.markdown(f"""
+        <div class="prem-empty-state">
+            <div class="prem-empty-icon">🔍</div>
+            <div class="prem-empty-title">{t('No FAQs match your search', 'आपकी खोज से मेल खाने वाला कोई FAQ नहीं')}</div>
+            <div class="prem-empty-sub">{t('Try different keywords or contact us directly below.', 'अलग कीवर्ड आज़माएँ या नीचे सीधे संपर्क करें।')}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    else:
+        for faq in filtered_faqs:
+            question = faq["q_hi"] if lang == "hi" else faq["q_en"]
+            answer = faq["a_hi"] if lang == "hi" else faq["a_en"]
+            category = faq["cat_hi"] if lang == "hi" else faq["cat_en"]
+            with st.expander(f"{faq['icon']}  {question}"):
+                st.markdown(f'<span class="prem-tag">{category}</span>', unsafe_allow_html=True)
+                st.markdown("<div style='margin-top:10px;'></div>", unsafe_allow_html=True)
+                st.markdown(answer)
+
+    # ─────────────────────────────────────────────────────────────
+    # CONTACT & SUPPORT CARDS
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f'<div class="prem-section-header">📞 {t("Contact Our Support Team", "हमारी सहायता टीम से संपर्क करें")}</div>', unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.markdown(f"""
+        <div class="prem-stat-card">
+            <div style="font-size:2rem;margin-bottom:6px;">📞</div>
+            <div class="prem-stat-lbl">{t('Toll-Free Helpline', 'टोल-फ्री हेल्पलाइन')}</div>
+            <div style="font-family:'DM Mono',monospace;font-weight:800;font-size:1.05rem;margin:10px 0 6px;color:var(--c-a1);letter-spacing:0.02em;">1800-XXX-XXXX</div>
+            <div style="font-size:0.7rem;color:var(--c-sub);">{t('9 AM – 6 PM · Mon–Sat', 'सुबह 9 – शाम 6 · सोम-शनि')}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown(f"""
+        <div class="prem-stat-card">
+            <div style="font-size:2rem;margin-bottom:6px;">✉️</div>
+            <div class="prem-stat-lbl">{t('Email Support', 'ईमेल सहायता')}</div>
+            <div style="font-family:'DM Mono',monospace;font-weight:700;font-size:0.85rem;margin:10px 0 6px;color:var(--c-a1);word-break:break-all;">support@janseva.gov.in</div>
+            <div style="font-size:0.7rem;color:var(--c-sub);">{t('Response within 24 hours', '24 घंटे में उत्तर')}</div>
+        </div>
+        """, unsafe_allow_html=True)
+    with col3:
+        st.markdown(f"""
+        <div class="prem-stat-card">
+            <div style="font-size:2rem;margin-bottom:6px;">🏛️</div>
+            <div class="prem-stat-lbl">{t('Grievance Officer', 'शिकायत अधिकारी')}</div>
+            <div style="font-weight:700;font-size:0.9rem;margin:10px 0 6px;color:var(--c-text);">{t('District Collector Office', 'जिला कलेक्टर कार्यालय')}</div>
+            <div style="font-size:0.7rem;color:var(--c-sub);">📍 Bhopal, Madhya Pradesh</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────
+    # EMERGENCY / ESCALATION
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f'<div class="prem-section-header">🚨 {t("Emergency & Escalation", "आपातकाल और एस्केलेशन")}</div>', unsafe_allow_html=True)
+
+    ec1, ec2 = st.columns(2)
+    with ec1:
+        st.markdown(f"""
+        <div class="prem-card" style="border-left:4px solid #EF4444;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                <div style="font-size:1.8rem;">🚨</div>
+                <div>
+                    <div style="font-weight:800;font-size:1rem;color:var(--c-text);">{t('Emergency Helpline', 'आपातकालीन हेल्पलाइन')}</div>
+                    <div style="font-size:0.75rem;color:var(--c-sub);">{t('Life-threatening situations only', 'केवल जीवन-घातक स्थितियाँ')}</div>
+                </div>
+            </div>
+            <div style="font-family:'DM Mono',monospace;font-weight:800;font-size:1.4rem;color:#DC2626;letter-spacing:0.05em;">112</div>
+            <div style="font-size:0.75rem;color:var(--c-sub);margin-top:6px;line-height:1.5;">
+                {t('National emergency response — available 24/7 for police, fire, and medical emergencies.',
+                   'राष्ट्रीय आपातकालीन प्रतिक्रिया — पुलिस, अग्नि और चिकित्सा आपात स्थितियों के लिए 24/7 उपलब्ध।')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+    with ec2:
+        st.markdown(f"""
+        <div class="prem-card" style="border-left:4px solid var(--c-a1);">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                <div style="font-size:1.8rem;">📈</div>
+                <div>
+                    <div style="font-weight:800;font-size:1rem;color:var(--c-text);">{t('Escalate a Complaint', 'शिकायत एस्केलेट करें')}</div>
+                    <div style="font-size:0.75rem;color:var(--c-sub);">{t('If not resolved within SLA', 'यदि SLA के भीतर हल नहीं हुआ')}</div>
+                </div>
+            </div>
+            <div style="font-size:0.85rem;color:var(--c-text);line-height:1.6;">
+                {t('Visit the complaint detail page and click ',
+                   'शिकायत विवरण पेज पर जाएँ और क्लिक करें ')}
+                <span class="prem-chip">⚡ Escalate</span>
+                {t(' to forward to a senior officer.', ' ताकि वरिष्ठ अधिकारी को भेजा जा सके।')}
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────
+    # USEFUL TIPS
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f'<div class="prem-section-header">💡 {t("Pro Tips", "प्रो टिप्स")}</div>', unsafe_allow_html=True)
+
+    tips = [
+        ("🎤", t("Use voice input for faster filing", "तेज़ फाइलिंग के लिए आवाज़ इनपुट का उपयोग करें")),
+        ("📍", t("Enable auto-location for precise complaint routing", "सटीक रूटिंग के लिए ऑटो-लोकेशन सक्षम करें")),
+        ("📷", t("Attach photos as evidence — they speed up resolution", "सबूत के रूप में फ़ोटो संलग्न करें — समाधान तेज़ होता है")),
+        ("🔔", t("Enable notifications to get real-time status updates", "रीयल-टाइम अपडेट के लिए सूचनाएं सक्षम करें")),
+    ]
+    for icon, text in tips:
+        st.markdown(f"""
+        <div class="prem-tip-bar" style="margin-top:0;margin-bottom:8px;">
+            <div class="prem-tip-icon">{icon}</div>
+            <div class="prem-tip-text">{text}</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    # ─────────────────────────────────────────────────────────────
+    # FOOTER NOTE + BACK BUTTON
+    # ─────────────────────────────────────────────────────────────
+    st.markdown(f"""
+    <div class="prem-divider">{t('Still need help?', 'अभी भी मदद चाहिए?')}</div>
+    <div style="text-align:center;color:var(--c-sub);font-size:0.85rem;line-height:1.7;margin-bottom:1.5rem;">
+        {t('Our support team is committed to resolving every concern. Average resolution time is under 48 hours.',
+           'हमारी सहायता टीम हर चिंता का समाधान करने के लिए प्रतिबद्ध है। औसत समाधान समय 48 घंटे से कम है।')}
+    </div>
+    """, unsafe_allow_html=True)
+
+    bc1, bc2, bc3 = st.columns([1, 2, 1])
+    with bc2:
+        if st.button("← " + t("Back to Dashboard", "डैशबोर्ड पर वापस"), use_container_width=True, key="help_back_btn"):
+            role = st.session_state.get("role")
+            if role == "user":
+                st.session_state.screen = "user_dashboard"
+            elif role == "official":
+                st.session_state.screen = "official_dashboard"
+            elif role == "admin":
+                st.session_state.screen = "admin_dashboard"
+            else:
+                st.session_state.screen = "language"
+            st.rerun()
  
 _LOGIN_EXTRA = {
     "en": {
@@ -3890,8 +4217,9 @@ def _render_single_complaint_card(c, lang, skip_ids, idx):
  
     card_cls  = "cc-emg" if is_emergency else f"cc-{priority}"
     emg_html  = '<span class="cc-badge badge-emg">🚨 EMERGENCY</span>' if is_emergency else ""
+    img_badge = "  📷" if img_path else ""
     exp_title = (("🚨 " if is_emergency else "")
-                 + f"{idx}. #{cid}  ·  {category}  ·  {s_icon} {s_lbl}")
+                 + f"{idx}. #{cid}  ·  {category}  ·  {s_icon} {s_lbl}{img_badge}")
  
     # number label
     st.markdown(f"<div class='cc-number'>{_t(lang,'Complaint','शिकायत')} #{idx}</div>",
@@ -3913,7 +4241,9 @@ def _render_single_complaint_card(c, lang, skip_ids, idx):
             f"<span class='cc-cid'>#{cid}</span>"
             f"<span class='cc-badge {s_cls}'>{s_icon} {s_lbl}</span>"
             f"<span class='cc-badge {p_cls}'>{p_icon} {p_lbl}</span>"
-            f"{emg_html}</div>"
+            f"{emg_html}"
+            f"{'<span class=\"cc-badge\" style=\"background:rgba(99,102,241,.10);color:#6366F1;border:1.5px solid rgba(99,102,241,.18);\">📷 Image</span>' if img_path else ''}"
+            f"</div>"
             f"<div class='cc-title'>{_html.escape(category)}</div>"
             f"<div class='cc-desc'>{_html.escape(desc[:200])}{'…' if len(desc)>200 else ''}</div>"
             f"<div class='cc-meta'>"
@@ -3941,7 +4271,7 @@ def _render_single_complaint_card(c, lang, skip_ids, idx):
                            else f"https://bfo-backend.onrender.com{img_path}")
                 st.image(img_url,
                          caption=_t(lang,"Uploaded Complaint Evidence","शिकायत का प्रमाण"),
-                         use_container_width=True)
+                         use_column_width=True)
  
         if sla:
             if overdue:
@@ -5888,7 +6218,7 @@ def _render_photo(lang: str):
                 "letter-spacing:.07em;color:#166534;margin-bottom:7px;'>✅ " + ready_lbl + "</div>",
                 unsafe_allow_html=True,
             )
-            st.image(uploaded, use_container_width=True)
+            st.image(uploaded, use_column_width=True)
             st.markdown(
                 "<div style='font-size:.63rem;color:#6B7280;margin-top:4px;'>"
                 + uploaded.name + "</div></div>",
@@ -7939,7 +8269,7 @@ def pg_schemes():
                                if s_img.startswith("/") else s_img)
                     di1, di2 = st.columns([1, 2])
                     with di1:
-                        st.image(img_url, use_container_width=True)
+                        st.image(img_url, use_column_width=True)
                     with di2:
                         st.markdown(
                             '<div class="sch-detail-field"><strong>'
@@ -8002,169 +8332,490 @@ def pg_schemes():
 # AI ASSISTANT
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_assistant():
-    
-    _apply_layout("user")  
+    _apply_layout("user")
     lang = st.session_state.get("language", "en")
     from frontend.pages.assistant import get_bot_response
 
     def _(en, hi):
         return en if lang == "en" else hi
 
-    # ---------- Modern UI CSS ----------
+    # ── ASSISTANT PAGE CSS ─────────────────────────────────────────────────────
     st.markdown("""
     <style>
-    /* Chat container */
-    .stChatMessage {
-        background: transparent !important;
-    }
-    /* User message bubble */
-    div[data-testid="stChatMessageUser"] div[data-testid="stChatMessageContent"] {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-        color: white !important;
-        border-radius: 20px 20px 4px 20px !important;
-        box-shadow: 0 4px 12px rgba(99,102,241,0.2) !important;
-    }
-    /* Assistant message bubble */
-    div[data-testid="stChatMessageAssistant"] div[data-testid="stChatMessageContent"] {
-        background: rgba(255,255,255,0.08) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 1px solid rgba(255,255,255,0.2) !important;
-        color: #1e293b !important;
-        border-radius: 20px 20px 20px 4px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05) !important;
-    }
-    /* Quick reply chips */
-    .chips {
+    /* ── PAGE ROOT ── */
+    .asst-root {
         display: flex;
-        flex-wrap: wrap;
-        gap: 0.6rem;
-        justify-content: center;
-        margin: 1.5rem 0;
+        flex-direction: column;
+        gap: 0;
+        max-width: 760px;
+        margin: 0 auto;
     }
-    .chip {
-        background: white;
-        border: 1px solid #e2e8f0;
-        border-radius: 40px;
-        padding: 0.5rem 1.2rem;
-        font-size: 0.85rem;
-        font-weight: 500;
-        transition: all 0.2s ease;
-        cursor: pointer;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.02);
-    }
-    .chip:hover {
-        background: #6366f1;
-        border-color: #6366f1;
-        color: white;
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(99,102,241,0.3);
-    }
-    /* Hero header */
-    .assistant-hero {
-        background: linear-gradient(135deg, #10b981, #059669);
-        border-radius: 28px;
-        padding: 1.8rem;
-        margin-bottom: 2rem;
-        text-align: center;
+
+    /* ── HERO ── */
+    .asst-hero {
+        background: linear-gradient(135deg, var(--c-a1) 0%, var(--c-a2) 55%, var(--c-a3) 100%);
+        border-radius: var(--r-xl);
+        padding: var(--sp-6) var(--sp-8);
+        margin-bottom: var(--sp-5);
         position: relative;
         overflow: hidden;
-        box-shadow: 0 20px 35px -10px rgba(0,0,0,0.15);
-    }
-    .assistant-hero::after {
-        content: '✨';
-        position: absolute;
-        bottom: 10px;
-        right: 20px;
-        font-size: 3rem;
-        opacity: 0.2;
-        transform: rotate(15deg);
-    }
-    .hero-title {
-        font-size: 1.8rem;
-        font-weight: 800;
-        color: white;
-        margin-bottom: 0.3rem;
-    }
-    .hero-sub {
-        font-size: 0.95rem;
-        color: rgba(255,255,255,0.9);
-    }
-    /* Mic button row */
-    .mic-row {
+        box-shadow: var(--sh-lg);
+        border: 1px solid rgba(255,255,255,0.10);
+        animation: prem-fade-up 0.32s ease both;
         display: flex;
         align-items: center;
-        justify-content: flex-end;
-        height: 100%;
+        justify-content: space-between;
+        gap: var(--sp-4);
     }
-    .mic-btn {
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
-        border: none;
+    .asst-hero::before {
+        content: '';
+        position: absolute;
+        top: -60px; right: -60px;
+        width: 220px; height: 220px;
+        background: radial-gradient(circle, rgba(255,255,255,0.12) 0%, transparent 70%);
+        pointer-events: none;
+        animation: prem-float 8s ease-in-out infinite;
+    }
+    .asst-hero::after {
+        content: '';
+        position: absolute;
+        bottom: -50px; left: 10%;
+        width: 160px; height: 160px;
+        background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
+        pointer-events: none;
+        animation: prem-float 10s ease-in-out infinite reverse;
+    }
+    .asst-hero-left { position: relative; z-index: 1; }
+    .asst-hero-eyebrow {
+        font-size: var(--fs-xs);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: rgba(255,255,255,0.65);
+        margin-bottom: var(--sp-1);
+    }
+    .asst-hero-title {
+        font-family: 'Bricolage Grotesque', 'DM Sans', sans-serif;
+        font-size: var(--fs-3xl);
+        font-weight: 800;
+        color: #fff;
+        line-height: 1.15;
+        letter-spacing: -0.03em;
+        margin-bottom: var(--sp-2);
+    }
+    .asst-hero-sub {
+        font-size: var(--fs-base);
+        color: rgba(255,255,255,0.80);
+        line-height: 1.55;
+        max-width: 340px;
+    }
+    .asst-hero-avatar {
+        position: relative;
+        z-index: 1;
+        width: 72px;
+        height: 72px;
         border-radius: 50%;
-        width: 48px;
-        height: 48px;
-        font-size: 1.3rem;
-        color: white;
-        cursor: pointer;
-        transition: all 0.2s;
-        box-shadow: 0 4px 12px rgba(99,102,241,0.4);
+        background: rgba(255,255,255,0.15);
+        border: 2px solid rgba(255,255,255,0.30);
         display: flex;
         align-items: center;
         justify-content: center;
+        font-size: 2rem;
+        flex-shrink: 0;
+        backdrop-filter: blur(12px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.18);
+        animation: prem-float 4s ease-in-out infinite;
     }
-    .mic-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 20px rgba(99,102,241,0.5);
+
+    /* ── STATUS BAR ── */
+    .asst-status-bar {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        margin-bottom: var(--sp-4);
+        padding: var(--sp-2) var(--sp-4);
+        background: var(--c-card);
+        border: 1.5px solid var(--c-border);
+        border-radius: var(--r-md);
+        box-shadow: var(--sh-sm);
+        animation: prem-fade-up 0.36s ease both;
     }
-    .mic-btn.recording {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-        animation: pulseMic 1.2s infinite;
+    .asst-status-dot {
+        width: 8px; height: 8px;
+        border-radius: 50%;
+        background: #10B981;
+        box-shadow: 0 0 0 4px rgba(16,185,129,0.15);
+        animation: prem-pulse-ring 2.5s ease infinite;
+        flex-shrink: 0;
     }
-    @keyframes pulseMic {
-        0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.6); }
-        70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
-        100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+    .asst-status-text {
+        font-size: var(--fs-xs);
+        font-weight: 600;
+        color: #10B981;
+        flex: 1;
+        letter-spacing: 0.02em;
     }
-    /* Chat input styling */
+    .asst-status-tag {
+        font-size: var(--fs-2xs);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--c-sub);
+        background: var(--c-card2);
+        border: 1px solid var(--c-border);
+        padding: 2px 9px;
+        border-radius: 99px;
+    }
+
+    /* ── CHAT WINDOW ── */
+    .asst-chat-window {
+        background: var(--c-card);
+        border-radius: var(--r-xl);
+        border: 1.5px solid var(--c-border);
+        box-shadow: var(--sh-md);
+        overflow: hidden;
+        margin-bottom: var(--sp-4);
+        animation: prem-fade-up 0.40s ease both;
+    }
+    .asst-chat-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--sp-3) var(--sp-5);
+        background: var(--c-card2);
+        border-bottom: 1.5px solid var(--c-border);
+    }
+    .asst-chat-topbar-left {
+        display: flex;
+        align-items: center;
+        gap: var(--sp-2);
+        font-size: var(--fs-sm);
+        font-weight: 700;
+        color: var(--c-text);
+        letter-spacing: -0.01em;
+    }
+    .asst-chat-topbar-icon {
+        width: 30px; height: 30px;
+        border-radius: var(--r-sm);
+        background: linear-gradient(135deg, var(--c-a1), var(--c-a2));
+        display: flex; align-items: center; justify-content: center;
+        font-size: 0.85rem;
+        color: white;
+        box-shadow: 0 3px 10px var(--c-a1-glow);
+    }
+    .asst-chat-topbar-pills {
+        display: flex;
+        gap: var(--sp-1);
+    }
+    .asst-chat-topbar-pill {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+    }
+
+    /* ── OVERRIDE DEFAULT STREAMLIT CHAT BUBBLES ── */
+    .stChatMessage {
+        background: transparent !important;
+        padding: 6px 0 !important;
+    }
+    /* User bubble */
+    div[data-testid="stChatMessageUser"] div[data-testid="stChatMessageContent"] {
+        background: linear-gradient(135deg, var(--c-a1), var(--c-a2)) !important;
+        color: #ffffff !important;
+        border-radius: 22px 22px 4px 22px !important;
+        padding: 12px 18px !important;
+        box-shadow: 0 6px 18px var(--c-a1-glow) !important;
+        font-size: var(--fs-base) !important;
+        font-weight: 500 !important;
+        line-height: 1.6 !important;
+    }
+    div[data-testid="stChatMessageUser"] div[data-testid="stChatMessageContent"] p {
+        color: #fff !important;
+    }
+    /* User avatar */
+    div[data-testid="stChatMessageUser"] img,
+    div[data-testid="stChatMessageUser"] [data-testid="stChatMessageAvatarUser"] {
+        background: linear-gradient(135deg, var(--c-a1), var(--c-a2)) !important;
+        border-radius: 50% !important;
+    }
+    /* Assistant bubble */
+    div[data-testid="stChatMessageAssistant"] div[data-testid="stChatMessageContent"] {
+        background: var(--c-card2) !important;
+        border: 1.5px solid var(--c-border) !important;
+        color: var(--c-text) !important;
+        border-radius: 22px 22px 22px 4px !important;
+        padding: 12px 18px !important;
+        box-shadow: var(--sh-sm) !important;
+        font-size: var(--fs-base) !important;
+        line-height: 1.65 !important;
+    }
+    div[data-testid="stChatMessageAssistant"] div[data-testid="stChatMessageContent"] p {
+        color: var(--c-text) !important;
+    }
+    /* Avatar icon size tweak */
+    div[data-testid="stChatMessageAssistant"] [data-testid="stChatMessageAvatarAssistant"] {
+        background: linear-gradient(135deg, #10b981, #059669) !important;
+        border-radius: 50% !important;
+    }
+
+    /* ── QUICK REPLY CHIPS ── */
+    .asst-chips-label {
+        font-size: var(--fs-xs);
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.10em;
+        color: var(--c-sub);
+        margin: var(--sp-5) 0 var(--sp-3);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    .asst-chips-label::before {
+        content: '';
+        width: 3px; height: 13px;
+        background: linear-gradient(180deg, var(--c-a1), var(--c-a2));
+        border-radius: 99px;
+        flex-shrink: 0;
+    }
+    .asst-chips-label::after {
+        content: '';
+        flex: 1; height: 1px;
+        background: linear-gradient(to right, var(--c-border), transparent);
+    }
+    .asst-chips-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--sp-2);
+        margin-bottom: var(--sp-4);
+        animation: prem-fade-up 0.44s ease both;
+    }
+
+    /* chip buttons — override stButton in chip context */
+    .asst-chip-col .stButton > button {
+        background: var(--c-card) !important;
+        color: var(--c-text) !important;
+        border: 1.5px solid var(--c-border) !important;
+        border-radius: var(--r-md) !important;
+        padding: 9px 12px !important;
+        font-size: var(--fs-xs) !important;
+        font-weight: 600 !important;
+        letter-spacing: -0.01em !important;
+        text-align: left !important;
+        justify-content: flex-start !important;
+        box-shadow: var(--sh-sm) !important;
+        transition: all var(--t-fast) !important;
+        line-height: 1.45 !important;
+        height: auto !important;
+        min-height: 52px !important;
+        white-space: normal !important;
+    }
+    .asst-chip-col .stButton > button:hover {
+        background: var(--c-a1-soft) !important;
+        border-color: var(--c-a1) !important;
+        color: var(--c-a1) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 16px var(--c-a1-glow) !important;
+    }
+
+    /* ── CHAT INPUT ── */
+    .asst-input-wrap {
+        animation: prem-fade-up 0.48s ease both;
+    }
     div[data-testid="stChatInput"] {
-        border-radius: 50px !important;
-        border: 1px solid #e2e8f0 !important;
-        background: white !important;
+        border-radius: var(--r-xl) !important;
+        border: 1.5px solid var(--c-border) !important;
+        background: var(--c-input) !important;
+        box-shadow: var(--sh-sm) !important;
+        transition: border-color var(--t-fast), box-shadow var(--t-fast) !important;
+    }
+    div[data-testid="stChatInput"]:focus-within {
+        border-color: var(--c-a1) !important;
+        box-shadow: 0 0 0 3px var(--c-a1-soft), var(--sh-sm) !important;
+    }
+    div[data-testid="stChatInput"] textarea {
+        font-family: 'DM Sans', 'Noto Sans Devanagari', sans-serif !important;
+        font-size: var(--fs-base) !important;
+        color: var(--c-text) !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 12px 16px !important;
+    }
+
+    /* ── UTILITY BUTTONS row ── */
+    .asst-util-row {
+        display: flex;
+        gap: var(--sp-2);
+        margin-top: var(--sp-3);
+        animation: prem-fade-up 0.50s ease both;
+    }
+    .asst-util-col .stButton > button {
+        background: var(--c-card) !important;
+        color: var(--c-sub) !important;
+        border: 1.5px solid var(--c-border) !important;
+        border-radius: var(--r-md) !important;
+        font-size: var(--fs-xs) !important;
+        font-weight: 600 !important;
+        padding: 9px 14px !important;
+        box-shadow: none !important;
+        transition: all var(--t-fast) !important;
+    }
+    .asst-util-col .stButton > button:hover {
+        background: var(--c-hover) !important;
+        border-color: var(--c-a1) !important;
+        color: var(--c-a1) !important;
+        transform: translateY(-1px) !important;
+    }
+
+    /* ── MIC ROW ── */
+    .asst-mic-row {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100%;
+        padding-top: 2px;
+    }
+    .asst-mic-btn {
+        background: linear-gradient(135deg, var(--c-a1), var(--c-a2));
+        border: none;
+        border-radius: 50%;
+        width: 48px; height: 48px;
+        font-size: 1.2rem;
+        color: white;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 4px 14px var(--c-a1-glow);
+        display: flex; align-items: center; justify-content: center;
+        flex-shrink: 0;
+    }
+    .asst-mic-btn:hover {
+        transform: scale(1.06);
+        box-shadow: 0 8px 22px var(--c-a1-glow);
+    }
+    .asst-mic-btn.recording {
+        background: linear-gradient(135deg, #EF4444, #DC2626);
+        animation: prem-pulse-emergency 1.2s infinite;
+    }
+
+    /* ── EMPTY STATE ── */
+    .asst-empty {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        color: var(--c-sub);
+    }
+    .asst-empty-icon {
+        font-size: 3rem;
+        display: block;
+        margin-bottom: var(--sp-3);
+        opacity: 0.40;
+        animation: prem-float 4s ease-in-out infinite;
+    }
+    .asst-empty-text {
+        font-size: var(--fs-sm);
+        line-height: 1.65;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+        .asst-hero { padding: var(--sp-5) var(--sp-4); border-radius: var(--r-lg); }
+        .asst-hero-title { font-size: var(--fs-2xl); }
+        .asst-hero-avatar { width: 56px; height: 56px; font-size: 1.5rem; }
+        .asst-chips-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 480px) {
+        .asst-chips-grid { grid-template-columns: 1fr; }
+        .asst-hero-avatar { display: none; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # ---------- Hero Header ----------
+    def _(en, hi):
+        return en if lang == "en" else hi
+
+    # ── HERO ────────────────────────────────────────────────────────────────────
     st.markdown(f"""
-    <div class="assistant-hero">
-        <div class="hero-title">🤖 {_('AI Assistant', 'एआई सहायक')}</div>
-        <div class="hero-sub">{_('Ask me anything about complaints, schemes, or the portal', 'शिकायतों, योजनाओं या पोर्टल के बारे में कुछ भी पूछें')}</div>
+    <div class="asst-hero">
+        <div class="asst-hero-left">
+            <div class="asst-hero-eyebrow">🏛️ {_('Grievance Portal', 'शिकायत पोर्टल')}</div>
+            <div class="asst-hero-title">
+                {_('AI Assistant', 'एआई सहायक')}
+            </div>
+            <div class="asst-hero-sub">
+                {_('Ask me anything about complaints, schemes, or the portal. I\'m here to help.',
+                   'शिकायतों, योजनाओं या पोर्टल के बारे में कुछ भी पूछें। मैं आपकी सहायता के लिए यहाँ हूँ।')}
+            </div>
+        </div>
+        <div class="asst-hero-avatar">🤖</div>
     </div>
     """, unsafe_allow_html=True)
 
-    # ---------- Initialize chat history ----------
+    # ── STATUS BAR ──────────────────────────────────────────────────────────────
+    st.markdown(f"""
+    <div class="asst-status-bar">
+        <div class="asst-status-dot"></div>
+        <div class="asst-status-text">{_('AI is online and ready', 'एआई ऑनलाइन और तैयार है')}</div>
+        <div class="asst-status-tag">GPT-Powered</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── INIT CHAT HISTORY ───────────────────────────────────────────────────────
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
     if not st.session_state.chat_history:
-        st.session_state.chat_history.append({"role": "assistant", "content": get_bot_response("hello", lang)})
+        st.session_state.chat_history.append({
+            "role": "assistant",
+            "content": get_bot_response("hello", lang)
+        })
 
-    # ---------- Display messages ----------
-    for msg in st.session_state.chat_history:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+    # ── CHAT MESSAGES ───────────────────────────────────────────────────────────
+    with st.container():
+        # Topbar chrome
+        st.markdown(f"""
+        <div class="asst-chat-window">
+            <div class="asst-chat-topbar">
+                <div class="asst-chat-topbar-left">
+                    <div class="asst-chat-topbar-icon">🤖</div>
+                    {_('Conversation', 'वार्तालाप')}
+                </div>
+                <div class="asst-chat-topbar-pills">
+                    <div class="asst-chat-topbar-pill" style="background:#ef4444;"></div>
+                    <div class="asst-chat-topbar-pill" style="background:#f59e0b;"></div>
+                    <div class="asst-chat-topbar-pill" style="background:#10b981;"></div>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
-    # ---------- Quick reply chips ----------
+        if len(st.session_state.chat_history) <= 1:
+            st.markdown(f"""
+            <div class="asst-empty">
+                <span class="asst-empty-icon">💬</span>
+                <div class="asst-empty-text">
+                    {_('Start the conversation by typing a message below or use a quick reply chip.',
+                       'नीचे संदेश टाइप करके या त्वरित उत्तर चिप का उपयोग करके बातचीत शुरू करें।')}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        for msg in st.session_state.chat_history:
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+    # ── QUICK REPLY CHIPS ────────────────────────────────────────────────────────
     quick_items = [
         ("📢 " + _("How to file a complaint?", "शिकायत कैसे दर्ज करें?"), "file complaint"),
-        ("🔍 " + _("Track my complaint", "मेरी शिकायत ट्रैक करें"), "track complaint"),
-        ("📜 " + _("Government schemes", "सरकारी योजनाएं"), "schemes"),
-        ("⏱️ " + _("What is SLA?", "SLA क्या है?"), "sla"),
-        ("⭐ " + _("How to rate an official?", "अधिकारी को कैसे रेट करें?"), "rating"),
-        ("🏢 " + _("Department contacts", "विभाग संपर्क"), "departments"),
+        ("🔍 " + _("Track my complaint", "मेरी शिकायत ट्रैक करें"),          "track complaint"),
+        ("📜 " + _("Government schemes", "सरकारी योजनाएं"),                    "schemes"),
+        ("⏱️ " + _("What is SLA?", "SLA क्या है?"),                            "sla"),
+        ("⭐ " + _("How to rate an official?", "अधिकारी को कैसे रेट करें?"),   "rating"),
+        ("🏢 " + _("Department contacts", "विभाग संपर्क"),                     "departments"),
     ]
-    st.markdown('<div class="chips">', unsafe_allow_html=True)
-    cols = st.columns(min(3, len(quick_items)))
+
+    st.markdown(f'<div class="asst-chips-label">{_("Quick replies", "त्वरित उत्तर")}</div>',
+                unsafe_allow_html=True)
+
+    cols = st.columns(3)
     for i, (label, intent) in enumerate(quick_items):
         with cols[i % 3]:
+            st.markdown('<div class="asst-chip-col">', unsafe_allow_html=True)
             if st.button(label, key=f"chip_{i}", use_container_width=True):
                 st.session_state.chat_history.append({"role": "user", "content": label})
                 with st.chat_message("user"):
@@ -8174,87 +8825,65 @@ def pg_assistant():
                 with st.chat_message("assistant"):
                     st.markdown(response)
                 st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
 
-    # ---------- Chat input + Microphone (fully functional) ----------
-    col_input, col_mic = st.columns([6, 1])
+    # ── INPUT ROW (chat input + mic) ─────────────────────────────────────────────
+    col_input, col_mic = st.columns([9, 1])
     with col_input:
-        user_input = st.chat_input(_("Type your message...", "अपना संदेश लिखें..."))
+        user_input = st.chat_input(_("Type your message…", "अपना संदेश लिखें…"))
     with col_mic:
         mic_html = f"""
-        <div class="mic-row">
-            <button id="modernMicBtn" class="mic-btn">🎤</button>
+        <div class="asst-mic-row">
+            <button id="asstMicBtn" class="asst-mic-btn" title="Voice input">🎤</button>
         </div>
         <script>
         (function() {{
-            const micBtn = document.getElementById('modernMicBtn');
-            if (!micBtn) return;
-            let recognition = null;
+            const btn = document.getElementById('asstMicBtn');
+            if (!btn) return;
+            let recog = null;
 
-            function findChatInput() {{
-                return window.parent.document.querySelector('div[data-testid="stChatInput"] textarea') ||
-                       window.parent.document.querySelector('input[data-testid="stChatInput"]');
+            function findInput() {{
+                return window.parent.document.querySelector('div[data-testid="stChatInput"] textarea')
+                    || window.parent.document.querySelector('input[data-testid="stChatInput"]');
             }}
-
-            function findSendButton() {{
-                const btns = window.parent.document.querySelectorAll('button');
-                for (let btn of btns) {{
-                    const aria = btn.getAttribute('aria-label') || '';
-                    if (aria === 'Send' || btn.innerText.includes('Send')) return btn;
+            function findSend() {{
+                for (let b of window.parent.document.querySelectorAll('button')) {{
+                    const a = b.getAttribute('aria-label') || '';
+                    if (a === 'Send' || b.innerText.includes('Send')) return b;
                 }}
                 return null;
             }}
-
-            function insertAndSend(text) {{
-                const input = findChatInput();
-                if (!input) return;
-                input.value = text;
-                input.dispatchEvent(new Event('input', {{ bubbles: true }}));
-                input.dispatchEvent(new Event('change', {{ bubbles: true }}));
-                setTimeout(() => {{
-                    const sendBtn = findSendButton();
-                    if (sendBtn) sendBtn.click();
-                }}, 200);
+            function dispatch(text) {{
+                const inp = findInput();
+                if (!inp) return;
+                inp.value = text;
+                ['input','change'].forEach(ev => inp.dispatchEvent(new Event(ev, {{bubbles:true}})));
+                setTimeout(() => {{ const s = findSend(); if(s) s.click(); }}, 200);
             }}
 
-            micBtn.onclick = () => {{
-                if (recognition) {{
-                    recognition.stop();
-                    recognition = null;
-                    micBtn.classList.remove('recording');
-                    micBtn.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
+            btn.onclick = () => {{
+                if (recog) {{
+                    recog.stop(); recog = null;
+                    btn.classList.remove('recording');
                     return;
                 }}
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                if (!SpeechRecognition) {{
-                    alert('Voice not supported. Please use Chrome/Edge.');
-                    return;
-                }}
-                recognition = new SpeechRecognition();
-                recognition.lang = '{'hi-IN' if lang == 'hi' else 'en-IN'}';
-                recognition.continuous = false;
-                recognition.interimResults = false;
-                recognition.onstart = () => {{
-                    micBtn.classList.add('recording');
-                    micBtn.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
-                }};
-                recognition.onresult = (e) => {{
-                    const text = e.results[0][0].transcript;
-                    insertAndSend(text);
-                }};
-                recognition.onend = () => {{
-                    micBtn.classList.remove('recording');
-                    micBtn.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
-                    recognition = null;
-                }};
-                recognition.start();
+                const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+                if (!SR) {{ alert('Voice not supported. Use Chrome/Edge.'); return; }}
+                recog = new SR();
+                recog.lang = '{'hi-IN' if lang == 'hi' else 'en-IN'}';
+                recog.continuous = false;
+                recog.interimResults = false;
+                recog.onstart  = () => btn.classList.add('recording');
+                recog.onresult = (e) => dispatch(e.results[0][0].transcript);
+                recog.onend    = () => {{ btn.classList.remove('recording'); recog = null; }};
+                recog.start();
             }};
         }})();
         </script>
         """
-        st.components.v1.html(mic_html, height=70)
+        st.components.v1.html(mic_html, height=58)
 
-    # ---------- Process typed input ----------
+    # Process typed input
     if user_input:
         st.session_state.chat_history.append({"role": "user", "content": user_input})
         with st.chat_message("user"):
@@ -8265,16 +8894,38 @@ def pg_assistant():
             st.markdown(response)
         st.rerun()
 
-    # ---------- Utility buttons ----------
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col2:
+    # ── UTILITY BUTTONS ──────────────────────────────────────────────────────────
+    c1, c2, c3 = st.columns([1, 1, 1])
+    with c1:
+        st.markdown('<div class="asst-util-col">', unsafe_allow_html=True)
         if st.button(_("🗑️ Clear Chat", "🗑️ चैट साफ़ करें"), use_container_width=True):
             st.session_state.chat_history = []
-            st.session_state.chat_history.append({"role": "assistant", "content": get_bot_response("hello", lang)})
+            st.session_state.chat_history.append({
+                "role": "assistant",
+                "content": get_bot_response("hello", lang)
+            })
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c2:
+        st.markdown('<div class="asst-util-col">', unsafe_allow_html=True)
         if st.button(_("← Back to Dashboard", "← डैशबोर्ड पर वापस"), use_container_width=True):
             st.session_state.screen = "user_dashboard"
             st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with c3:
+        st.markdown(f"""
+        <div style="
+            text-align:right;
+            font-size:var(--fs-xs);
+            color:var(--c-sub);
+            padding-top:10px;
+            font-family:'DM Mono',monospace;
+        ">
+            {len(st.session_state.chat_history)} {_('messages', 'संदेश')}
+        </div>
+        """, unsafe_allow_html=True)
 
 def pg_official_dashboard():
     
@@ -8860,6 +9511,7 @@ def pg_official_dashboard():
             phone = c.get("user_phone", "N/A")
             location = c.get("location", "N/A")
             created = c.get("created_at", "")
+            img_path = c.get("image_path") or c.get("image_url")
             
             # Status badge
             status_map = {
@@ -8885,6 +9537,7 @@ def pg_official_dashboard():
             # Preview for expander
             preview = description[:60] + "..." if len(description) > 60 else description
             safe_preview = html.escape(preview)
+            img_indicator = "  📷" if img_path else ""
             st.markdown(
                 f"""
                 <div style="
@@ -8893,13 +9546,13 @@ def pg_official_dashboard():
                     color:#3b82f6;
                     margin:10px 0 6px 4px;
                 ">
-                    Complaint #{idx}
+                    Complaint #{idx}{img_indicator}
                 </div>
                 """,
                 unsafe_allow_html=True
             )
             with st.expander(
-                f"{idx}. #{complaint_id} - {category} - {safe_preview}",
+                f"{idx}. #{complaint_id} - {category} - {safe_preview}{img_indicator}",
                 expanded=False
             ):
                 st.markdown(f"""
@@ -8908,6 +9561,7 @@ def pg_official_dashboard():
                         <div>
                             <span class="badge-status {status_class}">{status_text}</span>
                             <span class="badge-priority {priority_class}" style="margin-left: 8px;">{priority_text}</span>
+                            {'<span style="margin-left:8px;background:rgba(99,102,241,.10);color:#6366F1;border:1.5px solid rgba(99,102,241,.18);border-radius:20px;padding:3px 10px;font-size:.70rem;font-weight:700;">📷 Image</span>' if img_path else ''}
                         </div>
                         <div class="complaint-meta" style="margin:0; font-size:0.7rem;">
                             📅 {created}
@@ -8923,6 +9577,25 @@ def pg_official_dashboard():
                     </div>
                 """, unsafe_allow_html=True)
                 
+                # Image evidence section
+                if img_path:
+                    st.markdown(
+                        '<div style="background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.15);'
+                        'border-radius:12px;padding:10px 14px;margin:8px 0;">'
+                        '<span style="font-weight:700;font-size:.82rem;color:#6366F1;">🖼️ Complaint Evidence</span></div>',
+                        unsafe_allow_html=True,
+                    )
+                    if st.button(
+                        f"👁️ View Uploaded Photo",
+                        key=f"off_img_{complaint_id}_{idx}",
+                        use_container_width=True,
+                    ):
+                        img_url = (img_path if img_path.startswith("http")
+                                   else f"{API_BASE}{img_path}")
+                        st.image(img_url,
+                                 caption="Uploaded Complaint Evidence",
+                                 use_column_width=True)
+
                 # Show citizen feedback if any
                 if c.get("feedback") == "satisfied":
                     st.success("👍 Citizen satisfied with resolution")
@@ -12356,6 +13029,7 @@ def pg_admin_complaints():
         dept     = c.get("department", "")
         created  = c.get("created_at", "")
         is_emg   = bool(c.get("is_emergency", False))
+        img_path = c.get("image_path") or c.get("image_url")
 
         sb, st_tx, sbd, st_ico = STATUS_CFG.get(status, STATUS_CFG["pending"])
         pri_cls, pri_lbl       = PRI_CFG.get(priority, PRI_CFG["medium"])
@@ -12377,6 +13051,7 @@ def pg_admin_complaints():
         date_chip    = ('<span style="font-size:.68rem;color:#94A3B8;font-weight:600;margin-left:auto;">🕐 ' + date_str + '</span>') if date_str else ""
         dept_chip    = ('<span style="font-size:.72rem;color:#64748B;background:#F1F5F9;border-radius:8px;padding:2px 8px;">🏢 ' + dept + '</span>') if dept else ""
         loc_chip     = ('<span style="font-size:.72rem;color:#64748B;">📍 ' + loc_short + '</span>') if loc_short else ""
+        img_chip     = ('<span style="font-size:.70rem;font-weight:700;background:rgba(99,102,241,.10);color:#6366F1;border:1.5px solid rgba(99,102,241,.18);border-radius:20px;padding:3px 10px;">📷 Image</span>') if img_path else ""
 
         card = (
             # Outer card
@@ -12391,6 +13066,7 @@ def pg_admin_complaints():
             '<span class="prem-complaint-id">' + str(idx) + '. ' + cid + '</span>'
             + emg_badge + status_chip
             + '<span class="' + pri_cls + '">' + pri_lbl + '</span>'
+            + img_chip
             + date_chip +
             '</div>'
 
@@ -12416,7 +13092,8 @@ def pg_admin_complaints():
             '<div style="display:flex;align-items:center;flex-wrap:wrap;gap:10px;'
             'padding-top:10px;border-top:1px solid #F1F5F9;">'
             '<span style="font-size:.75rem;color:#334155;font-weight:600;">👤 ' + str(user) + '</span>'
-            + dept_chip + loc_chip +
+            + dept_chip + loc_chip
+            + ('<span style="font-size:.72rem;color:#6366F1;font-weight:600;">📷 Photo attached</span>' if img_path else '') +
             '</div>'
             '</div>'
         )
@@ -12458,6 +13135,25 @@ def pg_admin_complaints():
             if note and st.button("📌 Save Note", key="sn_" + cid):
                 api("post", "/complaints/" + cid + "/note", json={"note": note})
                 st.success("Note saved!")
+
+            # Image evidence section for admin
+            if img_path:
+                st.markdown(
+                    '<div style="background:rgba(99,102,241,.06);border:1.5px solid rgba(99,102,241,.15);'
+                    'border-radius:12px;padding:10px 14px;margin:10px 0 4px;">'
+                    '<span style="font-weight:700;font-size:.82rem;color:#6366F1;">🖼️ Complaint Evidence</span></div>',
+                    unsafe_allow_html=True,
+                )
+                if st.button(
+                    "👁️ View Uploaded Photo",
+                    key="admin_img_" + cid,
+                    use_container_width=True,
+                ):
+                    img_url = (img_path if img_path.startswith("http")
+                               else API_BASE + img_path)
+                    st.image(img_url,
+                             caption="Uploaded Complaint Evidence",
+                             use_column_width=True)
 
 def pg_admin_leaderboard():
     

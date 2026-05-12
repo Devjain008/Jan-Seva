@@ -1,4 +1,4 @@
-API_BASE = "https://bfo-backend.onrender.com"
+API_BASE = "https://bfo-backend-kjz3.onrender.com"
 # frontend/config.py
 
 TRANSLATIONS = {
