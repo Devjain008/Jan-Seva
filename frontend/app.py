@@ -1572,25 +1572,8 @@ html, body, [class*="css"] {
 #MainMenu, footer, header { visibility: hidden; }
  
 /* ── Streamlit button override ────────────────────────────────────── */
-.stButton > button {
-    font-family: 'DM Sans', sans-serif !important;
-    font-weight: 500 !important;
-    font-size: 13.5px !important;
-    border-radius: 10px !important;
-    border: 1.5px solid #E5E7EB !important;
-    background: #fff !important;
-    color: #374151 !important;
-    padding: 9px 18px !important;
-    transition: all 0.18s ease !important;
-    letter-spacing: 0.1px !important;
-    box-shadow: none !important;
-}
-.stButton > button:hover {
-    background: #F9FAFB !important;
-    border-color: #D1D5DB !important;
-    color: #111827 !important;
-}
-.stButton > button:active { transform: scale(0.98) !important; }
+
+
  
 /* ── Inputs ───────────────────────────────────────────────────────── */
 .stTextInput > div > div > input,
