@@ -888,6 +888,54 @@ div.section-header:not(.prem-section-header)::after{{content:'';flex:1;height:1p
 .official-complaint.high   {{border-left:4px solid {red_text};}}
 .official-complaint.medium {{border-left:4px solid {amber_text};}}
 .official-complaint.low    {{border-left:4px solid {green_text};}}
+
+/* ═══════════════════════════════════════
+   FIX SIDEBAR BUTTON WITHOUT BREAKING UI
+═══════════════════════════════════════ */
+
+/* Show sidebar toggle button */
+[data-testid="collapsedControl"]{{
+
+    display:flex!important;
+
+    visibility:visible!important;
+
+    opacity:1!important;
+
+    position:fixed!important;
+
+    top:14px!important;
+
+    left:14px!important;
+
+    z-index:999999!important;
+
+    background:rgba(99,102,241,.12)!important;
+
+    border-radius:12px!important;
+
+    padding:5px!important;
+
+    backdrop-filter:blur(10px)!important;
+}}
+
+/* Keep header visible */
+header{{
+
+    visibility:visible!important;
+
+    display:block!important;
+}}
+
+/* Prevent hiding */
+button[kind="header"]{{
+
+    display:flex!important;
+
+    visibility:visible!important;
+
+    opacity:1!important;
+}}
 .sidebar-active{{background:linear-gradient(90deg,{a1_soft},transparent);border-left:3px solid {accent1};border-radius:0 var(--r-sm) var(--r-sm) 0;padding:2px 0;margin:2px 0;transition:all var(--t-fast);}}
 .badge-high{{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 10px;font-size:var(--fs-2xs);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:{red_bg};color:{red_text};border:1px solid {red_bd};}}
 .badge-medium{{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 10px;font-size:var(--fs-2xs);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};}}

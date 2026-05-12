@@ -18,17 +18,33 @@ from frontend.styles import get_css
 from frontend.config import TRANSLATIONS, API_BASE
 
 st.set_page_config(
-
     page_title="Jan Seva Portal",
-
     page_icon="🏛️",
-
-    layout="wide",
-
-    initial_sidebar_state="expanded",
+    layout="centered",
+    initial_sidebar_state="collapsed",
 )
 
+if "show_menu" not in st.session_state:
 
+    st.session_state.show_menu = False
+
+menu_col1, menu_col2 = st.columns([1, 12])
+
+with menu_col1:
+
+    if st.button(
+
+        "☰",
+
+        key="menu_toggle"
+    ):
+
+        st.session_state.show_menu = (
+
+            not st.session_state.show_menu
+        )
+
+        st.rerun()
 # ─────────────────────────────────────────────
 # API HELPER
 # ─────────────────────────────────────────────
@@ -605,9 +621,15 @@ def render_sidebar():
     # ─────────────────────────────────────────────────────
     # SIDEBAR UI
     # ─────────────────────────────────────────────────────
-    with st.sidebar:
+    if st.session_state.show_menu:
 
-        st.markdown('<div class="sb-wrap">', unsafe_allow_html=True)
+        st.markdown(
+            "<div class='custom-menu-wrap'>",
+            unsafe_allow_html=True
+        )
+
+        # YOUR SIDEBAR CONTENT HERE
+
 
         # BRAND
         st.markdown("""
@@ -693,8 +715,10 @@ def render_sidebar():
         </div>
         """, unsafe_allow_html=True)
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
+        st.markdown(
+            "</div>",
+            unsafe_allow_html=True
+        )
 # ═════════════════════════════════════════════════════════════════════════════
 # ROUTER
 # ═════════════════════════════════════════════════════════════════════════════
