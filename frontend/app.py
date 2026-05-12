@@ -4970,7 +4970,7 @@ def pg_user_dashboard():
     _inject_dashboard_css()
  
     # 2. Data with loading spinner
-    with st.spinner(_t(lang,"Loading your dashboard…","डैशबोर्ड लोड हो रहा है…")):
+    with st.spinner(_t("loading_dashboard")):
         comps  = _fetch_complaints(uid)
         notifs = _fetch_notifications(uid)
  
