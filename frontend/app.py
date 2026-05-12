@@ -3998,6 +3998,7 @@ def _render_notifications_footer(notifs: list, lang: str) -> None:
 # ═══════════════════════════════════════════════════════════════════════════
 
 def pg_user_dashboard() -> None:
+    render_sidebar()
     _apply_layout("user") 
     try:
         submit_offline_complaints()
@@ -6075,6 +6076,7 @@ def _render_offline(lang: str) -> None:
 # ─────────────────────────────────────────────────────────────────────────────
  
 def pg_file_complaint() -> None:
+    render_sidebar()
     _apply_layout("user")  
     submit_offline_complaints()   # type: ignore[name-defined]
  
@@ -6980,6 +6982,7 @@ def _show_detail(d, uid, lang):
 # NOTIFICATIONS
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_notifications():
+    render_sidebar()
     _apply_layout("user")  
     import re
     import html as _html
@@ -7449,6 +7452,7 @@ div[data-testid="stButton"].notif-del-btn>button:hover{{
 # SCHEMES
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_schemes():
+    render_sidebar()
     _apply_layout("user")  
     lang = st.session_state.language
     user = st.session_state.user or {}
@@ -7915,6 +7919,7 @@ def pg_schemes():
 # AI ASSISTANT
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_assistant():
+    render_sidebar()
     _apply_layout("user")  
     lang = st.session_state.get("language", "en")
     from frontend.pages.assistant import get_bot_response
@@ -8189,6 +8194,7 @@ def pg_assistant():
             st.rerun()
 
 def pg_official_dashboard():
+    render_sidebar()
     
     _apply_layout("admin")  
     # ------------------- GET OFFICIAL DATA -------------------
@@ -8899,6 +8905,7 @@ def pg_official_dashboard():
     # ------------------- TIPS SECTION -------------------
 
 def pg_live_dashboard():
+    render_sidebar()
     _apply_layout("admin")  
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
@@ -9210,6 +9217,7 @@ def pg_live_dashboard():
             st.rerun()
 
 def pg_official_leaderboard():
+    render_sidebar()
     _apply_layout("admin")  
 
     off       = st.session_state.get("official", {})
@@ -9696,6 +9704,7 @@ def pg_official_leaderboard():
 # ADMIN SCREENS
 # ═════════════════════════════════════════════════════════════════════════════
 def pg_admin_dashboard():
+    render_sidebar()
     _apply_layout("admin")  
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
@@ -10264,6 +10273,7 @@ def pg_admin_dashboard():
                 st.rerun()
 
 def pg_admin_departments():
+    render_sidebar()
     _apply_layout("admin")  
     if st.session_state.viewing_dept_id:
         _dept_drill()
@@ -10926,6 +10936,7 @@ li[role="option"][aria-selected="true"] {{
         st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
 
 def pg_city_health_score():
+    render_sidebar()
     _apply_layout("admin")  
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
@@ -11519,6 +11530,7 @@ def _dept_leaderboard(dept_id):
 
 
 def pg_admin_officials():
+    render_sidebar()
     _apply_layout("admin")  
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
@@ -11867,6 +11879,7 @@ def pg_admin_officials():
             st.markdown("</div><div style='height:8px'></div>", unsafe_allow_html=True)
 
 def pg_admin_complaints():
+    render_sidebar()
     _apply_layout("admin")  
 
     # ══════════════════════════════════════════════════════════════════════════
@@ -12366,6 +12379,7 @@ def pg_admin_complaints():
                 st.success("Note saved!")
 
 def pg_admin_leaderboard():
+    render_sidebar()
     _apply_layout("admin")  
 
     st.markdown("""
@@ -12911,6 +12925,7 @@ def _rating_stars_display(rating: float, count: int = 0) -> str:
 
 
 def pg_admin_schemes():
+    render_sidebar()
     _apply_layout("admin")  
     lang  = st.session_state.language
     admin = st.session_state.admin or {}
@@ -13425,6 +13440,7 @@ div[data-testid="stButton"].sch-del > button:hover{{
             st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
 
 def pg_admin_heatmap():
+    render_sidebar()
     _apply_layout("admin")  
 
     # ── FETCH DATA ────────────────────────────────────────────────────────────
@@ -13976,6 +13992,7 @@ def _complaint_list(comps, pfx, off_id):
                 st.info("ℹ️ No further action required.")
 
 def pg_public_transparency():
+
     _apply_layout("user")
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
@@ -14504,6 +14521,7 @@ def _render_leaderboard(board):
 # Add this after pg_admin_heatmap() function or near other admin functions
 
 def pg_predictive_analytics():
+    render_sidebar()
     _apply_layout("user")
     
 
@@ -15125,6 +15143,8 @@ def render_simple_steps(complaint):
     return html
    
 def pg_sla_management():
+    render_sidebar()
+    
     _apply_layout("user")
     """SLA Management Dashboard — premium prem-* design, no HTML inside expanders."""
 
@@ -15743,5 +15763,5 @@ def pg_sla_management():
 # ═════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ═════════════════════════════════════════════════════════════════════════════
-render_sidebar()
+
 route()
