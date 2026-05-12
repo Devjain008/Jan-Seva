@@ -690,113 +690,253 @@ def render_sidebar():
     </style>
     """, unsafe_allow_html=True)
 
-    # ─────────────────────────────────────────────────────
-    # USER DATA
-    # ─────────────────────────────────────────────────────
-    user_data = (
-        st.session_state.get(role)
-        or st.session_state.get("user")
-        or {}
-    )
+    role = st.session_state.role
+    dark = st.session_state.dark_mode
+    lang = st.session_state.language
 
-    name = (
-        user_data.get("name")
-        or user_data.get("username")
-        or "User"
-    )
+    # ── Helper to get translation ──
+    def _(key): return t(key)
 
-    initials = name[:2].upper()
+    # ── Fetch unread notifications count for badge (dynamic) ──
+    unread_count = 0
+    if role == "user":
+        uid = (st.session_state.user or {}).get("user_id")
+        if uid:
+            notifs = api("get", f"/schemes/user/notifications/{uid}")
+            if isinstance(notifs, list):
+                unread_count = len([n for n in notifs if not n.get("is_read")])
 
-    # ─────────────────────────────────────────────────────
-    # SIDEBAR UI
-    # ─────────────────────────────────────────────────────
     with st.sidebar:
-
-        st.markdown('<div class="sb-wrap">', unsafe_allow_html=True)
-
-        st.markdown("""
-        <div class="sb-brand">
-            <div class="sb-brand-row">
-                <div class="sb-brand-logo">🏛️</div>
-                <div class="sb-brand-text">
-                    <div class="sb-brand-title">Jan<span>Seva</span></div>
-                    <div class="sb-brand-sub">Smart Government Platform</div>
-                </div>
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
-
-        # USER CARD
+        # ── Brand / Logo ────────────────────────────────────────────────
         st.markdown(f"""
-        <div class="sb-user">
-            <div class="sb-user-top">
-                <div class="sb-avatar">{initials}</div>
-                <div class="sb-user-info">
-                    <div class="sb-user-name">{name}</div>
-                    <div class="sb-user-role">{role.title()} · Online</div>
-                </div>
+        <div style="text-align:center;padding:20px 0 12px;">
+            <div style="font-size:2.8rem;">🏛️</div>
+            <div style="font-family:'DM Serif Display',serif;font-size:1.2rem;font-weight:600;color:#d97706;">
+                Jan Seva Portal
             </div>
+            <div style="font-size:.7rem;opacity:.6;">जन सेवा पोर्टल</div>
         </div>
         """, unsafe_allow_html=True)
 
-        # MENU
-        st.markdown('<div class="sb-section">Navigation</div>', unsafe_allow_html=True)
+        st.markdown("---")
 
-        menu_items = []
+        # ================================================================
+        # USER PROFILE CARD (dynamic)
+        # ================================================================
+        if role == "user":
+            u = st.session_state.user or {}
+            name = u.get('name', 'Citizen')
+            phone = u.get('phone', '')
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); border-radius: 16px; padding: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👤</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1rem;">{name}</div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">📞 {phone}</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        elif role == "official":
+            o = st.session_state.official or {}
+            name = o.get('name', 'Official')
+            dept = o.get('department', 'Department')
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); border-radius: 16px; padding: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">🏢</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1rem;">{name}</div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">{dept}</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+        elif role == "admin":
+            st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #667eea20 0%, #764ba220 100%); border-radius: 16px; padding: 12px; margin-bottom: 20px;">
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); width: 48px; height: 48px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">👑</div>
+                    <div>
+                        <div style="font-weight: 700; font-size: 1rem;">System Admin</div>
+                        <div style="font-size: 0.7rem; opacity: 0.7;">Administrator</div>
+                    </div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
+        # ================================================================
+        # NAVIGATION MENU (collapsible groups)
+        # ================================================================
+        # We'll use Streamlit's native expander components for groups
+
+        # --- MAIN MENU (always visible) ---
+        st.markdown("#### 🧭 Navigation")
 
         if role == "user":
-            menu_items = [
-                ("🏠  Dashboard", "user_dashboard"),
-                ("📝  Complaints", "user_complaints"),
-                ("📢  Schemes", "schemes"),
-                ("🤖  AI Assistant", "ai"),
-                ("⚙️  Settings", "settings"),
+            # User menu items with icons, labels, screen names
+            user_items = [
+                ("🏠", _("dashboard"), "user_dashboard"),
+                ("📢", _("file_complaint"), "file_complaint"),
+                ("🔍", _("track_complaint"), "tracking"),
+                ("📜", _("govt_schemes"), "schemes"),
+                ("🤖", _("ai_assistant"), "assistant"),
+                ("🔔", _("notifications"), "notifications"),  # Notifications will be handled separately for badge
             ]
+            for icon, label, screen in user_items:
+                active = (st.session_state.screen == screen)
+                btn_label = f"{icon}  {label}"
+                if active:
+                    st.markdown(f'<div class="sidebar-active" style="background: linear-gradient(90deg, #667eea20, transparent); border-left: 3px solid #667eea;">', unsafe_allow_html=True)
+                if st.button(btn_label, key=f"sb_{screen}", use_container_width=True):
+                    st.session_state.screen = screen
+                    st.rerun()
+                if active:
+                    st.markdown('</div>', unsafe_allow_html=True)
+
+            # # Notifications with badge (dynamic)
+            # notif_label = f"🔔 {_('notifications')}"
+            # if unread_count > 0:
+            #     notif_label = f"🔔 {_('notifications')} <span style='background:#EF4444; color:white; border-radius:20px; padding:0 8px; margin-left:6px; font-size:0.7rem;'>{unread_count}</span>"
+            # active = (st.session_state.screen == "notifications")
+            # if active:
+            #     st.markdown(f'<div class="sidebar-active" style="background: linear-gradient(90deg, #667eea20, transparent); border-left: 3px solid #667eea;">', unsafe_allow_html=True)
+            # if st.button(notif_label, key="sb_notifications", use_container_width=True):
+            #     st.session_state.screen = "notifications"
+            #     st.rerun()
+            # if active:
+            #     st.markdown('</div>', unsafe_allow_html=True)
+
         elif role == "official":
-            menu_items = [
-                ("🏠  Dashboard", "official_dashboard"),
-                ("📂  Complaints", "official_complaints"),
-                ("📊  Analytics", "analytics"),
-                ("🔔  Notifications", "notifications"),
-                ("⚙️  Settings", "settings"),
+            off_items = [
+                ("📊", _("dashboard"), "official_dashboard"),
+                ("📋", _("complaints"), "official_complaints"),
+                ("🏆", _("leaderboard"), "official_leaderboard"),
+                ("📜", _("govt_schemes"), "schemes"),
             ]
+            for icon, label, screen in off_items:
+                active = (st.session_state.screen == screen)
+                btn_label = f"{icon}  {label}"
+                if active:
+                    st.markdown(f'<div class="sidebar-active" style="background: linear-gradient(90deg, #667eea20, transparent); border-left: 3px solid #667eea;">', unsafe_allow_html=True)
+                if st.button(btn_label, key=f"sb_{screen}", use_container_width=True):
+                    st.session_state.screen = screen
+                    st.rerun()
+                if active:
+                    st.markdown('</div>', unsafe_allow_html=True)
+
         elif role == "admin":
-            menu_items = [
-                ("🏠  Dashboard", "admin_dashboard"),
-                ("👥  Users", "users"),
-                ("🏢  Departments", "departments"),
-                ("📈  Analytics", "analytics"),
-                ("⚙️  Settings", "settings"),
-            ]
+            # Admin menu with categories (use st.expander for groups)
+            with st.expander("📊 Overview", expanded=False):
+                admin_items = [
+                    ("📊", _("dashboard"), "admin_dashboard"),
+                    ("🏢", _("departments"), "admin_departments"),
+                    ("👥", _("officials"), "admin_officials"),
+                    ("📢", _("all_complaints"), "admin_complaints"),
+                ]
+                for icon, label, screen in admin_items:
+                    active = (st.session_state.screen == screen)
+                    btn_label = f"{icon}  {label}"
+                    if active:
+                        st.markdown(f'<div class="sidebar-active" style="background: linear-gradient(90deg, #667eea20, transparent); border-left: 3px solid #667eea;">', unsafe_allow_html=True)
+                    if st.button(btn_label, key=f"sb_{screen}", use_container_width=True):
+                        st.session_state.screen = screen
+                        st.rerun()
+                    if active:
+                        st.markdown('</div>', unsafe_allow_html=True)
+            with st.expander("🏆 Performance", expanded=False):
+                perf_items = [
+                    ("🏆", _("leaderboard"), "admin_leaderboard"),
+                    ("🔮", "Predictive AI", "predictive_analytics"),
+                    ("⏱️", "SLA Tracking", "sla_management"),
+                ]
+                for icon, label, screen in perf_items:
+                    active = (st.session_state.screen == screen)
+                    btn_label = f"{icon}  {label}"
+                    if active:
+                        st.markdown(f'<div class="sidebar-active" style="background: linear-gradient(90deg, #667eea20, transparent); border-left: 3px solid #667eea;">', unsafe_allow_html=True)
+                    if st.button(btn_label, key=f"sb_{screen}", use_container_width=True):
+                        st.session_state.screen = screen
+                        st.rerun()
+                    if active:
+                        st.markdown('</div>', unsafe_allow_html=True)
+            with st.expander("🏙️ City Analytics", expanded=False):
+                if st.button("🏆 City Health Score", key="sb_city_health", use_container_width=True):
+                    st.session_state.screen = "city_health_score"
+                    st.rerun()
+            with st.expander("📡 Live Monitoring", expanded=False):
+                if st.button("📈 Live Dashboard", key="sb_live_dashboard", use_container_width=True):
+                    st.session_state.screen = "live_dashboard"
+                    st.rerun()
+            with st.expander("📜 Content", expanded=False):
+                content_items = [
+                    ("📜", _("schemes"), "admin_schemes"),
+                    ("🗺️", "Heatmap", "admin_heatmap"),
+                ]
+                for icon, label, screen in content_items:
+                    active = (st.session_state.screen == screen)
+                    btn_label = f"{icon}  {label}"
+                    if active:
+                        st.markdown(f'<div class="sidebar-active" style="background: linear-gradient(90deg, #667eea20, transparent); border-left: 3px solid #667eea;">', unsafe_allow_html=True)
+                    if st.button(btn_label, key=f"sb_{screen}", use_container_width=True):
+                        st.session_state.screen = screen
+                        st.rerun()
+                    if active:
+                        st.markdown('</div>', unsafe_allow_html=True)
 
-        for label, screen in menu_items:
-            is_active = (current_screen == screen)
-            wrapper_class = "nav-active" if is_active else "nav-item"
-            st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
-            if st.button(label, key=f"sb_{screen}", use_container_width=True):
-                st.session_state.screen = screen
+        # ================================================================
+        # LOGGED OUT SIDEBAR
+        # ================================================================
+        else:
+            st.info("👋 Please login to access the portal")
+            col1, col2 = st.columns(2)
+            with col1:
+                if st.button("👤 Citizen", key="login_citizen", use_container_width=True):
+                    st.session_state.screen = "user_login"
+                    st.rerun()
+            with col2:
+                if st.button("🏢 Official", key="login_official", use_container_width=True):
+                    st.session_state.screen = "official_login"
+                    st.rerun()
+            if st.button("👑 Admin", key="login_admin", use_container_width=True):
+                st.session_state.screen = "admin_login"
                 st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
 
-        # ACCOUNT
-        st.markdown('<div class="sb-section">Account</div>', unsafe_allow_html=True)
+        st.markdown("---")
 
-        st.markdown('<div class="nav-logout">', unsafe_allow_html=True)
-        if st.button("🚪  Logout", key="sidebar_logout", use_container_width=True):
-            for k in ["user", "official", "admin", "role"]:
-                st.session_state.pop(k, None)
-            st.session_state.screen = "login_type"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        # ── Theme & Language Toggles (at bottom) ─────────────────────────
+        col1, col2 = st.columns(2)
+        with col1:
+            dark_label = "🌙 Dark" if not dark else "☀️ Light"
+            if st.button(dark_label, key="sb_dark", use_container_width=True):
+                st.session_state.dark_mode = not dark
+                st.rerun()
+        with col2:
+            lang_label = "🇮🇳 HI" if st.session_state.language == "en" else "🇬🇧 EN"
+            if st.button(lang_label, key="sb_lang", use_container_width=True):
+                st.session_state.language = "hi" if st.session_state.language == "en" else "en"
+                st.rerun()
 
-        # FOOTER
-        st.markdown("""
-        <div class="sb-footer">
-            <span class="sb-footer-dot"></span><strong>Jan Seva Portal</strong><br>
-            Modern Government System · v2.0
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown("</div>", unsafe_allow_html=True)
+        # Logout button (only when logged in)
+        if role:
+            if st.button("🔓 Logout", key="sb_logout", use_container_width=True):
+                logout()
+
+        # Footer
+        st.markdown("""<div style="text-align:center;font-size:.66rem;opacity:.35;padding:12px 0 4px;">
+            Jan Seva Portal v2.0<br>Made in 🇮🇳
+        </div>""", unsafe_allow_html=True)
+# def _sb_nav(items):
+#     for icon, label, scr in items:
+#         active = st.session_state.screen == scr
+#         if active:
+#             st.markdown('<div class="sidebar-active">', unsafe_allow_html=True)
+#         if st.button(f"{icon}  {label}", key=f"sb_{scr}", use_container_width=True):
+#             st.session_state.screen = scr
+#             st.rerun()
+#         if active:
+#             st.markdown('</div>', unsafe_allow_html=True)
 # ═════════════════════════════════════════════════════════════════════════════
 # ROUTER
 # ═════════════════════════════════════════════════════════════════════════════
