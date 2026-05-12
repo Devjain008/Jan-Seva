@@ -1434,901 +1434,557 @@ def pg_language():
     </script>
     """, height=0)
 
-
-
+ 
+import streamlit as st
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-#  SINGLE LOGIN CSS ENGINE  — light theme only, modern SaaS polish
+#  Shared base CSS  (inject once via get_css() in your real app)
 # ─────────────────────────────────────────────────────────────────────────────
-
-def _login_css(accent="#6366F1", accent2="#8B5CF6"):
-
-    try:
-        r = int(accent[1:3], 16)
-        g = int(accent[3:5], 16)
-        b = int(accent[5:7], 16)
-        ACCENT_RGB = f"{r},{g},{b}"
-    except Exception:
-        ACCENT_RGB = "99,102,241"
-
+ 
+def _base_css() -> str:
+    return """
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=Sora:wght@600;700&display=swap');
+ 
+/* ── Reset & base ─────────────────────────────────────────────────── */
+html, body, [class*="css"] {
+    font-family: 'DM Sans', sans-serif !important;
+}
+.stApp {
+    background: #F5F3EF !important;
+}
+.block-container {
+    padding-top: 0 !important;
+    max-width: 860px !important;
+}
+ 
+/* ── Hide Streamlit chrome ────────────────────────────────────────── */
+#MainMenu, footer, header { visibility: hidden; }
+ 
+/* ── Streamlit button override ────────────────────────────────────── */
+.stButton > button {
+    font-family: 'DM Sans', sans-serif !important;
+    font-weight: 500 !important;
+    font-size: 13.5px !important;
+    border-radius: 10px !important;
+    border: 1.5px solid #E5E7EB !important;
+    background: #fff !important;
+    color: #374151 !important;
+    padding: 9px 18px !important;
+    transition: all 0.18s ease !important;
+    letter-spacing: 0.1px !important;
+    box-shadow: none !important;
+}
+.stButton > button:hover {
+    background: #F9FAFB !important;
+    border-color: #D1D5DB !important;
+    color: #111827 !important;
+}
+.stButton > button:active { transform: scale(0.98) !important; }
+ 
+/* ── Inputs ───────────────────────────────────────────────────────── */
+.stTextInput > div > div > input,
+.stTextArea > div > div > textarea {
+    font-family: 'DM Sans', sans-serif !important;
+    background: #FAFAFA !important;
+    border: 1.5px solid #E5E7EB !important;
+    border-radius: 10px !important;
+    color: #111827 !important;
+    font-size: 14px !important;
+    padding: 10px 14px !important;
+}
+.stTextInput > div > div > input:focus,
+.stTextArea > div > div > textarea:focus {
+    border-color: #6366F1 !important;
+    box-shadow: 0 0 0 3px rgba(99,102,241,0.10) !important;
+    background: #fff !important;
+}
+.stTextInput label, .stTextArea label {
+    font-size: 12px !important;
+    font-weight: 500 !important;
+    color: #374151 !important;
+    font-family: 'DM Sans', sans-serif !important;
+}
+ 
+/* ── Tabs ─────────────────────────────────────────────────────────── */
+.stTabs [data-baseweb="tab-list"] {
+    background: #F3F4F6 !important;
+    border-radius: 10px !important;
+    padding: 4px !important;
+    gap: 4px !important;
+    border-bottom: none !important;
+}
+.stTabs [data-baseweb="tab"] {
+    border-radius: 8px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 400 !important;
+    color: #6B7280 !important;
+    background: transparent !important;
+    border: none !important;
+    padding: 8px 20px !important;
+}
+.stTabs [aria-selected="true"] {
+    background: #fff !important;
+    color: #111827 !important;
+    font-weight: 500 !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
+}
+.stTabs [data-baseweb="tab-highlight"] { display: none !important; }
+ 
+/* ── Form submit button ───────────────────────────────────────────── */
+.stFormSubmitButton > button {
+    font-family: 'DM Sans', sans-serif !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border-radius: 10px !important;
+    padding: 11px 18px !important;
+    color: #fff !important;
+    border: none !important;
+    width: 100% !important;
+}
+ 
+/* ── Alerts ───────────────────────────────────────────────────────── */
+.stAlert {
+    border-radius: 10px !important;
+    font-size: 13px !important;
+    font-family: 'DM Sans', sans-serif !important;
+    border-left-width: 3px !important;
+}
+ 
+/* ── Spinner ──────────────────────────────────────────────────────── */
+.stSpinner > div { border-color: #6366F1 transparent transparent !important; }
+</style>
+"""
+ 
+ 
+def _login_css(accent: str = "#6366F1", accent2: str = "#8B5CF6") -> str:
+    """Per-page accent colours injected on top of base."""
     return f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800;1,14..32,400&display=swap');
-
-/* ════════════════════════════════════════════════════
-   RESET & PAGE
-════════════════════════════════════════════════════ */
-#MainMenu, footer, header, .stDeployButton,
-.viewerBadge_container__1QSob {{ display:none!important; }}
-
-html, body, .stApp {{
-    background: #F7F8FA !important;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif !important;
-    -webkit-font-smoothing: antialiased !important;
-    color: #111827 !important;
-}}
-
-.main .block-container {{
-    padding: 2.5rem 1.25rem 4rem !important;
-    max-width: 460px !important;
-    margin: 0 auto !important;
-}}
-
-/* subtle page gradient */
-body::before {{
-    content: '';
-    position: fixed;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 80% 50% at 50% -10%, rgba({ACCENT_RGB},0.07) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba({ACCENT_RGB},0.05) 0%, transparent 60%);
-    pointer-events: none;
-    z-index: 0;
-}}
-
-/* top stripe */
-.stApp::before {{
-    content: '';
-    display: block;
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, {accent}88, {accent2}88, transparent);
-    z-index: 9999;
-    pointer-events: none;
-}}
-
-/* ════════════════════════════════════════════════════
-   HERO  — minimal, Stripe-like
-════════════════════════════════════════════════════ */
-.lp-hero {{
-    text-align: center;
-    padding: 2.5rem 0 1.5rem;
-    position: relative;
-    z-index: 1;
-}}
-.lp-hero-badge {{
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 100px;
-    padding: 5px 14px;
-    font-size: 0.72rem;
-    font-weight: 600;
-    color: #6B7280;
-    margin-bottom: 18px;
-    letter-spacing: 0.01em;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-}}
-.lp-hero-badge-dot {{
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    background: {accent};
-    box-shadow: 0 0 0 2px rgba({ACCENT_RGB},0.20);
-}}
-.lp-hero-icon {{
-    font-size: 2.8rem;
-    display: block;
-    margin-bottom: 16px;
-    line-height: 1;
-}}
-.lp-hero-title {{
-    font-size: 1.65rem;
-    font-weight: 700;
-    color: #111827;
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-    margin-bottom: 8px;
-}}
-.lp-hero-sub {{
-    font-size: 0.875rem;
-    color: #6B7280;
-    line-height: 1.6;
-    max-width: 320px;
-    margin: 0 auto;
-    font-weight: 400;
-}}
-
-/* ════════════════════════════════════════════════════
-   AUTH CARD  — clean white card, Stripe/Notion style
-════════════════════════════════════════════════════ */
-.lp-card {{
-    background: #FFFFFF;
-    border: 1px solid #E5E7EB;
-    border-radius: 16px;
-    padding: 28px 28px 24px;
-    margin: 0 0 12px;
-    position: relative;
-    z-index: 1;
-    box-shadow:
-        0 1px 3px rgba(0,0,0,0.06),
-        0 4px 16px rgba(0,0,0,0.04);
-    transition: box-shadow 0.2s ease;
-}}
-.lp-card:hover {{
-    box-shadow:
-        0 1px 3px rgba(0,0,0,0.06),
-        0 8px 24px rgba(0,0,0,0.07);
-}}
-
-/* card top accent line */
-.lp-card::before {{
-    content: '';
-    position: absolute;
-    top: 0; left: 24px; right: 24px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, {accent}44, transparent);
-}}
-
-.lp-card-label {{
-    font-size: 0.68rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.10em;
-    color: #9CA3AF;
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}}
-.lp-card-label::after {{
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #F3F4F6;
-}}
-
-/* ════════════════════════════════════════════════════
-   INPUTS  — GitHub / Linear style
-════════════════════════════════════════════════════ */
-.stTextInput > div > div > input,
-.stTextArea  > div > div > textarea {{
-    background: #FFFFFF !important;
-    border: 1.5px solid #D1D5DB !important;
-    border-radius: 10px !important;
-    color: #111827 !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.875rem !important;
-    font-weight: 400 !important;
-    padding: 10px 14px !important;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
-    min-height: 42px !important;
-}}
-.stTextInput > div > div > input:focus,
-.stTextArea  > div > div > textarea:focus {{
-    border-color: {accent} !important;
-    box-shadow: 0 0 0 3px rgba({ACCENT_RGB},0.12) !important;
-    outline: none !important;
-    background: #FAFBFF !important;
-}}
-.stTextInput > div > div > input:hover:not(:focus),
-.stTextArea  > div > div > textarea:hover:not(:focus) {{
-    border-color: #9CA3AF !important;
-}}
-.stTextInput > div > div > input::placeholder,
-.stTextArea  > div > div > textarea::placeholder {{
-    color: #9CA3AF !important;
-    font-weight: 400 !important;
-}}
-.stTextInput label, .stTextArea label {{
-    color: #374151 !important;
-    font-size: 0.800rem !important;
-    font-weight: 500 !important;
-    text-transform: none !important;
-    letter-spacing: 0 !important;
-    margin-bottom: 5px !important;
-    font-family: 'Inter', sans-serif !important;
-}}
-
-/* ════════════════════════════════════════════════════
-   BUTTONS  — primary: solid, modern
-════════════════════════════════════════════════════ */
-.stButton > button {{
-    background: {accent} !important;
-    color: #FFFFFF !important;
+/* Primary CTA button (accent coloured) */
+div[data-testid="stForm"] .stFormSubmitButton > button,
+.primary-btn .stButton > button {{
+    background: linear-gradient(135deg, {accent}, {accent2}) !important;
     border: none !important;
-    border-radius: 10px !important;
-    padding: 10px 18px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    letter-spacing: -0.01em !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    min-height: 42px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 6px !important;
-    transition: all 0.16s ease !important;
-    box-shadow:
-        0 1px 2px rgba(0,0,0,0.08),
-        0 4px 12px rgba({ACCENT_RGB},0.24) !important;
-    position: relative !important;
-    overflow: hidden !important;
+    color: #fff !important;
+    box-shadow: 0 2px 10px {accent}44 !important;
 }}
-.stButton > button::after {{
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
-    pointer-events: none;
-}}
-.stButton > button:hover {{
-    background: {accent} !important;
+div[data-testid="stForm"] .stFormSubmitButton > button:hover,
+.primary-btn .stButton > button:hover {{
     filter: brightness(1.08) !important;
-    transform: translateY(-1px) !important;
-    box-shadow:
-        0 2px 4px rgba(0,0,0,0.08),
-        0 8px 20px rgba({ACCENT_RGB},0.32) !important;
 }}
-.stButton > button:active {{
-    filter: brightness(0.96) !important;
-    transform: translateY(0) !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.08) !important;
-}}
-.stButton > button:focus {{
-    outline: none !important;
-    box-shadow:
-        0 0 0 3px rgba({ACCENT_RGB},0.20),
-        0 4px 12px rgba({ACCENT_RGB},0.24) !important;
-}}
-.stButton > button:disabled {{
-    opacity: 0.48 !important;
-    cursor: not-allowed !important;
-    transform: none !important;
-    filter: none !important;
-}}
-
-/* ── form submit mirrors primary ── */
-[data-testid="stFormSubmitButton"] > button {{
-    background: {accent} !important;
-    color: #FFFFFF !important;
-    border: none !important;
-    border-radius: 10px !important;
-    padding: 10px 18px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.875rem !important;
-    font-weight: 600 !important;
-    width: 100% !important;
-    cursor: pointer !important;
-    min-height: 42px !important;
-    transition: all 0.16s ease !important;
-    box-shadow:
-        0 1px 2px rgba(0,0,0,0.08),
-        0 4px 12px rgba({ACCENT_RGB},0.24) !important;
-    margin-top: 8px !important;
-    position: relative !important;
-    overflow: hidden !important;
-}}
-[data-testid="stFormSubmitButton"] > button::after {{
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, transparent 100%);
-    pointer-events: none;
-}}
-[data-testid="stFormSubmitButton"] > button:hover {{
-    filter: brightness(1.08) !important;
-    transform: translateY(-1px) !important;
-    box-shadow:
-        0 2px 4px rgba(0,0,0,0.08),
-        0 8px 20px rgba({ACCENT_RGB},0.32) !important;
-}}
-[data-testid="stFormSubmitButton"] > button:active {{
-    filter: brightness(0.96) !important;
-    transform: translateY(0) !important;
-}}
-
-/* ── back / secondary button ── */
-.lp-back .stButton > button {{
-    background: #FFFFFF !important;
-    color: #6B7280 !important;
+ 
+/* Ghost back button */
+.ghost-btn .stButton > button {{
+    background: transparent !important;
     border: 1.5px solid #E5E7EB !important;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.04) !important;
-    font-weight: 500 !important;
+    color: #6B7280 !important;
+    font-size: 12.5px !important;
 }}
-.lp-back .stButton > button:hover {{
+.ghost-btn .stButton > button:hover {{
     background: #F9FAFB !important;
     color: #374151 !important;
-    border-color: #D1D5DB !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
-    transform: none !important;
-    filter: none !important;
-}}
-
-/* ── ghost / text button (forgot password etc) ── */
-.lp-ghost .stButton > button {{
-    background: transparent !important;
-    color: {accent} !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-size: 0.825rem !important;
-    font-weight: 500 !important;
-    padding: 6px 0 !important;
-    min-height: auto !important;
-    text-decoration: none !important;
-    width: auto !important;
-}}
-.lp-ghost .stButton > button:hover {{
-    color: {accent2} !important;
-    background: transparent !important;
-    transform: none !important;
-    filter: none !important;
-    box-shadow: none !important;
-    text-decoration: underline !important;
-}}
-
-/* ════════════════════════════════════════════════════
-   TABS  — pill style, minimal
-════════════════════════════════════════════════════ */
-.stTabs [data-baseweb="tab-list"] {{
-    background: #F3F4F6 !important;
-    border: 1px solid #E5E7EB !important;
-    border-radius: 12px !important;
-    padding: 4px !important;
-    gap: 3px !important;
-    box-shadow: none !important;
-}}
-.stTabs [data-baseweb="tab"] {{
-    border-radius: 9px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.840rem !important;
-    font-weight: 500 !important;
-    color: #6B7280 !important;
-    padding: 8px 18px !important;
-    border: none !important;
-    transition: all 0.15s ease !important;
-    min-height: 36px !important;
-}}
-.stTabs [data-baseweb="tab"]:hover {{
-    color: #374151 !important;
-    background: #FFFFFF !important;
-}}
-.stTabs [aria-selected="true"] {{
-    background: #FFFFFF !important;
-    color: #111827 !important;
-    font-weight: 600 !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.10) !important;
-}}
-.stTabs [data-baseweb="tab-panel"] {{
-    background: transparent !important;
-    padding: 16px 0 0 !important;
-}}
-
-/* ── custom lp-tabs pill bar (official login) ── */
-.lp-tabs {{
-    display: flex;
-    gap: 4px;
-    background: #F3F4F6;
-    border: 1px solid #E5E7EB;
-    border-radius: 12px;
-    padding: 4px;
-    margin-bottom: 18px;
-}}
-.lp-tab-active .stButton > button {{
-    background: #FFFFFF !important;
-    color: #111827 !important;
-    border: none !important;
-    font-weight: 600 !important;
-    font-size: 0.840rem !important;
-    border-radius: 9px !important;
-    padding: 8px 16px !important;
-    min-height: 36px !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.10) !important;
-    transform: none !important;
-    filter: none !important;
-}}
-.lp-tab-idle .stButton > button {{
-    background: transparent !important;
-    color: #6B7280 !important;
-    border: none !important;
-    font-weight: 500 !important;
-    font-size: 0.840rem !important;
-    border-radius: 9px !important;
-    padding: 8px 16px !important;
-    min-height: 36px !important;
-    box-shadow: none !important;
-    transform: none !important;
-    filter: none !important;
-}}
-.lp-tab-idle .stButton > button:hover {{
-    background: #FFFFFF !important;
-    color: #374151 !important;
-    box-shadow: none !important;
-    transform: none !important;
-    filter: none !important;
-}}
-
-/* ════════════════════════════════════════════════════
-   STEP INDICATOR
-════════════════════════════════════════════════════ */
-.lp-step-wrap {{
-    display: flex;
-    align-items: center;
-    margin-bottom: 22px;
-}}
-.lp-step-col {{
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    flex: 0 0 auto;
-}}
-.lp-step-dot {{
-    width: 32px; height: 32px;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.78rem; font-weight: 700;
-    transition: all 0.20s ease;
-}}
-.lp-step-dot.active {{
-    background: {accent};
-    color: #FFFFFF;
-    box-shadow: 0 0 0 4px rgba({ACCENT_RGB},0.14);
-}}
-.lp-step-dot.done {{
-    background: {accent};
-    color: #FFFFFF;
-}}
-.lp-step-dot.idle {{
-    background: #F3F4F6;
-    color: #9CA3AF;
-    border: 1.5px solid #E5E7EB;
-}}
-.lp-step-lbl {{
-    font-size: 0.62rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-}}
-.lp-step-lbl.active {{ color: {accent}; }}
-.lp-step-lbl.idle   {{ color: #9CA3AF; }}
-.lp-step-line {{
-    flex: 1;
-    height: 1.5px;
-    background: #E5E7EB;
-    margin: 0 10px 20px;
-    border-radius: 2px;
-}}
-
-/* ════════════════════════════════════════════════════
-   STATUS BANNERS  — clean, no blur
-════════════════════════════════════════════════════ */
-/* OTP success box */
-.lp-otp-box {{
-    background: #F0FDF4;
-    border: 1.5px solid #BBF7D0;
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin: 12px 0;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}}
-.lp-otp-icon {{ font-size: 1.3rem; flex-shrink: 0; }}
-.lp-otp-label {{
-    font-size: 0.68rem;
-    color: #16A34A;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 3px;
-}}
-.lp-otp-code {{
-    font-family: 'DM Mono', 'Courier New', monospace;
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: #15803D;
-    letter-spacing: 8px;
-    display: block;
-    line-height: 1;
-}}
-
-/* phone badge */
-.lp-phone-badge {{
-    background: #EFF6FF;
-    border: 1px solid #BFDBFE;
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 0.800rem;
-    color: #1D4ED8;
-    font-weight: 500;
-    margin-bottom: 14px;
-    display: flex;
-    align-items: center;
-    gap: 6px;
-}}
-
-/* demo hint */
-.lp-demo-hint {{
-    background: #FFFBEB;
-    border: 1px solid #FDE68A;
-    border-radius: 10px;
-    padding: 11px 14px;
-    margin: 10px 0 0;
-    font-size: 0.800rem;
-    line-height: 1.6;
-}}
-.lp-demo-row {{ color: #92400E; margin-bottom: 2px; }}
-.lp-demo-row strong {{ font-weight: 600; }}
-
-/* verified state */
-.lp-verified {{
-    background: #F0FDF4;
-    border: 1px solid #BBF7D0;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 0.800rem;
-    color: #15803D;
-    font-weight: 500;
-    margin: 10px 0;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-}}
-
-/* warning */
-.lp-warn {{
-    background: #FFFBEB;
-    border: 1px solid #FDE68A;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 0.800rem;
-    color: #92400E;
-    font-weight: 500;
-    margin: 10px 0;
-}}
-
-/* info */
-.lp-info {{
-    background: #EFF6FF;
-    border: 1px solid #BFDBFE;
-    border-radius: 10px;
-    padding: 10px 14px;
-    font-size: 0.800rem;
-    color: #1D4ED8;
-    font-weight: 500;
-    margin: 10px 0;
-    display: flex;
-    align-items: flex-start;
-    gap: 7px;
-    line-height: 1.55;
-}}
-
-/* ════════════════════════════════════════════════════
-   STREAMLIT ALERTS — minimal restyle
-════════════════════════════════════════════════════ */
-.stAlert {{
-    border-radius: 10px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 0.840rem !important;
-    border-width: 1px !important;
-}}
-
-/* ════════════════════════════════════════════════════
-   DIVIDER TEXT  (— or — style)
-════════════════════════════════════════════════════ */
-.lp-divider {{
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 16px 0;
-    color: #9CA3AF;
-    font-size: 0.78rem;
-    font-weight: 500;
-}}
-.lp-divider::before, .lp-divider::after {{
-    content: '';
-    flex: 1;
-    height: 1px;
-    background: #E5E7EB;
-}}
-
-/* ════════════════════════════════════════════════════
-   FOOTER LINK
-════════════════════════════════════════════════════ */
-.lp-footer-text {{
-    text-align: center;
-    font-size: 0.800rem;
-    color: #6B7280;
-    margin-top: 6px;
-    line-height: 1.5;
-}}
-
-/* ════════════════════════════════════════════════════
-   MISC
-════════════════════════════════════════════════════ */
-p, span, div, label, small {{ color: inherit; }}
-.stMarkdown p {{ color: #374151 !important; }}
-
-::-webkit-scrollbar {{ width: 5px; }}
-::-webkit-scrollbar-track {{ background: transparent; }}
-::-webkit-scrollbar-thumb {{ background: #D1D5DB; border-radius: 99px; }}
-::-webkit-scrollbar-thumb:hover {{ background: #9CA3AF; }}
-
-/* ════════════════════════════════════════════════════
-   RESPONSIVE BREAKPOINTS
-════════════════════════════════════════════════════ */
-@media (max-width: 1024px) {{
-    .main .block-container {{
-        max-width: 440px !important;
-        padding: 2rem 1.5rem 3.5rem !important;
-    }}
-}}
-
-@media (max-width: 768px) {{
-    .main .block-container {{
-        max-width: 100% !important;
-        padding: 1.5rem 1.25rem 3rem !important;
-    }}
-    .lp-hero {{ padding: 1.75rem 0 1.25rem; }}
-    .lp-hero-title {{ font-size: 1.4rem; }}
-    .lp-hero-sub {{ font-size: 0.825rem; }}
-    .lp-card {{ padding: 22px 20px 18px; border-radius: 14px; }}
-    .stButton > button {{
-        padding: 10px 14px !important;
-        font-size: 0.840rem !important;
-    }}
-    [data-testid="stFormSubmitButton"] > button {{
-        padding: 10px 14px !important;
-    }}
-    .lp-otp-code {{ font-size: 1.5rem; letter-spacing: 6px; }}
-    .stTabs [data-baseweb="tab"] {{
-        padding: 7px 14px !important;
-        font-size: 0.800rem !important;
-    }}
-}}
-
-@media (max-width: 480px) {{
-    .main .block-container {{
-        padding: 1.25rem 1rem 2.5rem !important;
-    }}
-    .lp-hero {{ padding: 1.5rem 0 1rem; }}
-    .lp-hero-icon {{ font-size: 2.2rem; margin-bottom: 12px; }}
-    .lp-hero-title {{ font-size: 1.25rem; letter-spacing: -0.02em; }}
-    .lp-hero-sub {{ font-size: 0.800rem; }}
-    .lp-card {{ padding: 18px 16px 16px; border-radius: 12px; }}
-    .lp-card-label {{ font-size: 0.65rem; margin-bottom: 16px; }}
-    .stButton > button {{
-        padding: 9px 12px !important;
-        font-size: 0.825rem !important;
-        min-height: 40px !important;
-    }}
-    [data-testid="stFormSubmitButton"] > button {{
-        padding: 9px 12px !important;
-        min-height: 40px !important;
-    }}
-    .lp-otp-code {{ font-size: 1.35rem; letter-spacing: 4px; }}
-    .lp-tabs {{ gap: 3px; padding: 3px; border-radius: 10px; }}
-    .stTabs [data-baseweb="tab-list"] {{
-        border-radius: 10px !important;
-        padding: 3px !important;
-    }}
-    .stTabs [data-baseweb="tab"] {{
-        padding: 7px 12px !important;
-        font-size: 0.780rem !important;
-    }}
-    .lp-step-dot {{ width: 28px; height: 28px; font-size: 0.72rem; }}
-    .lp-step-lbl {{ font-size: 0.58rem; }}
 }}
 </style>
 """
-
-
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_login_type()  — Stripe/Linear role selection
+#  HTML building blocks
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
+def _topbar() -> str:
+    return """
+<div style="
+    background:#1A1A1A;
+    padding:10px 28px;
+    border-radius:0 0 16px 16px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:32px;
+">
+    <div style="display:flex;align-items:center;gap:12px;">
+        <div style="
+            width:38px;height:38px;
+            background:#E8660A;
+            border-radius:9px;
+            display:flex;align-items:center;justify-content:center;
+            font-size:20px;
+        ">🏛️</div>
+        <div>
+            <div style="font-family:'Sora',sans-serif;font-weight:700;font-size:15px;color:#fff;letter-spacing:-0.3px;">
+                Jan Seva Portal
+            </div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.4);font-weight:300;">
+                Government of India Initiative
+            </div>
+        </div>
+    </div>
+    <div style="
+        background:rgba(232,102,10,0.15);
+        border:1px solid rgba(232,102,10,0.35);
+        color:#E8660A;
+        font-size:11px;font-weight:500;
+        padding:4px 12px;border-radius:20px;
+        letter-spacing:0.5px;
+    ">● SECURE</div>
+</div>
+"""
+ 
+ 
+def _hero(icon: str, title: str, subtitle: str, gradient: str) -> str:
+    return f"""
+<div style="
+    background:{gradient};
+    border-radius:20px;
+    padding:36px 28px 30px;
+    text-align:center;
+    margin-bottom:20px;
+    position:relative;
+    overflow:hidden;
+">
+    <div style="
+        position:absolute;top:-40px;right:-40px;
+        width:150px;height:150px;
+        background:rgba(255,255,255,0.04);
+        border-radius:50%;
+    "></div>
+    <div style="font-size:2.6rem;margin-bottom:14px;filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25));">{icon}</div>
+    <div style="font-family:'Sora',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:-0.4px;margin-bottom:6px;">
+        {title}
+    </div>
+    <div style="font-size:13px;color:rgba(255,255,255,0.6);font-weight:300;">{subtitle}</div>
+</div>
+"""
+ 
+ 
+def _card_open(label: str = "") -> str:
+    label_html = f'<div style="font-size:10.5px;font-weight:600;color:#9CA3AF;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:20px;">{label}</div>' if label else ""
+    return f"""
+<div style="
+    background:#fff;
+    border:1.5px solid #E5E7EB;
+    border-radius:16px;
+    padding:28px;
+    margin-bottom:14px;
+">
+{label_html}
+"""
+ 
+ 
+def _card_close() -> str:
+    return "</div>"
+ 
+ 
+def _role_tile(css_class: str, icon: str, title: str, desc: str, gradient: str) -> str:
+    return f"""
+<div style="
+    background:#fff;
+    border:1.5px solid #E5E7EB;
+    border-radius:16px;
+    padding:28px 18px 22px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+    transition:all 0.2s ease;
+">
+    <div style="
+        position:absolute;top:0;left:0;right:0;
+        height:3px;
+        background:{gradient};
+        border-radius:16px 16px 0 0;
+    "></div>
+    <div style="font-size:2rem;margin-bottom:12px;">{icon}</div>
+    <div style="font-family:'Sora',sans-serif;font-size:14px;font-weight:700;color:#111827;margin-bottom:6px;">
+        {title}
+    </div>
+    <div style="font-size:12px;color:#6B7280;line-height:1.55;margin-bottom:18px;font-weight:300;">
+        {desc}
+    </div>
+</div>
+"""
+ 
+ 
+def _otp_badge(phone: str, otp: str) -> str:
+    return f"""
+<div style="
+    background:#F8FAFC;
+    border:1px solid #E5E7EB;
+    border-radius:12px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+">
+    <span style="font-size:1.1rem;">📱</span>
+    <div>
+        <div style="font-size:11px;color:#9CA3AF;font-weight:400;margin-bottom:2px;">OTP sent to</div>
+        <div style="font-size:13.5px;color:#111827;font-weight:500;">+91 {phone}</div>
+    </div>
+    <div style="
+        margin-left:auto;
+        background:linear-gradient(135deg,#F0FDF4,#DCFCE7);
+        border:1px solid #BBF7D0;
+        border-radius:8px;
+        padding:6px 12px;
+        text-align:center;
+    ">
+        <div style="font-size:10px;color:#6B7280;font-weight:400;">Demo OTP</div>
+        <div style="font-size:18px;font-weight:700;color:#16A34A;letter-spacing:3px;">{otp}</div>
+    </div>
+</div>
+"""
+ 
+ 
+def _step_indicator(step: int) -> str:
+    s1_cls = "active" if step == 1 else "done"
+    s2_cls = "active" if step == 2 else "idle"
+    s1_txt = "1" if step == 1 else "✓"
+ 
+    def dot(cls, txt):
+        if cls == "active":
+            bg, color, border = "#6366F1", "#fff", "#6366F1"
+        elif cls == "done":
+            bg, color, border = "#ECFDF5", "#16A34A", "#16A34A"
+        else:
+            bg, color, border = "#F3F4F6", "#9CA3AF", "#E5E7EB"
+        return f"""
+        <div style="
+            width:30px;height:30px;
+            border-radius:50%;
+            background:{bg};
+            border:2px solid {border};
+            color:{color};
+            font-size:12px;font-weight:600;
+            display:flex;align-items:center;justify-content:center;
+        ">{txt}</div>"""
+ 
+    def lbl(cls, text):
+        color = "#111827" if cls in ("active", "done") else "#9CA3AF"
+        return f'<div style="font-size:11px;color:{color};font-weight:{"500" if cls=="active" else "400"};margin-top:4px;">{text}</div>'
+ 
+    return f"""
+<div style="display:flex;align-items:center;justify-content:center;gap:0;margin-bottom:24px;">
+    <div style="text-align:center;">
+        {dot(s1_cls, s1_txt)}
+        {lbl(s1_cls, "Details")}
+    </div>
+    <div style="flex:1;max-width:80px;height:2px;background:{'#6366F1' if step==2 else '#E5E7EB'};margin:0 12px;margin-bottom:18px;border-radius:2px;"></div>
+    <div style="text-align:center;">
+        {dot(s2_cls, "2")}
+        {lbl(s2_cls, "Verify")}
+    </div>
+</div>
+"""
+ 
+ 
+def _info_box(text: str, icon: str = "ℹ️") -> str:
+    return f"""
+<div style="
+    background:#EFF6FF;border:1px solid #BFDBFE;
+    border-radius:10px;padding:12px 14px;
+    font-size:13px;color:#1D4ED8;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;
+">
+    <span>{icon}</span><span>{text}</span>
+</div>
+"""
+ 
+ 
+def _warn_box(text: str) -> str:
+    return f"""
+<div style="
+    background:#FFFBEB;border:1px solid #FDE68A;
+    border-radius:10px;padding:12px 14px;
+    font-size:13px;color:#92400E;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;
+">
+    <span>⚠️</span><span>{text}</span>
+</div>
+"""
+ 
+ 
+def _verified_box(text: str) -> str:
+    return f"""
+<div style="
+    background:#F0FDF4;border:1px solid #BBF7D0;
+    border-radius:10px;padding:12px 14px;
+    font-size:13px;color:#16A34A;font-weight:500;
+    margin-bottom:14px;display:flex;align-items:center;gap:8px;
+">
+    <span>✅</span><span>{text}</span>
+</div>
+"""
+ 
+ 
+def _divider() -> str:
+    return '<div style="height:14px;"></div>'
+ 
+ 
+def _footer(text: str = "Secure · Trusted · Government of India") -> str:
+    return f"""
+<div style="
+    text-align:center;
+    font-size:11.5px;
+    color:#9CA3AF;
+    font-weight:300;
+    letter-spacing:0.5px;
+    margin-top:8px;
+    padding-bottom:24px;
+">
+    {text}
+</div>
+"""
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+#  Primary accent button helper
+#  Wraps a st.button in a <div class="primary-btn"> so CSS can colour it
+# ─────────────────────────────────────────────────────────────────────────────
+ 
+def _primary_btn(label: str, key: str, accent: str = "#6366F1", accent2: str = "#8B5CF6") -> bool:
+    st.markdown(f"""
+    <style>
+    div[data-testid="stButton"][id="{key}"] > button,
+    #btn_{key} .stButton > button {{
+        background: linear-gradient(135deg, {accent}, {accent2}) !important;
+        border: none !important;
+        color: #fff !important;
+        box-shadow: 0 2px 10px {accent}44 !important;
+        width: 100% !important;
+        padding: 11px 16px !important;
+        font-size: 14px !important;
+    }}
+    </style>
+    <div id="btn_{key}">
+    """, unsafe_allow_html=True)
+    clicked = st.button(label, key=key, use_container_width=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+    return clicked
+ 
+ 
+# ─────────────────────────────────────────────────────────────────────────────
+#  pg_login_type  — Role selection screen
+# ─────────────────────────────────────────────────────────────────────────────
+ 
 def pg_login_type():
-    _apply_layout("auth") 
-    st.markdown(get_css(dark_mode=False), unsafe_allow_html=True)
-    st.markdown(_login_css(), unsafe_allow_html=True)
-
-    # ── page-level card style for the role tiles ─────────────────────────────
+    st.markdown(_base_css(), unsafe_allow_html=True)
+ 
+    # Role-specific CTA colours
     st.markdown("""
     <style>
-    .role-tile {
-        background    : #FFFFFF;
-        border        : 1.5px solid #E5E7EB;
-        border-radius : 14px;
-        padding       : 24px 18px 20px;
-        text-align    : center;
-        margin-bottom : 6px;
-        position      : relative;
-        overflow      : hidden;
-        transition    : border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
-        box-shadow    : 0 1px 3px rgba(0,0,0,0.05);
-        cursor        : pointer;
-    }
-    .role-tile::before {
-        content       : '';
-        position      : absolute;
-        top: 0; left: 0; right: 0;
-        height        : 3px;
-        border-radius : 14px 14px 0 0;
-    }
-    .role-tile.citizen::before  { background: linear-gradient(90deg,#6366F1,#8B5CF6); }
-    .role-tile.official::before { background: linear-gradient(90deg,#0EA5E9,#6366F1); }
-    .role-tile.admin::before    { background: linear-gradient(90deg,#F59E0B,#EF4444); }
-    .role-tile:hover {
-        border-color  : #D1D5DB;
-        box-shadow    : 0 4px 16px rgba(0,0,0,0.09);
-        transform     : translateY(-2px);
-    }
-    .role-tile-icon  { font-size: 2rem; margin-bottom: 10px; display: block; }
-    .role-tile-title {
-        font-size     : 0.94rem;
-        font-weight   : 700;
-        color         : #111827;
-        margin-bottom : 5px;
-        letter-spacing: -0.01em;
-    }
-    .role-tile-sub {
-        font-size     : 0.75rem;
-        color         : #6B7280;
-        line-height   : 1.5;
-        margin-bottom : 16px;
-    }
-
-    /* Role-specific button colours */
-    .btn-citizen  .stButton > button { background: #6366F1 !important; box-shadow: 0 2px 8px rgba(99,102,241,0.28) !important; }
-    .btn-citizen  .stButton > button:hover { filter: brightness(1.08) !important; }
-    .btn-official .stButton > button { background: #0EA5E9 !important; box-shadow: 0 2px 8px rgba(14,165,233,0.28) !important; }
-    .btn-official .stButton > button:hover { filter: brightness(1.08) !important; }
-    .btn-admin    .stButton > button { background: #F59E0B !important; box-shadow: 0 2px 8px rgba(245,158,11,0.28) !important; }
-    .btn-admin    .stButton > button:hover { filter: brightness(1.08) !important; }
-
-    @media (max-width: 480px) {
-        .role-tile { padding: 18px 14px 16px; border-radius: 12px; }
-        .role-tile-icon { font-size: 1.6rem; }
-        .role-tile-title { font-size: 0.875rem; }
-        .role-tile-sub { font-size: 0.72rem; margin-bottom: 12px; }
-    }
+    .btn-citizen  .stButton > button { background: linear-gradient(135deg,#6366F1,#8B5CF6) !important; border:none!important; color:#fff!important; font-size:13.5px!important; }
+    .btn-official .stButton > button { background: linear-gradient(135deg,#0EA5E9,#6366F1) !important; border:none!important; color:#fff!important; font-size:13.5px!important; }
+    .btn-admin    .stButton > button { background: linear-gradient(135deg,#E8660A,#EF4444) !important; border:none!important; color:#fff!important; font-size:13.5px!important; }
     </style>
     """, unsafe_allow_html=True)
-
-    # ── header ───────────────────────────────────────────────────────────────
+ 
+    st.markdown(_topbar(), unsafe_allow_html=True)
+ 
+    # Page header
     st.markdown("""
-    <div class="lp-hero">
-        <div class="lp-hero-badge">
-            <span class="lp-hero-badge-dot"></span>
-            Government of India Initiative
+    <div style="text-align:center;margin-bottom:32px;">
+        <div style="font-family:'Sora',sans-serif;font-size:26px;font-weight:700;color:#111827;letter-spacing:-0.5px;margin-bottom:8px;">
+            Choose your role
         </div>
-        <div class="lp-hero-icon">🏛️</div>
-        <div class="lp-hero-title">Jan Seva Portal</div>
-        <div class="lp-hero-sub">Choose your role to continue</div>
+        <div style="font-size:14px;color:#6B7280;font-weight:300;">
+            Select how you'd like to access the Jan Seva Portal
+        </div>
     </div>
     """, unsafe_allow_html=True)
-
-    # ── role cards ────────────────────────────────────────────────────────────
+ 
     r1, r2, r3 = st.columns(3, gap="medium")
-
+ 
     with r1:
-        st.markdown("""
-        <div class="role-tile citizen">
-            <span class="role-tile-icon">👤</span>
-            <div class="role-tile-title">Citizen</div>
-            <div class="role-tile-sub">File complaints, track status,
-            access government schemes</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(_role_tile(
+            "citizen", "👤", "Citizen",
+            "File complaints, track status, access government schemes",
+            "linear-gradient(90deg,#6366F1,#8B5CF6)"
+        ), unsafe_allow_html=True)
         st.markdown('<div class="btn-citizen">', unsafe_allow_html=True)
         if st.button("Continue as Citizen", key="citizen_role_btn", use_container_width=True):
             st.session_state.screen = "user_login"; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
+ 
     with r2:
-        st.markdown("""
-        <div class="role-tile official">
-            <span class="role-tile-icon">🏢</span>
-            <div class="role-tile-title">Official</div>
-            <div class="role-tile-sub">Manage &amp; resolve complaints
-            for your department</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(_role_tile(
+            "official", "🏢", "Official",
+            "Manage & resolve complaints for your department",
+            "linear-gradient(90deg,#0EA5E9,#6366F1)"
+        ), unsafe_allow_html=True)
         st.markdown('<div class="btn-official">', unsafe_allow_html=True)
         if st.button("Continue as Official", key="official_role_btn", use_container_width=True):
             st.session_state.screen = "official_login"; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
+ 
     with r3:
-        st.markdown("""
-        <div class="role-tile admin">
-            <span class="role-tile-icon">👑</span>
-            <div class="role-tile-title">Admin</div>
-            <div class="role-tile-sub">System management,
-            analytics &amp; oversight</div>
-        </div>""", unsafe_allow_html=True)
+        st.markdown(_role_tile(
+            "admin", "👑", "Admin",
+            "System management, analytics & oversight",
+            "linear-gradient(90deg,#E8660A,#EF4444)"
+        ), unsafe_allow_html=True)
         st.markdown('<div class="btn-admin">', unsafe_allow_html=True)
         if st.button("Continue as Admin", key="admin_role_btn", use_container_width=True):
             st.session_state.screen = "admin_login"; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
+ 
     st.markdown("<br>", unsafe_allow_html=True)
-    bc1, bc2, bc3 = st.columns([1, 2, 1])
-    with bc2:
-        st.markdown('<div class="lp-back">', unsafe_allow_html=True)
+    _, bc, _ = st.columns([1, 2, 1])
+    with bc:
+        st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
         if st.button("← Change Language", key="lt_lang", use_container_width=True):
             st.session_state.screen = "language"; st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("""
-    <div class="lp-footer-text" style="margin-top:20px;">
-        Secure · Trusted · Government of India
-    </div>
-    """, unsafe_allow_html=True)
-
-
+ 
+    st.markdown(_footer(), unsafe_allow_html=True)
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_user_login()  — Citizen OTP login (IDENTICAL flow, polished UI)
+#  pg_user_login  — Citizen OTP login
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def pg_user_login():
-    _apply_layout("auth")
-    st.markdown(get_css(dark_mode=False), unsafe_allow_html=True)
+    st.markdown(_base_css(), unsafe_allow_html=True)
     st.markdown(_login_css(accent="#6366F1", accent2="#8B5CF6"), unsafe_allow_html=True)
-
+ 
+    # Additional: colour the primary CTA inside form
+    st.markdown("""
+    <style>
+    .primary-btn .stButton > button {
+        background: linear-gradient(135deg,#6366F1,#8B5CF6) !important;
+        border: none !important; color: #fff !important;
+        box-shadow: 0 2px 10px rgba(99,102,241,0.30) !important;
+        font-size: 14px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+ 
     for k, v in [("otp_sent", False), ("login_phone", ""), ("demo_otp", "")]:
         if k not in st.session_state:
             st.session_state[k] = v
-
-    # hero
-    st.markdown(
-        "<div class='lp-hero' style='"
-        "background:linear-gradient(135deg,#1e1b4b 0%,#4338CA 45%,#0c4a6e 100%);"
-        "border-radius:18px;padding:2rem 1.5rem 1.75rem;margin-bottom:1.25rem;'>"
-        "<span class='lp-hero-icon' style='filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25));'>👤</span>"
-        "<div class='lp-hero-title' style='color:#fff;'>Welcome back</div>"
-        "<div class='lp-hero-sub' style='color:rgba(255,255,255,0.72);'>"
-        "File complaints · track status · access schemes</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
+ 
+    st.markdown(_topbar(), unsafe_allow_html=True)
+    st.markdown(_hero(
+        "👤", "Welcome back",
+        "File complaints · track status · access schemes",
+        "linear-gradient(135deg,#1e1b4b 0%,#4338CA 50%,#0c4a6e 100%)"
+    ), unsafe_allow_html=True)
+ 
     tab1, tab2 = st.tabs(["Sign In", "Create Account"])
-
-    # ── LOGIN tab ──────────────────────────────────────────────────────────
+ 
+    # ── SIGN IN ──────────────────────────────────────────────────────────────
     with tab1:
-        st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
-
+        st.markdown(_card_open("Phone Verification"), unsafe_allow_html=True)
+ 
         if not st.session_state.otp_sent:
-            st.markdown(
-                "<div class='lp-card-label'>Phone Verification</div>",
-                unsafe_allow_html=True,
-            )
-            phone = st.text_input(
-                "Mobile number",
-                placeholder="Enter your 10-digit number",
-                key="login_phone_input",
-            )
-            st.markdown(
-                "<div style='font-size:0.78rem;color:#9CA3AF;margin-top:-6px;'>"
-                "We'll send a one-time password to verify your number.</div>",
-                unsafe_allow_html=True,
-            )
-            st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-
+            phone = st.text_input("Mobile number", placeholder="Enter your 10-digit number", key="login_phone_input")
+            st.markdown('<p style="font-size:11.5px;color:#9CA3AF;margin-top:-6px;font-weight:300;">We\'ll send a one-time password to verify your number.</p>', unsafe_allow_html=True)
+            st.markdown(_divider(), unsafe_allow_html=True)
+ 
+            st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
             if st.button("Send OTP →", key="send_otp_btn", use_container_width=True):
                 p = phone.strip()
                 if not p:
@@ -2345,30 +2001,14 @@ def pg_user_login():
                         st.rerun()
                     else:
                         st.error(resp.get("detail", "Failed to send OTP. Try again."))
-
+            st.markdown("</div>", unsafe_allow_html=True)
+ 
         else:
-            st.markdown("<div class='lp-card-label'>Enter OTP</div>", unsafe_allow_html=True)
-            st.markdown(
-                f"<div class='lp-phone-badge'>"
-                f"📱 Code sent to +91 {st.session_state.login_phone}"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
-            st.markdown(
-                f"<div class='lp-otp-box'>"
-                f"<span class='lp-otp-icon'>🔑</span>"
-                f"<div>"
-                f"<div class='lp-otp-label'>Demo OTP</div>"
-                f"<span class='lp-otp-code'>{st.session_state.demo_otp}</span>"
-                f"</div></div>",
-                unsafe_allow_html=True,
-            )
-            otp = st.text_input(
-                "Enter OTP", placeholder="6-digit code",
-                key="temp_otp", type="password",
-            )
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-
+            st.markdown(_otp_badge(st.session_state.login_phone, st.session_state.demo_otp), unsafe_allow_html=True)
+            otp = st.text_input("Enter OTP", placeholder="6-digit code", key="temp_otp", type="password")
+            st.markdown(_divider(), unsafe_allow_html=True)
+ 
+            st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
             if st.button("Verify & Sign In →", key="verify_otp_btn", use_container_width=True):
                 if not otp:
                     st.error("Please enter the OTP.")
@@ -2385,14 +2025,14 @@ def pg_user_login():
                         st.rerun()
                     else:
                         st.error(resp.get("detail", "Invalid OTP. Please try again."))
-
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
+ 
+            st.markdown(_divider(), unsafe_allow_html=True)
             ra, rb = st.columns(2)
             with ra:
                 if st.button("🔄 Resend OTP", key="resend_otp_btn", use_container_width=True):
                     with st.spinner("Resending…"):
-                        resp = api("post", "/auth/user/send-otp",
-                                   json={"phone": st.session_state.login_phone})
+                        resp = api("post", "/auth/user/send-otp", json={"phone": st.session_state.login_phone})
                     if resp.get("success"):
                         st.session_state.demo_otp = resp.get("otp", "123456")
                         st.success("New OTP sent!")
@@ -2400,28 +2040,24 @@ def pg_user_login():
                     else:
                         st.error("Failed to resend OTP.")
             with rb:
-                st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
                 if st.button("← Change number", key="cancel_otp_btn", use_container_width=True):
                     st.session_state.otp_sent = False
                     st.session_state.demo_otp = ""
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # ── REGISTER tab ───────────────────────────────────────────────────────
+ 
+        st.markdown(_card_close(), unsafe_allow_html=True)
+ 
+    # ── CREATE ACCOUNT ───────────────────────────────────────────────────────
     with tab2:
-        st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
-        st.markdown(
-            "<div class='lp-card-label'>Create your account</div>",
-            unsafe_allow_html=True,
-        )
+        st.markdown(_card_open("Create your account"), unsafe_allow_html=True)
         with st.form(key="register_form", clear_on_submit=True):
-            r_name    = st.text_input("Full name *",    placeholder="Your full name",       key="reg_name")
-            r_phone   = st.text_input("Phone number *", placeholder="10-digit number",      key="reg_phone")
-            r_address = st.text_area("Address *",       placeholder="Your complete address",key="reg_address", height=85)
+            r_name    = st.text_input("Full name *",    placeholder="Your full name",        key="reg_name")
+            r_phone   = st.text_input("Phone number *", placeholder="10-digit number",       key="reg_phone")
+            r_address = st.text_area("Address *",       placeholder="Your complete address", key="reg_address", height=85)
             submitted = st.form_submit_button("Create Account →", use_container_width=True)
-
+ 
         if submitted:
             if not r_name:
                 st.error("Please enter your full name.")
@@ -2446,33 +2082,37 @@ def pg_user_login():
                         "❌ Phone already registered — please sign in."
                         if "already" in em.lower() else f"❌ {em}"
                     )
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # back
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+        st.markdown(_card_close(), unsafe_allow_html=True)
+ 
+    st.markdown(_divider(), unsafe_allow_html=True)
+    st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
     if st.button("← Back to role selection", key="back_to_role", use_container_width=True):
         st.session_state.otp_sent = False
         st.session_state.demo_otp = ""
         st.session_state.screen   = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown(
-        "<div class='lp-footer-text'>By continuing you agree to our Terms of Service</div>",
-        unsafe_allow_html=True,
-    )
-
-
+    st.markdown(_footer("By continuing you agree to our Terms of Service"), unsafe_allow_html=True)
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_official_login()  — Official login (IDENTICAL flow, polished UI)
+#  pg_official_login  — Official login + request access
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def pg_official_login():
-    _apply_layout("auth")
-    st.markdown(get_css(dark_mode=False), unsafe_allow_html=True)
+    st.markdown(_base_css(), unsafe_allow_html=True)
     st.markdown(_login_css(accent="#0EA5E9", accent2="#6366F1"), unsafe_allow_html=True)
-
+    st.markdown("""
+    <style>
+    .primary-btn .stButton > button {
+        background: linear-gradient(135deg,#0EA5E9,#6366F1) !important;
+        border:none!important; color:#fff!important;
+        box-shadow: 0 2px 10px rgba(14,165,233,0.30) !important;
+        font-size: 14px !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+ 
     for k, v in [
         ("off_active_tab", "login"), ("off_step", 1), ("off_data", {}),
         ("off_otp_verified", False), ("forgot_step", 1), ("forgot_email", ""),
@@ -2480,62 +2120,65 @@ def pg_official_login():
     ]:
         if k not in st.session_state:
             st.session_state[k] = v
-
-    # hero
-    st.markdown(
-        "<div class='lp-hero' style='"
-        "background:linear-gradient(135deg,#0c1a3a 0%,#0369a1 45%,#1e1b4b 100%);"
-        "border-radius:18px;padding:2rem 1.5rem 1.75rem;margin-bottom:1.25rem;'>"
-        "<span class='lp-hero-icon' style='filter:drop-shadow(0 4px 12px rgba(0,0,0,0.25));'>🏢</span>"
-        "<div class='lp-hero-title' style='color:#fff;'>Official Portal</div>"
-        "<div class='lp-hero-sub' style='color:rgba(255,255,255,0.72);'>"
-        "Department management &amp; complaint resolution</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
-    # custom pill tab bar
-    st.markdown("<div class='lp-tabs'>", unsafe_allow_html=True)
-    tc1, tc2 = st.columns(2)
+ 
+    st.markdown(_topbar(), unsafe_allow_html=True)
+    st.markdown(_hero(
+        "🏢", "Official Portal",
+        "Department management & complaint resolution",
+        "linear-gradient(135deg,#0c1a3a 0%,#0369a1 50%,#1e1b4b 100%)"
+    ), unsafe_allow_html=True)
+ 
+    # Custom pill tabs
+    st.markdown("""
+    <style>
+    .pill-tab-active .stButton > button {
+        background: #0EA5E9 !important; color: #fff !important;
+        border: none !important; font-weight: 500 !important;
+        box-shadow: 0 2px 8px rgba(14,165,233,0.30) !important;
+    }
+    .pill-tab-idle .stButton > button {
+        background: #F3F4F6 !important; color: #6B7280 !important;
+        border: 1.5px solid #E5E7EB !important; font-weight: 400 !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+ 
+    tc1, tc2 = st.columns(2, gap="small")
     with tc1:
-        cls = "lp-tab-active" if st.session_state.off_active_tab == "login" else "lp-tab-idle"
-        st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+        cls = "pill-tab-active" if st.session_state.off_active_tab == "login" else "pill-tab-idle"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
         if st.button("Sign In", key="tab_login_btn", use_container_width=True):
             st.session_state.off_active_tab = "login"
             st.session_state.show_forgot    = False
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
     with tc2:
-        cls = "lp-tab-active" if st.session_state.off_active_tab == "request" else "lp-tab-idle"
-        st.markdown(f"<div class='{cls}'>", unsafe_allow_html=True)
+        cls = "pill-tab-active" if st.session_state.off_active_tab == "request" else "pill-tab-idle"
+        st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
         if st.button("Request Access", key="tab_request_btn", use_container_width=True):
             st.session_state.off_active_tab = "request"
             st.session_state.show_forgot    = False
             st.rerun()
         st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    # ── LOGIN + FORGOT ────────────────────────────────────────────────────────
+ 
+    st.markdown(_divider(), unsafe_allow_html=True)
+ 
+    # ── SIGN IN / FORGOT ─────────────────────────────────────────────────────
     if st.session_state.off_active_tab == "login":
-
+ 
         if not st.session_state.show_forgot:
-            st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
-            st.markdown(
-                "<div class='lp-card-label'>Official credentials</div>",
-                unsafe_allow_html=True,
-            )
+            st.markdown(_card_open("Official credentials"), unsafe_allow_html=True)
             with st.form(key="official_login_form", clear_on_submit=False):
                 email    = st.text_input("Email address", placeholder="official@department.gov.in", key="official_email")
                 password = st.text_input("Password",      placeholder="Your password", key="official_password", type="password")
                 submitted = st.form_submit_button("Sign In →", use_container_width=True)
-
+ 
             if submitted:
                 if not email or not password:
                     st.error("Please enter both email and password.")
                 else:
                     with st.spinner("Signing in…"):
-                        resp = api("post", "/auth/official/login",
-                                   json={"email": email, "password": password})
+                        resp = api("post", "/auth/official/login", json={"email": email, "password": password})
                     if resp.get("success"):
                         st.session_state.official = resp
                         st.session_state.role     = "official"
@@ -2543,30 +2186,27 @@ def pg_official_login():
                         st.rerun()
                     else:
                         st.error(resp.get("detail", "Invalid email or password."))
-
-            st.markdown("<div style='height:4px'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='lp-ghost'>", unsafe_allow_html=True)
-            if st.button("Forgot password?", key="forgot_pwd_btn"):
+ 
+            st.markdown(_divider(), unsafe_allow_html=True)
+            st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
+            if st.button("Forgot password?", key="forgot_pwd_btn", use_container_width=True):
                 st.session_state.show_forgot         = True
                 st.session_state.forgot_step         = 1
                 st.session_state.forgot_otp_verified = False
                 st.session_state.forgot_email        = ""
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
+            st.markdown(_card_close(), unsafe_allow_html=True)
+ 
         else:
-            # forgot password flow
-            st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
-            st.markdown(
-                "<div class='lp-card-label'>Reset password</div>",
-                unsafe_allow_html=True,
-            )
+            # ── FORGOT PASSWORD ──────────────────────────────────────────────
+            st.markdown(_card_open("Reset password"), unsafe_allow_html=True)
             step = st.session_state.forgot_step
-
+ 
             if step == 1:
                 fe = st.text_input("Registered email address", key="forgot_email_input")
-                if st.button("Send Reset OTP →", use_container_width=True):
+                st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
+                if st.button("Send Reset OTP →", key="send_reset_otp", use_container_width=True):
                     if not fe:
                         st.error("Please enter your email.")
                     elif "@" not in fe or "." not in fe.split("@")[-1]:
@@ -2576,17 +2216,14 @@ def pg_official_login():
                         st.session_state.forgot_step  = 2
                         st.success("Demo OTP sent — use **123456**")
                         st.rerun()
-
+                st.markdown("</div>", unsafe_allow_html=True)
+ 
             elif step == 2:
-                st.markdown(
-                    f"<div class='lp-info'>"
-                    f"📧 Code sent to <strong>{st.session_state.forgot_email}</strong>"
-                    f" — use <strong>123456</strong></div>",
-                    unsafe_allow_html=True,
-                )
+                st.markdown(_info_box(f"Code sent to <strong>{st.session_state.forgot_email}</strong> — use <strong>123456</strong>", "📧"), unsafe_allow_html=True)
                 otp = st.text_input("Enter OTP", type="password", placeholder="123456", key="reset_otp")
                 c1, c2 = st.columns(2)
                 with c1:
+                    st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
                     if st.button("Verify OTP →", use_container_width=True, key="verify_reset"):
                         if otp == "123456":
                             st.session_state.forgot_otp_verified = True
@@ -2594,17 +2231,16 @@ def pg_official_login():
                             st.rerun()
                         else:
                             st.error("Invalid OTP — use 123456.")
+                    st.markdown("</div>", unsafe_allow_html=True)
                 with c2:
                     if st.button("Resend", use_container_width=True, key="resend_reset"):
                         st.info("OTP resent (still 123456).")
-
+ 
             else:
-                st.markdown(
-                    "<div class='lp-verified'>✅ Email verified — set your new password</div>",
-                    unsafe_allow_html=True,
-                )
+                st.markdown(_verified_box("Email verified — set your new password"), unsafe_allow_html=True)
                 new_pwd     = st.text_input("New password",         type="password", key="new_pwd")
                 confirm_pwd = st.text_input("Confirm new password", type="password", key="confirm_pwd")
+                st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
                 if st.button("Reset Password →", use_container_width=True, key="do_reset"):
                     if not new_pwd or not confirm_pwd:
                         st.error("Please fill both fields.")
@@ -2615,60 +2251,43 @@ def pg_official_login():
                     else:
                         with st.spinner("Updating…"):
                             resp = api("post", "/auth/official/reset-password",
-                                       json={"email": st.session_state.forgot_email,
-                                             "new_password": new_pwd})
+                                       json={"email": st.session_state.forgot_email, "new_password": new_pwd})
                         if resp.get("success"):
                             st.success("✅ Password reset! Please sign in.")
-                            for key in ["show_forgot","forgot_step","forgot_email","forgot_otp_verified"]:
+                            for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
                                 st.session_state.pop(key, None)
                             st.rerun()
                         else:
                             st.error(f"Reset failed: {resp.get('detail','Unknown error')}")
-
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                st.markdown("</div>", unsafe_allow_html=True)
+ 
+            st.markdown(_divider(), unsafe_allow_html=True)
+            st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
             if st.button("← Back to sign in", use_container_width=True, key="back_from_forgot"):
-                for key in ["show_forgot","forgot_step","forgot_email","forgot_otp_verified"]:
+                for key in ["show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"]:
                     st.session_state.pop(key, None)
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
-            st.markdown("</div>", unsafe_allow_html=True)
-
+            st.markdown(_card_close(), unsafe_allow_html=True)
+ 
     # ── REQUEST ACCESS ────────────────────────────────────────────────────────
     else:
-        st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
+        st.markdown(_card_open(), unsafe_allow_html=True)
         step = st.session_state.off_step
-
-        # step indicator
-        st.markdown(
-            f"<div class='lp-step-wrap'>"
-            f"  <div class='lp-step-col'>"
-            f"    <div class='lp-step-dot {'active' if step==1 else 'done'}'>"
-            f"      {'1' if step==1 else '✓'}"
-            f"    </div>"
-            f"    <div class='lp-step-lbl {'active' if step==1 else 'idle'}'>Details</div>"
-            f"  </div>"
-            f"  <div class='lp-step-line'></div>"
-            f"  <div class='lp-step-col'>"
-            f"    <div class='lp-step-dot {'active' if step==2 else 'idle'}'>2</div>"
-            f"    <div class='lp-step-lbl {'active' if step==2 else 'idle'}'>Verify</div>"
-            f"  </div>"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-
+        st.markdown(_step_indicator(step), unsafe_allow_html=True)
+ 
         if step == 1:
-            st.markdown("<div class='lp-card-label'>Your details</div>", unsafe_allow_html=True)
+            st.markdown('<p style="font-size:10.5px;font-weight:600;color:#9CA3AF;letter-spacing:1.1px;text-transform:uppercase;margin-bottom:16px;">Your details</p>', unsafe_allow_html=True)
             d  = st.session_state.off_data
-            nm = st.text_input("Full name *",                value=d.get("name",""),      key="off_name")
-            em = st.text_input("Email address *",            value=d.get("email",""),     key="off_email")
-            ph = st.text_input("Phone (10 digits) *",        value=d.get("phone",""),     key="off_phone")
-            pw = st.text_input("Password (min 6 chars) *",   value=d.get("password",""),  key="off_pass", type="password")
-            dc = st.text_input("Department code *",          value=d.get("dept_code",""), key="off_dept",
+            nm = st.text_input("Full name *",               value=d.get("name", ""),      key="off_name")
+            em = st.text_input("Email address *",           value=d.get("email", ""),     key="off_email")
+            ph = st.text_input("Phone (10 digits) *",       value=d.get("phone", ""),     key="off_phone")
+            pw = st.text_input("Password (min 6 chars) *",  value=d.get("password", ""),  key="off_pass",  type="password")
+            dc = st.text_input("Department code *",         value=d.get("dept_code", ""), key="off_dept",
                                help="Get this from your department admin")
-
+            st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
             if st.button("Continue →", use_container_width=True, key="off_send_otp"):
-                errs = [f for f, v in [("Name",nm),("Email",em),("Phone",ph),("Password",pw),("Dept Code",dc)] if not v]
+                errs = [f for f, v in [("Name", nm), ("Email", em), ("Phone", ph), ("Password", pw), ("Dept Code", dc)] if not v]
                 if errs:
                     st.error("Missing: " + ", ".join(errs))
                 elif len(ph) != 10 or not ph.isdigit():
@@ -2676,122 +2295,101 @@ def pg_official_login():
                 elif len(pw) < 6:
                     st.error("Password must be at least 6 characters.")
                 else:
-                    st.session_state.off_data         = {"name":nm,"email":em,"phone":ph,"password":pw,"dept_code":dc}
-                    st.session_state.off_step         = 2
+                    st.session_state.off_data = {"name": nm, "email": em, "phone": ph, "password": pw, "dept_code": dc}
+                    st.session_state.off_step = 2
                     st.session_state.off_otp_verified = False
                     st.rerun()
-
+            st.markdown("</div>", unsafe_allow_html=True)
+ 
         else:
-            st.markdown("<div class='lp-card-label'>Phone verification</div>", unsafe_allow_html=True)
-            masked = "******" + st.session_state.off_data.get("phone","")[-4:]
-            st.markdown(
-                f"<div class='lp-info'>"
-                f"📱 OTP sent to <strong>{masked}</strong> — use demo code <strong>123456</strong>"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
+            masked = "×" * 6 + st.session_state.off_data.get("phone", "")[-4:]
+            st.markdown(_info_box(f"OTP sent to <strong>{masked}</strong> — use demo code <strong>123456</strong>", "📱"), unsafe_allow_html=True)
+ 
             otp = st.text_input("OTP", type="password", placeholder="6-digit code",
-                                key="off_otp_input", max_chars=6,
-                                label_visibility="collapsed")
-
+                                key="off_otp_input", max_chars=6, label_visibility="collapsed")
+ 
             if st.session_state.off_otp_verified:
-                st.markdown(
-                    "<div class='lp-verified'>✅ Phone verified — ready to submit!</div>",
-                    unsafe_allow_html=True,
-                )
-
+                st.markdown(_verified_box("Phone verified — ready to submit!"), unsafe_allow_html=True)
+ 
             oc1, oc2 = st.columns(2)
             with oc1:
+                st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
                 if st.button("Verify OTP →", use_container_width=True, key="off_verify_otp"):
                     if otp and otp.strip() == "123456":
                         st.session_state.off_otp_verified = True
                         st.rerun()
                     else:
                         st.error("Invalid OTP — use 123456.")
+                st.markdown("</div>", unsafe_allow_html=True)
             with oc2:
                 if st.button("Resend", use_container_width=True, key="off_resend_otp"):
                     st.info("Demo OTP resent — still 123456.")
-
-            st.markdown("<div style='height:10px'></div>", unsafe_allow_html=True)
-
+ 
+            st.markdown(_divider(), unsafe_allow_html=True)
+ 
             if st.session_state.off_otp_verified:
+                st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
                 if st.button("Submit Request →", use_container_width=True, key="off_submit_request"):
                     with st.spinner("Submitting…"):
                         resp = api("post", "/auth/official/signup", json=st.session_state.off_data)
                     if resp.get("success"):
                         st.success("✅ Request submitted! Awaiting admin approval.")
-                        for k in ("off_step","off_data","off_otp_verified"):
+                        for k in ("off_step", "off_data", "off_otp_verified"):
                             st.session_state.pop(k, None)
                         st.session_state.off_active_tab = "login"
                         st.balloons()
                         st.rerun()
                     else:
-                        em2 = resp.get("detail","Unknown error")
-                        st.error(
-                            "❌ Email already registered — try signing in."
-                            if "already" in em2.lower() else f"❌ {em2}"
-                        )
+                        em2 = resp.get("detail", "Unknown error")
+                        st.error("❌ Email already registered — try signing in." if "already" in em2.lower() else f"❌ {em2}")
+                st.markdown("</div>", unsafe_allow_html=True)
             else:
-                st.markdown(
-                    "<div class='lp-warn'>🔐 Verify your OTP above before submitting.</div>",
-                    unsafe_allow_html=True,
-                )
-
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+                st.markdown(_warn_box("Verify your OTP above before submitting."), unsafe_allow_html=True)
+ 
+            st.markdown(_divider(), unsafe_allow_html=True)
+            st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
             if st.button("← Edit details", use_container_width=True, key="off_back_step1"):
                 st.session_state.off_step         = 1
                 st.session_state.off_otp_verified = False
                 st.rerun()
             st.markdown("</div>", unsafe_allow_html=True)
-
-        st.markdown("</div>", unsafe_allow_html=True)
-
-    # back
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+ 
+        st.markdown(_card_close(), unsafe_allow_html=True)
+ 
+    st.markdown(_divider(), unsafe_allow_html=True)
+    st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
     if st.button("← Back to role selection", key="official_back", use_container_width=True):
-        for k in ("off_step","off_data","off_otp_verified","off_active_tab",
-                  "show_forgot","forgot_step","forgot_email","forgot_otp_verified"):
+        for k in ("off_step", "off_data", "off_otp_verified", "off_active_tab",
+                  "show_forgot", "forgot_step", "forgot_email", "forgot_otp_verified"):
             st.session_state.pop(k, None)
         st.session_state.screen = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
-
+    st.markdown(_footer(), unsafe_allow_html=True)
+ 
+ 
 # ─────────────────────────────────────────────────────────────────────────────
-#  pg_admin_login()  — Admin login (IDENTICAL flow, polished UI)
+#  pg_admin_login  — Admin login
 # ─────────────────────────────────────────────────────────────────────────────
-
+ 
 def pg_admin_login():
-    _apply_layout("auth")
-    st.markdown(get_css(dark_mode=False), unsafe_allow_html=True)
-    st.markdown(_login_css(accent="#F59E0B", accent2="#EF4444"), unsafe_allow_html=True)
-
-    # hero
-    st.markdown(
-        "<div class='lp-hero' style='"
-        "background:linear-gradient(135deg,#3b1a00 0%,#78350f 45%,#1c1917 100%);"
-        "border-radius:18px;padding:2rem 1.5rem 1.75rem;margin-bottom:1.25rem;'>"
-        "<span class='lp-hero-icon' style='filter:drop-shadow(0 4px 12px rgba(0,0,0,0.30));'>👑</span>"
-        "<div class='lp-hero-title' style='color:#fff;'>Admin Panel</div>"
-        "<div class='lp-hero-sub' style='color:rgba(255,255,255,0.72);'>"
-        "System administration · analytics · oversight</div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-
-    st.markdown("<div class='lp-card'>", unsafe_allow_html=True)
-    st.markdown(
-        "<div class='lp-card-label'>Administrator credentials</div>",
-        unsafe_allow_html=True,
-    )
-
+    st.markdown(_base_css(), unsafe_allow_html=True)
+    st.markdown(_login_css(accent="#E8660A", accent2="#EF4444"), unsafe_allow_html=True)
+ 
+    st.markdown(_topbar(), unsafe_allow_html=True)
+    st.markdown(_hero(
+        "👑", "Admin Panel",
+        "System administration · analytics · oversight",
+        "linear-gradient(135deg,#3b1a00 0%,#78350f 50%,#1c1917 100%)"
+    ), unsafe_allow_html=True)
+ 
+    st.markdown(_card_open("Administrator credentials"), unsafe_allow_html=True)
+ 
     with st.form(key="admin_login_form", clear_on_submit=False):
         username  = st.text_input("Username", placeholder="Enter your username",  key="admin_username")
         password  = st.text_input("Password", placeholder="Enter your password",  key="admin_password", type="password")
         submitted = st.form_submit_button("Sign In to Admin Panel →", use_container_width=True)
-
+ 
     if submitted:
         if not username:
             st.error("Please enter your username.")
@@ -2799,8 +2397,7 @@ def pg_admin_login():
             st.error("Please enter your password.")
         else:
             with st.spinner("Authenticating…"):
-                resp = api("post", "/auth/admin/login",
-                           json={"username": username, "password": password})
+                resp = api("post", "/auth/admin/login", json={"username": username, "password": password})
             if resp.get("success"):
                 st.session_state.admin  = resp
                 st.session_state.role   = "admin"
@@ -2808,23 +2405,31 @@ def pg_admin_login():
                 st.rerun()
             else:
                 st.error(resp.get("detail", "Invalid username or password."))
-
-    st.markdown(
-        "<div class='lp-demo-hint'>"
-        "<div class='lp-demo-row'><strong>Default credentials:</strong></div>"
-        "<div class='lp-demo-row'>Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin123</strong></div>"
-        "</div>",
-        unsafe_allow_html=True,
-    )
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-    st.markdown("<div class='lp-back'>", unsafe_allow_html=True)
+ 
+    st.markdown("""
+    <div style="
+        background:#FFF7ED;
+        border:1px solid #FED7AA;
+        border-radius:10px;
+        padding:14px 16px;
+        margin-top:16px;
+        font-size:13px;
+        color:#92400E;
+    ">
+        <div style="font-weight:600;margin-bottom:4px;">Default credentials</div>
+        <div style="font-weight:300;">Username: <strong>admin</strong> &nbsp;·&nbsp; Password: <strong>admin123</strong></div>
+    </div>
+    """, unsafe_allow_html=True)
+ 
+    st.markdown(_card_close(), unsafe_allow_html=True)
+ 
+    st.markdown(_divider(), unsafe_allow_html=True)
+    st.markdown('<div class="ghost-btn">', unsafe_allow_html=True)
     if st.button("← Back to role selection", key="admin_back", use_container_width=True):
         st.session_state.screen = "login_type"
         st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
+    st.markdown(_footer(), unsafe_allow_html=True)
 
 # ═════════════════════════════════════════════════════════════════════════════
 # USER DASHBOARD
