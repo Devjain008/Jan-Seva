@@ -1607,22 +1607,8 @@ html, body, [class*="css"] {
     gap: 4px !important;
     border-bottom: none !important;
 }
-.stTabs [data-baseweb="tab"] {
-    border-radius: 8px !important;
-    font-family: 'DM Sans', sans-serif !important;
-    font-size: 13px !important;
-    font-weight: 400 !important;
-    color: #6B7280 !important;
-    background: transparent !important;
-    border: none !important;
-    padding: 8px 20px !important;
-}
-.stTabs [aria-selected="true"] {
-    background: #fff !important;
-    color: #111827 !important;
-    font-weight: 500 !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08) !important;
-}
+
+
 .stTabs [data-baseweb="tab-highlight"] { display: none !important; }
  
 /* ── Form submit button ───────────────────────────────────────────── */
