@@ -2209,7 +2209,7 @@ def pg_login_type():
 def pg_user_login():
     import streamlit as st
  
-    
+    st.markdown(_base_css(), unsafe_allow_html=True)
     st.markdown(_login_css(accent="#6366F1", accent2="#8B5CF6"),
                 unsafe_allow_html=True)
     st.markdown("""
@@ -2228,7 +2228,6 @@ def pg_user_login():
         if k not in st.session_state:
             st.session_state[k] = v
  
-    st.markdown(_topbar(), unsafe_allow_html=True)
     st.markdown(_hero(
         "👤",
         tx("welcome_back"),
@@ -2424,8 +2423,7 @@ def pg_official_login():
     ]:
         if k not in st.session_state:
             st.session_state[k] = v
- 
-    st.markdown(_topbar(), unsafe_allow_html=True)
+
     st.markdown(_hero(
         "🏢",
         tx("official_hero"),
@@ -2728,7 +2726,6 @@ def pg_admin_login():
     st.markdown(_login_css(accent="#E8660A", accent2="#EF4444"),
                 unsafe_allow_html=True)
  
-    st.markdown(_topbar(), unsafe_allow_html=True)
     st.markdown(_hero(
         "👑",
         tx("admin_hero"),
