@@ -3291,1033 +3291,854 @@ def _dashboard_render_hero(user: dict, comps: list, lang: str) -> None:
         unsafe_allow_html=True,
     )
 
-def _inject_css_once(dark: bool = False) -> None:
-    """Inject dashboard CSS into the Streamlit page exactly once per session.
-    Light-mode only — dark param kept for API compatibility but ignored.
-    """
-    flag = "_dash_css_light"
-    if st.session_state.get(flag):
-        return
+_CLEAN_RE = re.compile(r"[\"\'<>]", re.I)
+_SPACE_RE = re.compile(r"\s+")
+PAGE_SIZE  = 10
  
-    st.markdown("""
-<style>
-/* ═══════════════════════════════════════════════════
-   COLOUR TOKENS  (warm orange palette)
-═══════════════════════════════════════════════════ */
+ 
+# ═══════════════════════════════════════════════════════════════════════════
+# CSS — always injected, never behind a session flag
+# ═══════════════════════════════════════════════════════════════════════════
+ 
+def _inject_dashboard_css() -> None:
+    st.markdown("""<style>
 :root {
-    --d-bg:        #FAF8F5;
-    --d-card:      #FFFFFF;
-    --d-card2:     #FDF9F6;
-    --d-border:    #EDE8E2;
-    --d-text:      #1A1A1A;
-    --d-sub:       #6B7280;
-    --d-a1:        #E8590C;
-    --d-a2:        #D4500B;
-    --d-a3:        #F07D3A;
-    --d-a1-soft:   rgba(232,89,12,0.08);
-    --d-a1-glow:   rgba(232,89,12,0.18);
-    --d-hover:     #F5F0EA;
-    --d-green-bg:  #F0FDF4; --d-green-bd: #86EFAC; --d-green-tx: #166534;
-    --d-amber-bg:  #FFF7ED; --d-amber-bd: #FED7AA; --d-amber-tx: #C2410C;
-    --d-red-bg:    #FEF2F2; --d-red-bd:   #FECACA; --d-red-tx:   #991B1B;
-    --d-blue-bg:   #EFF6FF; --d-blue-bd:  #BFDBFE; --d-blue-tx:  #1E40AF;
-    --d-shadow-sm: 0 1px 3px rgba(26,20,10,0.06),0 4px 12px rgba(26,20,10,0.05);
-    --d-shadow-md: 0 4px 16px rgba(26,20,10,0.08),0 12px 32px rgba(26,20,10,0.06);
+    --d-bg:       #FAF8F5;
+    --d-card:     #FFFFFF;
+    --d-border:   #EDE8E2;
+    --d-border-lt:rgba(26,20,10,0.07);
+    --d-text:     #1A1A1A;
+    --d-sub:      #6B7280;
+    --d-a1:       #E8590C;
+    --d-a2:       #D4500B;
+    --d-a3:       #F07D3A;
+    --d-a1-soft:  rgba(232,89,12,0.08);
+    --d-a1-glow:  rgba(232,89,12,0.16);
+    --d-hover:    #F5F0EA;
+    --d-green-bg: #F0FDF4; --d-green-bd: #86EFAC; --d-green-tx: #166534;
+    --d-amber-bg: #FFF7ED; --d-amber-bd: #FED7AA; --d-amber-tx: #C2410C;
+    --d-red-bg:   #FEF2F2; --d-red-bd:   #FECACA; --d-red-tx:   #991B1B;
+    --d-blue-bg:  #EFF6FF; --d-blue-bd:  #BFDBFE; --d-blue-tx:  #1E40AF;
+    --d-sh-sm:    0 1px 3px rgba(26,20,10,0.05),0 4px 12px rgba(26,20,10,0.04);
+    --d-sh-md:    0 4px 16px rgba(26,20,10,0.08),0 12px 32px rgba(26,20,10,0.05);
+    --d-sh-lg:    0 8px 32px rgba(26,20,10,0.10),0 20px 48px rgba(26,20,10,0.06);
 }
  
-/* ═══════════════════════════════════════════════════
-   BASE OVERRIDES
-═══════════════════════════════════════════════════ */
-html, body, .stApp {
-    background-color: var(--d-bg) !important;
-    color: var(--d-text) !important;
-}
-p, span, div, label, small { color: var(--d-text); }
-.stMarkdown, .stMarkdown p, .stMarkdown span { color: var(--d-text) !important; }
+html,body,.stApp{background-color:var(--d-bg)!important;color:var(--d-text)!important;
+    font-family:'DM Sans','Noto Sans Devanagari',system-ui,sans-serif!important;}
+p,span,label,small{color:var(--d-text);}
+.stMarkdown,.stMarkdown p,.stMarkdown span{color:var(--d-text)!important;}
  
-/* ═══════════════════════════════════════════════════
-   QUICK-ACTION CARDS
-═══════════════════════════════════════════════════ */
-.qa-wrap { position: relative; }
-.qa-wrap .stButton {
-    position: absolute; inset: 0; opacity: 0; z-index: 2;
-}
-.qa-wrap .stButton > button {
-    width: 100% !important; height: 100% !important;
-    min-height: 100% !important; background: transparent !important;
-    border: none !important; box-shadow: none !important;
-}
+/* Labels */
+.stTextInput label,.stTextArea label,.stSelectbox label{
+    color:var(--d-sub)!important;font-size:.68rem!important;font-weight:700!important;
+    text-transform:uppercase!important;letter-spacing:.07em!important;}
+.stCheckbox label{text-transform:none!important;font-size:.875rem!important;color:var(--d-text)!important;}
  
-/* ═══════════════════════════════════════════════════
-   FILTER CHIP STRIP
-═══════════════════════════════════════════════════ */
-.dash-chips {
-    display: flex; gap: 8px; flex-wrap: wrap;
-    margin-bottom: 4px; padding: 4px 0;
-}
-.dash-chip {
-    padding: 7px 16px; border-radius: 30px;
-    font-size: .76rem; font-weight: 700;
-    border: 1.5px solid var(--d-border);
-    background: var(--d-card); color: var(--d-sub);
-    white-space: nowrap; pointer-events: none; transition: all .18s;
-}
-.dash-chip.active {
-    background: linear-gradient(135deg, var(--d-a1), var(--d-a2));
-    color: #fff; border-color: transparent;
-    box-shadow: 0 4px 14px var(--d-a1-glow);
-}
+/* Inputs */
+.stTextInput>div>div>input,.stTextArea>div>div>textarea{
+    background:#FFFFFF!important;border:1.5px solid var(--d-border)!important;
+    border-radius:12px!important;color:var(--d-text)!important;
+    font-size:.875rem!important;padding:10px 14px!important;
+    transition:border-color .15s,box-shadow .15s!important;}
+.stTextInput>div>div>input:focus,.stTextArea>div>div>textarea:focus{
+    border-color:var(--d-a1)!important;box-shadow:0 0 0 3px var(--d-a1-soft)!important;outline:none!important;}
  
-/* ═══════════════════════════════════════════════════
-   NOTIFICATION INLINE BAR
-═══════════════════════════════════════════════════ */
-.notif-inline {
-    background: var(--d-amber-bg);
-    border: 1.5px solid var(--d-amber-bd);
-    border-radius: 14px; padding: 12px 16px;
-    display: flex; align-items: center; gap: 10px; margin: 12px 0;
-}
-.ni-dot {
-    width: 9px; height: 9px; border-radius: 50%;
-    background: var(--d-a1); flex-shrink: 0;
-    box-shadow: 0 0 0 3px var(--d-a1-soft);
-}
-.ni-text { font-size: .80rem; color: var(--d-amber-tx); font-weight: 600; flex: 1; }
-.ni-badge {
-    background: var(--d-a1); color: #fff;
-    border-radius: 20px; padding: 2px 10px;
-    font-size: .66rem; font-weight: 800; flex-shrink: 0;
-}
+/* Buttons — orange gradient */
+.stButton>button{
+    background:linear-gradient(135deg,var(--d-a1),var(--d-a2))!important;
+    color:#fff!important;border:none!important;border-radius:12px!important;
+    padding:10px 20px!important;font-weight:700!important;font-size:.875rem!important;
+    width:100%!important;cursor:pointer!important;
+    transition:transform .18s,box-shadow .18s,filter .15s!important;
+    box-shadow:0 2px 8px var(--d-a1-glow)!important;
+    position:relative!important;overflow:hidden!important;}
+.stButton>button::before{content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,rgba(255,255,255,0.14) 0%,transparent 100%);
+    pointer-events:none;border-radius:inherit;}
+.stButton>button:hover{transform:translateY(-2px) scale(1.004)!important;
+    box-shadow:0 6px 20px var(--d-a1-glow)!important;filter:brightness(1.05)!important;}
+.stButton>button:active{transform:translateY(0) scale(.998)!important;filter:brightness(.96)!important;}
  
-/* ═══════════════════════════════════════════════════
-   COMPLAINT CARD  — clean white card with border
-═══════════════════════════════════════════════════ */
-.cc-outer {
-    background: #FFFFFF;
-    border: 1.5px solid #1A1A1A;          /* strong dark border as requested */
-    border-radius: 16px;
-    margin-bottom: 12px;
-    overflow: hidden;
-    box-shadow: var(--d-shadow-sm);
-    transition: box-shadow .18s, transform .18s;
-}
-.cc-outer:hover {
-    box-shadow: var(--d-shadow-md);
-    transform: translateY(-2px);
-}
-/* left priority stripe */
-.cc-outer.cc-high   { border-left: 4px solid #EF4444; }
-.cc-outer.cc-medium { border-left: 4px solid #F59E0B; }
-.cc-outer.cc-low    { border-left: 4px solid #22C55E; }
-.cc-outer.cc-emg    { border-left: 4px solid #DC2626; }
+/* Hero */
+.prem-hero{
+    background:linear-gradient(135deg,#1A0A00 0%,#7C2D00 45%,#C2410C 100%)!important;
+    border-radius:20px!important;padding:28px 28px 22px!important;
+    color:#fff!important;margin-bottom:24px!important;
+    position:relative!important;overflow:hidden!important;
+    box-shadow:var(--d-sh-lg)!important;border:1px solid rgba(255,255,255,0.10)!important;}
+.prem-hero::before{content:'';position:absolute;top:-80px;right:-60px;
+    width:260px;height:260px;
+    background:radial-gradient(circle,rgba(255,255,255,0.08) 0%,transparent 70%);
+    pointer-events:none;}
+.prem-hero-title{font-size:clamp(1.25rem,3.5vw,1.75rem)!important;font-weight:800!important;
+    color:#fff!important;letter-spacing:-.03em!important;margin-bottom:6px!important;
+    position:relative;z-index:1;}
+.prem-hero-sub{font-size:.875rem!important;color:rgba(255,255,255,.78)!important;
+    margin:0!important;position:relative;z-index:1;}
+.prem-hero-avatar{position:absolute;top:20px;right:22px;width:46px;height:46px;
+    border-radius:50%;background:rgba(255,255,255,.15);border:2px solid rgba(255,255,255,.28);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:1rem;color:#fff;z-index:1;}
+.prem-hero-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));
+    gap:10px;margin-top:20px;position:relative;z-index:1;}
+.prem-hstat{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.16);
+    border-radius:12px;padding:12px 8px;text-align:center;
+    transition:background .18s,transform .18s;}
+.prem-hstat:hover{background:rgba(255,255,255,.18);transform:translateY(-2px);}
+.prem-hstat-num{font-size:clamp(1.5rem,4vw,2.25rem)!important;font-weight:800;
+    line-height:1;color:#fff;letter-spacing:-.03em;margin-bottom:4px;}
+.prem-hstat-lbl{font-size:.625rem;font-weight:600;text-transform:uppercase;
+    letter-spacing:.08em;color:rgba(255,255,255,.60);}
+.prem-hstat.h-blue  .prem-hstat-num{color:#FED7AA;}
+.prem-hstat.h-amber .prem-hstat-num{color:#FDE68A;}
+.prem-hstat.h-green .prem-hstat-num{color:#6EE7B7;}
+.prem-hstat.h-red   .prem-hstat-num{color:#FCA5A5;}
  
-.cc-inner { padding: 14px 18px 12px; }
+/* Section header */
+.d-section-header{font-size:.6875rem;font-weight:700;text-transform:uppercase;
+    letter-spacing:.10em;color:var(--d-sub);margin:28px 0 12px;
+    display:flex;align-items:center;gap:10px;}
+.d-section-header::before{content:'';width:3px;height:14px;
+    background:linear-gradient(180deg,var(--d-a1),var(--d-a2));
+    border-radius:99px;flex-shrink:0;}
+.d-section-header::after{content:'';flex:1;height:1px;
+    background:linear-gradient(to right,var(--d-border),transparent);}
  
-/* complaint number label above expander */
-.cc-number {
-    font-size: 0.72rem; font-weight: 800;
-    color: var(--d-a1); margin: 10px 0 4px 2px;
-    letter-spacing: 0.05em; text-transform: uppercase;
-}
+/* Quick action cards */
+.prem-action-card{background:#FFFFFF!important;border-radius:16px!important;
+    padding:20px 14px 18px!important;text-align:center!important;
+    border:1.5px solid var(--d-border)!important;cursor:pointer!important;
+    transition:all .20s!important;box-shadow:var(--d-sh-sm)!important;
+    position:relative;overflow:hidden;
+    min-height:110px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;}
+.prem-action-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--d-a1),var(--d-a3));
+    transform:scaleX(0);transition:transform .20s;transform-origin:left;}
+.prem-action-card:hover{transform:translateY(-4px)!important;
+    box-shadow:var(--d-sh-md)!important;border-color:var(--d-a1)!important;}
+.prem-action-card:hover::before{transform:scaleX(1);}
+.prem-action-icon{width:48px;height:48px;border-radius:14px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:1.6rem;margin:0 auto 10px;transition:transform .18s;}
+.prem-action-card:hover .prem-action-icon{transform:scale(1.10);}
+.prem-action-label{font-size:.78rem;font-weight:800;line-height:1.3;letter-spacing:-.01em;}
  
-/* badge row */
-.cc-badges {
-    display: flex; align-items: center;
-    flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
-}
-.cc-cid {
-    font-family: 'DM Mono','Courier New', monospace;
-    font-size: .70rem; font-weight: 700;
-    background: var(--d-a1-soft); color: var(--d-a1);
-    padding: 3px 10px; border-radius: 8px;
-    border: 1px solid rgba(232,89,12,0.18);
-    display: inline-block;
-}
-.cc-badge { border-radius: 20px; padding: 3px 12px; font-size: .68rem; font-weight: 700; display: inline-block; }
+/* Notification banner */
+.notif-inline{background:var(--d-amber-bg);border:1.5px solid var(--d-amber-bd);
+    border-radius:14px;padding:12px 16px;
+    display:flex;align-items:center;gap:10px;margin:12px 0;}
+.ni-dot{width:9px;height:9px;border-radius:50%;background:var(--d-a1);flex-shrink:0;
+    box-shadow:0 0 0 3px var(--d-a1-soft);}
+.ni-text{font-size:.80rem;color:var(--d-amber-tx);font-weight:600;flex:1;}
+.ni-badge{background:var(--d-a1);color:#fff;border-radius:20px;padding:2px 10px;
+    font-size:.66rem;font-weight:800;flex-shrink:0;}
  
-/* status variants */
-.st-pending     { background: var(--d-amber-bg); color: var(--d-amber-tx); border: 1px solid var(--d-amber-bd); }
-.st-in_progress { background: var(--d-blue-bg);  color: var(--d-blue-tx);  border: 1px solid var(--d-blue-bd);  }
-.st-resolved    { background: var(--d-green-bg); color: var(--d-green-tx); border: 1px solid var(--d-green-bd); }
-.st-closed      { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
-.st-rejected    { background: var(--d-red-bg);   color: var(--d-red-tx);   border: 1px solid var(--d-red-bd);   }
+/* ═══ COMPLAINT CARD — NO BLACK BORDER ═══ */
+.cc-outer{background:#FFFFFF;border:1px solid var(--d-border-lt);
+    border-radius:16px;margin-bottom:10px;overflow:hidden;
+    box-shadow:var(--d-sh-sm);
+    transition:box-shadow .18s,transform .18s,border-color .18s;}
+.cc-outer:hover{box-shadow:var(--d-sh-md);transform:translateY(-2px);
+    border-color:rgba(232,89,12,0.20);}
+.cc-outer.cc-high   {border-left:3px solid #EF4444;}
+.cc-outer.cc-medium {border-left:3px solid #F59E0B;}
+.cc-outer.cc-low    {border-left:3px solid #22C55E;}
+.cc-outer.cc-emg    {border-left:3px solid #DC2626;}
  
-/* priority variants */
-.pr-high   { background: var(--d-red-bg);   color: var(--d-red-tx);   border: 1px solid var(--d-red-bd);   }
-.pr-medium { background: var(--d-amber-bg); color: var(--d-amber-tx); border: 1px solid var(--d-amber-bd); }
-.pr-low    { background: var(--d-green-bg); color: var(--d-green-tx); border: 1px solid var(--d-green-bd); }
+.cc-number{font-size:.68rem;font-weight:800;color:var(--d-a1);
+    margin:10px 0 4px 2px;letter-spacing:.05em;text-transform:uppercase;}
  
-/* emergency */
-.badge-emg {
-    background: #DC2626; color: #fff;
-    border-radius: 20px; padding: 3px 10px;
-    font-size: .67rem; font-weight: 700;
-    animation: pulse-emg 2s ease infinite;
-}
-@keyframes pulse-emg {
-    0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
-    50%      { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
-}
+.cc-badges{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;}
+.cc-cid{font-family:'DM Mono','Courier New',monospace;font-size:.68rem;font-weight:700;
+    background:var(--d-a1-soft);color:var(--d-a1);padding:3px 10px;border-radius:8px;
+    border:1px solid rgba(232,89,12,0.18);display:inline-block;}
+.cc-badge{border-radius:20px;padding:3px 12px;font-size:.66rem;font-weight:700;display:inline-block;}
+.st-pending    {background:var(--d-amber-bg);color:var(--d-amber-tx);border:1px solid var(--d-amber-bd);}
+.st-in_progress{background:var(--d-blue-bg); color:var(--d-blue-tx); border:1px solid var(--d-blue-bd);}
+.st-resolved   {background:var(--d-green-bg);color:var(--d-green-tx);border:1px solid var(--d-green-bd);}
+.st-closed     {background:#F1F5F9;color:#475569;border:1px solid #CBD5E1;}
+.st-rejected   {background:var(--d-red-bg);  color:var(--d-red-tx); border:1px solid var(--d-red-bd);}
+.pr-high  {background:var(--d-red-bg);  color:var(--d-red-tx); border:1px solid var(--d-red-bd);}
+.pr-medium{background:var(--d-amber-bg);color:var(--d-amber-tx);border:1px solid var(--d-amber-bd);}
+.pr-low   {background:var(--d-green-bg);color:var(--d-green-tx);border:1px solid var(--d-green-bd);}
+.badge-emg{background:#DC2626;color:#fff;border-radius:20px;padding:3px 10px;
+    font-size:.65rem;font-weight:700;animation:pulse-emg 2s ease infinite;}
+@keyframes pulse-emg{0%,100%{box-shadow:0 0 0 0 rgba(220,38,38,0.4);}
+    50%{box-shadow:0 0 0 6px rgba(220,38,38,0);}}
+.cc-title{font-size:.90rem;font-weight:800;color:var(--d-text);margin:6px 0 4px;}
+.cc-desc {font-size:.80rem;color:var(--d-sub);line-height:1.65;margin-bottom:8px;}
+.cc-meta {font-size:.70rem;color:var(--d-sub);display:flex;gap:14px;flex-wrap:wrap;
+    padding-top:10px;border-top:1px solid var(--d-border);}
+.bl-high   {border-left:3px solid #EF4444;padding-left:12px;margin-bottom:4px;}
+.bl-medium {border-left:3px solid #F59E0B;padding-left:12px;margin-bottom:4px;}
+.bl-low    {border-left:3px solid #22C55E;padding-left:12px;margin-bottom:4px;}
+.bl-emg    {border-left:3px solid #DC2626;padding-left:12px;margin-bottom:4px;}
+.bl-default{border-left:3px solid var(--d-a1);padding-left:12px;margin-bottom:4px;}
  
-.cc-title {
-    font-size: .92rem; font-weight: 800;
-    color: var(--d-text); margin: 6px 0 4px;
-    letter-spacing: -0.01em;
-}
-.cc-desc {
-    font-size: .80rem; color: var(--d-sub);
-    line-height: 1.65; margin-bottom: 8px;
-}
-.cc-meta {
-    font-size: .71rem; color: var(--d-sub);
-    display: flex; gap: 14px; flex-wrap: wrap;
-    padding-top: 10px;
-    border-top: 1px solid var(--d-border);
-}
+/* Expander — clean white */
+.streamlit-expanderHeader{background:#FFFFFF!important;
+    border:1px solid var(--d-border-lt)!important;border-radius:12px!important;
+    color:var(--d-text)!important;font-weight:700!important;font-size:.875rem!important;
+    padding:12px 16px!important;transition:border-color .18s,box-shadow .18s!important;}
+.streamlit-expanderHeader:hover{border-color:var(--d-a1)!important;
+    box-shadow:0 0 0 3px var(--d-a1-soft)!important;}
+.streamlit-expanderContent{background:#FFFFFF!important;
+    border:1px solid var(--d-border-lt)!important;border-top:none!important;
+    border-radius:0 0 12px 12px!important;padding:14px 16px!important;}
  
-/* ── priority left-border helpers (inside expander) ── */
-.bl-high    { border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 4px; }
-.bl-medium  { border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 4px; }
-.bl-low     { border-left: 3px solid #22C55E; padding-left: 12px; margin-bottom: 4px; }
-.bl-emg     { border-left: 3px solid #DC2626; padding-left: 12px; margin-bottom: 4px; }
-.bl-default { border-left: 3px solid var(--d-a1); padding-left: 12px; margin-bottom: 4px; }
+/* Evidence box */
+.evidence-box{background:var(--d-a1-soft);border:1.5px solid rgba(232,89,12,0.16);
+    border-radius:14px;padding:14px;margin:10px 0 8px;}
+.evidence-title{font-size:.78rem;font-weight:800;color:var(--d-a1);
+    margin-bottom:10px;display:flex;align-items:center;gap:7px;}
  
-/* ═══════════════════════════════════════════════════
-   FEEDBACK & RATING CARDS
-═══════════════════════════════════════════════════ */
-.fb-card {
-    background: #FFFFFF;
-    border: 1.5px solid var(--d-green-bd);
-    border-radius: 18px; padding: 18px 20px; margin: 8px 0;
-    box-shadow: 0 0 0 4px var(--d-green-bg);
-}
-.fb-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.fb-icon {
-    width: 42px; height: 42px; border-radius: 13px;
-    background: var(--d-green-bg); border: 1px solid var(--d-green-bd);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; flex-shrink: 0;
-}
-.fb-title { font-weight: 800; font-size: .92rem; color: var(--d-text); }
-.fb-sub   { font-size: .74rem; color: var(--d-sub); margin-top: 2px; }
-.fb-desc  { font-size: .80rem; color: var(--d-sub); line-height: 1.65; }
+/* Feedback cards */
+.fb-card{background:#FFFFFF;border:1.5px solid var(--d-green-bd);border-radius:16px;
+    padding:18px 20px;margin:8px 0;box-shadow:0 0 0 4px var(--d-green-bg);}
+.fb-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.fb-icon{width:42px;height:42px;border-radius:13px;background:var(--d-green-bg);
+    border:1px solid var(--d-green-bd);display:flex;align-items:center;
+    justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.fb-title{font-weight:800;font-size:.90rem;color:var(--d-text);}
+.fb-sub  {font-size:.73rem;color:var(--d-sub);margin-top:2px;}
+.fb-desc {font-size:.80rem;color:var(--d-sub);line-height:1.65;}
  
-.rt-card {
-    background: #FFFFFF;
-    border: 1.5px solid var(--d-blue-bd);
-    border-radius: 18px; padding: 18px 20px; margin: 8px 0;
-    box-shadow: 0 0 0 4px var(--d-blue-bg);
-}
-.rt-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
-.rt-icon {
-    width: 42px; height: 42px; border-radius: 13px;
-    background: var(--d-blue-bg); border: 1px solid var(--d-blue-bd);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.2rem; flex-shrink: 0;
-}
-.rt-title       { font-weight: 800; font-size: .92rem; color: var(--d-text); }
-.rt-sub         { font-size: .74rem; color: var(--d-sub); margin-top: 2px; }
-.rt-desc        { font-size: .80rem; color: var(--d-sub); line-height: 1.6; margin-bottom: 12px; }
-.rt-display     { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
-.rt-stars-large { font-size: 1.5rem; color: #F59E0B; letter-spacing: 2px; }
-.rt-lbl         { font-size: .74rem; color: var(--d-sub); font-weight: 600; }
+.rt-card{background:#FFFFFF;border:1.5px solid var(--d-blue-bd);border-radius:16px;
+    padding:18px 20px;margin:8px 0;box-shadow:0 0 0 4px var(--d-blue-bg);}
+.rt-head{display:flex;align-items:center;gap:12px;margin-bottom:10px;}
+.rt-icon{width:42px;height:42px;border-radius:13px;background:var(--d-blue-bg);
+    border:1px solid var(--d-blue-bd);display:flex;align-items:center;
+    justify-content:center;font-size:1.2rem;flex-shrink:0;}
+.rt-title      {font-weight:800;font-size:.90rem;color:var(--d-text);}
+.rt-sub        {font-size:.73rem;color:var(--d-sub);margin-top:2px;}
+.rt-desc       {font-size:.79rem;color:var(--d-sub);line-height:1.6;margin-bottom:10px;}
+.rt-display    {display:flex;align-items:center;gap:12px;margin:10px 0;}
+.rt-stars-large{font-size:1.5rem;color:#F59E0B;letter-spacing:2px;}
+.rt-lbl        {font-size:.73rem;color:var(--d-sub);font-weight:600;}
  
-/* ═══════════════════════════════════════════════════
-   TIP BAR
-═══════════════════════════════════════════════════ */
-.tip-bar {
-    background: #FFFFFF; border: 1.5px solid var(--d-border);
-    border-radius: 16px; padding: 14px 18px;
-    display: flex; align-items: center; gap: 12px; margin-top: 20px;
-    box-shadow: var(--d-shadow-sm);
-    transition: border-color .18s;
-}
-.tip-bar:hover { border-color: var(--d-a1); }
-.tip-text { font-size: .80rem; color: var(--d-sub); flex: 1; line-height: 1.55; }
-.tip-text strong { color: var(--d-text); font-weight: 700; }
+/* Filter chips */
+.dash-chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;padding:4px 0;}
+.dash-chip{padding:7px 16px;border-radius:30px;font-size:.75rem;font-weight:700;
+    border:1.5px solid var(--d-border);background:#FFFFFF;color:var(--d-sub);
+    white-space:nowrap;pointer-events:none;transition:all .18s;}
+.dash-chip.active{background:linear-gradient(135deg,var(--d-a1),var(--d-a2));
+    color:#fff;border-color:transparent;box-shadow:0 4px 12px var(--d-a1-glow);}
+.dash-filter-btns .stButton>button{opacity:0!important;height:0!important;
+    padding:0!important;margin:0!important;min-height:0!important;overflow:hidden!important;}
  
-/* ═══════════════════════════════════════════════════
-   PAGE INFO & NAV
-═══════════════════════════════════════════════════ */
-.page-row {
-    display: flex; align-items: center;
-    justify-content: space-between;
-    flex-wrap: wrap; gap: 8px; margin: 12px 0 8px;
-}
-.page-info {
-    background: var(--d-a1-soft); color: var(--d-a1);
-    border: 1.5px solid rgba(232,89,12,0.20); border-radius: 20px;
-    padding: 5px 16px; font-size: .78rem; font-weight: 800;
-}
+/* Page info */
+.page-row{display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:8px;margin:12px 0 8px;}
+.page-info{background:var(--d-a1-soft);color:var(--d-a1);
+    border:1.5px solid rgba(232,89,12,0.18);border-radius:20px;
+    padding:5px 16px;font-size:.77rem;font-weight:800;}
  
-/* ── Hide filter buttons (visually replaced by chip divs) ── */
-.dash-filter-btns .stButton > button {
-    opacity: 0 !important; height: 0 !important;
-    padding: 0 !important; margin: 0 !important;
-    min-height: 0 !important; overflow: hidden !important;
-}
+/* Notification footer */
+.prem-notif-card{background:#FFFFFF!important;
+    border:1px solid var(--d-border-lt)!important;box-shadow:var(--d-sh-sm)!important;}
+.prem-notif-dot{background:var(--d-a1)!important;
+    box-shadow:0 0 0 4px var(--d-a1-soft)!important;}
+.prem-notif-title{color:var(--d-text)!important;}
+.prem-notif-msg  {color:var(--d-sub)!important;}
+.prem-notif-time {color:var(--d-sub)!important;}
  
-/* ═══════════════════════════════════════════════════
-   CLEAR / FC BUTTON
-═══════════════════════════════════════════════════ */
-.fc-clear-btn .stButton > button {
-    background: linear-gradient(135deg, var(--d-a1), var(--d-a2)) !important;
-    color: #fff !important; border: none !important;
-    border-radius: 12px !important; padding: 8px 16px !important;
-    font-size: .78rem !important; font-weight: 700 !important;
-    box-shadow: 0 4px 14px var(--d-a1-glow) !important;
-    transition: all .18s ease !important;
-}
-.fc-clear-btn .stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 8px 24px var(--d-a1-glow) !important;
-    filter: brightness(1.05) !important;
-}
+/* Tip bar */
+.tip-bar{background:#FFFFFF;border:1.5px solid var(--d-border);border-radius:16px;
+    padding:14px 18px;display:flex;align-items:center;gap:12px;margin-top:20px;
+    box-shadow:var(--d-sh-sm);transition:border-color .18s;}
+.tip-bar:hover{border-color:var(--d-a1);}
+.tip-text{font-size:.80rem;color:var(--d-sub);flex:1;line-height:1.55;}
+.tip-text strong{color:var(--d-text);font-weight:700;}
  
-/* ═══════════════════════════════════════════════════
-   EVIDENCE IMAGE BUTTON
-═══════════════════════════════════════════════════ */
-.evidence-wrap  { margin-top: 14px; margin-bottom: 10px; }
-.evidence-title {
-    font-size: .80rem; font-weight: 800; color: var(--d-a1);
-    margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
-}
-.evidence-box {
-    background: linear-gradient(135deg, var(--d-a1-soft), rgba(212,80,11,0.04));
-    border: 1.5px solid rgba(232,89,12,0.18);
-    border-radius: 18px; padding: 14px;
-}
-.img-btn .stButton > button {
-    width: 100%; border: none !important;
-    border-radius: 14px !important;
-    background: linear-gradient(135deg, var(--d-a1), var(--d-a2)) !important;
-    color: white !important; font-weight: 700 !important;
-    padding: 12px 18px !important; font-size: .84rem !important;
-    box-shadow: 0 8px 24px var(--d-a1-glow) !important;
-    transition: all .18s ease !important;
-}
-.img-btn .stButton > button:hover {
-    transform: translateY(-2px) !important;
-    box-shadow: 0 12px 30px var(--d-a1-glow) !important;
-}
+/* Empty state */
+.prem-empty-state{background:#FFFFFF!important;border:1px dashed var(--d-border)!important;}
  
-/* ═══════════════════════════════════════════════════
-   STREAMLIT EXPANDER — clean white
-═══════════════════════════════════════════════════ */
-.streamlit-expanderHeader {
-    background: #FFFFFF !important;
-    border: 1.5px solid var(--d-border) !important;
-    border-radius: 12px !important;
-    color: var(--d-text) !important;
-    font-weight: 700 !important;
-    font-size: .88rem !important;
-    padding: 12px 16px !important;
-    transition: border-color .18s, box-shadow .18s !important;
+/* Responsive */
+@media(max-width:768px){
+    .prem-hero{padding:22px 18px 18px!important;border-radius:16px!important;}
+    .prem-hero-avatar{display:none;}
+    .prem-hero-title{font-size:1.2rem!important;}
+    .prem-hero-stats{grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px;}
+    .cc-meta{flex-direction:column;gap:4px;}
+    .cc-badges{gap:4px;}
+    .tip-bar{flex-direction:column;text-align:center;}
+    .page-row{flex-direction:column;align-items:flex-start;}
+    .prem-action-card{min-height:90px;padding:14px 8px 12px!important;}
+    .prem-action-icon{width:40px;height:40px;font-size:1.3rem;margin-bottom:8px;}
+    .prem-action-label{font-size:.70rem!important;}
+    .dash-chips{gap:6px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;}
+    .dash-chip{flex-shrink:0;padding:5px 12px;font-size:.70rem;}
 }
-.streamlit-expanderHeader:hover {
-    border-color: var(--d-a1) !important;
-    box-shadow: 0 0 0 3px var(--d-a1-soft) !important;
+@media(max-width:480px){
+    .prem-hero-stats{grid-template-columns:repeat(2,1fr);}
+    .prem-hstat-num{font-size:1.5rem!important;}
 }
-.streamlit-expanderContent {
-    background: #FFFFFF !important;
-    border: 1.5px solid var(--d-border) !important;
-    border-top: none !important;
-    border-radius: 0 0 12px 12px !important;
-    padding: 14px 16px !important;
-}
+</style>""", unsafe_allow_html=True)
  
-/* ═══════════════════════════════════════════════════
-   QUICK-ACTION CARD COLORS — override prem-action-card
-═══════════════════════════════════════════════════ */
-.prem-action-card {
-    background: #FFFFFF !important;
-    border: 1.5px solid var(--d-border) !important;
-    box-shadow: var(--d-shadow-sm) !important;
-}
-.prem-action-card:hover {
-    box-shadow: var(--d-shadow-md) !important;
-}
  
-/* ═══════════════════════════════════════════════════
-   RESPONSIVE
-═══════════════════════════════════════════════════ */
-@media (max-width: 768px) {
-    .cc-meta  { flex-direction: column; gap: 4px; }
-    .cc-badges { gap: 4px; }
-    .tip-bar  { flex-direction: column; text-align: center; }
-    .page-row { flex-direction: column; align-items: flex-start; }
-}
-</style>
-""", unsafe_allow_html=True)
-    st.session_state[flag] = True
-
-
 # ═══════════════════════════════════════════════════════════════════════════
-# DATA FETCHERS  ── all cached with TTL to eliminate duplicate requests
+# DATA FETCHERS
 # ═══════════════════════════════════════════════════════════════════════════
-
+ 
 @st.cache_data(ttl=30, show_spinner=False)
-def _fetch_complaints(uid: int) -> list:
-    """Single cached complaints fetch. TTL=30 s — fresh enough for dashboard."""
-    import requests as _req
+def _fetch_complaints(uid):
+    import requests as _r
     try:
-        r = _req.get(f"https://bfo-backend.onrender.com/complaints/user/{uid}", timeout=10)
-        if r.status_code == 200:
-            data = r.json()
-            return data if isinstance(data, list) else []
+        resp = _r.get(f"https://bfo-backend.onrender.com/complaints/user/{uid}", timeout=10)
+        if resp.status_code == 200:
+            d = resp.json()
+            return d if isinstance(d, list) else []
     except Exception:
         pass
     return []
-
-
+ 
+ 
 @st.cache_data(ttl=60, show_spinner=False)
-def _fetch_notifications(uid: int) -> list:
-    """Cached notifications. Reused for both the banner and bottom section."""
-    import requests as _req
+def _fetch_notifications(uid):
+    import requests as _r
     try:
-        r = _req.get(f"https://bfo-backend.onrender.com/schemes/user/notifications/{uid}", timeout=10)
-        if r.status_code == 200:
-            data = r.json()
-            return data if isinstance(data, list) else []
+        resp = _r.get(f"https://bfo-backend.onrender.com/schemes/user/notifications/{uid}", timeout=10)
+        if resp.status_code == 200:
+            d = resp.json()
+            return d if isinstance(d, list) else []
     except Exception:
         pass
     return []
-
-
+ 
+ 
 @st.cache_data(ttl=120, show_spinner=False)
-def _fetch_officials_map() -> dict:
-    """Fetch all officials once, return id→name dict for O(1) lookup."""
-    import requests as _req
+def _fetch_officials_map():
+    import requests as _r
     try:
-        r = _req.get("https://bfo-backend.onrender.com/admin/officials/all", timeout=10)
-        if r.status_code == 200:
-            data = r.json()
-            if isinstance(data, list):
-                return {o.get("id"): o.get("name", "") for o in data}
+        resp = _r.get("https://bfo-backend.onrender.com/admin/officials/all", timeout=10)
+        if resp.status_code == 200:
+            d = resp.json()
+            if isinstance(d, list):
+                return {o.get("id"): o.get("name","") for o in d}
     except Exception:
         pass
     return {}
-
-
-def _api_post(endpoint: str, json_body: dict) -> dict:
-    """Lightweight POST helper; invalidates complaint cache on success."""
-    import requests as _req
+ 
+ 
+def _api_post(endpoint, body):
+    import requests as _r
     try:
-        r = _req.post(f"https://bfo-backend.onrender.com{endpoint}", json=json_body, timeout=10)
-        if r.status_code != 200:
-            return {"error": f"HTTP {r.status_code}: {r.text[:100]}"}
-        return r.json()
+        resp = _r.post(f"https://bfo-backend.onrender.com{endpoint}", json=body, timeout=10)
+        return resp.json() if resp.status_code == 200 else {"error": f"HTTP {resp.status_code}"}
     except Exception as e:
         return {"error": str(e)}
-
-
-def _api_put(endpoint: str, json_body: dict) -> dict:
-    import requests as _req
+ 
+ 
+def _api_put(endpoint, body):
+    import requests as _r
     try:
-        r = _req.put(f"https://bfo-backend.onrender.com{endpoint}", json=json_body, timeout=10)
-        if r.status_code != 200:
-            return {"error": f"HTTP {r.status_code}: {r.text[:100]}"}
-        return r.json()
+        resp = _r.put(f"https://bfo-backend.onrender.com{endpoint}", json=body, timeout=10)
+        return resp.json() if resp.status_code == 200 else {"error": f"HTTP {resp.status_code}"}
     except Exception as e:
         return {"error": str(e)}
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════════════════════════════
 # HELPERS
 # ═══════════════════════════════════════════════════════════════════════════
-
-def _clean(text: str) -> str:
-    """Sanitise complaint description text. Uses pre-compiled regexes."""
+ 
+def _clean(text):
     if not text:
         return ""
-    text = _CLEAN_RE.sub("", text)
+    text = _CLEAN_RE.sub("", str(text))
     return _SPACE_RE.sub(" ", text).strip()
-
-
-def _t(lang: str, en: str, hi: str) -> str:
+ 
+ 
+def _t(lang, en, hi):
     return en if lang == "en" else hi
-
-
-# ── Pre-computed lookup tables (built once at module level) ─────────────────
+ 
+ 
 _STATUS_META = {
-    "pending":     ("⏳", "Pending",     "st-pending"),
-    "in_progress": ("🔄", "In Progress", "st-in_progress"),
-    "resolved":    ("✅", "Resolved",    "st-resolved"),
-    "closed":      ("🔒", "Closed",      "st-closed"),
-    "rejected":    ("❌", "Rejected",    "st-rejected"),
+    "pending":     ("⏳","Pending",    "st-pending"),
+    "in_progress": ("🔄","In Progress","st-in_progress"),
+    "resolved":    ("✅","Resolved",   "st-resolved"),
+    "closed":      ("🔒","Closed",     "st-closed"),
+    "rejected":    ("❌","Rejected",   "st-rejected"),
 }
 _PRIORITY_META = {
-    "high":   ("🔴", "High",   "pr-high",   "bl-high"),
-    "medium": ("🟡", "Medium", "pr-medium", "bl-medium"),
-    "low":    ("🟢", "Low",    "pr-low",    "bl-low"),
+    "high":   ("🔴","High",  "pr-high",  "bl-high"),
+    "medium": ("🟡","Medium","pr-medium","bl-medium"),
+    "low":    ("🟢","Low",   "pr-low",   "bl-low"),
 }
-
-
+ 
+ 
 # ═══════════════════════════════════════════════════════════════════════════
-# RENDER HELPERS  ── modular, single-responsibility
+# RENDER SECTIONS
 # ═══════════════════════════════════════════════════════════════════════════
-
-def _render_hero(user: dict, comps: list, lang: str) -> None:
-    hour       = datetime.now().hour
-    greet_map  = [(12,"Good Morning","सुप्रभात","☀️"),
-                  (17,"Good Afternoon","नमस्कार","👋"),
-                  (24,"Good Evening","शुभ संध्या","🌙")]
+ 
+def _render_hero(user, comps, lang):
+    """FIX: was called _dashboard_render_hero() — correct name is _render_hero()"""
+    hour = datetime.now().hour
+    greet_map = [(12,"Good Morning","सुप्रभात","☀️"),
+                 (17,"Good Afternoon","नमस्कार","👋"),
+                 (24,"Good Evening","शुभ संध्या","🌙")]
     greet, emoji = next(
-        ((_t(lang, g, h), e) for lim, g, h, e in greet_map if hour < lim),
-        (_t(lang,"Good Evening","शुभ संध्या"), "🌙")
+        ((_t(lang,g,h),e) for lim,g,h,e in greet_map if hour < lim),
+        (_t(lang,"Good Evening","शुभ संध्या"),"🌙")
     )
-    user_name = user.get("name", "User").split()[0]
-    initials  = "".join(p[0].upper() for p in user.get("name", "U U").split()[:2])
-    total     = len(comps)
-    active    = sum(1 for c in comps if c.get("status") in ("pending", "in_progress"))
-    resolved  = sum(1 for c in comps if c.get("status") in ("resolved", "closed"))
-    pending   = sum(1 for c in comps if c.get("status") == "pending")
-
+    name     = user.get("name","User")
+    initials = "".join(p[0].upper() for p in name.split()[:2])
+    total    = len(comps)
+    active   = sum(1 for c in comps if c.get("status") in ("pending","in_progress"))
+    resolved = sum(1 for c in comps if c.get("status") in ("resolved","closed"))
+    pending  = sum(1 for c in comps if c.get("status") == "pending")
+ 
     st.markdown(
-        f'<div class="prem-hero">'
-        f'<div class="prem-hero-avatar">{initials}</div>'
-        f'<div class="prem-hero-title">{emoji} {greet}, {_html.escape(user_name)}!</div>'
-        f'<div class="prem-hero-sub">{_t(lang,"Welcome to your complaint dashboard","आपकी सेवा में तत्पर हैं")}</div>'
-        f'<div class="prem-hero-stats">'
-        f'<div class="prem-hstat h-blue"><div class="prem-hstat-num">{total}</div>'
-        f'<div class="prem-hstat-lbl">📋 {_t(lang,"Total","कुल")}</div></div>'
-        f'<div class="prem-hstat h-amber"><div class="prem-hstat-num">{active}</div>'
-        f'<div class="prem-hstat-lbl">🔄 {_t(lang,"Active","सक्रिय")}</div></div>'
-        f'<div class="prem-hstat h-green"><div class="prem-hstat-num">{resolved}</div>'
-        f'<div class="prem-hstat-lbl">✅ {_t(lang,"Resolved","समाधान")}</div></div>'
-        f'<div class="prem-hstat h-red"><div class="prem-hstat-num">{pending}</div>'
-        f'<div class="prem-hstat-lbl">⏳ {_t(lang,"Pending","लंबित")}</div></div>'
-        f'</div></div>',
+        f"<div class='prem-hero'>"
+        f"<div class='prem-hero-avatar'>{initials}</div>"
+        f"<div class='prem-hero-title'>{emoji} {greet}, {_html.escape(name.split()[0])}!</div>"
+        f"<div class='prem-hero-sub'>{_t(lang,'Welcome to your complaint dashboard','आपकी सेवा में तत्पर हैं')}</div>"
+        f"<div class='prem-hero-stats'>"
+        f"<div class='prem-hstat h-blue'><div class='prem-hstat-num'>{total}</div>"
+        f"<div class='prem-hstat-lbl'>📋 {_t(lang,'Total','कुल')}</div></div>"
+        f"<div class='prem-hstat h-amber'><div class='prem-hstat-num'>{active}</div>"
+        f"<div class='prem-hstat-lbl'>🔄 {_t(lang,'Active','सक्रिय')}</div></div>"
+        f"<div class='prem-hstat h-green'><div class='prem-hstat-num'>{resolved}</div>"
+        f"<div class='prem-hstat-lbl'>✅ {_t(lang,'Resolved','समाधान')}</div></div>"
+        f"<div class='prem-hstat h-red'><div class='prem-hstat-num'>{pending}</div>"
+        f"<div class='prem-hstat-lbl'>⏳ {_t(lang,'Pending','लंबित')}</div></div>"
+        f"</div></div>",
         unsafe_allow_html=True,
     )
-
-
-def _render_quick_actions(lang: str) -> None:
-    """Quick action cards — warm orange palette, clean white cards."""
+ 
+ 
+def _render_quick_actions(lang):
     st.markdown(
-        f'<div class="prem-section-header">⚡ {_t(lang,"Quick Actions","त्वरित कार्य")}</div>',
+        f"<div class='d-section-header'>⚡ {_t(lang,'Quick Actions','त्वरित कार्य')}</div>",
         unsafe_allow_html=True,
     )
     actions = [
-        ("📢", _t(lang, "File Complaint", "शिकायत दर्ज"),   "file_complaint",
-         "#E8590C", "rgba(232,89,12,0.08)"),
-        ("🔍", _t(lang, "Track Status",   "ट्रैक करें"),    "tracking",
-         "#D4500B", "rgba(212,80,11,0.08)"),
-        ("📜", _t(lang, "Govt Schemes",   "सरकारी योजनाएं"), "schemes",
-         "#059669", "rgba(5,150,105,0.08)"),
-        ("🤖", _t(lang, "AI Assistant",   "एआई सहायक"),     "assistant",
-         "#0EA5E9", "rgba(14,165,233,0.08)"),
+        ("📢",_t(lang,"File Complaint","शिकायत दर्ज"),"file_complaint","#E8590C","rgba(232,89,12,0.08)"),
+        ("🔍",_t(lang,"Track Status","ट्रैक करें"),   "tracking",      "#D4500B","rgba(212,80,11,0.08)"),
+        ("📜",_t(lang,"Govt Schemes","सरकारी योजनाएं"),"schemes",      "#059669","rgba(5,150,105,0.08)"),
+        ("🤖",_t(lang,"AI Assistant","एआई सहायक"),    "assistant",     "#0EA5E9","rgba(14,165,233,0.08)"),
     ]
-    qa_cols = st.columns(4)
-    for col, (icon, label, screen, color, bg) in zip(qa_cols, actions):
+    cols = st.columns(4)
+    for col,(icon,label,screen,color,bg) in zip(cols,actions):
         with col:
             st.markdown(
-                f'<div class="prem-action-card" style="'
-                f'background:{bg}!important;'
-                f'border:1.5px solid {color}22!important;">'
-                f'<div class="prem-action-icon" style="'
-                f'background:{color}18;border:1.5px solid {color}30;font-size:1.5rem;">'
-                f'{icon}</div>'
-                f'<div class="prem-action-label" style="color:{color};font-weight:800;">'
-                f'{label}</div>'
-                f'</div>',
+                f"<div class='prem-action-card' style='background:{bg}!important;"
+                f"border:1.5px solid {color}22!important;'>"
+                f"<div class='prem-action-icon' style='background:{color}18;"
+                f"border:1.5px solid {color}30;'>{icon}</div>"
+                f"<div class='prem-action-label' style='color:{color};'>{label}</div>"
+                f"</div>",
                 unsafe_allow_html=True,
             )
             if st.button(label, key=f"qa_{screen}", use_container_width=True):
                 st.session_state.screen = screen
                 st.rerun()
-
-
-def _render_notification_banner(notifs: list, lang: str) -> None:
-    """Render top notification banner — uses already-fetched notifs list."""
+ 
+ 
+def _render_notification_banner(notifs, lang):
     unread = [n for n in notifs if not n.get("is_read")]
     if not unread:
         return
     first = unread[0]
     st.markdown(
-        f'<div class="notif-inline">'
-        f'<div class="ni-dot"></div>'
-        f'<div class="ni-text">🔔 {_html.escape(first.get("title",""))} — '
-        f'{_html.escape(first.get("message","")[:65])}…</div>'
-        f'<span class="ni-badge">{len(unread)} {_t(lang,"new","नई")}</span>'
-        f'</div>',
+        f"<div class='notif-inline'><div class='ni-dot'></div>"
+        f"<div class='ni-text'>🔔 {_html.escape(str(first.get('title','')))} — "
+        f"{_html.escape(str(first.get('message',''))[:65])}…</div>"
+        f"<span class='ni-badge'>{len(unread)} {_t(lang,'new','नई')}</span></div>",
         unsafe_allow_html=True,
     )
-
-
-def _render_feedback_section(comps: list, lang: str) -> None:
-    """Feedback confirmation cards — no extra API calls."""
-    need_feedback = [c for c in comps if c.get("status") == "resolved" and not c.get("feedback")]
-    if not need_feedback:
+ 
+ 
+def _render_feedback_section(comps, lang):
+    need = [c for c in comps if c.get("status") == "resolved" and not c.get("feedback")]
+    if not need:
         return
-
     st.markdown(
-        f'<div class="prem-section-header">✅ {_t(lang,"Confirm Resolution","समाधान की पुष्टि करें")}</div>',
+        f"<div class='d-section-header'>✅ {_t(lang,'Confirm Resolution','समाधान की पुष्टि करें')}</div>",
         unsafe_allow_html=True,
     )
-    for fb_comp in need_feedback:
-        fb_cid      = fb_comp.get("complaint_id")
-        fb_deadline = fb_comp.get("feedback_deadline", _t(lang,"within 2 days","2 दिनों के भीतर"))
-        cleaned     = _clean(fb_comp.get("description", ""))
-
+    for c in need:
+        cid      = c.get("complaint_id")
+        deadline = c.get("feedback_deadline", _t(lang,"within 2 days","2 दिनों के भीतर"))
+        desc     = _clean(c.get("description",""))
         st.markdown(
-            f'<div class="fb-card">'
-            f'<div class="fb-head">'
-            f'<div class="fb-icon">✅</div>'
-            f'<div>'
-            f'<div class="fb-title">{_t(lang,"Complaint Resolved — Please Confirm!","शिकायत समाधान हुई — पुष्टि करें!")}</div>'
-            f'<div class="fb-sub">#{fb_cid}</div>'
-            f'</div></div>'
-            f'<div class="fb-desc">{_html.escape(cleaned[:120])}…'
-            f'<br><small>⏰ {_t(lang,"Respond by","उत्तर दें:")} {_html.escape(str(fb_deadline))}</small>'
-            f'</div></div>',
+            f"<div class='fb-card'><div class='fb-head'><div class='fb-icon'>✅</div>"
+            f"<div><div class='fb-title'>{_t(lang,'Complaint Resolved — Please Confirm!','शिकायत समाधान हुई — पुष्टि करें!')}</div>"
+            f"<div class='fb-sub'>#{cid}</div></div></div>"
+            f"<div class='fb-desc'>{_html.escape(desc[:120])}…"
+            f"<br><small>⏰ {_t(lang,'Respond by','उत्तर दें:')} {_html.escape(str(deadline))}</small>"
+            f"</div></div>",
             unsafe_allow_html=True,
         )
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button(_t(lang,"👍 Yes, Satisfied!","👍 हाँ, संतुष्ट हूँ!"), key=f"fb_ok_{fb_cid}"):
-                resp = _api_put(f"/complaints/{fb_cid}/feedback", {"feedback": "satisfied"})
+        c1,c2 = st.columns(2)
+        with c1:
+            if st.button(_t(lang,"👍 Yes, Satisfied!","👍 हाँ, संतुष्ट हूँ!"), key=f"fb_ok_{cid}"):
+                resp = _api_put(f"/complaints/{cid}/feedback", {"feedback":"satisfied"})
                 if resp.get("success"):
-                    st.session_state[f"pending_rating_{fb_cid}"] = True
-                    _fetch_complaints.clear()          # invalidate cache
-                    st.toast("Feedback submitted")
-                    st.rerun()
+                    st.session_state[f"pending_rating_{cid}"] = True
+                    _fetch_complaints.clear(); st.toast("Feedback submitted ✅"); st.rerun()
                 else:
                     st.error(f"Error: {resp.get('error','Unknown')}")
-        with col2:
-            if st.button(_t(lang,"❌ Not Resolved — Reopen","❌ समाधान नहीं — पुनः खोलें"), key=f"fb_no_{fb_cid}"):
-                resp = _api_put(f"/complaints/{fb_cid}/feedback", {"feedback": "not_satisfied"})
+        with c2:
+            if st.button(_t(lang,"❌ Not Resolved — Reopen","❌ समाधान नहीं — पुनः खोलें"), key=f"fb_no_{cid}"):
+                resp = _api_put(f"/complaints/{cid}/feedback", {"feedback":"not_satisfied"})
                 if resp.get("success"):
-                    _fetch_complaints.clear()
-                    st.toast("Complaint reopened")
-                    st.rerun()
+                    _fetch_complaints.clear(); st.toast("Complaint reopened 🔄"); st.rerun()
                 else:
                     st.error(f"Error: {resp.get('error','Unknown')}")
-
-
-def _render_rating_section(comps: list, lang: str) -> None:
-    """Rating cards. Officials fetched once via _fetch_officials_map()."""
-    need_rating = [c for c in comps if c.get("feedback") == "satisfied" and not c.get("rating")]
-    # also include any that have a pending_rating_ flag in session_state
-    pending_ids = {
-        k.replace("pending_rating_","")
-        for k in st.session_state
-        if k.startswith("pending_rating_")
-    }
-    existing_ids = {c.get("complaint_id") for c in need_rating}
+ 
+ 
+def _render_rating_section(comps, lang):
+    need = [c for c in comps if c.get("feedback") == "satisfied" and not c.get("rating")]
+    pending_ids = {k.replace("pending_rating_","") for k in st.session_state if k.startswith("pending_rating_")}
+    existing_ids = {c.get("complaint_id") for c in need}
     for cid in pending_ids - existing_ids:
-        match = next((c for c in comps if str(c.get("complaint_id")) == cid), None)
-        if match:
-            need_rating.append(match)
-
-    if not need_rating:
+        m = next((c for c in comps if str(c.get("complaint_id")) == cid), None)
+        if m:
+            need.append(m)
+    if not need:
         return
-
-    # Single fetch for all officials — O(1) lookup inside the loop
+ 
     officials_map = _fetch_officials_map()
-
+    STAR_LABELS = {1:_t(lang,"Very Poor","बहुत खराब"),2:_t(lang,"Poor","खराब"),
+                   3:_t(lang,"Average","औसत"),4:_t(lang,"Good","अच्छा"),5:_t(lang,"Excellent","उत्कृष्ट")}
     st.markdown(
-        f'<div class="prem-section-header">⭐ {_t(lang,"Rate the Service","सेवा को रेट करें")}</div>',
+        f"<div class='d-section-header'>⭐ {_t(lang,'Rate the Service','सेवा को रेट करें')}</div>",
         unsafe_allow_html=True,
     )
-    STAR_LABELS = {
-        1: _t(lang,"Very Poor","बहुत खराब"),
-        2: _t(lang,"Poor","खराब"),
-        3: _t(lang,"Average","औसत"),
-        4: _t(lang,"Good","अच्छा"),
-        5: _t(lang,"Excellent","उत्कृष्ट"),
-    }
-
-    for rt_comp in need_rating:
-        rt_cid      = rt_comp.get("complaint_id")
-        rt_off_id   = rt_comp.get("official_id")
-        rt_off_name = (
-            rt_comp.get("official_name")
-            or officials_map.get(rt_off_id)
-            or _t(lang,"the department","विभाग")
-        )
-        star_key    = f"_star_val_{rt_cid}"
-        comment_key = f"_comment_val_{rt_cid}"
-        cur_star    = st.session_state.get(star_key, 0)
-        star_disp   = "★" * cur_star if cur_star > 0 else "☆☆☆☆☆"
-        cleaned     = _clean(rt_comp.get("description",""))
-
+ 
+    for rt in need:
+        cid      = rt.get("complaint_id")
+        off_id   = rt.get("official_id")
+        off_name = rt.get("official_name") or officials_map.get(off_id) or _t(lang,"the department","विभाग")
+        star_key = f"_star_val_{cid}"
+        cmnt_key = f"_comment_val_{cid}"
+        cur      = st.session_state.get(star_key, 0)
+        disp     = "★"*cur if cur > 0 else "☆☆☆☆☆"
+        desc     = _clean(rt.get("description",""))
+ 
         st.markdown(
-            f'<div class="rt-card">'
-            f'<div class="rt-head"><div class="rt-icon">⭐</div><div>'
-            f'<div class="rt-title">{_t(lang,"Rate the Service","सेवा को रेट करें")}</div>'
-            f'<div class="rt-sub">{_t(lang,"Resolved by","समाधानकर्ता")}: '
-            f'<strong>{_html.escape(str(rt_off_name))}</strong> · #{rt_cid}</div>'
-            f'</div></div>'
-            f'<div class="rt-desc">{_html.escape(cleaned[:100])}…</div>'
-            f'<div class="rt-display">'
-            f'<div class="rt-stars-large">{star_disp}</div>'
-            f'<div class="rt-lbl">{_t(lang,"Select your rating below","नीचे रेटिंग चुनें")}</div>'
-            f'</div></div>',
+            f"<div class='rt-card'><div class='rt-head'><div class='rt-icon'>⭐</div>"
+            f"<div><div class='rt-title'>{_t(lang,'Rate the Service','सेवा को रेट करें')}</div>"
+            f"<div class='rt-sub'>{_t(lang,'Resolved by','समाधानकर्ता')}: "
+            f"<strong>{_html.escape(str(off_name))}</strong> · #{cid}</div>"
+            f"</div></div><div class='rt-desc'>{_html.escape(desc[:100])}…</div>"
+            f"<div class='rt-display'><div class='rt-stars-large'>{disp}</div>"
+            f"<div class='rt-lbl'>{_t(lang,'Select your rating below','नीचे रेटिंग चुनें')}</div>"
+            f"</div></div>",
             unsafe_allow_html=True,
         )
-
-        star_cols = st.columns(5)
-        for val in range(1, 6):
-            with star_cols[val - 1]:
-                icon = "★" if cur_star == val else "☆"
-                if st.button(f"{icon} {STAR_LABELS[val]}", key=f"star_{rt_cid}_{val}"):
-                    st.session_state[star_key] = val
-                    st.rerun()
-
-        comment = st.text_area(
-            _t(lang,"Additional feedback (optional)","अतिरिक्त प्रतिक्रिया (वैकल्पिक)"),
-            key=comment_key, height=85,
-        )
-
-        if cur_star == 0:
-            st.info(_t(lang,
-                "⭐ Please select a star rating above before submitting.",
-                "⭐ सबमिट करने से पहले ऊपर एक स्टार रेटिंग चुनें।"))
+        scols = st.columns(5)
+        for val in range(1,6):
+            with scols[val-1]:
+                icon = "★" if cur == val else "☆"
+                if st.button(f"{icon} {STAR_LABELS[val]}", key=f"star_{cid}_{val}"):
+                    st.session_state[star_key] = val; st.rerun()
+ 
+        comment = st.text_area(_t(lang,"Additional feedback (optional)","अतिरिक्त प्रतिक्रिया (वैकल्पिक)"),
+                                key=cmnt_key, height=80)
+        if cur == 0:
+            st.info(_t(lang,"⭐ Select a star rating above before submitting.","⭐ सबमिट से पहले स्टार रेटिंग चुनें।"))
         else:
-            sub_key = f"rate_sub_{rt_cid}"
-            if st.button(f"{'⭐'*cur_star} {_t(lang,'Submit Rating','रेटिंग सबमिट करें')}",
-                         key=sub_key):
-                payload = {
-                    "stars":       cur_star,
-                    "comment":     comment or None,
-                    "user_id":     st.session_state.user.get("user_id"),
-                    "official_id": rt_off_id if rt_off_id else 1,
-                }
-                resp = _api_post(f"/complaints/{rt_cid}/rate", payload)
+            if st.button(f"{'⭐'*cur} {_t(lang,'Submit Rating','रेटिंग सबमिट करें')}", key=f"rate_sub_{cid}"):
+                resp = _api_post(f"/complaints/{cid}/rate",
+                    {"stars":cur,"comment":comment or None,
+                     "user_id":st.session_state.user.get("user_id"),
+                     "official_id":off_id if off_id else 1})
                 if resp.get("success"):
-                    for k in (star_key, comment_key, f"pending_rating_{rt_cid}"):
-                        st.session_state.pop(k, None)
+                    for k in (star_key,cmnt_key,f"pending_rating_{cid}"):
+                        st.session_state.pop(k,None)
                     _fetch_complaints.clear()
                     st.success(_t(lang,"✅ Rating submitted! Thank you.","✅ रेटिंग सबमिट हो गई! धन्यवाद।"))
-                    st.balloons()
-                    st.rerun()
+                    st.balloons(); st.rerun()
                 else:
-                    st.error(f"Error: {resp.get('detail', resp.get('error','Unknown'))}")
-
+                    st.error(f"Error: {resp.get('detail',resp.get('error','Unknown'))}")
+ 
         st.markdown(
-            f'<div style="height:1px;background:linear-gradient(90deg,'
-            f'transparent,rgba(99,102,241,.15),transparent);margin:16px 0 24px;"></div>',
+            "<div style='height:1px;background:linear-gradient(90deg,"
+            "transparent,rgba(232,89,12,0.12),transparent);margin:16px 0 22px;'></div>",
             unsafe_allow_html=True,
         )
-
-def _render_single_complaint_card(
-        c: dict,
-        lang: str,
-        skip_ids: set,
-        idx: int
-    ) -> bool:
+ 
+ 
+def _render_single_complaint_card(c, lang, skip_ids, idx):
     """
-    Renders one complaint as a clean white card with dark border.
-    Returns False if the card was skipped, True otherwise.
+    Clean white card — NO black border.
+    FIX: image evidence is ONE html block + native button after it.
     """
-    cid = c.get("complaint_id", "N/A")
+    cid = c.get("complaint_id","N/A")
     if cid in skip_ids:
         return False
  
-    status       = c.get("status", "pending")
-    priority     = c.get("priority", "medium")
-    category     = c.get("category", "other").title()
-    desc         = _clean(c.get("description", ""))
-    loc          = c.get("location", "—")
-    date         = c.get("created_at", "—")
+    status       = c.get("status","pending")
+    priority     = c.get("priority","medium")
+    category     = c.get("category","other").title()
+    desc         = _clean(c.get("description",""))
+    loc          = c.get("location","—")
+    date         = c.get("created_at","—")
     is_emergency = c.get("is_emergency", False)
     sla          = c.get("sla_deadline")
     overdue      = c.get("is_overdue", False)
-    img_path     = c.get("image_path")
+    img_path     = c.get("image_path") or c.get("image_url")
  
-    s_icon, s_lbl, s_cls = _STATUS_META.get(status, ("", status.title(), "st-pending"))
-    p_icon, p_lbl, p_cls, bl_cls = _PRIORITY_META.get(
-        priority, ("", priority.title(), "pr-medium", "bl-default")
-    )
+    s_icon,s_lbl,s_cls   = _STATUS_META.get(status, ("📋",status.title(),"st-pending"))
+    p_icon,p_lbl,p_cls,bl_cls = _PRIORITY_META.get(priority, ("","Medium","pr-medium","bl-default"))
     if is_emergency:
         bl_cls = "bl-emg"
  
-    # card outer priority class
-    card_cls = "cc-emg" if is_emergency else f"cc-{priority}"
- 
+    card_cls  = "cc-emg" if is_emergency else f"cc-{priority}"
     emg_html  = '<span class="cc-badge badge-emg">🚨 EMERGENCY</span>' if is_emergency else ""
-    exp_title = (
-        ("🚨 " if is_emergency else "")
-        + f"{idx}. #{cid}  ·  {category}  ·  {s_icon} {s_lbl}"
-    )
+    exp_title = (("🚨 " if is_emergency else "")
+                 + f"{idx}. #{cid}  ·  {category}  ·  {s_icon} {s_lbl}")
  
-    # complaint number above the expander
-    st.markdown(
-        f'<div class="cc-number">Complaint #{idx}</div>',
-        unsafe_allow_html=True,
-    )
- 
-    # wrap the whole expander in the bordered card div
-    st.markdown(
-        f'<div class="cc-outer {card_cls}">',
-        unsafe_allow_html=True,
-    )
+    # number label
+    st.markdown(f"<div class='cc-number'>{_t(lang,'Complaint','शिकायत')} #{idx}</div>",
+                unsafe_allow_html=True)
+    # open card (light border)
+    st.markdown(f"<div class='cc-outer {card_cls}'>", unsafe_allow_html=True)
  
     with st.expander(exp_title, expanded=False):
         if st.button(f"🔊 {_t(lang,'Listen','सुनें')}", key=f"voice_{cid}"):
             try:
-                speak_text(f"Complaint {cid}: {desc}", lang)
+                speak_text(f"Complaint {cid}: {desc}", lang)  # noqa: F821
             except NameError:
                 pass
  
+        # ONE complete detail block
         st.markdown(
-            f'<div class="{bl_cls}">'
-            f'<div class="cc-badges">'
-            f'<span class="cc-cid">#{cid}</span>'
-            f'<span class="cc-badge {s_cls}">{s_icon} {s_lbl}</span>'
-            f'<span class="cc-badge {p_cls}">{p_icon} {p_lbl}</span>'
-            f'{emg_html}'
-            f'</div>'
-            f'<div class="cc-title">{_html.escape(category)}</div>'
-            f'<div class="cc-desc">'
-            f'{_html.escape(desc[:180])}{"…" if len(desc) > 180 else ""}'
-            f'</div>'
-            f'<div class="cc-meta">'
-            f'<span>📍 {_html.escape(str(loc))}</span>'
-            f'<span>📅 {_html.escape(str(date))}</span>'
-            f'</div></div>',
+            f"<div class='{bl_cls}'>"
+            f"<div class='cc-badges'>"
+            f"<span class='cc-cid'>#{cid}</span>"
+            f"<span class='cc-badge {s_cls}'>{s_icon} {s_lbl}</span>"
+            f"<span class='cc-badge {p_cls}'>{p_icon} {p_lbl}</span>"
+            f"{emg_html}</div>"
+            f"<div class='cc-title'>{_html.escape(category)}</div>"
+            f"<div class='cc-desc'>{_html.escape(desc[:200])}{'…' if len(desc)>200 else ''}</div>"
+            f"<div class='cc-meta'>"
+            f"<span>📍 {_html.escape(str(loc))}</span>"
+            f"<span>📅 {_html.escape(str(date))}</span>"
+            f"</div></div>",
             unsafe_allow_html=True,
         )
  
+        # Image evidence — html block then native button (no split divs around the button)
         if img_path:
             st.markdown(
-                '<div class="evidence-wrap">'
-                '<div class="evidence-title">🖼️ Complaint Evidence</div>'
-                '<div class="evidence-box">',
+                "<div class='evidence-box'>"
+                "<div class='evidence-title'>🖼️ "
+                + _t(lang,"Complaint Evidence","शिकायत साक्ष्य") +
+                "</div></div>",
                 unsafe_allow_html=True,
             )
-            st.markdown('<div class="img-btn">', unsafe_allow_html=True)
-            show_img = st.button(
-                "👁️ View Uploaded Image",
+            if st.button(
+                f"👁️ {_t(lang,'View Uploaded Photo','अपलोड की गई फ़ोटो देखें')}",
                 key=f"show_img_{cid}",
                 use_container_width=True,
-            )
-            st.markdown("</div>", unsafe_allow_html=True)
-            if show_img:
-                st.image(
-                    f"https://bfo-backend.onrender.com{img_path}",
-                    caption="Uploaded Complaint Evidence",
-                    use_container_width=True,
-                )
-            st.markdown("</div></div>", unsafe_allow_html=True)
+            ):
+                img_url = (img_path if img_path.startswith("http")
+                           else f"https://bfo-backend.onrender.com{img_path}")
+                st.image(img_url,
+                         caption=_t(lang,"Uploaded Complaint Evidence","शिकायत का प्रमाण"),
+                         use_container_width=True)
  
         if sla:
             if overdue:
-                st.error(f"⏰ OVERDUE! Expected by: {sla}")
+                st.error(f"⏰ {_t(lang,'OVERDUE! Expected by:','अतिदेय! समय सीमा:')} {sla}")
             else:
-                st.info(f"⏱️ Expected by: {sla}")
+                st.info(f"⏱️ {_t(lang,'Expected by:','अपेक्षित:')} {sla}")
  
-    st.markdown("</div>", unsafe_allow_html=True)   # close .cc-outer
- 
+    # close card
+    st.markdown("</div>", unsafe_allow_html=True)
     return True
-
-
-def _render_complaint_list(comps: list, lang: str, skip_ids: set) -> None:
+ 
+ 
+def _render_complaint_list(comps, lang, skip_ids):
     if not comps:
         st.markdown(
-            f'<div class="prem-empty-state" style="margin-top:12px;">'
-            f'<span class="prem-empty-icon">📭</span>'
-            f'<div class="prem-empty-title">'
-            f'{_t(lang,"You have not filed any complaints yet.","आपने अभी तक कोई शिकायत दर्ज नहीं की है।")}'
-            f'</div><div class="prem-empty-sub">'
-            f'{_t(lang,"Use Quick Actions above to file your first complaint.","पहली शिकायत दर्ज करने के लिए ऊपर Quick Actions का उपयोग करें।")}'
-            f'</div></div>',
+            f"<div class='prem-empty-state' style='margin-top:12px;'>"
+            f"<span class='prem-empty-icon'>📭</span>"
+            f"<div class='prem-empty-title'>"
+            f"{_t(lang,'No complaints filed yet.','अभी तक कोई शिकायत दर्ज नहीं।')}"
+            f"</div><div class='prem-empty-sub'>"
+            f"{_t(lang,'Use Quick Actions above to file your first complaint.','ऊपर Quick Actions से पहली शिकायत दर्ज करें।')}"
+            f"</div></div>",
             unsafe_allow_html=True,
         )
         return
-
+ 
     st.markdown(
-        f'<div class="prem-section-header">📋 {_t(lang,"Your Complaints","आपकी शिकायतें")}</div>',
+        f"<div class='d-section-header'>📋 {_t(lang,'Your Complaints','आपकी शिकायतें')}</div>",
         unsafe_allow_html=True,
     )
-
-    # ── Filter chips (visual display only) ────────────────────────────────
+ 
     filters = [
-        ("all",         "All",         "📋"),
-        ("pending",     "Pending",     "⏳"),
-        ("in_progress", "In Progress", "🔄"),
-        ("resolved",    "Resolved",    "✅"),
-        ("closed",      "Closed",      "🔒"),
+        ("all",        _t(lang,"All","सभी"),               "📋"),
+        ("pending",    _t(lang,"Pending","लंबित"),          "⏳"),
+        ("in_progress",_t(lang,"In Progress","प्रगति में"), "🔄"),
+        ("resolved",   _t(lang,"Resolved","समाधान"),        "✅"),
+        ("closed",     _t(lang,"Closed","बंद"),             "🔒"),
     ]
-    active_filter = st.session_state.get("dash_filter", "all")
-    
-
-    # ── Filter buttons (hidden but functional) ─────────────────────────────
-    st.markdown('<div class="dash-filter-btns">', unsafe_allow_html=True)
-    with st.container():
-        fcols = st.columns(len(filters))
-        for fcol, (fval, flbl, ficon) in zip(fcols, filters):
-            with fcol:
-                if st.button(f"{ficon} {flbl}", key=f"flt_{fval}", use_container_width=True):
-                    st.session_state.dash_filter = fval
-                    # Reset to page 1 on filter change — no full rerun needed
-                    st.session_state["dash_page"] = 0
-                    st.rerun()
+    active_filter = st.session_state.get("dash_filter","all")
+ 
+    # visual chips
+    chips = "<div class='dash-chips'>"
+    for fval,flbl,ficon in filters:
+        cls = " active" if fval == active_filter else ""
+        chips += f"<span class='dash-chip{cls}'>{ficon} {flbl}</span>"
+    chips += "</div>"
+    st.markdown(chips, unsafe_allow_html=True)
+ 
+    # hidden functional buttons
+    st.markdown("<div class='dash-filter-btns'>", unsafe_allow_html=True)
+    fcols = st.columns(len(filters))
+    for fcol,(fval,flbl,ficon) in zip(fcols, filters):
+        with fcol:
+            if st.button(f"{ficon} {flbl}", key=f"flt_{fval}", use_container_width=True):
+                st.session_state.dash_filter = fval
+                st.session_state["dash_page"] = 0
+                st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
-
-    # ── Filter data ────────────────────────────────────────────────────────
-    filtered = comps if active_filter == "all" else [
-        c for c in comps if c.get("status") == active_filter
-    ]
-    # Exclude feedback/rating cards already shown above
+ 
+    filtered = (comps if active_filter == "all"
+                else [c for c in comps if c.get("status") == active_filter])
     filtered = [c for c in filtered if c.get("complaint_id") not in skip_ids]
-
-    # ── Pagination ─────────────────────────────────────────────────────────
-    total_pages = max(1, (len(filtered) + PAGE_SIZE - 1) // PAGE_SIZE)
-    page        = st.session_state.get("dash_page", 0)
-    page        = max(0, min(page, total_pages - 1))   # clamp
-    page_slice  = filtered[page * PAGE_SIZE : (page + 1) * PAGE_SIZE]
-
+ 
+    total_pages = max(1,(len(filtered)+PAGE_SIZE-1)//PAGE_SIZE)
+    page        = max(0, min(st.session_state.get("dash_page",0), total_pages-1))
+    page_slice  = filtered[page*PAGE_SIZE:(page+1)*PAGE_SIZE]
+ 
     st.markdown(
-        f'<div class="page-row">'
-        f'<span class="page-info">'
-        f'{_t(lang,"Showing","दिखा रहे हैं")} '
-        f'<strong>{len(page_slice)}</strong> / <strong>{len(filtered)}</strong> '
-        f'{_t(lang,"complaints","शिकायतें")}</span>'
-        f'</div>',
+        f"<div class='page-row'><span class='page-info'>"
+        f"{_t(lang,'Showing','दिखा रहे हैं')} "
+        f"<strong>{len(page_slice)}</strong> / <strong>{len(filtered)}</strong> "
+        f"{_t(lang,'complaints','शिकायतें')}</span></div>",
         unsafe_allow_html=True,
     )
-
-    # ── Render only the current page ──���────────────────────────────────────
+ 
     shown = 0
-
-    start_no = page * PAGE_SIZE + 1
-
-    for idx, c in enumerate(page_slice, start=start_no):
-
-        if _render_single_complaint_card(
-            c,
-            lang,
-            skip_ids,
-            idx
-        ):
+    for idx,c in enumerate(page_slice, start=page*PAGE_SIZE+1):
+        if _render_single_complaint_card(c, lang, skip_ids, idx):
             shown += 1
-
+ 
     if shown == 0:
         st.markdown(
-            f'<div class="prem-empty-state" style="margin-top:12px;">'
-            f'<span class="prem-empty-icon">🔍</span>'
-            f'<div class="prem-empty-title">'
-            f'{_t(lang,"No complaints match the current filter.","वर्तमान फ़िल्टर से मेल खाती कोई शिकायत नहीं।")}'
-            f'</div></div>',
+            f"<div class='prem-empty-state' style='margin-top:12px;'>"
+            f"<span class='prem-empty-icon'>🔍</span>"
+            f"<div class='prem-empty-title'>"
+            f"{_t(lang,'No complaints match this filter.','इस फ़िल्टर से कोई शिकायत नहीं मिली।')}"
+            f"</div></div>",
             unsafe_allow_html=True,
         )
-
-    # ── Page navigation ────────────────────────────────────────────────────
+ 
     if total_pages > 1:
-        nav_cols = st.columns([1, 3, 1])
-        with nav_cols[0]:
-            if page > 0:
-                if st.button("← Prev", key="page_prev", use_container_width=True):
-                    st.session_state["dash_page"] = page - 1
-                    st.rerun()
-        with nav_cols[1]:
+        nav = st.columns([1,3,1])
+        with nav[0]:
+            if page > 0 and st.button(f"← {_t(lang,'Prev','पिछला')}", key="page_prev", use_container_width=True):
+                st.session_state["dash_page"] = page-1; st.rerun()
+        with nav[1]:
             st.markdown(
-                f'<div style="text-align:center;font-size:.78rem;'
-                f'color:rgba(99,102,241,.80);font-weight:700;padding:8px 0;">'
-                f'Page {page+1} / {total_pages}</div>',
+                f"<div style='text-align:center;font-size:.78rem;"
+                f"color:var(--d-a1);font-weight:800;padding:8px 0;'>"
+                f"{_t(lang,'Page','पृष्ठ')} {page+1} / {total_pages}</div>",
                 unsafe_allow_html=True,
             )
-        with nav_cols[2]:
-            if page < total_pages - 1:
-                if st.button("Next →", key="page_next", use_container_width=True):
-                    st.session_state["dash_page"] = page + 1
-                    st.rerun()
-
-
-def _render_notifications_footer(notifs: list, lang: str) -> None:
-    """Bottom notifications section — reuses already-fetched notifs."""
+        with nav[2]:
+            if page < total_pages-1 and st.button(f"{_t(lang,'Next','अगला')} →", key="page_next", use_container_width=True):
+                st.session_state["dash_page"] = page+1; st.rerun()
+ 
+ 
+def _render_notifications_footer(notifs, lang):
     unread = [n for n in notifs if not n.get("is_read")]
     if not unread:
         return
-
     st.markdown(
-        f'<div class="prem-section-header">🔔 {_t(lang,"Notifications","सूचनाएं")} '
-        f'<span style="background:#6366F1;color:#fff;border-radius:20px;'
-        f'padding:2px 10px;font-size:.68rem;font-weight:800;">'
-        f'{len(unread)} {_t(lang,"new","नई")}</span></div>',
+        f"<div class='d-section-header'>🔔 {_t(lang,'Notifications','सूचनाएं')} "
+        f"<span style='background:var(--d-a1);color:#fff;border-radius:20px;"
+        f"padding:2px 10px;font-size:.66rem;font-weight:800;'>"
+        f"{len(unread)} {_t(lang,'new','नई')}</span></div>",
         unsafe_allow_html=True,
     )
     for n in unread[:3]:
+        title = _clean(str(n.get("title","")))
+        msg   = _clean(str(n.get("message","")))
+        time_ = _clean(str(n.get("time","")))
         st.markdown(
-            f'<div class="prem-notif-card">'
-            f'<div class="prem-notif-dot"></div>'
-            f'<div>'
-            f'<div class="prem-notif-title">🔔 {_clean(_html.unescape(str(n.get("title",""))))}</div>'
-            f'<div class="prem-notif-msg">{_clean(_html.unescape(str(n.get("message",""))))}</div>'
-            f'<div class="prem-notif-time">{_clean(_html.unescape(str(n.get("time",""))))}</div>'
-            f'</div></div>',
+            f"<div class='prem-notif-card'><div class='prem-notif-dot'></div>"
+            f"<div><div class='prem-notif-title'>🔔 {_html.escape(title)}</div>"
+            f"<div class='prem-notif-msg'>{_html.escape(msg)}</div>"
+            f"<div class='prem-notif-time'>{_html.escape(time_)}</div>"
+            f"</div></div>",
             unsafe_allow_html=True,
         )
     if st.button(_t(lang,"View All Notifications →","सभी सूचनाएं देखें →"), key="va_notifs_dash"):
-        st.session_state.screen = "notifications"
-        st.rerun()
-
-
+        st.session_state.screen = "notifications"; st.rerun()
+ 
+ 
 # ═══════════════════════════════════════════════════════════════════════════
 # MAIN ENTRY POINT
 # ═══════════════════════════════════════════════════════════════════════════
-
-def pg_user_dashboard() -> None:
-    
-    _apply_layout("user") 
+ 
+def pg_user_dashboard():
     try:
-        submit_offline_complaints()
+        _apply_layout("user")       # noqa: F821 — defined in app.py
     except NameError:
         pass
-
+    try:
+        submit_offline_complaints() # noqa: F821
+    except NameError:
+        pass
+ 
     user = st.session_state.user or {}
     uid  = user.get("user_id")
     lang = st.session_state.language
     dark = st.session_state.get("dark_mode", False)
-
-    # ── 1. CSS injected once per session ───────────────────────────────────
-    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
-    _inject_css_once(dark)
-
-    # ── 2. All data fetched via cached functions (single network trip each) ─
-    comps  = _fetch_complaints(uid)
-    notifs = _fetch_notifications(uid)
-
-    # ── 3. Session-state defaults ───────────────────────────────────────────
-    st.session_state.setdefault("dash_filter", "all")
-    st.session_state.setdefault("dash_page",   0)
-
-    # ── 4. Build skip-set: IDs shown in feedback/rating sections ───────────
+ 
+    # 1. CSS — always injected, no flag
+    st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)  # noqa: F821
+    _inject_dashboard_css()
+ 
+    # 2. Data with loading spinner
+    with st.spinner(_t(lang,"Loading your dashboard…","डैशबोर्ड लोड हो रहा है…")):
+        comps  = _fetch_complaints(uid)
+        notifs = _fetch_notifications(uid)
+ 
+    # 3. Session defaults
+    st.session_state.setdefault("dash_filter","all")
+    st.session_state.setdefault("dash_page",  0)
+ 
+    # 4. Skip-set
     skip_ids = {
-        c.get("complaint_id")
-        for c in comps
+        c.get("complaint_id") for c in comps
         if (c.get("status") == "resolved" and not c.get("feedback"))
-        or (c.get("feedback") == "satisfied"  and not c.get("rating"))
+        or (c.get("feedback") == "satisfied" and not c.get("rating"))
     }
-
-    # ── 5. Render sections ─────────────────────────────────────────────────
-    
-    _dashboard_render_hero(user, comps, lang)
+ 
+    # 5. Render — _render_hero is the correct name
+    _render_hero(user, comps, lang)
     _render_quick_actions(lang)
     _render_notification_banner(notifs, lang)
     _render_feedback_section(comps, lang)
     _render_rating_section(comps, lang)
     _render_complaint_list(comps, lang, skip_ids)
     _render_notifications_footer(notifs, lang)
-
-    # ── 6. Tip bar ─────────────────────────────────────────────────────────
+ 
+    # 6. Tip bar
     st.markdown(
-        f'<div class="tip-bar">'
-        f'<span style="font-size:1.1rem;">💡</span>'
-        f'<div class="tip-text"><strong>{_t(lang,"Pro Tip:","सुझाव:")}</strong> '
-        f'{_t(lang,"Track your complaint in real-time and get instant notifications on every update.","अपनी शिकायत को रियल-टाइम में ट्रैक करें और हर अपडेट पर तुरंत सूचना पाएं।")}'
-        f'</div></div>',
+        f"<div class='tip-bar'><span style='font-size:1.1rem;'>💡</span>"
+        f"<div class='tip-text'><strong>{_t(lang,'Pro Tip:','सुझाव:')}</strong> "
+        f"{_t(lang,'Track your complaint in real-time and get instant notifications on every update.','अपनी शिकायत को रियल-टाइम में ट्रैक करें और हर अपडेट पर तुरंत सूचना पाएं।')}"
+        f"</div></div>",
         unsafe_allow_html=True,
     )
-
-    # ── 7. Manual refresh (the ONLY justified rerun) ───────────────────────
-    if st.button(_t(lang,"🔄 Refresh Dashboard","🔄 डैशबोर्ड रिफ्रेश करें"),
-                 key="refresh_dash", use_container_width=True):
-        _fetch_complaints.clear()
-        _fetch_notifications.clear()
-        st.rerun()
+ 
+    # 7. Refresh — centered
+    c1,c2,c3 = st.columns([1,2,1])
+    with c2:
+        if st.button(_t(lang,"🔄 Refresh Dashboard","🔄 डैशबोर्ड रिफ्रेश करें"),
+                     key="refresh_dash", use_container_width=True):
+            _fetch_complaints.clear(); _fetch_notifications.clear(); st.rerun()
 
 def _feedback_confirm_card(c, uid, idx=0):
     cid = c.get("complaint_id", "")
