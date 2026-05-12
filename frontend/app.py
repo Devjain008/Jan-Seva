@@ -2584,7 +2584,7 @@ def pg_official_login():
     #  REQUEST ACCESS TAB
     # ══════════════════════════════════════════════════════════════════════════
     else:
-        st.markdown(_card_open(), unsafe_allow_html=True)
+        st.markdown(_card_open(tx("Send Request")), unsafe_allow_html=True)
 
         step = st.session_state.off_step
         st.markdown(
@@ -2641,11 +2641,8 @@ def pg_official_login():
                     tx("pass_req"),
 
                     value=d.get("password", ""),
-
                     key="off_pass",
-
                     type="password",
-
                     placeholder="Create password"
                 )
 
