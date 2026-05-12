@@ -375,43 +375,7 @@ def render_sidebar():
         border-color: #F97316 !important;
     }}
 
-    /* Inside-sidebar collapse button */
-    button[data-testid="stSidebarCollapseButton"] {{
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        color: #F97316 !important;
-    }}
-
-    button[data-testid="stSidebarCollapseButton"] svg {{
-        color: #F97316 !important;
-        fill: #F97316 !important;
-    }}
-
-    /* Don't let header hide it */
-    header[data-testid="stHeader"] {{
-        background: transparent !important;
-        z-index: 999 !important;
-    }}
-
     
-    /* Prevent sidebar from collapsing content area */
-    section[data-testid="stSidebar"] + div {{
-        margin-left: 260px !important;
-    }}
-    
-    /* On mobile, sidebar stays collapsible */
-    @media (max-width: 768px) {{
-        section[data-testid="stSidebar"] {{
-            min-width : 240px !important;
-            max-width : 240px !important;
-        }}
-    }}
-
-    section[data-testid="stSidebar"] > div {{
-        background: {BG} !important;
-        padding-top: 0.5rem;
-    }}
 
     /* Hide default Streamlit chrome */
     section[data-testid="stSidebar"] [data-testid="stSidebarNav"] {{

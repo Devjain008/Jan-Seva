@@ -137,83 +137,32 @@ button[kind="header"]{{
     width: 100% !important;
 }}
 
-/* ===== FIX: Sidebar collapse/expand toggle button ===== */
-    
-    /* The collapse button (visible when sidebar is OPEN) */
-    section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"],
-    section[data-testid="stSidebar"] button[kind="header"],
-    section[data-testid="stSidebar"] [data-testid="collapsedControl"] {{
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        background: {CARD} !important;
-        border: 1px solid {BORDER} !important;
-        border-radius: 8px !important;
-        color: {ACCENT} !important;
-        width: 32px !important;
-        height: 32px !important;
-        z-index: 999999 !important;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.08) !important;
-    }}
-
-    section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"] svg,
-    section[data-testid="stSidebar"] button[kind="header"] svg {{
-        color: {ACCENT} !important;
-        fill: {ACCENT} !important;
-        width: 18px !important;
-        height: 18px !important;
-    }}
-
-    section[data-testid="stSidebar"] button[data-testid="stSidebarCollapseButton"]:hover {{
-        background: {ACTIVE_BG} !important;
-        border-color: {ACCENT} !important;
-        transform: scale(1.05);
-    }}
-
-    /* The EXPAND button (visible when sidebar is CLOSED) — floats on main page */
-    button[data-testid="stSidebarCollapsedControl"],
-    [data-testid="collapsedControl"],
-    button[kind="headerNoPadding"] {{
-        display: flex !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        background: white !important;
-        border: 1px solid {BORDER} !important;
-        border-radius: 10px !important;
-        color: {ACCENT} !important;
-        width: 40px !important;
-        height: 40px !important;
-        position: fixed !important;
-        top: 12px !important;
-        left: 12px !important;
-        z-index: 999999 !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }}
-
-    button[data-testid="stSidebarCollapsedControl"] svg,
-    [data-testid="collapsedControl"] svg,
-    button[kind="headerNoPadding"] svg {{
-        color: {ACCENT} !important;
-        fill: {ACCENT} !important;
-        width: 20px !important;
-        height: 20px !important;
-    }}
-
-    button[data-testid="stSidebarCollapsedControl"]:hover,
-    [data-testid="collapsedControl"]:hover {{
-        background: {ACTIVE_BG} !important;
-        border-color: {ACCENT} !important;
-        transform: scale(1.05);
-        transition: all 0.15s ease;
-    }}
-
-    /* Make sure the header area doesn't hide the toggle */
-    header[data-testid="stHeader"] {{
-        background: transparent !important;
-        z-index: 999 !important;
-    }}
+/* ═══════════════════════════════════════════════
+   SIDEBAR TOGGLE BUTTON
+═══════════════════════════════════════════════ */
+[data-testid="collapsedControl"],
+[data-testid="stSidebarCollapsedControl"]{{
+    position:fixed!important;
+    top:14px!important;left:14px!important;
+    width:44px!important;height:44px!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    visibility:visible!important;opacity:1!important;
+    z-index:999999!important;border-radius:12px!important;
+    background:#FFFFFF!important;
+    border:1px solid {border}!important;
+    box-shadow:0 4px 16px rgba(26,20,10,0.10)!important;
+    transition:all .18s ease!important;
+}}
+[data-testid="collapsedControl"]:hover,
+[data-testid="stSidebarCollapsedControl"]:hover{{
+    background:{hover_bg}!important;transform:scale(1.04)!important;
+}}
+[data-testid="collapsedControl"] svg,
+[data-testid="stSidebarCollapsedControl"] svg{{
+    fill:#1A1A1A!important;color:#1A1A1A!important;
+    stroke:#1A1A1A!important;opacity:1!important;
+    width:20px!important;height:20px!important;
+}}
 
 /* ═══════════════════════════════════════════════════════
    SIDEBAR
@@ -939,68 +888,7 @@ div.section-header:not(.prem-section-header)::after{{content:'';flex:1;height:1p
 .official-complaint.medium {{border-left:4px solid {amber_text};}}
 .official-complaint.low    {{border-left:4px solid {green_text};}}
 
-/* ═══════════════════════════════════════
-   CUSTOM FLOATING MENU
-═══════════════════════════════════════ */
 
-.custom-menu-wrap{{
-
-    position:fixed!important;
-
-    top:70px!important;
-
-    left:18px!important;
-
-    width:260px!important;
-
-    z-index:999999!important;
-
-    background:rgba(255,255,255,.96)!important;
-
-    border:1px solid rgba(99,102,241,.12)!important;
-
-    border-radius:20px!important;
-
-    padding:18px!important;
-
-    box-shadow:
-        0 20px 50px rgba(15,23,42,.16)!important;
-
-    backdrop-filter:blur(18px)!important;
-}}
-
-/* Floating button */
-div[data-testid="stButton"] button[key="menu_toggle"]{{
-
-    position:fixed!important;
-
-    top:16px!important;
-
-    left:16px!important;
-
-    z-index:999999!important;
-
-    width:48px!important;
-
-    height:48px!important;
-
-    border-radius:14px!important;
-
-    background:
-        linear-gradient(
-            135deg,
-            #6366F1,
-            #8B5CF6
-        )!important;
-
-    color:#FFFFFF!important;
-
-    border:none!important;
-
-    font-size:20px!important;
-
-    font-weight:800!important;
-}}
 .sidebar-active{{background:linear-gradient(90deg,{a1_soft},transparent);border-left:3px solid {accent1};border-radius:0 var(--r-sm) var(--r-sm) 0;padding:2px 0;margin:2px 0;transition:all var(--t-fast);}}
 .badge-high{{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 10px;font-size:var(--fs-2xs);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:{red_bg};color:{red_text};border:1px solid {red_bd};}}
 .badge-medium{{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 10px;font-size:var(--fs-2xs);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:{amber_bg};color:{amber_text};border:1px solid {amber_bd};}}
