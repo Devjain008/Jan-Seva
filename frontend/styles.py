@@ -890,51 +890,66 @@ div.section-header:not(.prem-section-header)::after{{content:'';flex:1;height:1p
 .official-complaint.low    {{border-left:4px solid {green_text};}}
 
 /* ═══════════════════════════════════════
-   FIX SIDEBAR BUTTON WITHOUT BREAKING UI
+   CUSTOM FLOATING MENU
 ═══════════════════════════════════════ */
 
-/* Show sidebar toggle button */
-[data-testid="collapsedControl"]{{
-
-    display:flex!important;
-
-    visibility:visible!important;
-
-    opacity:1!important;
+.custom-menu-wrap{{
 
     position:fixed!important;
 
-    top:14px!important;
+    top:70px!important;
 
-    left:14px!important;
+    left:18px!important;
+
+    width:260px!important;
 
     z-index:999999!important;
 
-    background:rgba(99,102,241,.12)!important;
+    background:rgba(255,255,255,.96)!important;
 
-    border-radius:12px!important;
+    border:1px solid rgba(99,102,241,.12)!important;
 
-    padding:5px!important;
+    border-radius:20px!important;
 
-    backdrop-filter:blur(10px)!important;
+    padding:18px!important;
+
+    box-shadow:
+        0 20px 50px rgba(15,23,42,.16)!important;
+
+    backdrop-filter:blur(18px)!important;
 }}
 
-/* Keep header visible */
-header{{
+/* Floating button */
+div[data-testid="stButton"] button[key="menu_toggle"]{{
 
-    visibility:visible!important;
+    position:fixed!important;
 
-    display:block!important;
-}}
+    top:16px!important;
 
-/* Prevent hiding */
-button[kind="header"]{{
+    left:16px!important;
 
-    display:flex!important;
+    z-index:999999!important;
 
-    visibility:visible!important;
+    width:48px!important;
 
-    opacity:1!important;
+    height:48px!important;
+
+    border-radius:14px!important;
+
+    background:
+        linear-gradient(
+            135deg,
+            #6366F1,
+            #8B5CF6
+        )!important;
+
+    color:#FFFFFF!important;
+
+    border:none!important;
+
+    font-size:20px!important;
+
+    font-weight:800!important;
 }}
 .sidebar-active{{background:linear-gradient(90deg,{a1_soft},transparent);border-left:3px solid {accent1};border-radius:0 var(--r-sm) var(--r-sm) 0;padding:2px 0;margin:2px 0;transition:all var(--t-fast);}}
 .badge-high{{display:inline-flex;align-items:center;gap:4px;border-radius:7px;padding:3px 10px;font-size:var(--fs-2xs);font-weight:700;letter-spacing:0.04em;text-transform:uppercase;background:{red_bg};color:{red_text};border:1px solid {red_bd};}}
