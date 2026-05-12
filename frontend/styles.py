@@ -132,10 +132,9 @@ button[kind="header"]{{
    LAYOUT
 ═══════════════════════════════════════════════════════ */
 .main .block-container {{
-    padding:clamp(1rem,3vw,2rem) clamp(0.75rem,3.5vw,2rem) clamp(3rem,6vw,5rem)!important;
-    max-width:clamp(300px,90vw,1100px)!important;
-    margin:0 auto!important;
-    width:100%!important;
+    padding: 1.75rem 2rem 4rem !important;
+    margin: 0 auto !important;
+    width: 100% !important;
 }}
 
 /* ═══════════════════════════════════════════════
