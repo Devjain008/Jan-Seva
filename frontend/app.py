@@ -333,12 +333,67 @@ def render_sidebar():
         border-right: 1px solid {BORDER} !important;
         box-shadow: none !important;
     }}
+    
         /* Fixed sidebar width across all screen sizes */
     section[data-testid="stSidebar"] {{
         min-width : 260px !important;
         max-width : 260px !important;
         width     : 260px !important;
     }}
+    button[data-testid="stSidebarCollapsedControl"],
+    [data-testid="collapsedControl"],
+    button[kind="headerNoPadding"] {{
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        background: #FFFFFF !important;
+        border: 1px solid #F1E9DD !important;
+        border-radius: 10px !important;
+        color: #F97316 !important;
+        width: 40px !important;
+        height: 40px !important;
+        position: fixed !important;
+        top: 12px !important;
+        left: 12px !important;
+        z-index: 999999 !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12) !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }}
+
+    button[data-testid="stSidebarCollapsedControl"] svg,
+    [data-testid="collapsedControl"] svg,
+    button[kind="headerNoPadding"] svg {{
+        color: #F97316 !important;
+        fill: #F97316 !important;
+        width: 20px !important;
+        height: 20px !important;
+    }}
+
+    button[data-testid="stSidebarCollapsedControl"]:hover {{
+        background: #FFEDD5 !important;
+        border-color: #F97316 !important;
+    }}
+
+    /* Inside-sidebar collapse button */
+    button[data-testid="stSidebarCollapseButton"] {{
+        display: flex !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        color: #F97316 !important;
+    }}
+
+    button[data-testid="stSidebarCollapseButton"] svg {{
+        color: #F97316 !important;
+        fill: #F97316 !important;
+    }}
+
+    /* Don't let header hide it */
+    header[data-testid="stHeader"] {{
+        background: transparent !important;
+        z-index: 999 !important;
+    }}
+
     
     /* Prevent sidebar from collapsing content area */
     section[data-testid="stSidebar"] + div {{
@@ -721,17 +776,10 @@ def render_sidebar():
     # ─────────────────────────────────────────────────────
     # SIDEBAR UI
     # ─────────────────────────────────────────────────────
-    if st.session_state.show_menu:
+    with st.sidebar:
 
-        st.markdown(
-            "<div class='custom-menu-wrap'>",
-            unsafe_allow_html=True
-        )
+        st.markdown('<div class="sb-wrap">', unsafe_allow_html=True)
 
-        # YOUR SIDEBAR CONTENT HERE
-
-
-        # BRAND
         st.markdown("""
         <div class="sb-brand">
             <div class="sb-brand-row">
@@ -814,11 +862,7 @@ def render_sidebar():
             Modern Government System · v2.0
         </div>
         """, unsafe_allow_html=True)
-
-        st.markdown(
-            "</div>",
-            unsafe_allow_html=True
-        )
+        st.markdown("</div>", unsafe_allow_html=True)
 # ═════════════════════════════════════════════════════════════════════════════
 # ROUTER
 # ═════════════════════════════════════════════════════════════════════════════
