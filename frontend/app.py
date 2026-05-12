@@ -103,56 +103,25 @@ def _apply_layout(page_type: str = "user") -> None:
         unsafe_allow_html=True,
     )
 
-
-
-if "show_menu" not in st.session_state:
-
-    st.session_state.show_menu = False
-
-menu_col1, menu_col2 = st.columns([1, 12])
-
-with menu_col1:
-
-    if st.button(
-
-        "☰",
-
-        key="menu_toggle"
-    ):
-
-        st.session_state.show_menu = (
-
-            not st.session_state.show_menu
-        )
-
-        st.rerun()
 # ─────────────────────────────────────────────
 # API HELPER
 # ─────────────────────────────────────────────
 
 def api(method, endpoint, **kwargs):
-
     url = f"{API_BASE}{endpoint}"
-
     try:
-
         response = _req.request(
             method=method.upper(),
             url=url,
             timeout=30,
             **kwargs
         )
-
         response.raise_for_status()
-
         try:
             return response.json()
-
         except Exception:
             return {"success": True}
-
     except _req.exceptions.HTTPError:
-
         try:
             return response.json()
         except Exception:
@@ -160,7 +129,6 @@ def api(method, endpoint, **kwargs):
                 "success": False,
                 "error": f"HTTP {response.status_code}"
             }
-
     except Exception as e:
 
         return {
