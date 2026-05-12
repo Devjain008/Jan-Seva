@@ -3019,152 +3019,362 @@ def _dashboard_render_hero(user: dict, comps: list, lang: str) -> None:
         unsafe_allow_html=True,
     )
 
-def _inject_css_once(dark: bool) -> None:
-    """Inject dashboard CSS into the Streamlit page exactly once per session."""
-    flag = f"_dash_css_{dark}"
+def _inject_css_once(dark: bool = False) -> None:
+    """Inject dashboard CSS into the Streamlit page exactly once per session.
+    Light-mode only — dark param kept for API compatibility but ignored.
+    """
+    flag = "_dash_css_light"
     if st.session_state.get(flag):
         return
-
-    _CARD = "#10161F" if dark else "#FFFFFF"
-    _BOR  = "#1E2A3D" if dark else "#E2E8F4"
-    _TXT  = "#F0F4FF" if dark else "#0F172A"
-    _SUB  = "#8896B0" if dark else "#64748B"
-
-    # Semantic badge classes replace per-card inline style strings
-    st.markdown(f"""
+ 
+    st.markdown("""
 <style>
-/* ── Quick-action overlay ── */
-.qa-wrap{{position:relative;}}
-.qa-wrap .stButton{{position:absolute;inset:0;opacity:0;z-index:2;}}
-.qa-wrap .stButton>button{{width:100%!important;height:100%!important;
-  min-height:100%!important;background:transparent!important;
-  border:none!important;box-shadow:none!important;}}
-
-/* ── Filter chip strip ── */
-.dash-chips{{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px;padding:4px 0;}}
-.dash-chip{{padding:7px 16px;border-radius:30px;font-size:.76rem;font-weight:700;
-  border:1.5px solid {_BOR};background:{_CARD};color:{_SUB};
-  white-space:nowrap;pointer-events:none;transition:all .18s;}}
-.dash-chip.active{{background:linear-gradient(135deg,#6366F1,#8B5CF6);
-  color:#fff;border-color:transparent;
-  box-shadow:0 4px 14px rgba(99,102,241,.30);}}
-
-/* ── Notification inline bar ── */
-.notif-inline{{background:{"#1C1408" if dark else "#FFFBEB"};
-  border:1.5px solid {"#78350F" if dark else "#FDE68A"};
-  border-radius:14px;padding:12px 16px;
-  display:flex;align-items:center;gap:10px;margin:12px 0;}}
-.ni-dot{{width:9px;height:9px;border-radius:50%;background:#F59E0B;flex-shrink:0;
-  box-shadow:0 0 0 3px rgba(245,158,11,.20);}}
-.ni-text{{font-size:.80rem;color:{"#FCD34D" if dark else "#B45309"};
-  font-weight:600;flex:1;}}
-.ni-badge{{background:#F59E0B;color:#fff;border-radius:20px;
-  padding:2px 10px;font-size:.66rem;font-weight:800;flex-shrink:0;}}
-
-/* ── Feedback card ── */
-.fb-card{{background:{_CARD};
-  border:1.5px solid {"#14532D" if dark else "#BBF7D0"};
-  border-radius:18px;padding:18px 20px;margin:8px 0;
-  box-shadow:0 0 0 4px {"#0A2218" if dark else "#F0FDF4"};}}
-.fb-head{{display:flex;align-items:center;gap:12px;margin-bottom:10px;}}
-.fb-icon{{width:42px;height:42px;border-radius:13px;
-  background:{"#0A2218" if dark else "#DCFCE7"};
-  border:1px solid {"#14532D" if dark else "#BBF7D0"};
-  display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}}
-.fb-title{{font-weight:800;font-size:.92rem;color:{_TXT};}}
-.fb-sub{{font-size:.74rem;color:{_SUB};margin-top:2px;}}
-.fb-desc{{font-size:.80rem;color:{_SUB};line-height:1.65;}}
-
-/* ── Rating card ── */
-.rt-card{{background:{_CARD};
-  border:1.5px solid {"#1E3A5F" if dark else "#BFDBFE"};
-  border-radius:18px;padding:18px 20px;margin:8px 0;
-  box-shadow:0 0 0 4px {"#080F1C" if dark else "#EFF6FF"};}}
-.rt-head{{display:flex;align-items:center;gap:12px;margin-bottom:10px;}}
-.rt-icon{{width:42px;height:42px;border-radius:13px;
-  background:{"#080F1C" if dark else "#EFF6FF"};
-  border:1px solid {"#1E3A5F" if dark else "#BFDBFE"};
-  display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}}
-.rt-title{{font-weight:800;font-size:.92rem;color:{_TXT};}}
-.rt-sub{{font-size:.74rem;color:{_SUB};margin-top:2px;}}
-.rt-desc{{font-size:.80rem;color:{_SUB};line-height:1.6;margin-bottom:12px;}}
-.rt-display{{display:flex;align-items:center;gap:12px;margin:10px 0;}}
-.rt-stars-large{{font-size:1.5rem;color:#F59E0B;letter-spacing:2px;}}
-.rt-lbl{{font-size:.74rem;color:{_SUB};font-weight:600;}}
-
-/* ── Complaint card (inside expander) ── */
-.cc-badges{{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px;}}
-.cc-cid{{font-family:'Courier New',monospace;font-size:.70rem;font-weight:700;
-  background:rgba(99,102,241,.10);color:#6366F1;
-  padding:3px 10px;border-radius:8px;display:inline-block;}}
-.cc-badge{{border-radius:20px;padding:3px 12px;font-size:.68rem;font-weight:700;display:inline-block;}}
-/* Status variants */
-.st-pending    {{background:#FFFBEB;color:#B45309;}}
-.st-in_progress{{background:#EFF6FF;color:#1D4ED8;}}
-.st-resolved   {{background:#F0FDF4;color:#15803D;}}
-.st-closed     {{background:#F1F5F9;color:#475569;}}
-.st-rejected   {{background:#FFF1F2;color:#BE123C;}}
-/* Priority variants */
-.pr-high  {{background:#FFF1F2;color:#BE123C;}}
-.pr-medium{{background:#FFFBEB;color:#B45309;}}
-.pr-low   {{background:#F0FDF4;color:#15803D;}}
-/* Emergency */
-.badge-emg{{background:#DC2626;color:#fff;
-  border-radius:20px;padding:3px 10px;font-size:.67rem;font-weight:700;}}
-
-.cc-title{{font-size:.92rem;font-weight:800;color:{_TXT};margin:6px 0 4px;}}
-.cc-desc {{font-size:.80rem;color:{_SUB};line-height:1.65;margin-bottom:8px;}}
-.cc-meta {{font-size:.71rem;color:{_SUB};
-  display:flex;gap:14px;flex-wrap:wrap;
-  padding-top:10px;border-top:1px solid {_BOR};}}
-
-/* ── Tip bar ── */
-.tip-bar{{background:{_CARD};border:1px solid {_BOR};
-  border-radius:16px;padding:14px 18px;
-  display:flex;align-items:center;gap:12px;margin-top:20px;
-  box-shadow:0 2px 10px rgba(15,23,42,.05);}}
-.tip-text{{font-size:.80rem;color:{_SUB};flex:1;line-height:1.55;}}
-.tip-text strong{{color:{_TXT};font-weight:700;}}
-
-/* ── Priority border helpers ── */
-.bl-high   {{border-left:4px solid #EF4444;padding:0 0 0 14px;margin-bottom:4px;}}
-.bl-medium {{border-left:4px solid #F59E0B;padding:0 0 0 14px;margin-bottom:4px;}}
-.bl-low    {{border-left:4px solid #22C55E;padding:0 0 0 14px;margin-bottom:4px;}}
-.bl-emg    {{border-left:4px solid #DC2626;padding:0 0 0 14px;margin-bottom:4px;}}
-.bl-default{{border-left:4px solid #6366F1;padding:0 0 0 14px;margin-bottom:4px;}}
-
-/* ── NOTIFICATION CLEAR BUTTON ── */
-.fc-clear-btn .stButton>button{{
-    background:linear-gradient(135deg,#6366F1,#8B5CF6)!important;
-    color:#fff!important;
-    border:none!important;
-    border-radius:12px!important;
-    padding:8px 16px!important;
-    font-size:.78rem!important;
-    font-weight:700!important;
-    box-shadow:0 4px 14px rgba(99,102,241,.28)!important;
-    transition:all .18s ease!important;
-}}
-
-.fc-clear-btn .stButton>button:hover{{
-    transform:translateY(-2px)!important;
-    box-shadow:0 8px 24px rgba(99,102,241,.42)!important;
-    filter:brightness(1.05)!important;
-}}
-
-.fc-clear-btn .stButton>button:active{{
-    transform:scale(.98)!important;
-}}
-/* ── Page selector ── */
-.page-row{{display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:8px;margin:12px 0 8px;}}
-.page-info{{background:rgba(99,102,241,.09);color:#6366F1;
-  border:1.5px solid rgba(99,102,241,.20);border-radius:20px;
-  padding:5px 16px;font-size:.78rem;font-weight:800;}}
-
-/* ── Hide filter buttons ── */
-.dash-filter-btns .stButton>button{{opacity:0!important;height:0!important;
-  padding:0!important;margin:0!important;min-height:0!important;overflow:hidden!important;}}
+/* ═══════════════════════════════════════════════════
+   COLOUR TOKENS  (warm orange palette)
+═══════════════════════════════════════════════════ */
+:root {
+    --d-bg:        #FAF8F5;
+    --d-card:      #FFFFFF;
+    --d-card2:     #FDF9F6;
+    --d-border:    #EDE8E2;
+    --d-text:      #1A1A1A;
+    --d-sub:       #6B7280;
+    --d-a1:        #E8590C;
+    --d-a2:        #D4500B;
+    --d-a3:        #F07D3A;
+    --d-a1-soft:   rgba(232,89,12,0.08);
+    --d-a1-glow:   rgba(232,89,12,0.18);
+    --d-hover:     #F5F0EA;
+    --d-green-bg:  #F0FDF4; --d-green-bd: #86EFAC; --d-green-tx: #166534;
+    --d-amber-bg:  #FFF7ED; --d-amber-bd: #FED7AA; --d-amber-tx: #C2410C;
+    --d-red-bg:    #FEF2F2; --d-red-bd:   #FECACA; --d-red-tx:   #991B1B;
+    --d-blue-bg:   #EFF6FF; --d-blue-bd:  #BFDBFE; --d-blue-tx:  #1E40AF;
+    --d-shadow-sm: 0 1px 3px rgba(26,20,10,0.06),0 4px 12px rgba(26,20,10,0.05);
+    --d-shadow-md: 0 4px 16px rgba(26,20,10,0.08),0 12px 32px rgba(26,20,10,0.06);
+}
+ 
+/* ═══════════════════════════════════════════════════
+   BASE OVERRIDES
+═══════════════════════════════════════════════════ */
+html, body, .stApp {
+    background-color: var(--d-bg) !important;
+    color: var(--d-text) !important;
+}
+p, span, div, label, small { color: var(--d-text); }
+.stMarkdown, .stMarkdown p, .stMarkdown span { color: var(--d-text) !important; }
+ 
+/* ═══════════════════════════════════════════════════
+   QUICK-ACTION CARDS
+═══════════════════════════════════════════════════ */
+.qa-wrap { position: relative; }
+.qa-wrap .stButton {
+    position: absolute; inset: 0; opacity: 0; z-index: 2;
+}
+.qa-wrap .stButton > button {
+    width: 100% !important; height: 100% !important;
+    min-height: 100% !important; background: transparent !important;
+    border: none !important; box-shadow: none !important;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   FILTER CHIP STRIP
+═══════════════════════════════════════════════════ */
+.dash-chips {
+    display: flex; gap: 8px; flex-wrap: wrap;
+    margin-bottom: 4px; padding: 4px 0;
+}
+.dash-chip {
+    padding: 7px 16px; border-radius: 30px;
+    font-size: .76rem; font-weight: 700;
+    border: 1.5px solid var(--d-border);
+    background: var(--d-card); color: var(--d-sub);
+    white-space: nowrap; pointer-events: none; transition: all .18s;
+}
+.dash-chip.active {
+    background: linear-gradient(135deg, var(--d-a1), var(--d-a2));
+    color: #fff; border-color: transparent;
+    box-shadow: 0 4px 14px var(--d-a1-glow);
+}
+ 
+/* ═══════════════════════════════════════════════════
+   NOTIFICATION INLINE BAR
+═══════════════════════════════════════════════════ */
+.notif-inline {
+    background: var(--d-amber-bg);
+    border: 1.5px solid var(--d-amber-bd);
+    border-radius: 14px; padding: 12px 16px;
+    display: flex; align-items: center; gap: 10px; margin: 12px 0;
+}
+.ni-dot {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--d-a1); flex-shrink: 0;
+    box-shadow: 0 0 0 3px var(--d-a1-soft);
+}
+.ni-text { font-size: .80rem; color: var(--d-amber-tx); font-weight: 600; flex: 1; }
+.ni-badge {
+    background: var(--d-a1); color: #fff;
+    border-radius: 20px; padding: 2px 10px;
+    font-size: .66rem; font-weight: 800; flex-shrink: 0;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   COMPLAINT CARD  — clean white card with border
+═══════════════════════════════════════════════════ */
+.cc-outer {
+    background: #FFFFFF;
+    border: 1.5px solid #1A1A1A;          /* strong dark border as requested */
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    box-shadow: var(--d-shadow-sm);
+    transition: box-shadow .18s, transform .18s;
+}
+.cc-outer:hover {
+    box-shadow: var(--d-shadow-md);
+    transform: translateY(-2px);
+}
+/* left priority stripe */
+.cc-outer.cc-high   { border-left: 4px solid #EF4444; }
+.cc-outer.cc-medium { border-left: 4px solid #F59E0B; }
+.cc-outer.cc-low    { border-left: 4px solid #22C55E; }
+.cc-outer.cc-emg    { border-left: 4px solid #DC2626; }
+ 
+.cc-inner { padding: 14px 18px 12px; }
+ 
+/* complaint number label above expander */
+.cc-number {
+    font-size: 0.72rem; font-weight: 800;
+    color: var(--d-a1); margin: 10px 0 4px 2px;
+    letter-spacing: 0.05em; text-transform: uppercase;
+}
+ 
+/* badge row */
+.cc-badges {
+    display: flex; align-items: center;
+    flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+}
+.cc-cid {
+    font-family: 'DM Mono','Courier New', monospace;
+    font-size: .70rem; font-weight: 700;
+    background: var(--d-a1-soft); color: var(--d-a1);
+    padding: 3px 10px; border-radius: 8px;
+    border: 1px solid rgba(232,89,12,0.18);
+    display: inline-block;
+}
+.cc-badge { border-radius: 20px; padding: 3px 12px; font-size: .68rem; font-weight: 700; display: inline-block; }
+ 
+/* status variants */
+.st-pending     { background: var(--d-amber-bg); color: var(--d-amber-tx); border: 1px solid var(--d-amber-bd); }
+.st-in_progress { background: var(--d-blue-bg);  color: var(--d-blue-tx);  border: 1px solid var(--d-blue-bd);  }
+.st-resolved    { background: var(--d-green-bg); color: var(--d-green-tx); border: 1px solid var(--d-green-bd); }
+.st-closed      { background: #F1F5F9; color: #475569; border: 1px solid #CBD5E1; }
+.st-rejected    { background: var(--d-red-bg);   color: var(--d-red-tx);   border: 1px solid var(--d-red-bd);   }
+ 
+/* priority variants */
+.pr-high   { background: var(--d-red-bg);   color: var(--d-red-tx);   border: 1px solid var(--d-red-bd);   }
+.pr-medium { background: var(--d-amber-bg); color: var(--d-amber-tx); border: 1px solid var(--d-amber-bd); }
+.pr-low    { background: var(--d-green-bg); color: var(--d-green-tx); border: 1px solid var(--d-green-bd); }
+ 
+/* emergency */
+.badge-emg {
+    background: #DC2626; color: #fff;
+    border-radius: 20px; padding: 3px 10px;
+    font-size: .67rem; font-weight: 700;
+    animation: pulse-emg 2s ease infinite;
+}
+@keyframes pulse-emg {
+    0%,100% { box-shadow: 0 0 0 0 rgba(220,38,38,0.4); }
+    50%      { box-shadow: 0 0 0 6px rgba(220,38,38,0); }
+}
+ 
+.cc-title {
+    font-size: .92rem; font-weight: 800;
+    color: var(--d-text); margin: 6px 0 4px;
+    letter-spacing: -0.01em;
+}
+.cc-desc {
+    font-size: .80rem; color: var(--d-sub);
+    line-height: 1.65; margin-bottom: 8px;
+}
+.cc-meta {
+    font-size: .71rem; color: var(--d-sub);
+    display: flex; gap: 14px; flex-wrap: wrap;
+    padding-top: 10px;
+    border-top: 1px solid var(--d-border);
+}
+ 
+/* ── priority left-border helpers (inside expander) ── */
+.bl-high    { border-left: 3px solid #EF4444; padding-left: 12px; margin-bottom: 4px; }
+.bl-medium  { border-left: 3px solid #F59E0B; padding-left: 12px; margin-bottom: 4px; }
+.bl-low     { border-left: 3px solid #22C55E; padding-left: 12px; margin-bottom: 4px; }
+.bl-emg     { border-left: 3px solid #DC2626; padding-left: 12px; margin-bottom: 4px; }
+.bl-default { border-left: 3px solid var(--d-a1); padding-left: 12px; margin-bottom: 4px; }
+ 
+/* ═══════════════════════════════════════════════════
+   FEEDBACK & RATING CARDS
+═══════════════════════════════════════════════════ */
+.fb-card {
+    background: #FFFFFF;
+    border: 1.5px solid var(--d-green-bd);
+    border-radius: 18px; padding: 18px 20px; margin: 8px 0;
+    box-shadow: 0 0 0 4px var(--d-green-bg);
+}
+.fb-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.fb-icon {
+    width: 42px; height: 42px; border-radius: 13px;
+    background: var(--d-green-bg); border: 1px solid var(--d-green-bd);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+}
+.fb-title { font-weight: 800; font-size: .92rem; color: var(--d-text); }
+.fb-sub   { font-size: .74rem; color: var(--d-sub); margin-top: 2px; }
+.fb-desc  { font-size: .80rem; color: var(--d-sub); line-height: 1.65; }
+ 
+.rt-card {
+    background: #FFFFFF;
+    border: 1.5px solid var(--d-blue-bd);
+    border-radius: 18px; padding: 18px 20px; margin: 8px 0;
+    box-shadow: 0 0 0 4px var(--d-blue-bg);
+}
+.rt-head { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.rt-icon {
+    width: 42px; height: 42px; border-radius: 13px;
+    background: var(--d-blue-bg); border: 1px solid var(--d-blue-bd);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem; flex-shrink: 0;
+}
+.rt-title       { font-weight: 800; font-size: .92rem; color: var(--d-text); }
+.rt-sub         { font-size: .74rem; color: var(--d-sub); margin-top: 2px; }
+.rt-desc        { font-size: .80rem; color: var(--d-sub); line-height: 1.6; margin-bottom: 12px; }
+.rt-display     { display: flex; align-items: center; gap: 12px; margin: 10px 0; }
+.rt-stars-large { font-size: 1.5rem; color: #F59E0B; letter-spacing: 2px; }
+.rt-lbl         { font-size: .74rem; color: var(--d-sub); font-weight: 600; }
+ 
+/* ═══════════════════════════════════════════════════
+   TIP BAR
+═══════════════════════════════════════════════════ */
+.tip-bar {
+    background: #FFFFFF; border: 1.5px solid var(--d-border);
+    border-radius: 16px; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px; margin-top: 20px;
+    box-shadow: var(--d-shadow-sm);
+    transition: border-color .18s;
+}
+.tip-bar:hover { border-color: var(--d-a1); }
+.tip-text { font-size: .80rem; color: var(--d-sub); flex: 1; line-height: 1.55; }
+.tip-text strong { color: var(--d-text); font-weight: 700; }
+ 
+/* ═══════════════════════════════════════════════════
+   PAGE INFO & NAV
+═══════════════════════════════════════════════════ */
+.page-row {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap; gap: 8px; margin: 12px 0 8px;
+}
+.page-info {
+    background: var(--d-a1-soft); color: var(--d-a1);
+    border: 1.5px solid rgba(232,89,12,0.20); border-radius: 20px;
+    padding: 5px 16px; font-size: .78rem; font-weight: 800;
+}
+ 
+/* ── Hide filter buttons (visually replaced by chip divs) ── */
+.dash-filter-btns .stButton > button {
+    opacity: 0 !important; height: 0 !important;
+    padding: 0 !important; margin: 0 !important;
+    min-height: 0 !important; overflow: hidden !important;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   CLEAR / FC BUTTON
+═══════════════════════════════════════════════════ */
+.fc-clear-btn .stButton > button {
+    background: linear-gradient(135deg, var(--d-a1), var(--d-a2)) !important;
+    color: #fff !important; border: none !important;
+    border-radius: 12px !important; padding: 8px 16px !important;
+    font-size: .78rem !important; font-weight: 700 !important;
+    box-shadow: 0 4px 14px var(--d-a1-glow) !important;
+    transition: all .18s ease !important;
+}
+.fc-clear-btn .stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 8px 24px var(--d-a1-glow) !important;
+    filter: brightness(1.05) !important;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   EVIDENCE IMAGE BUTTON
+═══════════════════════════════════════════════════ */
+.evidence-wrap  { margin-top: 14px; margin-bottom: 10px; }
+.evidence-title {
+    font-size: .80rem; font-weight: 800; color: var(--d-a1);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 8px;
+}
+.evidence-box {
+    background: linear-gradient(135deg, var(--d-a1-soft), rgba(212,80,11,0.04));
+    border: 1.5px solid rgba(232,89,12,0.18);
+    border-radius: 18px; padding: 14px;
+}
+.img-btn .stButton > button {
+    width: 100%; border: none !important;
+    border-radius: 14px !important;
+    background: linear-gradient(135deg, var(--d-a1), var(--d-a2)) !important;
+    color: white !important; font-weight: 700 !important;
+    padding: 12px 18px !important; font-size: .84rem !important;
+    box-shadow: 0 8px 24px var(--d-a1-glow) !important;
+    transition: all .18s ease !important;
+}
+.img-btn .stButton > button:hover {
+    transform: translateY(-2px) !important;
+    box-shadow: 0 12px 30px var(--d-a1-glow) !important;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   STREAMLIT EXPANDER — clean white
+═══════════════════════════════════════════════════ */
+.streamlit-expanderHeader {
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--d-border) !important;
+    border-radius: 12px !important;
+    color: var(--d-text) !important;
+    font-weight: 700 !important;
+    font-size: .88rem !important;
+    padding: 12px 16px !important;
+    transition: border-color .18s, box-shadow .18s !important;
+}
+.streamlit-expanderHeader:hover {
+    border-color: var(--d-a1) !important;
+    box-shadow: 0 0 0 3px var(--d-a1-soft) !important;
+}
+.streamlit-expanderContent {
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--d-border) !important;
+    border-top: none !important;
+    border-radius: 0 0 12px 12px !important;
+    padding: 14px 16px !important;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   QUICK-ACTION CARD COLORS — override prem-action-card
+═══════════════════════════════════════════════════ */
+.prem-action-card {
+    background: #FFFFFF !important;
+    border: 1.5px solid var(--d-border) !important;
+    box-shadow: var(--d-shadow-sm) !important;
+}
+.prem-action-card:hover {
+    box-shadow: var(--d-shadow-md) !important;
+}
+ 
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 768px) {
+    .cc-meta  { flex-direction: column; gap: 4px; }
+    .cc-badges { gap: 4px; }
+    .tip-bar  { flex-direction: column; text-align: center; }
+    .page-row { flex-direction: column; align-items: flex-start; }
+}
 </style>
 """, unsafe_allow_html=True)
     st.session_state[flag] = True
@@ -3311,29 +3521,33 @@ def _render_hero(user: dict, comps: list, lang: str) -> None:
 
 
 def _render_quick_actions(lang: str) -> None:
+    """Quick action cards — warm orange palette, clean white cards."""
     st.markdown(
         f'<div class="prem-section-header">⚡ {_t(lang,"Quick Actions","त्वरित कार्य")}</div>',
         unsafe_allow_html=True,
     )
     actions = [
-        ("📢", _t(lang,"File Complaint","शिकायत दर्ज"),    "file_complaint",
-         "linear-gradient(135deg,rgba(239,68,68,.12),rgba(220,38,38,.06))",  "#EF4444"),
-        ("🔍", _t(lang,"Track Status","ट्रैक करें"),      "tracking",
-         "linear-gradient(135deg,rgba(99,102,241,.12),rgba(139,92,246,.06))", "#6366F1"),
-        ("📜", _t(lang,"Govt Schemes","सरकारी योजनाएं"), "schemes",
-         "linear-gradient(135deg,rgba(5,150,105,.12),rgba(16,185,129,.06))",  "#059669"),
-        ("🤖", _t(lang,"AI Assistant","एआई सहायक"),      "assistant",
-         "linear-gradient(135deg,rgba(6,182,212,.12),rgba(14,165,233,.06))",  "#06B6D4"),
+        ("📢", _t(lang, "File Complaint", "शिकायत दर्ज"),   "file_complaint",
+         "#E8590C", "rgba(232,89,12,0.08)"),
+        ("🔍", _t(lang, "Track Status",   "ट्रैक करें"),    "tracking",
+         "#D4500B", "rgba(212,80,11,0.08)"),
+        ("📜", _t(lang, "Govt Schemes",   "सरकारी योजनाएं"), "schemes",
+         "#059669", "rgba(5,150,105,0.08)"),
+        ("🤖", _t(lang, "AI Assistant",   "एआई सहायक"),     "assistant",
+         "#0EA5E9", "rgba(14,165,233,0.08)"),
     ]
     qa_cols = st.columns(4)
-    for col, (icon, label, screen, bg, color) in zip(qa_cols, actions):
+    for col, (icon, label, screen, color, bg) in zip(qa_cols, actions):
         with col:
             st.markdown(
                 f'<div class="prem-action-card" style="'
-                f'background:{bg};border:1.5px solid {color}22;">'
+                f'background:{bg}!important;'
+                f'border:1.5px solid {color}22!important;">'
                 f'<div class="prem-action-icon" style="'
-                f'background:{color}18;border:1.5px solid {color}30;font-size:1.5rem;">{icon}</div>'
-                f'<div class="prem-action-label" style="color:{color};font-weight:800;">{label}</div>'
+                f'background:{color}18;border:1.5px solid {color}30;font-size:1.5rem;">'
+                f'{icon}</div>'
+                f'<div class="prem-action-label" style="color:{color};font-weight:800;">'
+                f'{label}</div>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -3515,7 +3729,6 @@ def _render_rating_section(comps: list, lang: str) -> None:
             unsafe_allow_html=True,
         )
 
-
 def _render_single_complaint_card(
         c: dict,
         lang: str,
@@ -3523,15 +3736,13 @@ def _render_single_complaint_card(
         idx: int
     ) -> bool:
     """
-    Render one complaint expander.
-    Returns False if the card was skipped (in skip_ids), True otherwise.
-    All badge/border CSS now comes from pre-defined classes — zero per-card
-    Python string work for colors.
+    Renders one complaint as a clean white card with dark border.
+    Returns False if the card was skipped, True otherwise.
     """
     cid = c.get("complaint_id", "N/A")
     if cid in skip_ids:
         return False
-
+ 
     status       = c.get("status", "pending")
     priority     = c.get("priority", "medium")
     category     = c.get("category", "other").title()
@@ -3542,37 +3753,42 @@ def _render_single_complaint_card(
     sla          = c.get("sla_deadline")
     overdue      = c.get("is_overdue", False)
     img_path     = c.get("image_path")
-
-    s_icon, s_lbl, s_cls = _STATUS_META.get(status, ("", "", ""))
-    p_icon, p_lbl, p_cls, bl_cls = _PRIORITY_META.get(priority, ("", "", "pr-medium", "bl-default"))
+ 
+    s_icon, s_lbl, s_cls = _STATUS_META.get(status, ("", status.title(), "st-pending"))
+    p_icon, p_lbl, p_cls, bl_cls = _PRIORITY_META.get(
+        priority, ("", priority.title(), "pr-medium", "bl-default")
+    )
     if is_emergency:
         bl_cls = "bl-emg"
-
+ 
+    # card outer priority class
+    card_cls = "cc-emg" if is_emergency else f"cc-{priority}"
+ 
     emg_html  = '<span class="cc-badge badge-emg">🚨 EMERGENCY</span>' if is_emergency else ""
     exp_title = (
         ("🚨 " if is_emergency else "")
         + f"{idx}. #{cid}  ·  {category}  ·  {s_icon} {s_lbl}"
     )
+ 
+    # complaint number above the expander
     st.markdown(
-        f"""
-        <div style="
-            font-size:0.82rem;
-            font-weight:800;
-            color:#6366F1;
-            margin:10px 0 6px 4px;
-        ">
-            Complaint #{idx}
-        </div>
-        """,
+        f'<div class="cc-number">Complaint #{idx}</div>',
         unsafe_allow_html=True,
     )
+ 
+    # wrap the whole expander in the bordered card div
+    st.markdown(
+        f'<div class="cc-outer {card_cls}">',
+        unsafe_allow_html=True,
+    )
+ 
     with st.expander(exp_title, expanded=False):
         if st.button(f"🔊 {_t(lang,'Listen','सुनें')}", key=f"voice_{cid}"):
             try:
                 speak_text(f"Complaint {cid}: {desc}", lang)
             except NameError:
                 pass
-
+ 
         st.markdown(
             f'<div class="{bl_cls}">'
             f'<div class="cc-badges">'
@@ -3582,107 +3798,46 @@ def _render_single_complaint_card(
             f'{emg_html}'
             f'</div>'
             f'<div class="cc-title">{_html.escape(category)}</div>'
-            f'<div class="cc-desc">{_html.escape(desc[:180])}{"…" if len(desc)>180 else ""}</div>'
+            f'<div class="cc-desc">'
+            f'{_html.escape(desc[:180])}{"…" if len(desc) > 180 else ""}'
+            f'</div>'
             f'<div class="cc-meta">'
             f'<span>📍 {_html.escape(str(loc))}</span>'
             f'<span>📅 {_html.escape(str(date))}</span>'
             f'</div></div>',
             unsafe_allow_html=True,
         )
-
-        # Lazy image render — only fetched/decoded when expander is open
-        # ── Complaint Image Preview ─────────────────────────
-
-        # ── Complaint Evidence Image ─────────────────────────
-
+ 
         if img_path:
-
-            st.markdown("""
-            <style>
-
-            .evidence-wrap{
-                margin-top:14px;
-                margin-bottom:10px;
-            }
-
-            .evidence-title{
-                font-size:.80rem;
-                font-weight:800;
-                color:#6366F1;
-                margin-bottom:8px;
-                display:flex;
-                align-items:center;
-                gap:8px;
-            }
-
-            .evidence-box{
-                background:linear-gradient(
-                    135deg,
-                    rgba(99,102,241,.08),
-                    rgba(139,92,246,.04)
-                );
-                border:1.5px solid rgba(99,102,241,.18);
-                border-radius:18px;
-                padding:14px;
-            }
-
-            .img-btn .stButton>button{
-                width:100%;
-                border:none!important;
-                border-radius:14px!important;
-                background:linear-gradient(135deg,#6366F1,#8B5CF6)!important;
-                color:white!important;
-                font-weight:700!important;
-                padding:12px 18px!important;
-                font-size:.84rem!important;
-                box-shadow:0 8px 24px rgba(99,102,241,.28)!important;
-                transition:all .18s ease!important;
-            }
-
-            .img-btn .stButton>button:hover{
-                transform:translateY(-2px)!important;
-                box-shadow:0 12px 30px rgba(99,102,241,.38)!important;
-            }
-
-            </style>
-            """, unsafe_allow_html=True)
-
-            st.markdown("""
-            <div class="evidence-wrap">
-
-                <div class="evidence-title">
-                    🖼️ Complaint Evidence
-                </div>
-
-                <div class="evidence-box">
-            """, unsafe_allow_html=True)
-
+            st.markdown(
+                '<div class="evidence-wrap">'
+                '<div class="evidence-title">🖼️ Complaint Evidence</div>'
+                '<div class="evidence-box">',
+                unsafe_allow_html=True,
+            )
             st.markdown('<div class="img-btn">', unsafe_allow_html=True)
-
             show_img = st.button(
                 "👁️ View Uploaded Image",
                 key=f"show_img_{cid}",
-                use_container_width=True
+                use_container_width=True,
             )
-
             st.markdown("</div>", unsafe_allow_html=True)
-
             if show_img:
-
                 st.image(
                     f"https://bfo-backend.onrender.com{img_path}",
                     caption="Uploaded Complaint Evidence",
-                    use_container_width=True
+                    use_container_width=True,
                 )
-
             st.markdown("</div></div>", unsafe_allow_html=True)
-
+ 
         if sla:
             if overdue:
                 st.error(f"⏰ OVERDUE! Expected by: {sla}")
             else:
                 st.info(f"⏱️ Expected by: {sla}")
-
+ 
+    st.markdown("</div>", unsafe_allow_html=True)   # close .cc-outer
+ 
     return True
 
 
