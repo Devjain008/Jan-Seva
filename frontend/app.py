@@ -15462,14 +15462,7 @@ div[data-testid="stButton"].sch-del > button:hover{{
             voice_text = f"Attention citizens. A new government scheme has been launched. {safe_title}. {safe_desc}…"
             st.markdown("<div class='sch-adm-sec'>📢 Voice Announcement Preview</div>",
                         unsafe_allow_html=True)
-            st.markdown(
-                f"<div class='sch-voice-prev'>"
-                f"<div class='sch-voice-text'>🔊 {voice_text}</div>"
-                f"<div class='sch-voice-hint'>"
-                f"This announcement plays when users open the scheme details.</div>"
-                f"</div>",
-                unsafe_allow_html=True,
-            )
+            
 
             # ── submit ────────────────────────────────────
             sc1, sc2, sc3 = st.columns([1,2,1])

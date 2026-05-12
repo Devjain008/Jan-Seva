@@ -233,7 +233,7 @@ section[data-testid="stSidebar"] .stButton>button:hover{{
 .stTextInput>div>div>input,
 .stTextArea>div>div>textarea,
 .stSelectbox>div>div>div{{
-    background:{"#FFCFA8"}!important;
+    background:{"#ECECEC"}!important;
     border:1.5px solid {border}!important;
     border-radius:var(--r-md)!important;
     color:{text}!important;
