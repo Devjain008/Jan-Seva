@@ -633,754 +633,529 @@ def analyze_sentiment(rating, comment=""):
 # ═════════════════════════════════════════════════════════════════════════════
 # PUBLIC SCREENS
 # ═════════════════════════════════════════════════════════════════════════════
-import streamlit as st
-
-
+ 
 def pg_language():
-    # _apply_layout("auth")  # Uncomment when integrating with your layout system
-
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # ALL CSS — injected once at the top
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <style>
-    @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
-
-    :root {
-        --navy:      #0B1F45;
-        --blue:      #1A56DB;
-        --sky:       #3B9EFF;
-        --teal:      #0D9488;
-        --gold:      #F59E0B;
-        --saffron:   #FF6B2B;
-        --green:     #059669;
-        --light-bg:  #F0F4FF;
-        --card-bg:   #FFFFFF;
-        --border:    #DDE3F0;
-        --text-1:    #0B1F45;
-        --text-2:    #4B5672;
-        --text-3:    #8A95B0;
-        --radius-xl: 20px;
-        --radius-lg: 14px;
-        --radius-md: 10px;
-        --shadow-sm: 0 2px 8px rgba(11,31,69,0.07);
-        --shadow-md: 0 8px 24px rgba(11,31,69,0.10);
-        --shadow-lg: 0 16px 40px rgba(11,31,69,0.13);
-    }
-
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    .jsp-wrap {
-        font-family: 'Sora', sans-serif;
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 0 0.5rem 2rem;
-        color: var(--text-1);
-    }
-
-    /* ── HERO ── */
-    .jsp-hero {
-        background: linear-gradient(135deg, var(--navy) 0%, #1A3A6E 55%, #1A56DB 100%);
-        border-radius: var(--radius-xl);
-        padding: 3rem 2rem 2.5rem;
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-        margin-bottom: 2rem;
-    }
-    .jsp-hero::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background:
-            radial-gradient(circle at 15% 50%, rgba(255,107,43,0.18) 0%, transparent 50%),
-            radial-gradient(circle at 85% 20%, rgba(59,158,255,0.22) 0%, transparent 50%);
-        pointer-events: none;
-    }
-    .jsp-hero-top {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        margin-bottom: 1.5rem;
-        flex-wrap: wrap;
-    }
-    .jsp-ashoka {
-        width: 64px;
-        height: 64px;
-        background: rgba(255,255,255,0.12);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2.2rem;
-        border: 2px solid rgba(255,255,255,0.25);
-        backdrop-filter: blur(4px);
-    }
-    .jsp-hero-titles { text-align: left; }
-    .jsp-hero-en {
-        font-size: 1.9rem;
-        font-weight: 800;
-        color: #FFFFFF;
-        letter-spacing: -0.5px;
-        line-height: 1.1;
-    }
-    .jsp-hero-hi {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: rgba(255,255,255,0.75);
-        font-family: 'Noto Sans Devanagari', sans-serif;
-        margin-top: 0.15rem;
-    }
-    .jsp-hero-sub {
-        font-size: 0.9rem;
-        color: rgba(255,255,255,0.7);
-        margin-bottom: 1.5rem;
-        letter-spacing: 0.2px;
-    }
-    .jsp-badges {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.5rem;
-        justify-content: center;
-    }
-    .jsp-badge {
-        background: rgba(255,255,255,0.13);
-        border: 1px solid rgba(255,255,255,0.22);
-        color: rgba(255,255,255,0.9);
-        font-size: 0.7rem;
-        font-weight: 600;
-        padding: 0.3rem 0.9rem;
-        border-radius: 50px;
-        backdrop-filter: blur(4px);
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-    }
-
-    /* ── STATS BAR ── */
-    .jsp-stats {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        margin-bottom: 2rem;
-    }
-    .jsp-stat {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 1rem 0.75rem;
-        text-align: center;
-        box-shadow: var(--shadow-sm);
-        transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .jsp-stat:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-md);
-    }
-    .jsp-stat-num {
-        font-size: 1.6rem;
-        font-weight: 800;
-        color: var(--blue);
-        line-height: 1;
-    }
-    .jsp-stat-unit {
-        font-size: 0.75rem;
-        color: var(--teal);
-        font-weight: 600;
-    }
-    .jsp-stat-lbl {
-        font-size: 0.68rem;
-        color: var(--text-3);
-        margin-top: 0.3rem;
-        letter-spacing: 0.2px;
-    }
-
-    /* ── SECTION HEADER ── */
-    .jsp-sec-head {
-        display: flex;
-        align-items: center;
-        gap: 0.6rem;
-        margin: 2rem 0 1rem;
-    }
-    .jsp-sec-line {
-        flex: 1;
-        height: 2px;
-        background: linear-gradient(90deg, var(--blue) 0%, transparent 100%);
-        border-radius: 2px;
-        opacity: 0.25;
-    }
-    .jsp-sec-title {
-        font-size: 1.15rem;
-        font-weight: 700;
-        color: var(--navy);
-        white-space: nowrap;
-    }
-    .jsp-sec-subtitle {
-        font-size: 0.78rem;
-        color: var(--text-3);
-        margin-top: 0.15rem;
-    }
-
-    /* ── LANGUAGE CARDS ── */
-    .jsp-lang-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.25rem;
-        margin-bottom: 0.5rem;
-    }
-    .jsp-lang-card {
-        background: var(--card-bg);
-        border: 2px solid var(--border);
-        border-radius: var(--radius-xl);
-        padding: 1.8rem 1.5rem;
-        text-align: center;
-        transition: all 0.25s ease;
-        box-shadow: var(--shadow-sm);
-    }
-    .jsp-lang-card:hover {
-        border-color: var(--blue);
-        transform: translateY(-4px);
-        box-shadow: 0 12px 28px rgba(26,86,219,0.15);
-    }
-    .jsp-lang-flag { font-size: 2.8rem; margin-bottom: 0.6rem; }
-    .jsp-lang-name {
-        font-size: 1.25rem;
-        font-weight: 700;
-        color: var(--navy);
-        margin-bottom: 0.2rem;
-    }
-    .jsp-lang-native {
-        font-size: 0.78rem;
-        color: var(--text-3);
-        font-family: 'Noto Sans Devanagari', sans-serif;
-    }
-    .jsp-lang-pill {
-        display: inline-block;
-        background: var(--light-bg);
-        color: var(--blue);
-        font-size: 0.65rem;
-        font-weight: 600;
-        padding: 0.2rem 0.7rem;
-        border-radius: 20px;
-        margin-top: 0.6rem;
-        letter-spacing: 0.3px;
-        text-transform: uppercase;
-    }
-
-    /* ── HOW IT WORKS ── */
-    .jsp-steps {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-        margin-top: 0.5rem;
-    }
-    .jsp-step {
-        background: var(--card-bg);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-xl);
-        padding: 1.5rem 1.25rem;
-        position: relative;
-        box-shadow: var(--shadow-sm);
-        overflow: hidden;
-        transition: all 0.25s;
-    }
-    .jsp-step:hover {
-        transform: translateY(-4px);
-        box-shadow: var(--shadow-md);
-    }
-    .jsp-step::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 4px;
-    }
-    .jsp-step:nth-child(1)::after { background: linear-gradient(90deg, var(--blue), var(--sky)); }
-    .jsp-step:nth-child(2)::after { background: linear-gradient(90deg, var(--teal), #34D399); }
-    .jsp-step:nth-child(3)::after { background: linear-gradient(90deg, var(--saffron), var(--gold)); }
-    .jsp-step-num {
-        font-size: 0.65rem;
-        font-weight: 700;
-        letter-spacing: 1px;
-        text-transform: uppercase;
-        color: var(--text-3);
-        margin-bottom: 0.6rem;
-    }
-    .jsp-step-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .jsp-step-title {
-        font-size: 0.95rem;
-        font-weight: 700;
-        color: var(--navy);
-        margin-bottom: 0.4rem;
-    }
-    .jsp-step-desc {
-        font-size: 0.75rem;
-        color: var(--text-2);
-        line-height: 1.55;
-    }
-    .jsp-step-arrow {
-        position: absolute;
-        right: -1.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        font-size: 1.2rem;
-        color: var(--border);
-        z-index: 2;
-    }
-
-    /* ── GOVERNMENT SCHEMES ── */
-    .jsp-schemes {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 1rem;
-    }
-    .jsp-scheme {
-        background: linear-gradient(145deg, #f0fdf8, #e6fff5);
-        border: 1px solid #a7f3d0;
-        border-radius: var(--radius-lg);
-        padding: 1.1rem;
-        transition: all 0.25s;
-        display: flex;
-        align-items: flex-start;
-        gap: 0.75rem;
-    }
-    .jsp-scheme:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px rgba(5,150,105,0.15);
-    }
-    .jsp-scheme-ico {
-        font-size: 1.6rem;
-        flex-shrink: 0;
-        width: 42px;
-        height: 42px;
-        background: rgba(255,255,255,0.7);
-        border-radius: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-    .jsp-scheme-name {
-        font-size: 0.82rem;
-        font-weight: 700;
-        color: #065F46;
-        margin-bottom: 0.2rem;
-    }
-    .jsp-scheme-desc {
-        font-size: 0.68rem;
-        color: #374151;
-        line-height: 1.45;
-    }
-
-    /* ── FEATURES ── */
-    .jsp-features {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 0.85rem;
-    }
-    .jsp-feature {
-        background: var(--light-bg);
-        border-radius: var(--radius-lg);
-        padding: 1rem 0.75rem;
-        text-align: center;
-        transition: all 0.25s;
-        border: 1px solid transparent;
-    }
-    .jsp-feature:hover {
-        background: var(--card-bg);
-        border-color: var(--blue);
-        box-shadow: var(--shadow-sm);
-        transform: translateY(-3px);
-    }
-    .jsp-feature-ico { font-size: 1.7rem; margin-bottom: 0.4rem; }
-    .jsp-feature-title {
-        font-size: 0.78rem;
-        font-weight: 700;
-        color: var(--navy);
-    }
-    .jsp-feature-sub {
-        font-size: 0.65rem;
-        color: var(--text-3);
-        margin-top: 0.15rem;
-    }
-
-    /* ── TRANSPARENCY PORTAL BUTTON ── */
-    .jsp-portal-btn {
-        background: linear-gradient(135deg, #FFF7ED, #FEF3C7);
-        border: 2px solid #FCD34D;
-        border-radius: var(--radius-lg);
-        padding: 1rem 1.5rem;
-        text-align: center;
-        margin: 1.5rem 0;
-        cursor: pointer;
-        transition: all 0.25s;
-    }
-    .jsp-portal-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(245,158,11,0.2);
-    }
-    .jsp-portal-btn-title {
-        font-size: 0.9rem;
-        font-weight: 700;
-        color: #92400E;
-    }
-    .jsp-portal-btn-sub {
-        font-size: 0.72rem;
-        color: #B45309;
-        margin-top: 0.2rem;
-    }
-
-    /* ── HELP BOX ── */
-    .jsp-help {
-        background: linear-gradient(135deg, var(--navy), #1A3A6E);
-        border-radius: var(--radius-xl);
-        padding: 1.5rem 2rem;
-        color: white;
-        display: grid;
-        grid-template-columns: 1fr auto;
-        align-items: center;
-        gap: 1rem;
-        margin: 1.5rem 0 1rem;
-    }
-    .jsp-help-title {
-        font-size: 1rem;
-        font-weight: 700;
-        color: white;
-        margin-bottom: 0.3rem;
-    }
-    .jsp-help-info {
-        font-size: 0.78rem;
-        color: rgba(255,255,255,0.75);
-        line-height: 1.6;
-    }
-    .jsp-help-number {
-        background: var(--saffron);
-        color: white;
-        font-size: 0.9rem;
-        font-weight: 700;
-        padding: 0.6rem 1.2rem;
-        border-radius: 50px;
-        white-space: nowrap;
-        text-align: center;
-    }
-
-    /* ── FOOTER ── */
-    .jsp-footer {
-        text-align: center;
-        padding: 1.25rem;
-        border-top: 1px solid var(--border);
-        font-size: 0.68rem;
-        color: var(--text-3);
-        line-height: 1.7;
-    }
-    .jsp-footer strong { color: var(--text-2); }
-
-    /* ── INDIA FLAG STRIPE ── */
-    .jsp-tricolor {
-        height: 4px;
-        background: linear-gradient(90deg,
-            #FF9933 0%, #FF9933 33.3%,
-            #FFFFFF 33.3%, #FFFFFF 66.6%,
-            #128807 66.6%, #128807 100%
-        );
-        border-radius: 2px;
-        margin: 1.5rem 0;
-    }
-
-    /* Responsive */
-    @media (max-width: 768px) {
-        .jsp-stats      { grid-template-columns: repeat(2, 1fr); }
-        .jsp-steps      { grid-template-columns: 1fr; }
-        .jsp-schemes    { grid-template-columns: 1fr; }
-        .jsp-features   { grid-template-columns: repeat(2, 1fr); }
-        .jsp-hero-en    { font-size: 1.4rem; }
-        .jsp-help       { grid-template-columns: 1fr; text-align: center; }
-    }
-    @media (max-width: 480px) {
-        .jsp-lang-grid  { grid-template-columns: 1fr; }
-        .jsp-features   { grid-template-columns: repeat(2, 1fr); }
-    }
-    </style>
-
-    <div class="jsp-wrap">
-
-        <!-- ═══ HERO ═══ -->
-        <div class="jsp-hero">
-            <div class="jsp-hero-top">
-                <div class="jsp-ashoka">🏛️</div>
-                <div class="jsp-hero-titles">
-                    <div class="jsp-hero-en">Jan Seva Portal</div>
-                    <div class="jsp-hero-hi">जन सेवा पोर्टल</div>
-                </div>
-            </div>
-            <div class="jsp-hero-sub">AI-Powered Citizen Grievance Management System</div>
-            <div class="jsp-badges">
-                <span class="jsp-badge">🇮🇳 Digital India</span>
-                <span class="jsp-badge">⚙️ Smart Governance</span>
-                <span class="jsp-badge">🔒 Secure & Trusted</span>
-                <span class="jsp-badge">📱 Mobile Ready</span>
-            </div>
-        </div>
-
-        <!-- ═══ STATS BAR ═══ -->
-        <div class="jsp-stats">
-            <div class="jsp-stat">
-                <div class="jsp-stat-num">2.4<span class="jsp-stat-unit">M+</span></div>
-                <div class="jsp-stat-lbl">Complaints Resolved</div>
-            </div>
-            <div class="jsp-stat">
-                <div class="jsp-stat-num">98<span class="jsp-stat-unit">%</span></div>
-                <div class="jsp-stat-lbl">Resolution Rate</div>
-            </div>
-            <div class="jsp-stat">
-                <div class="jsp-stat-num">4.8<span class="jsp-stat-unit">★</span></div>
-                <div class="jsp-stat-lbl">Citizen Satisfaction</div>
-            </div>
-            <div class="jsp-stat">
-                <div class="jsp-stat-num">72<span class="jsp-stat-unit">hr</span></div>
-                <div class="jsp-stat-lbl">Avg Resolution Time</div>
-            </div>
-        </div>
-
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ─── LANGUAGE SELECTION ────────────────────────────────────────────────────
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600;700&display=swap');
+ 
+:root {
+    --navy:     #0B1F45;
+    --blue:     #1A56DB;
+    --sky:      #3B9EFF;
+    --teal:     #0D9488;
+    --gold:     #F59E0B;
+    --saffron:  #FF6B2B;
+    --green:    #059669;
+    --light-bg: #F0F4FF;
+    --card-bg:  #FFFFFF;
+    --border:   #DDE3F0;
+    --text-1:   #0B1F45;
+    --text-2:   #4B5672;
+    --text-3:   #8A95B0;
+    --r-xl: 20px; --r-lg: 14px; --r-md: 10px;
+    --sh-sm: 0 2px 8px rgba(11,31,69,.07);
+    --sh-md: 0 8px 24px rgba(11,31,69,.10);
+}
+ 
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+.jsp { font-family: 'Sora', sans-serif; color: var(--text-1); }
+ 
+/* ── HERO ── */
+.jsp-hero {
+    background: linear-gradient(135deg, var(--navy) 0%, #1A3A6E 55%, #1A56DB 100%);
+    border-radius: var(--r-xl); padding: 3rem 2rem 2.5rem;
+    text-align: center; position: relative; overflow: hidden; margin-bottom: 1.25rem;
+}
+.jsp-hero::before {
+    content:''; position:absolute; inset:0; pointer-events:none;
+    background: radial-gradient(circle at 15% 50%, rgba(255,107,43,.18) 0%, transparent 50%),
+                radial-gradient(circle at 85% 20%, rgba(59,158,255,.22) 0%, transparent 50%);
+}
+.jsp-hero-top {
+    display:flex; align-items:center; justify-content:center;
+    gap:1rem; margin-bottom:1.25rem; flex-wrap:wrap; position:relative; z-index:1;
+}
+.jsp-ashoka {
+    width:64px; height:64px; background:rgba(255,255,255,.12);
+    border-radius:50%; display:flex; align-items:center; justify-content:center;
+    font-size:2.2rem; border:2px solid rgba(255,255,255,.25); flex-shrink:0;
+}
+.jsp-hero-titles { text-align:left; }
+.jsp-hero-en {
+    font-size:2rem; font-weight:800; color:#fff;
+    letter-spacing:-.5px; line-height:1.1;
+}
+.jsp-hero-hi {
+    font-family:'Noto Sans Devanagari',sans-serif;
+    font-size:1.15rem; font-weight:600; color:rgba(255,255,255,.72); margin-top:.15rem;
+}
+.jsp-hero-sub {
+    font-size:.88rem; color:rgba(255,255,255,.68);
+    margin-bottom:1.25rem; position:relative; z-index:1;
+}
+.jsp-badges {
+    display:flex; flex-wrap:wrap; gap:.45rem;
+    justify-content:center; position:relative; z-index:1;
+}
+.jsp-badge {
+    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+    color:rgba(255,255,255,.9); font-size:.68rem; font-weight:600;
+    padding:.28rem .85rem; border-radius:50px; letter-spacing:.3px; text-transform:uppercase;
+}
+.jsp-tricolor {
+    height:3px; border-radius:2px; margin-top:1.25rem; opacity:.55; position:relative; z-index:1;
+    background: linear-gradient(90deg,#FF9933 0%,#FF9933 33.3%,#fff 33.3%,#fff 66.6%,#138808 66.6%,#138808 100%);
+}
+ 
+/* ── STATS ── */
+.jsp-stats {
+    display:grid; grid-template-columns:repeat(4,1fr);
+    gap:.9rem; margin-bottom:1.75rem;
+}
+.jsp-stat {
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:var(--r-lg); padding:1rem .75rem; text-align:center;
+    box-shadow:var(--sh-sm); transition:transform .2s,box-shadow .2s;
+}
+.jsp-stat:hover { transform:translateY(-3px); box-shadow:var(--sh-md); }
+.jsp-stat-num { font-size:1.6rem; font-weight:800; color:var(--blue); line-height:1; }
+.jsp-stat-unit { font-size:.72rem; font-weight:700; color:var(--teal); margin-left:1px; }
+.jsp-stat-lbl { font-size:.65rem; color:var(--text-3); margin-top:.3rem; }
+ 
+/* ── SECTION HEADER ── */
+.jsp-sec {
+    display:flex; align-items:center; gap:.7rem; margin:1.75rem 0 .85rem;
+}
+.jsp-sec-title { font-size:1.1rem; font-weight:700; color:var(--navy); white-space:nowrap; }
+.jsp-sec-line {
+    flex:1; height:2px; opacity:.2; border-radius:2px;
+    background:linear-gradient(90deg,var(--blue),transparent);
+}
+.jsp-sec-sub { font-size:.75rem; color:var(--text-3); margin-bottom:.9rem; }
+ 
+/* ── LANGUAGE CARDS ── */
+.jsp-lang-grid { display:grid; grid-template-columns:1fr 1fr; gap:1.1rem; margin-bottom:.5rem; }
+.jsp-lang-card {
+    background:var(--card-bg); border:2px solid var(--border);
+    border-radius:var(--r-xl); padding:1.75rem 1.5rem; text-align:center;
+    box-shadow:var(--sh-sm); transition:all .25s;
+}
+.jsp-lang-card:hover { border-color:var(--blue); transform:translateY(-4px); box-shadow:0 12px 28px rgba(26,86,219,.15); }
+.jsp-lang-flag { font-size:2.6rem; margin-bottom:.55rem; }
+.jsp-lang-name { font-size:1.2rem; font-weight:700; color:var(--navy); margin-bottom:.2rem; }
+.jsp-lang-native {
+    font-size:.78rem; color:var(--text-3);
+    font-family:'Noto Sans Devanagari',sans-serif;
+}
+.jsp-lang-pill {
+    display:inline-block; background:var(--light-bg); color:var(--blue);
+    font-size:.62rem; font-weight:600; padding:.18rem .65rem;
+    border-radius:20px; margin-top:.5rem; letter-spacing:.3px; text-transform:uppercase;
+}
+ 
+/* ── TRANSPARENCY PORTAL ── */
+.jsp-portal {
+    background:linear-gradient(135deg,#FFF7ED,#FEF3C7);
+    border:2px solid #FCD34D; border-radius:var(--r-lg);
+    padding:1rem 1.5rem; text-align:center; margin:1rem 0 .5rem;
+}
+.jsp-portal-title { font-size:.9rem; font-weight:700; color:#92400E; }
+.jsp-portal-sub   { font-size:.72rem; color:#B45309; margin-top:.2rem; }
+ 
+/* ── HOW IT WORKS ── */
+.jsp-steps { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+.jsp-step {
+    background:var(--card-bg); border:1px solid var(--border);
+    border-radius:var(--r-xl); padding:1.5rem 1.25rem;
+    position:relative; overflow:hidden; box-shadow:var(--sh-sm); transition:all .25s;
+}
+.jsp-step:hover { transform:translateY(-4px); box-shadow:var(--sh-md); }
+.jsp-step::after {
+    content:''; position:absolute; top:0; left:0; width:100%; height:4px;
+}
+.jsp-step-1::after { background:linear-gradient(90deg,var(--blue),var(--sky)); }
+.jsp-step-2::after { background:linear-gradient(90deg,var(--teal),#34D399); }
+.jsp-step-3::after { background:linear-gradient(90deg,var(--saffron),var(--gold)); }
+.jsp-step-num  { font-size:.62rem; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text-3); margin-bottom:.5rem; }
+.jsp-step-icon { font-size:1.9rem; margin-bottom:.45rem; }
+.jsp-step-title{ font-size:.92rem; font-weight:700; color:var(--navy); margin-bottom:.35rem; }
+.jsp-step-desc { font-size:.73rem; color:var(--text-2); line-height:1.55; }
+ 
+/* ── GOVERNMENT SCHEMES ── */
+.jsp-schemes { display:grid; grid-template-columns:repeat(3,1fr); gap:.9rem; }
+.jsp-scheme {
+    background:linear-gradient(145deg,#f0fdf8,#e6fff5);
+    border:1px solid #a7f3d0; border-radius:var(--r-lg);
+    padding:1rem 1rem; display:flex; align-items:flex-start;
+    gap:.7rem; transition:all .25s;
+}
+.jsp-scheme:hover { transform:translateY(-3px); box-shadow:0 8px 20px rgba(5,150,105,.15); }
+.jsp-scheme-ico {
+    font-size:1.5rem; flex-shrink:0; width:40px; height:40px;
+    background:rgba(255,255,255,.7); border-radius:10px;
+    display:flex; align-items:center; justify-content:center;
+}
+.jsp-scheme-name { font-size:.8rem; font-weight:700; color:#065F46; margin-bottom:.18rem; }
+.jsp-scheme-desc { font-size:.67rem; color:#374151; line-height:1.45; }
+ 
+/* ── FEATURES ── */
+.jsp-features { display:grid; grid-template-columns:repeat(4,1fr); gap:.8rem; }
+.jsp-feature {
+    background:var(--light-bg); border-radius:var(--r-lg);
+    padding:.9rem .6rem; text-align:center;
+    border:1px solid transparent; transition:all .25s;
+}
+.jsp-feature:hover {
+    background:var(--card-bg); border-color:var(--blue);
+    box-shadow:var(--sh-sm); transform:translateY(-3px);
+}
+.jsp-feature-ico   { font-size:1.6rem; margin-bottom:.35rem; }
+.jsp-feature-title { font-size:.75rem; font-weight:700; color:var(--navy); }
+.jsp-feature-sub   { font-size:.62rem; color:var(--text-3); margin-top:.12rem; }
+ 
+/* ── HELP BOX ── */
+.jsp-help {
+    background:linear-gradient(135deg,var(--navy),#1A3A6E);
+    border-radius:var(--r-xl); padding:1.5rem 2rem; margin:1.5rem 0 1rem;
+    display:grid; grid-template-columns:1fr auto; align-items:center; gap:1rem;
+}
+.jsp-help-title { font-size:.95rem; font-weight:700; color:#fff; margin-bottom:.25rem; }
+.jsp-help-info  { font-size:.75rem; color:rgba(255,255,255,.72); line-height:1.6; }
+.jsp-help-info strong { color:rgba(255,255,255,.95); }
+.jsp-help-num {
+    background:var(--saffron); color:#fff; font-size:.85rem;
+    font-weight:700; padding:.6rem 1.2rem; border-radius:50px;
+    white-space:nowrap; text-align:center; line-height:1.4;
+}
+.jsp-help-num span { font-size:.6rem; font-weight:400; opacity:.85; display:block; }
+ 
+/* ── FOOTER ── */
+.jsp-footer {
+    text-align:center; padding:1.25rem; border-top:1px solid var(--border);
+    font-size:.67rem; color:var(--text-3); line-height:1.8; margin-top:1rem;
+}
+.jsp-footer strong { color:var(--text-2); }
+.jsp-footer a { color:var(--blue); text-decoration:none; }
+ 
+/* ── RESPONSIVE ── */
+@media(max-width:768px) {
+    .jsp-stats    { grid-template-columns:repeat(2,1fr); }
+    .jsp-steps    { grid-template-columns:1fr; }
+    .jsp-schemes  { grid-template-columns:1fr; }
+    .jsp-features { grid-template-columns:repeat(2,1fr); }
+    .jsp-help     { grid-template-columns:1fr; text-align:center; }
+    .jsp-hero-en  { font-size:1.4rem; }
+}
+@media(max-width:480px) {
+    .jsp-lang-grid { grid-template-columns:1fr; }
+}
+ 
+/* Streamlit button tweaks */
+div[data-testid="stButton"] > button {
+    font-family:'Sora',sans-serif !important;
+    font-weight:600 !important;
+    border-radius:12px !important;
+    height:48px !important;
+    font-size:.85rem !important;
+}
+</style>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # HERO + STATS
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-sec-head">
-            <span class="jsp-sec-title">🌐 Choose Your Language &nbsp;|&nbsp; <span style="font-family:'Noto Sans Devanagari',sans-serif;font-size:0.95rem">अपनी भाषा चुनें</span></span>
-            <div class="jsp-sec-line"></div>
-        </div>
-        <div class="jsp-lang-grid">
-            <div class="jsp-lang-card">
-                <div class="jsp-lang-flag">🇬🇧</div>
-                <div class="jsp-lang-name">English</div>
-                <div class="jsp-lang-native">International Language</div>
-                <div class="jsp-lang-pill">Widely Spoken</div>
-            </div>
-            <div class="jsp-lang-card">
-                <div class="jsp-lang-flag">🇮🇳</div>
-                <div class="jsp-lang-name">हिंदी</div>
-                <div class="jsp-lang-native">भारत की राष्ट्रीय भाषा</div>
-                <div class="jsp-lang-pill">National Language</div>
-            </div>
-        </div>
+<div class="jsp">
+  <div class="jsp-hero">
+    <div class="jsp-hero-top">
+      <div class="jsp-ashoka">🏛️</div>
+      <div class="jsp-hero-titles">
+        <div class="jsp-hero-en">Jan Seva Portal</div>
+        <div class="jsp-hero-hi">जन सेवा पोर्टल</div>
+      </div>
     </div>
-    """, unsafe_allow_html=True)
-
+    <div class="jsp-hero-sub">AI-Powered Citizen Grievance Management System</div>
+    <div class="jsp-badges">
+      <span class="jsp-badge">🇮🇳 Digital India</span>
+      <span class="jsp-badge">⚙️ Smart Governance</span>
+      <span class="jsp-badge">🔒 Secure &amp; Trusted</span>
+      <span class="jsp-badge">📱 Mobile Ready</span>
+    </div>
+    <div class="jsp-tricolor"></div>
+  </div>
+ 
+  <div class="jsp-stats">
+    <div class="jsp-stat">
+      <div class="jsp-stat-num">2.4<span class="jsp-stat-unit">M+</span></div>
+      <div class="jsp-stat-lbl">Complaints Resolved</div>
+    </div>
+    <div class="jsp-stat">
+      <div class="jsp-stat-num">98<span class="jsp-stat-unit">%</span></div>
+      <div class="jsp-stat-lbl">Resolution Rate</div>
+    </div>
+    <div class="jsp-stat">
+      <div class="jsp-stat-num">4.8<span class="jsp-stat-unit">★</span></div>
+      <div class="jsp-stat-lbl">Citizen Satisfaction</div>
+    </div>
+    <div class="jsp-stat">
+      <div class="jsp-stat-num">72<span class="jsp-stat-unit">hr</span></div>
+      <div class="jsp-stat-lbl">Avg Resolution Time</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # LANGUAGE SELECTION
+    # ══════════════════════════════════════════════════════════════════════════
+    st.markdown("""
+<div class="jsp">
+  <div class="jsp-sec">
+    <span class="jsp-sec-title">🌐 Choose Your Language</span>
+    <div class="jsp-sec-line"></div>
+  </div>
+  <p class="jsp-sec-sub">अपनी भाषा चुनें &nbsp;·&nbsp; Select your preferred language to continue</p>
+  <div class="jsp-lang-grid">
+    <div class="jsp-lang-card">
+      <div class="jsp-lang-flag">🇬🇧</div>
+      <div class="jsp-lang-name">English</div>
+      <div class="jsp-lang-native">International Language</div>
+      <div class="jsp-lang-pill">Widely Spoken</div>
+    </div>
+    <div class="jsp-lang-card">
+      <div class="jsp-lang-flag">🇮🇳</div>
+      <div class="jsp-lang-name">हिंदी</div>
+      <div class="jsp-lang-native">भारत की राष्ट्रीय भाषा</div>
+      <div class="jsp-lang-pill">National Language</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
     col1, col2 = st.columns(2, gap="medium")
     with col1:
-        if st.button("🌐 Continue in English", key="lang_en", use_container_width=True, type="primary"):
+        if st.button("🌐 Continue in English", key="lang_en",
+                     use_container_width=True, type="primary"):
             st.session_state.language = "en"
             st.session_state.screen = "login_type"
             st.rerun()
     with col2:
-        if st.button("🇮🇳 हिंदी में जारी रखें", key="lang_hi", use_container_width=True):
+        if st.button("🇮🇳 हिंदी में जारी रखें", key="lang_hi",
+                     use_container_width=True):
             st.session_state.language = "hi"
             st.session_state.screen = "login_type"
             st.rerun()
-
-    # ─── TRANSPARENCY PORTAL ───────────────────────────────────────────────────
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # TRANSPARENCY PORTAL
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-portal-btn">
-            <div class="jsp-portal-btn-title">📊 Public Transparency Portal</div>
-            <div class="jsp-portal-btn-sub">View real-time grievance statistics, department performance & open data reports</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+<div class="jsp">
+  <div class="jsp-portal">
+    <div class="jsp-portal-title">📊 Public Transparency Portal</div>
+    <div class="jsp-portal-sub">View real-time grievance statistics, department performance &amp; open data reports</div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
     col_a, col_b, col_c = st.columns([1, 2, 1])
     with col_b:
-        if st.button("📊 Open Transparency Portal", use_container_width=True):
+        if st.button("📊 Open Transparency Portal",
+                     key="transparency", use_container_width=True):
             st.session_state.screen = "public_transparency"
             st.rerun()
-
-    # ─── HOW IT WORKS ─────────────────────────────────────────────────────────
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # HOW IT WORKS
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-sec-head">
-            <span class="jsp-sec-title">📚 How It Works</span>
-            <div class="jsp-sec-line"></div>
-        </div>
-        <div class="jsp-sec-subtitle" style="margin-bottom:0.75rem;color:#8A95B0;font-size:0.78rem;">
-            Simple 3-step process to get your grievance resolved
-        </div>
-        <div class="jsp-steps">
-            <div class="jsp-step">
-                <div class="jsp-step-num">Step 01</div>
-                <div class="jsp-step-icon">📝</div>
-                <div class="jsp-step-title">File a Complaint</div>
-                <div class="jsp-step-desc">Describe your issue in text or voice, add your location and photos. Our AI auto-categorises it and routes it to the right department instantly.</div>
-            </div>
-            <div class="jsp-step">
-                <div class="jsp-step-num">Step 02</div>
-                <div class="jsp-step-icon">⚙️</div>
-                <div class="jsp-step-title">Track Progress</div>
-                <div class="jsp-step-desc">Receive real-time SMS and email alerts. Watch live status updates on a transparent dashboard and escalate automatically if SLA is breached.</div>
-            </div>
-            <div class="jsp-step">
-                <div class="jsp-step-num">Step 03</div>
-                <div class="jsp-step-icon">✅</div>
-                <div class="jsp-step-title">Get Resolution</div>
-                <div class="jsp-step-desc">Officials submit action reports with photos. Rate your experience and give feedback to improve government service quality continuously.</div>
-            </div>
-        </div>
-        <div class="jsp-tricolor"></div>
+<div class="jsp">
+  <div class="jsp-sec">
+    <span class="jsp-sec-title">📚 How It Works</span>
+    <div class="jsp-sec-line"></div>
+  </div>
+  <p class="jsp-sec-sub">Simple 3-step process to get your grievance resolved</p>
+  <div class="jsp-steps">
+    <div class="jsp-step jsp-step-1">
+      <div class="jsp-step-num">Step 01</div>
+      <div class="jsp-step-icon">📝</div>
+      <div class="jsp-step-title">File a Complaint</div>
+      <div class="jsp-step-desc">Describe your issue in text or voice, add your location and photos. Our AI auto-categorises it and routes it to the right department instantly.</div>
     </div>
-    """, unsafe_allow_html=True)
-
-    # ─── GOVERNMENT SCHEMES ───────────────────────────────────────────────────
+    <div class="jsp-step jsp-step-2">
+      <div class="jsp-step-num">Step 02</div>
+      <div class="jsp-step-icon">⚙️</div>
+      <div class="jsp-step-title">Track Progress</div>
+      <div class="jsp-step-desc">Receive real-time SMS and email alerts. Watch live status updates on a transparent dashboard and escalate automatically if SLA is breached.</div>
+    </div>
+    <div class="jsp-step jsp-step-3">
+      <div class="jsp-step-num">Step 03</div>
+      <div class="jsp-step-icon">✅</div>
+      <div class="jsp-step-title">Get Resolution</div>
+      <div class="jsp-step-desc">Officials submit action reports with photos. Rate your experience and give feedback to improve government service quality continuously.</div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # GOVERNMENT SCHEMES
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-sec-head">
-            <span class="jsp-sec-title">🏅 Government Schemes</span>
-            <div class="jsp-sec-line"></div>
-        </div>
-        <div class="jsp-sec-subtitle" style="margin-bottom:0.75rem;color:#8A95B0;font-size:0.78rem;">
-            Major citizen welfare initiatives you can file complaints or queries about
-        </div>
-        <div class="jsp-schemes">
-            <div class="jsp-scheme">
-                <div class="jsp-scheme-ico">🏠</div>
-                <div>
-                    <div class="jsp-scheme-name">PM Awas Yojana</div>
-                    <div class="jsp-scheme-desc">Housing for All — report issues with allotment, construction quality, or beneficiary enrolment.</div>
-                </div>
-            </div>
-            <div class="jsp-scheme">
-                <div class="jsp-scheme-ico">💧</div>
-                <div>
-                    <div class="jsp-scheme-name">Jal Jeevan Mission</div>
-                    <div class="jsp-scheme-desc">Tap water connection for every household — file complaints about supply or pipeline damage.</div>
-                </div>
-            </div>
-            <div class="jsp-scheme">
-                <div class="jsp-scheme-ico">⚡</div>
-                <div>
-                    <div class="jsp-scheme-name">PM KUSUM / SAUBHAGYA</div>
-                    <div class="jsp-scheme-desc">Solar energy & rural electrification — report outages, metering issues or connection delays.</div>
-                </div>
-            </div>
-            <div class="jsp-scheme">
-                <div class="jsp-scheme-ico">🛣️</div>
-                <div>
-                    <div class="jsp-scheme-name">PM Gram Sadak Yojana</div>
-                    <div class="jsp-scheme-desc">All-weather rural roads — raise concerns about poor road quality, potholes or missing links.</div>
-                </div>
-            </div>
-            <div class="jsp-scheme">
-                <div class="jsp-scheme-ico">🌾</div>
-                <div>
-                    <div class="jsp-scheme-name">PM Kisan Samman Nidhi</div>
-                    <div class="jsp-scheme-desc">Direct income support to farmers — flag payment delays, KYC issues or enrolment problems.</div>
-                </div>
-            </div>
-            <div class="jsp-scheme">
-                <div class="jsp-scheme-ico">🏥</div>
-                <div>
-                    <div class="jsp-scheme-name">Ayushman Bharat</div>
-                    <div class="jsp-scheme-desc">Health coverage up to ₹5 lakh — report denial of treatment, card issues or hospital fraud.</div>
-                </div>
-            </div>
-        </div>
+<div class="jsp">
+  <div class="jsp-sec">
+    <span class="jsp-sec-title">🏅 Government Schemes</span>
+    <div class="jsp-sec-line"></div>
+  </div>
+  <p class="jsp-sec-sub">Major citizen welfare initiatives — file complaints or queries about these schemes</p>
+  <div class="jsp-schemes">
+    <div class="jsp-scheme">
+      <div class="jsp-scheme-ico">🏠</div>
+      <div>
+        <div class="jsp-scheme-name">PM Awas Yojana</div>
+        <div class="jsp-scheme-desc">Housing for All — report issues with allotment, construction quality or beneficiary enrolment.</div>
+      </div>
     </div>
-    """, unsafe_allow_html=True)
-
-    # ─── KEY FEATURES ─────────────────────────────────────────────────────────
+    <div class="jsp-scheme">
+      <div class="jsp-scheme-ico">💧</div>
+      <div>
+        <div class="jsp-scheme-name">Jal Jeevan Mission</div>
+        <div class="jsp-scheme-desc">Tap water for every household — complaints about supply disruptions or pipeline damage.</div>
+      </div>
+    </div>
+    <div class="jsp-scheme">
+      <div class="jsp-scheme-ico">⚡</div>
+      <div>
+        <div class="jsp-scheme-name">PM KUSUM / SAUBHAGYA</div>
+        <div class="jsp-scheme-desc">Solar energy &amp; rural electrification — report outages, metering issues or connection delays.</div>
+      </div>
+    </div>
+    <div class="jsp-scheme">
+      <div class="jsp-scheme-ico">🛣️</div>
+      <div>
+        <div class="jsp-scheme-name">PM Gram Sadak Yojana</div>
+        <div class="jsp-scheme-desc">All-weather rural roads — raise concerns about poor quality, potholes or missing links.</div>
+      </div>
+    </div>
+    <div class="jsp-scheme">
+      <div class="jsp-scheme-ico">🌾</div>
+      <div>
+        <div class="jsp-scheme-name">PM Kisan Samman Nidhi</div>
+        <div class="jsp-scheme-desc">Direct income support to farmers — flag payment delays, KYC issues or enrolment problems.</div>
+      </div>
+    </div>
+    <div class="jsp-scheme">
+      <div class="jsp-scheme-ico">🏥</div>
+      <div>
+        <div class="jsp-scheme-name">Ayushman Bharat</div>
+        <div class="jsp-scheme-desc">Health coverage up to ₹5 lakh — report denial of treatment, card issues or hospital fraud.</div>
+      </div>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # KEY FEATURES
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-sec-head">
-            <span class="jsp-sec-title">✨ Platform Features</span>
-            <div class="jsp-sec-line"></div>
-        </div>
-        <div class="jsp-features">
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">🤖</div>
-                <div class="jsp-feature-title">AI-Powered</div>
-                <div class="jsp-feature-sub">Smart auto-categorisation</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">🎤</div>
-                <div class="jsp-feature-title">Voice Input</div>
-                <div class="jsp-feature-sub">Speak your complaint</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">📍</div>
-                <div class="jsp-feature-title">GPS Location</div>
-                <div class="jsp-feature-sub">Auto-detect address</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">🔔</div>
-                <div class="jsp-feature-title">Real-time Alerts</div>
-                <div class="jsp-feature-sub">SMS & email notifications</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">⏱️</div>
-                <div class="jsp-feature-title">SLA Tracking</div>
-                <div class="jsp-feature-sub">Time-bound resolution</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">📊</div>
-                <div class="jsp-feature-title">Analytics</div>
-                <div class="jsp-feature-sub">Data-driven insights</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">🌙</div>
-                <div class="jsp-feature-title">Dark Mode</div>
-                <div class="jsp-feature-sub">Eye-friendly interface</div>
-            </div>
-            <div class="jsp-feature">
-                <div class="jsp-feature-ico">🔒</div>
-                <div class="jsp-feature-title">Secure & Private</div>
-                <div class="jsp-feature-sub">End-to-end encryption</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ─── HELP & CONTACT ───────────────────────────────────────────────────────
+<div class="jsp">
+  <div class="jsp-sec">
+    <span class="jsp-sec-title">✨ Platform Features</span>
+    <div class="jsp-sec-line"></div>
+  </div>
+  <div class="jsp-features">
+    <div class="jsp-feature"><div class="jsp-feature-ico">🤖</div><div class="jsp-feature-title">AI-Powered</div><div class="jsp-feature-sub">Smart auto-categorisation</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">🎤</div><div class="jsp-feature-title">Voice Input</div><div class="jsp-feature-sub">Speak your complaint</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">📍</div><div class="jsp-feature-title">GPS Location</div><div class="jsp-feature-sub">Auto-detect address</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">🔔</div><div class="jsp-feature-title">Real-time Alerts</div><div class="jsp-feature-sub">SMS &amp; email notifications</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">⏱️</div><div class="jsp-feature-title">SLA Tracking</div><div class="jsp-feature-sub">Time-bound resolution</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">📊</div><div class="jsp-feature-title">Analytics</div><div class="jsp-feature-sub">Data-driven insights</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">🌙</div><div class="jsp-feature-title">Dark Mode</div><div class="jsp-feature-sub">Eye-friendly interface</div></div>
+    <div class="jsp-feature"><div class="jsp-feature-ico">🔒</div><div class="jsp-feature-title">Secure &amp; Private</div><div class="jsp-feature-sub">End-to-end encryption</div></div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # HELP & CONTACT
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-help">
-            <div>
-                <div class="jsp-help-title">📞 Need Help? We're Here.</div>
-                <div class="jsp-help-info">
-                    Email: <strong>support@janseva.gov.in</strong><br>
-                    Working Hours: Monday – Saturday, 9:00 AM to 6:00 PM IST
-                </div>
-            </div>
-            <div class="jsp-help-number">📲 1800-XXX-XXXX<br><span style="font-size:0.6rem;font-weight:400;opacity:0.85">Toll-Free Helpline</span></div>
-        </div>
+<div class="jsp">
+  <div class="jsp-help">
+    <div>
+      <div class="jsp-help-title">📞 Need Help? We're Here.</div>
+      <div class="jsp-help-info">
+        Email: <strong>support@janseva.gov.in</strong><br>
+        Working Hours: Monday – Saturday, 9:00 AM to 6:00 PM IST
+      </div>
     </div>
-    """, unsafe_allow_html=True)
-
-    # ─── FOOTER ───────────────────────────────────────────────────────────────
+    <div class="jsp-help-num">
+      📲 1800-XXX-XXXX
+      <span>Toll-Free Helpline</span>
+    </div>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # FOOTER
+    # ══════════════════════════════════════════════════════════════════════════
     st.markdown("""
-    <div class="jsp-wrap">
-        <div class="jsp-footer">
-            <strong>© 2024 Jan Seva Portal</strong> — An Initiative by the Government of India &nbsp;|&nbsp; Version 2.0<br>
-            Empowering Citizens &nbsp;·&nbsp; Ensuring Accountability &nbsp;·&nbsp; Enhancing Governance<br>
-            <span style="margin-top:0.3rem;display:inline-block;">
-                Built on <strong>Digital India</strong> infrastructure &nbsp;|&nbsp; Data localised in India &nbsp;|&nbsp; 
-                <a href="#" style="color:#1A56DB;text-decoration:none;">Privacy Policy</a> &nbsp;|&nbsp;
-                <a href="#" style="color:#1A56DB;text-decoration:none;">Terms of Use</a>
-            </span>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    # ─── VOICE GREETING ───────────────────────────────────────────────────────
+<div class="jsp">
+  <div class="jsp-footer">
+    <strong>© 2024 Jan Seva Portal</strong> — An Initiative by the Government of India &nbsp;|&nbsp; Version 2.0<br>
+    Empowering Citizens &nbsp;·&nbsp; Ensuring Accountability &nbsp;·&nbsp; Enhancing Governance<br>
+    Built on <strong>Digital India</strong> infrastructure &nbsp;·&nbsp; Data localised in India &nbsp;·&nbsp;
+    <a href="#">Privacy Policy</a> &nbsp;|&nbsp; <a href="#">Terms of Use</a>
+  </div>
+</div>
+""", unsafe_allow_html=True)
+ 
+    # ══════════════════════════════════════════════════════════════════════════
+    # VOICE GREETING
+    # ══════════════════════════════════════════════════════════════════════════
     st.components.v1.html("""
-    <script>
-    (function() {
-        if (!('speechSynthesis' in window)) return;
-        var msg = new SpeechSynthesisUtterance(
-            "Welcome to Jan Seva Portal. An AI-powered Citizen Grievance Management System. Please select your preferred language to continue."
-        );
-        msg.lang  = 'en-IN';
-        msg.rate  = 0.88;
-        msg.pitch = 1.05;
-        // Only speak after fonts and content settle
-        setTimeout(function() { window.speechSynthesis.speak(msg); }, 800);
-    })();
-    </script>
-    """, height=0)
+<script>
+(function() {
+    if (!('speechSynthesis' in window)) return;
+    var msg = new SpeechSynthesisUtterance(
+        "Welcome to Jan Seva Portal. An AI-powered Citizen Grievance Management System. Please select your preferred language to continue."
+    );
+    msg.lang  = 'en-IN';
+    msg.rate  = 0.88;
+    msg.pitch = 1.05;
+    setTimeout(function() { window.speechSynthesis.speak(msg); }, 800);
+})();
+</script>
+""", height=0)
+ 
+ 
+# ─── ENTRY POINT ──────────────────────────────────────────────────────────────
+# if __name__ == "__main__":
+#     if "screen" not in st.session_state:
+#         st.session_state.screen = "language"
+#     if "language" not in st.session_state:
+#         st.session_state.language = None
+ 
+#     if st.session_state.screen == "language":
+#         pg_language()
+#     elif st.session_state.screen == "login_type":
+#         st.success(f"✅ Language set to: **{st.session_state.language.upper()}** — connect your login_type page here.")
+#         if st.button("← Back"):
+#             st.session_state.screen = "language"
+#             st.rerun()
+#     elif st.session_state.screen == "public_transparency":
+#         st.info("📊 Transparency Portal — connect your transparency page here.")
+#         if st.button("← Back"):
+#             st.session_state.screen = "language"
+#             st.rerun()
 
  
  
