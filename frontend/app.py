@@ -398,20 +398,31 @@ def _section_label(text):
     """, unsafe_allow_html=True)
 
 
-# ═════════════════════════════════════════════════════════════════════════════
-# MAIN SIDEBAR
-# ═════════════════════════════════════════════════════════════════════════════
 def _inject_sidebar_css():
     st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
 
+/* ── HIDE STREAMLIT PAGE NAV (the keyboard_doub file list) ── */
+section[data-testid="stSidebarNav"],
+section[data-testid="stSidebarNavItems"],
+div[data-testid="stSidebarNavSeparator"],
+[data-testid="stSidebarNavLink"],
+section[data-testid="stSidebar"] ul,
+section[data-testid="stSidebar"] nav {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+}
+
 /* ── SIDEBAR SHELL ── */
 section[data-testid="stSidebar"] {
     background: #FFFFFF !important;
-    border-right: 1px solid #DDE3F0 !important;
-    min-width: 260px !important;
-    max-width: 260px !important;
+    border-right: 2px solid #C7D4F0 !important;
+    box-shadow: 4px 0 20px rgba(11,31,69,0.08) !important;
+    min-width: 268px !important;
+    max-width: 268px !important;
 }
 section[data-testid="stSidebar"] > div:first-child {
     padding: 0 !important;
@@ -421,89 +432,94 @@ section[data-testid="stSidebar"] * {
 }
 
 /* ── SCROLLBAR ── */
-section[data-testid="stSidebar"]::-webkit-scrollbar { width: 4px; }
+section[data-testid="stSidebar"]::-webkit-scrollbar { width: 3px; }
 section[data-testid="stSidebar"]::-webkit-scrollbar-track { background: transparent; }
 section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-    background: #DDE3F0; border-radius: 4px;
+    background: #C7D4F0; border-radius: 3px;
 }
 
 /* ── BRAND BLOCK ── */
 .sb-brand {
-    background: linear-gradient(135deg, #0B1F45 0%, #1A3A6E 60%, #1A56DB 100%);
-    padding: 1.5rem 1rem 1.25rem;
+    background: linear-gradient(135deg, #0B1F45 0%, #1A3A6E 55%, #1A56DB 100%);
+    padding: 1.6rem 1rem 1.3rem;
     text-align: center;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 .sb-brand::before {
     content: '';
     position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(circle at 80% 20%, rgba(59,158,255,.25) 0%, transparent 60%),
-                radial-gradient(circle at 10% 80%, rgba(255,107,43,.15) 0%, transparent 50%);
+    background: radial-gradient(circle at 80% 15%, rgba(59,158,255,.28) 0%, transparent 55%),
+                radial-gradient(circle at 10% 85%, rgba(255,107,43,.16) 0%, transparent 50%);
 }
 .sb-brand-icon {
-    width: 52px; height: 52px;
-    background: rgba(255,255,255,0.12);
-    border: 2px solid rgba(255,255,255,0.22);
-    border-radius: 14px;
+    width: 54px; height: 54px;
+    background: rgba(255,255,255,0.13);
+    border: 2px solid rgba(255,255,255,0.24);
+    border-radius: 16px;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 1.7rem;
-    margin-bottom: 0.6rem;
+    font-size: 1.75rem;
+    margin-bottom: 0.65rem;
     position: relative; z-index: 1;
 }
 .sb-brand-name {
-    font-size: 1.05rem; font-weight: 800;
+    font-size: 1.08rem; font-weight: 800;
     color: #FFFFFF; letter-spacing: -0.3px;
     position: relative; z-index: 1;
-    line-height: 1.1;
+    line-height: 1.15;
 }
 .sb-brand-hi {
     font-family: 'Noto Sans Devanagari', sans-serif !important;
-    font-size: 0.72rem; font-weight: 600;
-    color: rgba(255,255,255,0.65);
+    font-size: 0.7rem; font-weight: 600;
+    color: rgba(255,255,255,0.58);
     position: relative; z-index: 1;
-    margin-top: 0.15rem;
+    margin-top: 0.18rem;
 }
 .sb-tricolor {
     height: 3px;
-    background: linear-gradient(90deg, #FF9933 0%,#FF9933 33.3%, #fff 33.3%,#fff 66.6%, #138808 66.6%,#138808 100%);
-    opacity: 0.5;
-    margin-top: 1rem;
+    background: linear-gradient(90deg,
+        #FF9933 0%, #FF9933 33.3%,
+        #fff    33.3%, #fff    66.6%,
+        #138808 66.6%, #138808 100%);
+    opacity: 0.55;
+    margin-top: 1.1rem;
+    border-radius: 2px;
     position: relative; z-index: 1;
 }
 
 /* ── PROFILE CARD ── */
 .sb-profile {
     display: flex; align-items: center; gap: 0.65rem;
-    background: #F0F4FF;
+    background: #F4F7FF;
     border-radius: 14px;
-    padding: 0.75rem 0.9rem;
-    margin: 0.85rem 0.75rem 0.5rem;
+    padding: 0.72rem 0.85rem;
+    margin: 0.9rem 0.7rem 0.45rem;
     border: 1px solid #DDE3F0;
 }
 .sb-profile-avatar {
-    width: 40px; height: 40px; border-radius: 50%;
+    width: 38px; height: 38px; border-radius: 50%;
     background: linear-gradient(135deg, #1A56DB, #0D9488);
     display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem; flex-shrink: 0;
+    font-size: 1rem; flex-shrink: 0;
     border: 2px solid #fff;
-    box-shadow: 0 2px 6px rgba(26,86,219,0.2);
+    box-shadow: 0 2px 8px rgba(26,86,219,0.22);
 }
 .sb-profile-name {
-    font-size: 0.82rem; font-weight: 700; color: #0B1F45;
-    line-height: 1.2;
+    font-size: 0.8rem; font-weight: 700; color: #0B1F45;
+    line-height: 1.25;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .sb-profile-sub {
-    font-size: 0.65rem; color: #8A95B0;
+    font-size: 0.62rem; color: #8A95B0;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 /* ── SECTION LABEL ── */
 .sb-section {
-    font-size: 0.62rem; font-weight: 700; letter-spacing: 0.8px;
-    text-transform: uppercase; color: #8A95B0;
-    padding: 0.9rem 0.9rem 0.35rem;
+    font-size: 0.58rem; font-weight: 700; letter-spacing: 1px;
+    text-transform: uppercase; color: #A0AABF;
+    padding: 0.85rem 0.85rem 0.28rem;
 }
 
 /* ── NAV BUTTONS ── */
@@ -512,92 +528,117 @@ section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
     background: transparent !important;
     border: none !important;
     border-radius: 10px !important;
-    padding: 0.55rem 0.9rem !important;
+    padding: 0.52rem 0.85rem !important;
     text-align: left !important;
-    font-size: 0.82rem !important;
+    font-size: 0.8rem !important;
     font-weight: 500 !important;
     color: #4B5672 !important;
-    transition: all 0.18s ease !important;
+    transition: background 0.15s, color 0.15s !important;
     box-shadow: none !important;
-    margin: 1px 0 !important;
+    margin: 1px 0.35rem !important;
     justify-content: flex-start !important;
+    line-height: 1.4 !important;
 }
 section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-    background: #F0F4FF !important;
+    background: #EEF3FF !important;
     color: #1A56DB !important;
 }
 
-/* Active nav button — add class .sb-nav-active via JS or use selected state */
-.sb-nav-active > button {
-    background: linear-gradient(135deg, #EEF4FF, #E0EDFF) !important;
+/* ── ACTIVE NAV ── */
+.sb-nav-active div[data-testid="stButton"] > button {
+    background: #EEF3FF !important;
     color: #1A56DB !important;
     font-weight: 700 !important;
     border-left: 3px solid #1A56DB !important;
-    padding-left: 0.7rem !important;
-}
-
-/* ── BADGE ── */
-.sb-badge {
-    display: inline-block;
-    background: #FF6B2B; color: #fff;
-    font-size: 0.6rem; font-weight: 700;
-    min-width: 18px; height: 18px;
-    border-radius: 9px; padding: 0 5px;
-    text-align: center; line-height: 18px;
-    margin-left: 6px; vertical-align: middle;
+    border-radius: 0 10px 10px 0 !important;
+    padding-left: 0.65rem !important;
 }
 
 /* ── DIVIDER ── */
 .sb-divider {
-    height: 1px; background: #DDE3F0;
-    margin: 0.6rem 0.75rem;
-}
-
-/* ── PREFERENCES ROW ── */
-.sb-pref-row {
-    display: flex; gap: 8px;
-    padding: 0 0.75rem; margin: 0.4rem 0;
+    height: 1px; background: #E8ECF5;
+    margin: 0.55rem 0.7rem;
 }
 
 /* ── LOGOUT BUTTON ── */
-.sb-logout > button {
-    background: #FFF0F0 !important;
+.sb-logout div[data-testid="stButton"] > button {
+    background: #FFF5F5 !important;
     color: #DC2626 !important;
-    border: 1px solid #FECACA !important;
+    border: 1px solid #FED7D7 !important;
     border-radius: 10px !important;
     font-weight: 600 !important;
-    font-size: 0.8rem !important;
+    font-size: 0.78rem !important;
+    margin: 0 0.35rem !important;
 }
-.sb-logout > button:hover {
+.sb-logout div[data-testid="stButton"] > button:hover {
     background: #FEE2E2 !important;
     border-color: #FCA5A5 !important;
+}
+
+/* ── PREF BUTTONS ── */
+.sb-pref div[data-testid="stButton"] > button {
+    background: #F4F7FF !important;
+    border: 1px solid #DDE3F0 !important;
+    border-radius: 10px !important;
+    color: #4B5672 !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+}
+.sb-pref div[data-testid="stButton"] > button:hover {
+    background: #EEF3FF !important;
+    color: #1A56DB !important;
+    border-color: #B8CBF5 !important;
 }
 
 /* ── FOOTER ── */
 .sb-footer {
     text-align: center;
-    font-size: 0.63rem; color: #8A95B0;
-    padding: 1rem 0.75rem 0.75rem;
-    line-height: 1.7;
-    border-top: 1px solid #DDE3F0;
-    margin-top: 0.5rem;
+    font-size: 0.6rem; color: #A0AABF;
+    padding: 0.85rem 0.7rem 0.7rem;
+    line-height: 1.75;
+    border-top: 1px solid #E8ECF5;
+    margin-top: 0.4rem;
 }
 
-/* ── EXPANDER TWEAKS (admin) ── */
+/* ── EXPANDER (admin) ── */
 section[data-testid="stSidebar"] details {
     border: 1px solid #DDE3F0 !important;
-    border-radius: 10px !important;
-    margin: 0.3rem 0.75rem !important;
+    border-radius: 12px !important;
+    margin: 0.3rem 0.7rem !important;
     overflow: hidden;
     background: #FAFBFF !important;
 }
 section[data-testid="stSidebar"] details summary {
-    font-size: 0.8rem !important; font-weight: 600 !important;
+    font-size: 0.78rem !important; font-weight: 600 !important;
     color: #0B1F45 !important; padding: 0.6rem 0.85rem !important;
     background: transparent !important;
 }
 section[data-testid="stSidebar"] details[open] summary {
-    border-bottom: 1px solid #DDE3F0;
+    border-bottom: 1px solid #E8ECF5;
+}
+
+/* ── LOGIN BUTTONS (logged-out state) ── */
+.sb-login-btns div[data-testid="stButton"] > button {
+    background: #F4F7FF !important;
+    border: 1px solid #DDE3F0 !important;
+    border-radius: 10px !important;
+    color: #0B1F45 !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+}
+.sb-login-btns div[data-testid="stButton"] > button:hover {
+    background: #EEF3FF !important;
+    border-color: #B8CBF5 !important;
+    color: #1A56DB !important;
+}
+.sb-login-admin div[data-testid="stButton"] > button {
+    background: linear-gradient(135deg, #0B1F45, #1A56DB) !important;
+    color: #fff !important;
+    border: none !important;
+    border-radius: 10px !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    margin: 0 0.35rem !important;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -730,14 +771,15 @@ def render_sidebar():
             # ── NOT LOGGED IN ──────────────────────────────────────────────
             st.markdown("""
 <div style="
-    background:#F0F4FF; border:1px solid #DDE3F0; border-radius:14px;
-    padding:1rem 0.85rem; margin:0.85rem 0.75rem; text-align:center;
+    background:#F4F7FF; border:1px solid #DDE3F0; border-radius:14px;
+    padding:1.1rem 0.85rem; margin:0.9rem 0.7rem 0.6rem; text-align:center;
 ">
-    <div style="font-size:1.5rem; margin-bottom:0.4rem;">👋</div>
-    <div style="font-size:0.8rem; font-weight:600; color:#0B1F45; margin-bottom:0.2rem;">Welcome</div>
-    <div style="font-size:0.7rem; color:#8A95B0;">Please login to access the portal</div>
+    <div style="font-size:1.6rem; margin-bottom:0.4rem;">👋</div>
+    <div style="font-size:0.82rem; font-weight:700; color:#0B1F45; margin-bottom:0.18rem;">Welcome</div>
+    <div style="font-size:0.68rem; color:#8A95B0; line-height:1.4;">Please login to access the portal</div>
 </div>
 """, unsafe_allow_html=True)
+            st.markdown('<div class="sb-login-btns">', unsafe_allow_html=True)
             col1, col2 = st.columns(2)
             with col1:
                 if st.button("👤 Citizen", key="login_citizen", use_container_width=True):
@@ -747,15 +789,18 @@ def render_sidebar():
                 if st.button("🏢 Official", key="login_official", use_container_width=True):
                     st.session_state.screen = "official_login"
                     st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown('<div class="sb-login-admin">', unsafe_allow_html=True)
             if st.button("👑 Admin Login", key="login_admin", use_container_width=True):
                 st.session_state.screen = "admin_login"
                 st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
         # ── PREFERENCES ───────────────────────────────────────────────────────
         _sb_divider()
         _sb_section("⚙️ Preferences")
 
-        # Language toggle only (dark mode removed)
+        st.markdown('<div class="sb-pref">', unsafe_allow_html=True)
         col1, col2 = st.columns(2)
         with col1:
             lang_label = "🇮🇳 हिंदी" if lang == "en" else "🇬🇧 English"
@@ -766,6 +811,7 @@ def render_sidebar():
             if st.button("❓ Help", key="sb_help", use_container_width=True):
                 st.session_state.screen = "help"
                 st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
 
         # ── LOGOUT ────────────────────────────────────────────────────────────
         if role:
