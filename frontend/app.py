@@ -18,10 +18,14 @@ from frontend.styles import get_css
 from frontend.config import TRANSLATIONS, API_BASE
 
 st.set_page_config(
+
     page_title="Jan Seva Portal",
+
     page_icon="🏛️",
-    layout="centered",
-    initial_sidebar_state="collapsed",
+
+    layout="wide",
+
+    initial_sidebar_state="expanded",
 )
 
 
