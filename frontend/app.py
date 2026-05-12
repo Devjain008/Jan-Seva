@@ -2585,49 +2585,152 @@ def pg_official_login():
     # ══════════════════════════════════════════════════════════════════════════
     else:
         st.markdown(_card_open(), unsafe_allow_html=True)
+
         step = st.session_state.off_step
-        st.markdown(_step_indicator(step), unsafe_allow_html=True)
- 
+        st.markdown(
+            _step_indicator(step),
+            unsafe_allow_html=True
+        )
         if step == 1:
             st.markdown(
-                f'<p style="font-size:10.5px;font-weight:600;color:#9CA3AF;'
-                f'letter-spacing:1.1px;text-transform:uppercase;margin-bottom:16px;">'
-                f'{tx("your_details")}</p>',
+                f"""
+                <div class="off-step-title">
+                    {tx("your_details")}
+                </div>
+                """,
                 unsafe_allow_html=True
             )
-            d  = st.session_state.off_data
-            nm = st.text_input(tx("full_name_req"),  value=d.get("name", ""),      key="off_name")
-            em = st.text_input(tx("email_req"),       value=d.get("email", ""),     key="off_email")
-            ph = st.text_input(tx("phone_req"),       value=d.get("phone", ""),     key="off_phone")
-            pw = st.text_input(tx("pass_req"),        value=d.get("password", ""),  key="off_pass", type="password")
-            dc = st.text_input(tx("dept_code_req"),   value=d.get("dept_code", ""), key="off_dept",
-                               help=tx("dept_code_help"))
-            st.markdown('<div class="primary-btn">', unsafe_allow_html=True)
-            if st.button(tx("continue_arrow"), use_container_width=True,
-                         key="off_send_otp"):
-                errs = [f for f, v in [
-                    (tx("full_name_req"), nm),
-                    (tx("email_req"), em),
-                    (tx("phone_req"), ph),
-                    (tx("pass_req"), pw),
-                    (tx("dept_code_req"), dc)
-                ] if not v]
+            d = st.session_state.off_data
+            with st.container():
+
+                nm = st.text_input(
+
+                    tx("full_name_req"),
+
+                    value=d.get("name", ""),
+
+                    key="off_name",
+
+                    placeholder="Enter full name"
+                )
+
+                em = st.text_input(
+
+                    tx("email_req"),
+
+                    value=d.get("email", ""),
+
+                    key="off_email",
+
+                    placeholder="Enter email address"
+                )
+
+                ph = st.text_input(
+
+                    tx("phone_req"),
+
+                    value=d.get("phone", ""),
+
+                    key="off_phone",
+
+                    placeholder="Enter phone number"
+                )
+
+                pw = st.text_input(
+
+                    tx("pass_req"),
+
+                    value=d.get("password", ""),
+
+                    key="off_pass",
+
+                    type="password",
+
+                    placeholder="Create password"
+                )
+
+                dc = st.text_input(
+
+                    tx("dept_code_req"),
+
+                    value=d.get("dept_code", ""),
+
+                    key="off_dept",
+
+                    placeholder="Enter department code",
+
+                    help=tx("dept_code_help")
+                )
+
+            # ───────────────────────────────────
+            # BUTTON
+            # ───────────────────────────────────
+
+            st.markdown(
+                "<div class='off-btn-wrap'>",
+                unsafe_allow_html=True
+            )
+
+            continue_btn = st.button(
+
+                tx("continue_arrow"),
+
+                use_container_width=True,
+
+                key="off_send_otp"
+            )
+
+            st.markdown(
+                "</div>",
+                unsafe_allow_html=True
+            )
+
+            # ───────────────────────────────────
+            # VALIDATION
+            # ───────────────────────────────────
+
+            if continue_btn:
+
+                errs = [
+
+                    f for f, v in [
+
+                        (tx("full_name_req"), nm),
+
+                        (tx("email_req"), em),
+
+                        (tx("phone_req"), ph),
+
+                        (tx("pass_req"), pw),
+
+                        (tx("dept_code_req"), dc)
+
+                    ]
+
+                    if not str(v).strip()
+                ]
+
                 if errs:
-                    st.error(tx("missing_fields") + ", ".join(errs))
+
+                    st.error(
+
+                        tx("missing_fields")
+
+                        + ", ".join(errs)
+                    )
+
                 elif len(ph) != 10 or not ph.isdigit():
-                    st.error(tx("phone_10_err"))
+
+                    st.error(
+                        tx("phone_10_err")
+                    )
+
                 elif len(pw) < 6:
-                    st.error(tx("pass_6_err"))
-                else:
-                    st.session_state.off_data = {
-                        "name": nm, "email": em, "phone": ph,
-                        "password": pw, "dept_code": dc
-                    }
-                    st.session_state.off_step         = 2
-                    st.session_state.off_otp_verified = False
-                    st.rerun()
-            st.markdown("</div>", unsafe_allow_html=True)
- 
+
+                    st.error(
+                        tx("pass_6_err")
+                    )
+
         else:
             masked = "×" * 6 + st.session_state.off_data.get("phone", "")[-4:]
             st.markdown(
