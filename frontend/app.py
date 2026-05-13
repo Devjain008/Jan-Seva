@@ -24,6 +24,37 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+def api(method, endpoint, **kwargs):
+    url = f"{API_BASE}{endpoint}"
+    try:
+        response = _req.request(
+            method=method.upper(),
+            url=url,
+            timeout=30,
+            **kwargs
+        )
+        response.raise_for_status()
+        try:
+            return response.json()
+        except Exception:
+            return {"success": True}
+    except _req.exceptions.HTTPError:
+
+        try:
+            return response.json()
+        except Exception:
+            return {
+                "success": False,
+                "error": f"HTTP {response.status_code}"
+            }
+
+    except Exception as e:
+
+        return {
+            "success": False,
+            "error": str(e)
+        }
+
 def _apply_layout(page_type: str = "user") -> None:
   
  
@@ -107,36 +138,7 @@ def _apply_layout(page_type: str = "user") -> None:
 # API HELPER
 # ─────────────────────────────────────────────
 
-def api(method, endpoint, **kwargs):
-    url = f"{API_BASE}{endpoint}"
-    try:
-        response = _req.request(
-            method=method.upper(),
-            url=url,
-            timeout=30,
-            **kwargs
-        )
-        response.raise_for_status()
-        try:
-            return response.json()
-        except Exception:
-            return {"success": True}
-    except _req.exceptions.HTTPError:
 
-        try:
-            return response.json()
-        except Exception:
-            return {
-                "success": False,
-                "error": f"HTTP {response.status_code}"
-            }
-
-    except Exception as e:
-
-        return {
-            "success": False,
-            "error": str(e)
-        }
 
 # In app.py, after st.set_page_config
 st.markdown("""
@@ -228,7 +230,6 @@ def logout():
     for k, v in DEFS.items():
         st.session_state[k] = v
     st.rerun()
-
 SC   = {"pending": "#b45309", "in_progress": "#1d4ed8", "resolved": "#15803d",
         "rejected": "#b91c1c", "closed": "#6b7280"}
 SI   = {"pending": "⏳", "in_progress": "🔄", "resolved": "✅", "rejected": "❌", "closed": "🔒"}
@@ -236,7 +237,6 @@ PC   = {"high": "badge-high", "medium": "badge-medium", "low": "badge-low"}
 STAR = ["", "⭐", "⭐⭐", "⭐⭐⭐", "⭐⭐⭐⭐", "⭐⭐⭐⭐⭐"]
 
 def stars_html(avg, count=0):
-    """Returns a safe HTML string for a star rating."""
     avg = float(avg or 0)
     full  = int(avg)
     half  = 1 if (avg - full) >= 0.5 else 0
@@ -248,162 +248,38 @@ def stars_html(avg, count=0):
         f'<span style="font-size:.78rem;opacity:.7;"> {avg:.1f}{ct}</span>'
     )
 
-# ═════════════════════════════════════════════════════════════════════════════
-# MODERN COLOR PALETTE (Indigo + Slate – 2025 SaaS style)
-# ═════════════════════════════════════════════════════════════════════════════
-COLORS = {
-    "primary":      "#6366f1",   # Indigo 500 – main accent
-    "primary_dark": "#4f46e5",   # Indigo 600 – hover
-    "primary_soft": "#eef2ff",   # Indigo 50  – soft bg
-    "secondary":    "#8b5cf6",   # Violet 500 – gradient pair
-    "bg_card":      "#f8fafc",   # Slate 50
-    "text":         "#0f172a",   # Slate 900
-    "text_muted":   "#64748b",   # Slate 500
-    "border":       "#e2e8f0",   # Slate 200
-    "danger":       "#ef4444",   # Red 500 – notifications badge
-    "success":      "#10b981",   # Emerald 500
-}
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Stubs — delete when integrating into your main app
+# ─────────────────────────────────────────────────────────────────────────────
+def logout():
+    for k in list(st.session_state.keys()):
+        del st.session_state[k]
+    st.rerun()
 
 
-def _inject_sidebar_css():
-    """Inject modern sidebar styles once."""
-    st.markdown(f"""
-    <style>
-        /* Hide Streamlit's auto-generated nav */
-        section[data-testid="stSidebar"] nav,
-        div[data-testid="stSidebarNav"],
-        ul[data-testid="stSidebarNavItems"],
-        button[data-testid="baseButton-header"] {{
-            display: none !important;
-        }}
 
-        /* Sidebar background – soft gradient */
-        section[data-testid="stSidebar"] > div:first-child {{
-            background: linear-gradient(180deg, #ffffff 0%, {COLORS['primary_soft']} 100%);
-            border-right: 1px solid {COLORS['border']};
-        }}
-
-        /* Sidebar buttons – modern pill style */
-        section[data-testid="stSidebar"] .stButton > button {{
-            background: transparent;
-            color: {COLORS['text']};
-            border: 1px solid transparent;
-            border-radius: 10px;
-            padding: 10px 14px;
-            font-weight: 500;
-            font-size: 0.92rem;
-            text-align: left;
-            justify-content: flex-start;
-            transition: all 0.18s ease;
-            box-shadow: none;
-        }}
-        section[data-testid="stSidebar"] .stButton > button:hover {{
-            background: {COLORS['primary_soft']};
-            color: {COLORS['primary_dark']};
-            border-color: {COLORS['border']};
-            transform: translateX(2px);
-        }}
-
-        /* Active nav item */
-        .sb-active .stButton > button {{
-            background: linear-gradient(90deg, {COLORS['primary']}, {COLORS['secondary']}) !important;
-            color: white !important;
-            font-weight: 600 !important;
-            box-shadow: 0 4px 12px {COLORS['primary']}40 !important;
-        }}
-        .sb-active .stButton > button:hover {{
-            transform: translateX(0) !important;
-        }}
-
-        /* Expander styling */
-        section[data-testid="stSidebar"] .streamlit-expanderHeader {{
-            font-weight: 600;
-            color: {COLORS['text_muted']};
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }}
-
-        /* Divider */
-        section[data-testid="stSidebar"] hr {{
-            border-color: {COLORS['border']};
-            margin: 14px 0;
-        }}
-    </style>
-    """, unsafe_allow_html=True)
-
-
-def _nav_button(icon, label, screen, badge=None):
-    """Render a single navigation button with active highlight + optional badge."""
-    active = (st.session_state.screen == screen)
-    wrapper_class = "sb-active" if active else ""
-
-    # Badge HTML (for notifications etc.)
-    badge_html = ""
-    if badge and badge > 0:
-        badge_html = (
-            f" <span style='background:{COLORS['danger']};color:white;"
-            f"border-radius:10px;padding:1px 7px;font-size:0.65rem;"
-            f"font-weight:700;margin-left:6px;'>{badge}</span>"
-        )
-
-    st.markdown(f'<div class="{wrapper_class}">', unsafe_allow_html=True)
-    # Streamlit buttons don't render HTML – so badges go as plain text count
-    btn_label = f"{icon}  {label}" + (f"  ({badge})" if badge else "")
-    if st.button(btn_label, key=f"sb_{screen}", use_container_width=True):
-        st.session_state.screen = screen
-        st.rerun()
-    st.markdown('</div>', unsafe_allow_html=True)
-
-
-def _profile_card(icon, name, subtitle):
-    """Render the user/official/admin profile card with modern gradient."""
-    st.markdown(f"""
-    <div style="
-        background: linear-gradient(135deg, {COLORS['primary']}15 0%, {COLORS['secondary']}15 100%);
-        border: 1px solid {COLORS['border']};
-        border-radius: 14px;
-        padding: 14px;
-        margin-bottom: 18px;
-    ">
-        <div style="display:flex;align-items:center;gap:12px;">
-            <div style="
-                background: linear-gradient(135deg, {COLORS['primary']}, {COLORS['secondary']});
-                width:46px;height:46px;border-radius:12px;
-                display:flex;align-items:center;justify-content:center;
-                font-size:1.4rem;color:white;
-                box-shadow: 0 4px 12px {COLORS['primary']}40;
-            ">{icon}</div>
-            <div style="overflow:hidden;">
-                <div style="font-weight:700;font-size:0.95rem;color:{COLORS['text']};
-                            white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{name}</div>
-                <div style="font-size:0.72rem;color:{COLORS['text_muted']};margin-top:2px;">{subtitle}</div>
-            </div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-def _section_label(text):
-    """Small uppercase section label."""
-    st.markdown(f"""
-    <div style="
-        font-size:0.7rem;
-        font-weight:700;
-        color:{COLORS['text_muted']};
-        text-transform:uppercase;
-        letter-spacing:1px;
-        margin: 14px 4px 8px;
-    ">{text}</div>
-    """, unsafe_allow_html=True)
+def t(key):
+    try:
+        from config import TRANSLATIONS
+        lang = st.session_state.get("language", "en")
+        return TRANSLATIONS.get(lang, TRANSLATIONS["en"]).get(key, key)
+    except Exception:
+        return key
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 def _inject_sidebar_css():
     st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
+/* ══════════════════════════════════════════════════════════════
+   FONTS
+══════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap');
 
-/* ── HIDE STREAMLIT PAGE NAV ── */
+/* ══════════════════════════════════════════════════════════════
+   HIDE STREAMLIT DEFAULT NAV
+══════════════════════════════════════════════════════════════ */
 section[data-testid="stSidebarNav"],
 section[data-testid="stSidebarNavItems"],
 div[data-testid="stSidebarNavSeparator"],
@@ -416,914 +292,1020 @@ section[data-testid="stSidebar"] nav {
     overflow: hidden !important;
 }
 
-/* ══════════════════════════════════════
-   SIDEBAR SHELL — glassmorphism + gradient border
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   SIDEBAR SHELL
+══════════════════════════════════════════════════════════════ */
 section[data-testid="stSidebar"] {
-    background: linear-gradient(180deg, #FAFAFF 0%, #F2F4FC 40%, #EDF0FA 100%) !important;
-    border-right: none !important;
-    box-shadow:
-        1px 0 0 0 rgba(99,102,241,0.12),
-        3px 0 0 0 rgba(99,102,241,0.04),
-        6px 0 20px -4px rgba(99,102,241,0.08),
-        12px 0 40px -8px rgba(139,92,246,0.06) !important;
-    min-width: 274px !important;
-    max-width: 274px !important;
-    position: relative !important;
-}
-/* Gradient accent border — blue to purple */
-section[data-testid="stSidebar"]::after {
-    content: '';
-    position: absolute;
-    top: 0; right: 0; bottom: 0;
-    width: 2px;
-    background: linear-gradient(180deg,
-        #6366F1 0%, #818CF8 25%, #A78BFA 50%, #8B5CF6 75%, #6366F1 100%) !important;
-    opacity: 0.45;
-    z-index: 999;
+    background: #FFFFFF !important;
+    border-right: 1.5px solid #EAE6DF !important;
+    min-width: 268px !important;
+    max-width: 268px !important;
+    box-shadow: 2px 0 12px rgba(28,28,26,0.06) !important;
 }
 section[data-testid="stSidebar"] > div:first-child {
     padding: 0 !important;
-    backdrop-filter: blur(16px) !important;
-    -webkit-backdrop-filter: blur(16px) !important;
+    background: #FFFFFF !important;
 }
+
+/* Font for everything inside */
+section[data-testid="stSidebar"],
 section[data-testid="stSidebar"] * {
-    font-family: 'Sora', sans-serif !important;
+    font-family: 'Plus Jakarta Sans', 'Noto Sans Devanagari', sans-serif !important;
 }
 
-/* ── LOCK DOWN ALL INTERNAL SPACING ── */
-section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+/* ── Kill ALL default Streamlit spacing inside sidebar ────── */
+section[data-testid="stSidebar"] [data-testid="stVerticalBlock"],
+section[data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"],
+section[data-testid="stSidebar"] .block-container,
+section[data-testid="stSidebar"] .element-container,
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"],
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] > p,
+section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] > div {
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
     gap: 0 !important;
-    padding: 0 !important;
-}
-section[data-testid="stSidebar"] [data-testid="stVerticalBlockBorderWrapper"] {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-section[data-testid="stSidebar"] .block-container {
-    padding: 0 !important;
-}
-section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] {
-    padding: 0 !important;
-    margin: 0 !important;
-}
-section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-section[data-testid="stSidebar"] .element-container {
-    margin: 0 !important;
-    padding: 0 !important;
-}
-section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] {
-    gap: 0.35rem !important;
-}
-section[data-testid="stSidebar"] [data-testid="column"] {
-    padding: 0 !important;
 }
 
-/* ── SCROLLBAR — subtle ── */
+/* Scrollbar */
 section[data-testid="stSidebar"]::-webkit-scrollbar { width: 3px; }
 section[data-testid="stSidebar"]::-webkit-scrollbar-track { background: transparent; }
 section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-    background: linear-gradient(180deg, rgba(99,102,241,0.25), rgba(139,92,246,0.25));
-    border-radius: 4px;
+    background: #D6D1C8; border-radius: 4px;
 }
 
-/* ══════════════════════════════════════
-   BRAND HEADER — premium gradient
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   ★ THE GAP FIX ★
+   All wrapper divs use display:contents — they become
+   invisible to the layout engine, contributing ZERO height.
+   The button inside flows as if the wrapper doesn't exist.
+   Active/idle/logout states only change colors, never geometry.
+══════════════════════════════════════════════════════════════ */
+.sb-nav-active,
+.sb-nav-idle,
+.sb-logout,
+.sb-pref,
+.sb-login-btns {
+    display: contents !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   ALL SIDEBAR BUTTONS — base style
+   CRITICAL: padding, border-width, border-radius, margin are
+   NEVER changed between active/idle/hover/any state.
+   Only background, color, box-shadow change.
+══════════════════════════════════════════════════════════════ */
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+    /* ── Geometry — LOCKED, never changes ── */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    width: calc(100% - 20px) !important;
+    margin: 1.5px 10px !important;
+    padding: 9px 13px !important;
+    border-radius: 10px !important;
+    border: 1px solid transparent !important;
+    /* ── Typography ── */
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.05px !important;
+    text-align: left !important;
+    /* ── Colors — default idle ── */
+    background: transparent !important;
+    color: #4A4540 !important;
+    /* ── Motion ── */
+    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    /* ── No transforms (they cause layout jitter in Streamlit) ── */
+    transform: none !important;
+}
+
+/* Hover — only bg + color, NO geometry change */
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+    background: #FFF3E8 !important;
+    color: #B84D00 !important;
+    border-color: #FDDCB5 !important;
+    box-shadow: none !important;
+    transform: none !important;
+}
+
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button:active,
+section[data-testid="stSidebar"] div[data-testid="stButton"] > button:focus {
+    transform: none !important;
+    outline: none !important;
+}
+
+/* ── ACTIVE NAV ITEM
+   Left accent via inset shadow = ZERO width/padding change ── */
+.sb-nav-active div[data-testid="stButton"] > button {
+    background: #FFF0E2 !important;
+    color: #B84D00 !important;
+    border-color: #FDDCB5 !important;
+    font-weight: 700 !important;
+    box-shadow: inset 3px 0 0 0 #E8660A !important;
+}
+.sb-nav-active div[data-testid="stButton"] > button:hover {
+    background: #FFE8D0 !important;
+    box-shadow: inset 3px 0 0 0 #E8660A !important;
+}
+
+/* ── LOGOUT ── */
+.sb-logout div[data-testid="stButton"] > button {
+    background: #FEF2F2 !important;
+    color: #DC2626 !important;
+    border-color: #FEE2E2 !important;
+    font-weight: 600 !important;
+}
+.sb-logout div[data-testid="stButton"] > button:hover {
+    background: #FEE2E2 !important;
+    border-color: #FCA5A5 !important;
+    color: #B91C1C !important;
+}
+
+/* ── PREF / UTILITY ── */
+.sb-pref div[data-testid="stButton"] > button {
+    background: #F7F5F0 !important;
+    border-color: #EAE6DF !important;
+    color: #5C5649 !important;
+}
+.sb-pref div[data-testid="stButton"] > button:hover {
+    background: #F0EDE8 !important;
+    color: #1C1C1A !important;
+    border-color: #D6D1C8 !important;
+}
+
+/* ── LOGIN BUTTONS ── */
+.sb-login-btns div[data-testid="stButton"] > button {
+    background: #F7F5F0 !important;
+    border-color: #EAE6DF !important;
+    color: #3D3929 !important;
+    font-weight: 600 !important;
+}
+.sb-login-btns div[data-testid="stButton"] > button:hover {
+    background: #FFF0E2 !important;
+    border-color: #FDDCB5 !important;
+    color: #B84D00 !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   BRAND HEADER
+══════════════════════════════════════════════════════════════ */
 .sb-brand {
-    background: linear-gradient(135deg, #0B1F45 0%, #162D5A 40%, #1A56DB 100%);
-    padding: 1.5rem 1.2rem 1.25rem;
+    background: linear-gradient(150deg, #1C1C1A 0%, #2D1800 50%, #1C1C1A 100%);
+    padding: 20px 16px 16px;
     text-align: center;
     position: relative;
     overflow: hidden;
-    border-bottom: none;
+    /* No margin — flush with top */
 }
 .sb-brand::before {
     content: '';
-    position: absolute; inset: 0; pointer-events: none;
-    background: radial-gradient(circle at 85% 20%, rgba(99,149,255,.25) 0%, transparent 50%),
-                radial-gradient(circle at 15% 80%, rgba(255,153,51,.12) 0%, transparent 45%);
+    position: absolute; top: -40px; right: -30px;
+    width: 120px; height: 120px;
+    background: rgba(232,102,10,0.20);
+    border-radius: 50%;
+    pointer-events: none;
 }
 .sb-brand::after {
     content: '';
     position: absolute; bottom: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 5%, rgba(255,255,255,0.15) 50%, transparent 95%);
+    background: linear-gradient(90deg, transparent, rgba(232,102,10,0.4), transparent);
 }
-.sb-brand-icon {
-    width: 50px; height: 50px;
-    background: rgba(255,255,255,0.12);
-    border: 1.5px solid rgba(255,255,255,0.22);
+.sb-brand-icon-wrap {
+    width: 48px; height: 48px;
+    background: rgba(232,102,10,0.18);
+    border: 1.5px solid rgba(232,102,10,0.40);
     border-radius: 14px;
     display: inline-flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    margin-bottom: 0.6rem;
+    font-size: 22px; margin-bottom: 10px;
     position: relative; z-index: 1;
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
 }
 .sb-brand-name {
-    font-size: 1.05rem; font-weight: 800;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 15.5px; font-weight: 800;
     color: #FFFFFF; letter-spacing: -0.3px;
-    position: relative; z-index: 1;
-    line-height: 1.2;
-    text-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    line-height: 1.15; position: relative; z-index: 1;
 }
-.sb-brand-hi {
+.sb-brand-sub {
     font-family: 'Noto Sans Devanagari', sans-serif !important;
-    font-size: 0.68rem; font-weight: 600;
-    color: rgba(255,255,255,0.55);
-    position: relative; z-index: 1;
-    margin-top: 0.15rem;
+    font-size: 11px; font-weight: 500;
+    color: rgba(255,255,255,0.42);
+    margin-top: 3px; position: relative; z-index: 1;
 }
 .sb-tricolor {
     height: 2.5px;
     background: linear-gradient(90deg,
-        #FF9933 0%, #FF9933 33.3%,
-        #FFFFFF 33.3%, #FFFFFF 66.6%,
-        #138808 66.6%, #138808 100%);
-    opacity: 0.6;
-    margin-top: 1rem;
-    border-radius: 2px;
-    position: relative; z-index: 1;
+        #FF9933 0% 33.3%, #FFFFFF 33.3% 66.6%, #138808 66.6% 100%);
+    opacity: 0.55; width: 56%;
+    margin: 12px auto 0;
+    border-radius: 2px; position: relative; z-index: 1;
 }
 
-/* ══════════════════════════════════════
-   PROFILE CARD — frosted glass
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   PROFILE CARD
+══════════════════════════════════════════════════════════════ */
 .sb-profile {
-    display: flex; align-items: center; gap: 0.7rem;
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border-radius: 14px;
-    padding: 0.75rem 0.9rem;
-    margin: 0.75rem 0.75rem 0.5rem;
-    border: 1px solid rgba(221,227,240,0.7);
-    box-shadow: 0 2px 8px rgba(11,31,69,0.04);
-    transition: box-shadow 0.2s, border-color 0.2s;
-}
-.sb-profile:hover {
-    box-shadow: 0 4px 14px rgba(11,31,69,0.08);
-    border-color: rgba(26,86,219,0.2);
+    display: flex; align-items: center; gap: 10px;
+    background: #F7F5F0;
+    border: 1px solid #EAE6DF;
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin: 10px 10px 0;
 }
 .sb-profile-avatar {
-    width: 36px; height: 36px; border-radius: 10px;
-    background: linear-gradient(135deg, #1A56DB, #0D9488);
+    width: 38px; height: 38px; border-radius: 10px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 0.95rem; flex-shrink: 0;
-    border: 1.5px solid rgba(255,255,255,0.8);
-    box-shadow: 0 2px 6px rgba(26,86,219,0.2);
+    font-size: 18px; flex-shrink: 0; color: #fff;
+}
+.sb-profile-role-badge {
+    display: inline-block;
+    font-size: 9px; font-weight: 700;
+    letter-spacing: 0.7px; text-transform: uppercase;
+    padding: 2px 7px; border-radius: 20px;
+    margin-bottom: 3px; line-height: 1.4;
 }
 .sb-profile-name {
-    font-size: 0.78rem; font-weight: 700; color: #0B1F45;
-    line-height: 1.25;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 13px; font-weight: 700;
+    color: #1C1C1A; line-height: 1.2;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 155px;
 }
 .sb-profile-sub {
-    font-size: 0.6rem; color: #8A95B0; font-weight: 400;
+    font-size: 10.5px; color: #7A7568; font-weight: 400;
     white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    margin-top: 1px;
+    max-width: 155px; margin-top: 1px;
 }
 
-/* ══════════════════════════════════════
-   SECTION LABEL
-══════════════════════════════════════ */
-.sb-section {
-    font-size: 0.56rem; font-weight: 700; letter-spacing: 1.2px;
-    text-transform: uppercase; color: #94A3B8;
-    padding: 0.65rem 1rem 0.25rem;
+/* ══════════════════════════════════════════════════════════════
+   AI BADGE
+══════════════════════════════════════════════════════════════ */
+.sb-ai-badge {
+    display: flex; align-items: center; gap: 10px;
+    background: linear-gradient(135deg, #FFF7ED, #FFFBEB);
+    border: 1px solid #FED7AA;
+    border-radius: 11px;
+    padding: 9px 12px;
+    margin: 8px 10px 0;
 }
+.sb-ai-icon-wrap {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #E8660A, #F59E0B);
+    border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; flex-shrink: 0;
+}
+.sb-ai-title { font-size: 11.5px; font-weight: 700; color: #92400E; line-height: 1.2; }
+.sb-ai-sub { font-size: 10px; color: #B45309; margin-top: 1px; }
 
-/* ══════════════════════════════════════
-   NAV BUTTONS — bordered & separated
-══════════════════════════════════════ */
-section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    width: 100% !important;
-    background: rgba(255,255,255,0.4) !important;
-    border: 1px solid rgba(226,232,240,0.5) !important;
-    border-radius: 10px !important;
-    padding: 0.55rem 0.85rem !important;
-    text-align: left !important;
-    font-size: 0.78rem !important;
-    font-weight: 500 !important;
-    color: #475569 !important;
-    transition: all 0.18s ease !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
-    margin: 3.5px 0.5rem !important;
-    justify-content: flex-start !important;
-    line-height: 1.4 !important;
+/* ══════════════════════════════════════════════════════════════
+   SECTION LABEL + DIVIDER
+══════════════════════════════════════════════════════════════ */
+.sb-section-label {
+    font-size: 9.5px; font-weight: 700;
+    letter-spacing: 1.1px; text-transform: uppercase;
+    color: #A8A199; padding: 14px 14px 5px;
+    display: block;
 }
-section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-    background: rgba(251,146,60,0.08) !important;
-    color: #C2410C !important;
-    border-color: rgba(251,146,60,0.25) !important;
-    transform: translateX(2px) !important;
-}
-
-/* ── ACTIVE NAV — light orange background ── */
-.sb-nav-active div[data-testid="stButton"] > button {
-    background: linear-gradient(90deg,
-        rgba(251,146,60,0.12) 0%,
-        rgba(249,115,22,0.06) 70%,
-        rgba(255,237,213,0.3) 100%) !important;
-    color: #C2410C !important;
-    font-weight: 700 !important;
-    border: 1px solid rgba(251,146,60,0.3) !important;
-    border-left: 3px solid #F97316 !important;
-    border-radius: 0 10px 10px 0 !important;
-    padding-left: 0.7rem !important;
-    box-shadow: inset 3px 0 12px -4px rgba(249,115,22,0.12),
-                0 2px 6px rgba(249,115,22,0.08) !important;
-}
-
-/* ══════════════════════════════════════
-   DIVIDER — gradient shimmer line
-══════════════════════════════════════ */
 .sb-divider {
     height: 1px;
     background: linear-gradient(90deg,
-        transparent 5%,
-        rgba(99,102,241,0.08) 20%,
-        rgba(139,92,246,0.12) 50%,
-        rgba(99,102,241,0.08) 80%,
-        transparent 95%);
-    margin: 0.55rem 0.9rem;
+        transparent 0%, #EAE6DF 20%, #EAE6DF 80%, transparent 100%);
+    margin: 5px 10px;
 }
 
-/* ══════════════════════════════════════
-   LOGOUT BUTTON
-══════════════════════════════════════ */
-.sb-logout div[data-testid="stButton"] > button {
-    background: rgba(254,226,226,0.5) !important;
-    color: #DC2626 !important;
-    border: 1px solid rgba(252,165,165,0.4) !important;
-    border-radius: 10px !important;
-    font-weight: 600 !important;
-    font-size: 0.76rem !important;
-    margin: 0 0.5rem !important;
-    transition: all 0.18s ease !important;
-}
-.sb-logout div[data-testid="stButton"] > button:hover {
-    background: rgba(254,226,226,0.8) !important;
-    border-color: rgba(252,165,165,0.7) !important;
-    transform: translateY(-1px) !important;
-}
-
-/* ══════════════════════════════════════
-   PREF BUTTONS — clean pill style
-══════════════════════════════════════ */
-.sb-pref div[data-testid="stButton"] > button {
-    background: rgba(255,255,255,0.6) !important;
-    border: 1px solid rgba(221,227,240,0.7) !important;
-    border-radius: 10px !important;
-    color: #475569 !important;
-    font-size: 0.73rem !important;
-    font-weight: 600 !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    transition: all 0.18s ease !important;
-}
-.sb-pref div[data-testid="stButton"] > button:hover {
-    background: rgba(238,243,255,0.8) !important;
-    color: #1A56DB !important;
-    border-color: rgba(184,203,245,0.6) !important;
-    transform: translateY(-1px) !important;
-}
-
-
-
-/* ══════════════════════════════════════
-   LOGIN BUTTONS — logged-out state
-══════════════════════════════════════ */
-.sb-login-btns div[data-testid="stButton"] > button {
-    background: rgba(255,255,255,0.65) !important;
-    border: 1px solid rgba(221,227,240,0.7) !important;
-    border-radius: 10px !important;
-    color: #0B1F45 !important;
-    font-size: 0.76rem !important;
-    font-weight: 600 !important;
-    backdrop-filter: blur(6px) !important;
-    -webkit-backdrop-filter: blur(6px) !important;
-    transition: all 0.18s ease !important;
-}
-.sb-login-btns div[data-testid="stButton"] > button:hover {
-    background: rgba(238,243,255,0.8) !important;
-    border-color: rgba(184,203,245,0.6) !important;
-    color: #1A56DB !important;
-    transform: translateY(-1px) !important;
-}
-.sb-login-admin div[data-testid="stButton"] > button {
-    background: linear-gradient(135deg, #0B1F45, #1A56DB) !important;
-    color: #fff !important;
-    border: none !important;
-    border-radius: 10px !important;
-    font-size: 0.76rem !important;
-    font-weight: 600 !important;
-    margin: 0 0.5rem !important;
-    box-shadow: 0 3px 10px rgba(26,86,219,0.22) !important;
-    transition: all 0.2s ease !important;
-}
-.sb-login-admin div[data-testid="stButton"] > button:hover {
-    box-shadow: 0 5px 16px rgba(26,86,219,0.32) !important;
-    transform: translateY(-1px) !important;
-}
-
-/* ══════════════════════════════════════
-   SIDEBAR COLLAPSE BUTTON
-══════════════════════════════════════ */
-button[data-testid="stSidebarCollapseButton"],
-button[kind="headerNoPadding"] {
-    color: #475569 !important;
-    background: rgba(255,255,255,0.7) !important;
-    border: 1px solid rgba(221,227,240,0.5) !important;
-    border-radius: 8px !important;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
-    transition: all 0.18s ease !important;
-}
-button[data-testid="stSidebarCollapseButton"]:hover,
-button[kind="headerNoPadding"]:hover {
-    background: #EEF3FF !important;
-    color: #1A56DB !important;
-    border-color: rgba(26,86,219,0.15) !important;
-}
-button[data-testid="stSidebarCollapseButton"] svg,
-button[kind="headerNoPadding"] svg {
-    fill: currentColor !important;
-    stroke: currentColor !important;
-}
-
-/* ══════════════════════════════════════
-   ROLE INDICATOR TABS
-══════════════════════════════════════ */
-.sb-role-tabs {
-    display: flex;
-    gap: 6px;
-    padding: 0 0.75rem;
-    margin: 0.4rem 0 0.15rem;
-}
-.sb-role-idle {
-    flex: 1;
-    text-align: center;
-    font-size: 0.62rem;
-    font-weight: 600;
-    padding: 0.35rem 0.3rem;
-    border-radius: 8px;
-    background: rgba(241,245,249,0.8);
-    color: #94A3B8;
-    border: 1px solid rgba(226,232,240,0.6);
-    cursor: default;
-    transition: all 0.15s ease;
-}
-.sb-role-active {
-    flex: 1;
-    text-align: center;
-    font-size: 0.62rem;
-    font-weight: 700;
-    padding: 0.35rem 0.3rem;
-    border-radius: 8px;
-    background: linear-gradient(135deg, #4F46E5, #6366F1);
-    color: #fff;
-    border: 1px solid rgba(99,102,241,0.3);
-    box-shadow: 0 2px 8px rgba(99,102,241,0.25);
-    cursor: default;
-}
-
-/* ══════════════════════════════════════
-   AI POWERED BADGE
-══════════════════════════════════════ */
-.sb-ai-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: linear-gradient(135deg, #EEF2FF 0%, #F0FDFA 100%);
-    border: 1px solid rgba(99,102,241,0.15);
+/* ══════════════════════════════════════════════════════════════
+   WELCOME CARD (not logged in)
+══════════════════════════════════════════════════════════════ */
+.sb-welcome {
+    background: #F7F5F0;
+    border: 1px solid #EAE6DF;
     border-radius: 12px;
-    padding: 0.6rem 0.8rem;
-    margin: 0.55rem 0.75rem 0.25rem;
-    box-shadow: 0 1px 4px rgba(99,102,241,0.06);
-}
-.sb-ai-icon {
-    width: 34px; height: 34px;
-    background: linear-gradient(135deg, #6366F1, #8B5CF6);
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 1.1rem;
-    flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(99,102,241,0.2);
-}
-.sb-ai-title {
-    font-size: 0.72rem;
-    font-weight: 700;
-    color: #1E293B;
-    line-height: 1.2;
-}
-.sb-ai-sub {
-    font-size: 0.6rem;
-    color: #64748B;
-    font-weight: 400;
-    margin-top: 1px;
-}
-
-/* ══════════════════════════════════════
-   WELCOME CARD (logged out)
-══════════════════════════════════════ */
-.sb-welcome-card {
-    background: linear-gradient(135deg, #F8FAFF, #F0F4FF);
-    border: 1px solid rgba(221,227,240,0.7);
-    border-radius: 14px;
-    padding: 1.1rem 0.85rem;
-    margin: 0.9rem 0.75rem 0.6rem;
+    padding: 16px; margin: 10px 10px 0;
     text-align: center;
-    box-shadow: 0 1px 6px rgba(11,31,69,0.04);
 }
+.sb-welcome-icon { font-size: 28px; margin-bottom: 8px; display: block; }
 .sb-welcome-title {
-    font-size: 0.82rem;
-    font-weight: 700;
-    color: #0B1F45;
-    margin-bottom: 0.18rem;
+    font-family: 'Outfit', sans-serif !important;
+    font-size: 13px; font-weight: 700;
+    color: #1C1C1A; margin-bottom: 4px;
 }
-.sb-welcome-sub {
-    font-size: 0.68rem;
-    color: #8A95B0;
-    line-height: 1.4;
-}
+.sb-welcome-sub { font-size: 11px; color: #7A7568; line-height: 1.5; }
 
-/* ══════════════════════════════════════
-   PROFILE — welcome line
-══════════════════════════════════════ */
-.sb-profile-welcome {
-    font-size: 0.58rem;
-    color: #94A3B8;
-    font-weight: 400;
-    line-height: 1;
-    margin-bottom: 1px;
-}
-
-/* ══════════════════════════════════════
-   FOOTER — Digital India
-══════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════════════════════════ */
 .sb-footer {
     text-align: center;
-    font-size: 0.58rem; color: #94A3B8;
-    padding: 0.75rem 0.9rem 0.7rem;
-    line-height: 1.8;
-    border-top: 1px solid rgba(226,232,240,0.6);
-    margin-top: 0.5rem;
-    letter-spacing: 0.2px;
+    font-size: 10px; color: #A8A199;
+    padding: 10px 12px 14px;
+    border-top: 1px solid #EAE6DF;
+    margin: 8px 10px 0;
+    line-height: 1.9;
 }
-.sb-footer-logo {
-    font-size: 1.2rem;
-    margin-bottom: 0.25rem;
+.sb-footer-flag { font-size: 20px; display: block; margin-bottom: 3px; }
+
+/* ══════════════════════════════════════════════════════════════
+   RESPONSIVE — collapse gracefully below 300px
+══════════════════════════════════════════════════════════════ */
+@media (max-width: 300px) {
+    section[data-testid="stSidebar"] {
+        min-width: 220px !important;
+        max-width: 220px !important;
+    }
+    .sb-brand-name { font-size: 13px !important; }
+    .sb-profile-name { max-width: 110px !important; }
 }
 </style>
 """, unsafe_allow_html=True)
-def _sb_profile_card(avatar_emoji, name, subtitle, role_label=None):
-    """Profile card for sidebar (role_label not used but kept for compatibility)."""
-    st.markdown(f"""
-<div class="sb-profile">
-    <div class="sb-profile-avatar">{avatar_emoji}</div>
-    <div style="overflow:hidden;">
-        <div class="sb-profile-name">{name}</div>
-        <div class="sb-profile-sub">{subtitle}</div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
 
-def _sb_section(label):
-    st.markdown(f'<div class="sb-section">{label}</div>', unsafe_allow_html=True)
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Small HTML helpers
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _sb_section(label: str):
+    st.markdown(f'<div class="sb-section-label">{label}</div>', unsafe_allow_html=True)
 
 def _sb_divider():
     st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
 
-def _nav_button(icon, label, screen, badge=0):
-    """Render a sidebar nav button. Highlights if current screen matches."""
+def _sb_gap(px: int = 6):
+    st.markdown(f'<div style="height:{px}px;flex-shrink:0;"></div>', unsafe_allow_html=True)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+#  Nav button  ← THE CORE FIX
+# ─────────────────────────────────────────────────────────────────────────────
+
+def _nav_button(icon: str, label: str, screen: str, badge: int = 0):
+    """
+    Render one sidebar nav button.
+
+    FIX SUMMARY
+    ───────────
+    Both the active wrapper (.sb-nav-active) and the idle wrapper
+    (.sb-nav-idle) have `display: contents` in CSS, making them
+    **invisible to the layout engine**.  Streamlit's own spacing divs
+    around st.button() stay constant — they are never touched.
+    The button's padding / border-width / margin / border-radius are
+    identical in ALL states; only background + color + box-shadow change.
+    Result: zero layout shift when clicking between items.
+    """
     is_active = st.session_state.get("screen") == screen
-    display_label = f"{icon}  {label}"
-    if badge:
-        display_label += f"  🔴 {badge}"
-    btn_key = f"nav_{screen}"
-    if is_active:
-        st.markdown('<div class="sb-nav-active">', unsafe_allow_html=True)
-    if st.button(display_label, key=btn_key, use_container_width=True):
+    badge_txt = f"  ·  {badge}" if badge else ""
+    btn_label = f"{icon}  {label}{badge_txt}"
+    cls = "sb-nav-active" if is_active else "sb-nav-idle"
+
+    st.markdown(f'<div class="{cls}">', unsafe_allow_html=True)
+    if st.button(btn_label, key=f"nav_{screen}", use_container_width=True):
         st.session_state.screen = screen
         st.rerun()
-    if is_active:
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
 
-def _inject_sidebar_css():
-    """Clean, modern sidebar CSS – stable buttons, active page animation only."""
-    st.markdown("""
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=Noto+Sans+Devanagari:wght@400;600&display=swap');
 
-/* ──────────────────────────────────────────────────────────
-   HIDE STREAMLIT DEFAULT NAVIGATION
-   ────────────────────────────────────────────────────────── */
-section[data-testid="stSidebarNav"],
-section[data-testid="stSidebarNavItems"],
-div[data-testid="stSidebarNavSeparator"],
-[data-testid="stSidebarNavLink"],
-section[data-testid="stSidebar"] ul,
-section[data-testid="stSidebar"] nav {
-    display: none !important;
-    visibility: hidden !important;
-    height: 0 !important;
-    overflow: hidden !important;
+# ─────────────────────────────────────────────────────────────────────────────
+#  Profile card
+# ─────────────────────────────────────────────────────────────────────────────
+
+_AVATAR_BG = {
+    "👤": "linear-gradient(135deg,#4F46E5,#7C3AED)",
+    "🏢": "linear-gradient(135deg,#0284C7,#0EA5E9)",
+    "👑": "linear-gradient(135deg,#E8660A,#F59E0B)",
+}
+_BADGE_STYLE = {
+    "citizen":  ("color:#4338CA;background:#EEF2FF;",  "Citizen",  "नागरिक"),
+    "official": ("color:#0369A1;background:#E0F2FE;",  "Official", "अधिकारी"),
+    "admin":    ("color:#C2410C;background:#FFF4EC;",  "Admin",    "एडमिन"),
 }
 
-/* ──────────────────────────────────────────────────────────
-   SIDEBAR SHELL
-   ────────────────────────────────────────────────────────── */
-section[data-testid="stSidebar"] {
-    background: #FFFFFF !important;
-    border-right: 1px solid #E2E8F0 !important;
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.02) !important;
-    min-width: 268px !important;
-    max-width: 268px !important;
-}
-section[data-testid="stSidebar"] > div:first-child {
-    padding: 0 !important;
-}
-section[data-testid="stSidebar"] * {
-    font-family: 'Sora', sans-serif !important;
-}
-
-/* scrollbar – clean */
-section[data-testid="stSidebar"]::-webkit-scrollbar { width: 3px; }
-section[data-testid="stSidebar"]::-webkit-scrollbar-track { background: transparent; }
-section[data-testid="stSidebar"]::-webkit-scrollbar-thumb {
-    background: #CBD5E1; border-radius: 3px;
-}
-
-/* ──────────────────────────────────────────────────────────
-   BRAND HEADER – ROUNDED CARD
-   ────────────────────────────────────────────────────────── */
-.sb-brand {
-    background: linear-gradient(135deg, #0B1F45 0%, #1A3A6E 55%, #1A56DB 100%);
-    padding: 1.4rem 1rem 1.2rem;
-    text-align: center;
-    margin: 0.9rem 0.8rem 0.8rem 0.8rem;
-    border-radius: 20px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-.sb-brand-icon {
-    width: 48px; height: 48px;
-    background: rgba(255,255,255,0.12);
-    border: 1.5px solid rgba(255,255,255,0.25);
-    border-radius: 14px;
-    display: inline-flex; align-items: center; justify-content: center;
-    font-size: 1.6rem;
-    margin-bottom: 0.6rem;
-}
-.sb-brand-name {
-    font-size: 1rem; font-weight: 800;
-    color: #FFFFFF; letter-spacing: -0.3px;
-    line-height: 1.2;
-}
-.sb-brand-hi {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-    font-size: 0.66rem; font-weight: 500;
-    color: rgba(255,255,255,0.6);
-    margin-top: 0.2rem;
-}
-.sb-tricolor {
-    height: 2px;
-    background: linear-gradient(90deg, #FF9933 0%, #FF9933 33.3%, #fff 33.3%, #fff 66.6%, #138808 66.6%, #138808 100%);
-    opacity: 0.5;
-    width: 70%;
-    margin: 0.8rem auto 0;
-    border-radius: 2px;
-}
-
-/* ──────────────────────────────────────────────────────────
-   PROFILE CARD
-   ────────────────────────────────────────────────────────── */
-.sb-profile {
-    display: flex; align-items: center; gap: 0.7rem;
-    background: #F8FAFC;
-    border-radius: 16px;
-    padding: 0.65rem 0.85rem;
-    margin: 0.8rem;
-    border: 1px solid #E2E8F0;
-}
-.sb-profile-avatar {
-    width: 36px; height: 36px; border-radius: 12px;
-    background: linear-gradient(135deg, #1A56DB, #0D9488);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 0.95rem;
-    color: white;
-    flex-shrink: 0;
-}
-.sb-profile-name {
-    font-size: 0.78rem; font-weight: 700; color: #0F172A;
-    line-height: 1.3;
-}
-.sb-profile-sub {
-    font-size: 0.6rem; color: #64748B;
-}
-
-/* ──────────────────────────────────────────────────────────
-   AI BADGE
-   ────────────────────────────────────────────────────────── */
-.sb-ai-badge {
-    display: flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: #F1F5F9;
-    border-radius: 14px;
-    padding: 0.5rem 0.8rem;
-    margin: 0.6rem 0.8rem;
-    border: 1px solid #E2E8F0;
-}
-.sb-ai-icon {
-    font-size: 1.1rem;
-}
-.sb-ai-title {
-    font-size: 0.65rem;
-    font-weight: 800;
-    color: #1E293B;
-}
-.sb-ai-sub {
-    font-size: 0.55rem;
-    color: #64748B;
-}
-
-/* ──────────────────────────────────────────────────────────
-   SECTION DIVIDER & LABEL
-   ────────────────────────────────────────────────────────── */
-.sb-divider {
-    height: 1px;
-    background: #E2E8F0;
-    margin: 0.5rem 0.8rem;
-}
-.sb-section {
-    font-size: 0.58rem; font-weight: 700; letter-spacing: 0.8px;
-    text-transform: uppercase; color: #94A3B8;
-    padding: 0.6rem 0.8rem 0.2rem;
-    margin-top: 0.2rem;
-}
-
-/* ──────────────────────────────────────────────────────────
-   NAVIGATION BUTTONS – STABLE, NO MOVEMENT
-   ────────────────────────────────────────────────────────── */
-section[data-testid="stSidebar"] div[data-testid="stButton"] > button {
-    width: 100% !important;
-    background: transparent !important;
-    border: none !important;
-    border-radius: 12px !important;
-    padding: 0.55rem 0.85rem !important;
-    text-align: left !important;
-    font-size: 0.78rem !important;
-    font-weight: 500 !important;
-    color: #334155 !important;
-    transition: background 0.2s ease, color 0.15s ease !important;
-    box-shadow: none !important;
-    margin: 1px 0.35rem !important;
-    justify-content: flex-start !important;
-    line-height: 1.4 !important;
-}
-/* Hover – only background color, no transform */
-section[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
-    background: #F1F5F9 !important;
-    color: #1A56DB !important;
-}
-/* Active page – smooth highlight with left border animation */
-.sb-nav-active div[data-testid="stButton"] > button {
-    background: #EFF6FF !important;
-    color: #1A56DB !important;
-    font-weight: 700 !important;
-    border-left: 3px solid #1A56DB !important;
-    border-radius: 0 12px 12px 0 !important;
-    padding-left: 0.65rem !important;
-    transition: all 0.15s ease !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   PREFERENCES & LOGIN BUTTONS
-   ────────────────────────────────────────────────────────── */
-.sb-pref, .sb-login-btns {
-    margin: 0 0.7rem;
-}
-.sb-pref div[data-testid="stButton"] > button,
-.sb-login-btns div[data-testid="stButton"] > button {
-    background: #F8FAFC !important;
-    border: 1px solid #E2E8F0 !important;
-    border-radius: 12px !important;
-    color: #334155 !important;
-    font-size: 0.74rem !important;
-    font-weight: 600 !important;
-    box-shadow: none !important;
-    transition: background 0.2s ease !important;
-}
-.sb-pref div[data-testid="stButton"] > button:hover,
-.sb-login-btns div[data-testid="stButton"] > button:hover {
-    background: #F1F5F9 !important;
-    color: #1A56DB !important;
-    border-color: #BFDBFE !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   LOGOUT BUTTON
-   ────────────────────────────────────────────────────────── */
-.sb-logout {
-    margin: 0 0.7rem;
-}
-.sb-logout div[data-testid="stButton"] > button {
-    background: #FEF2F2 !important;
-    color: #DC2626 !important;
-    border: 1px solid #FEE2E2 !important;
-    border-radius: 12px !important;
-    font-weight: 600 !important;
-    font-size: 0.74rem !important;
-    box-shadow: none !important;
-}
-.sb-logout div[data-testid="stButton"] > button:hover {
-    background: #FEE2E2 !important;
-    border-color: #FCA5A5 !important;
-}
-
-/* ──────────────────────────────────────────────────────────
-   FOOTER
-   ────────────────────────────────────────────────────────── */
-.sb-footer {
-    text-align: center;
-    font-size: 0.6rem; color: #94A3B8;
-    padding: 0.7rem 0.5rem 0.5rem;
-    border-top: 1px solid #E2E8F0;
-    margin: 0.4rem 0.7rem 0.7rem;
-}
-.sb-footer-logo {
-    font-size: 1.1rem;
-    margin-bottom: 5px;
-}
-                .sb-login-btns div[data-testid="stButton"] > button {
-    background: #F4F7FF !important;
-    border: 1px solid #DDE3F0 !important;
-    border-radius: 10px !important;
-    color: #0B1F45 !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-}
-.sb-login-btns div[data-testid="stButton"] > button:hover {
-    background: #EEF3FF !important;
-    border-color: #B8CBF5 !important;
-    color: #1A56DB !important;
-}
-
-/* Footer */
-.sb-footer {
-    text-align: center;
-    font-size: 0.6rem; color: #A0AABF;
-    padding: 0.85rem 0.7rem 0.7rem;
-    border-top: 1px solid #E8ECF5;
-    margin-top: 0.4rem;
-}
-.sb-footer-logo {
-    font-size: 1.2rem;
-    margin-bottom: 6px;
-}
-</style>
-""", unsafe_allow_html=True)
-
-def render_sidebar():
-    _inject_sidebar_css()
-
-    role     = st.session_state.get("role")
-    lang     = st.session_state.get("language", "en")
-
-    def _(key):
-        return t(key)
-
-    # ── Unread notification count ──────────────────────────────────────────
-    unread_count = 0
-    if role == "user":
-        uid = (st.session_state.get("user") or {}).get("user_id")
-        if uid:
-            notifs = api("get", f"/schemes/user/notifications/{uid}")
-            if isinstance(notifs, list):
-                unread_count = len([n for n in notifs if not n.get("is_read")])
-
-    with st.sidebar:
-        # ── BRAND HEADER ─────────────────────────────────────────────────────
-        st.markdown("""
-<div class="sb-brand">
-    <div class="sb-brand-icon">🏛️</div>
-    <div class="sb-brand-name">Jan Seva Portal</div>
-    <div class="sb-brand-hi">जन सेवा पोर्टल</div>
-    <div class="sb-tricolor"></div>
-</div>
-""", unsafe_allow_html=True)
-
-        # ── PROFILE CARD ─────────────────────────────────────────────────────
-        if role == "user":
-            u = st.session_state.get("user") or {}
-            _sb_profile_card("👤", u.get("name", "Citizen"), f"📞 {u.get('phone', '')}")
-        elif role == "official":
-            o = st.session_state.get("official") or {}
-            _sb_profile_card("🏢", o.get("name", "Official"), o.get("department", "Department"))
-        elif role == "admin":
-            _sb_profile_card("👑", "System Admin", "Administrator")
-
-        # ── AI BADGE ─────────────────────────────────────────────────────────
-        st.markdown("""
-<div class="sb-ai-badge">
-    <div class="sb-ai-icon">🤖</div>
-    <div>
-        <div class="sb-ai-title">AI Powered</div>
-        <div class="sb-ai-sub">Grievance System ✨</div>
+def _sb_profile(avatar: str, name: str, sub: str, role_key: str, lang: str):
+    av_bg   = _AVATAR_BG.get(avatar, _AVATAR_BG["👤"])
+    bstyle, ben, bhi = _BADGE_STYLE.get(role_key, ("", "", ""))
+    blabel  = bhi if lang == "hi" else ben
+    st.markdown(f"""
+<div class="sb-profile">
+    <div class="sb-profile-avatar" style="background:{av_bg};">{avatar}</div>
+    <div style="overflow:hidden;flex:1;min-width:0;">
+        <div class="sb-profile-role-badge" style="{bstyle}">{blabel}</div>
+        <div class="sb-profile-name">{name}</div>
+        <div class="sb-profile-sub">{sub}</div>
     </div>
 </div>
 """, unsafe_allow_html=True)
+# =============================================================================
+# SIDEBAR – FIXED, NO LEAKING TEXTS, BILINGUAL, COMPACT
+# =============================================================================
 
-        # ── NAVIGATION ────────────────────────────────────────────────────────
-        _sb_divider()
+def render_sidebar():
+    # Only ONE sidebar CSS – compact buttons, no extra spacing
+    st.markdown("""
+    <style>
+                /* =========================================================
+                REMOVE STREAMLIT DEFAULT MULTIPAGE SIDEBAR
+                ========================================================= */
 
-        if role == "user":
-            _sb_section("MAIN MENU")
-            _nav_button("🏠", _("dashboard"),       "user_dashboard")
-            _nav_button("📢", _("file_complaint"),  "file_complaint")
-            _nav_button("🔍", _("track_complaint"), "tracking")
-            _nav_button("📜", _("govt_schemes"),    "schemes")
-            _nav_button("🤖", _("ai_assistant"),    "assistant")
-            _nav_button("🔔", _("notifications"),   "notifications", badge=unread_count)
+                [data-testid="stSidebarNav"] {
+                    display: none !important;
+                }
 
-        elif role == "official":
-            _sb_section("WORKSPACE")
-            _nav_button("📊", _("dashboard"),    "official_dashboard")
-            _nav_button("📋", _("complaints"),   "official_complaints")
-            _nav_button("🏆", _("leaderboard"),  "official_leaderboard")
+                [data-testid="stSidebarNavItems"] {
+                    display: none !important;
+                }
 
-        elif role == "admin":
-            _sb_section("MAIN MENU")
-            _nav_button("📊", _("dashboard"),      "admin_dashboard")
-            _nav_button("🏢", _("departments"),    "admin_departments")
-            _nav_button("👥", _("officials"),      "admin_officials")
-            _nav_button("📢", _("all_complaints"), "admin_complaints")
-            _sb_divider()
-            _sb_section("PERFORMANCE")
-            _nav_button("🏆", _("leaderboard"),  "admin_leaderboard")
-            _nav_button("🔮", "Predictive AI",   "predictive_analytics")
-            _nav_button("⏱️", "SLA Tracking",    "sla_management")
-            _sb_divider()
-            _sb_section("ANALYTICS")
-            _nav_button("🏙️", "City Health Score", "city_health_score")
-            _nav_button("📈", "Live Dashboard", "live_dashboard")
-            _nav_button("🗺️", "Heatmap",    "admin_heatmap")
-            _sb_divider()
-            _sb_section("CONTENT")
-            _nav_button("📜", _("schemes"), "admin_schemes")
+                [data-testid="stSidebarNavSeparator"] {
+                    display: none !important;
+                }
 
-        else:
-            # ── NOT LOGGED IN ──────────────────────────────────────────────
-            _sb_section("LOGIN")
-            st.markdown('<div class="sb-login-btns">', unsafe_allow_html=True)
-            if st.button("👤  Citizen", key="login_citizen", use_container_width=True):
-                st.session_state.screen = "user_login"
-                st.rerun()
-            if st.button("🏢  Official", key="login_official", use_container_width=True):
-                st.session_state.screen = "official_login"
-                st.rerun()
-            if st.button("👑  Admin", key="login_admin", use_container_width=True):
-                st.session_state.screen = "admin_login"
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+                [data-testid="stSidebarNavLink"] {
+                    display: none !important;
+                }
 
-        # ── OTHER SECTION ─────────────────────────────────────────────────────
-        _sb_divider()
-        _sb_section("OTHER")
-        st.markdown('<div class="sb-pref">', unsafe_allow_html=True)
-        lang_label = "🌐 Hindi" if lang == "en" else "🌐  English"
-        if st.button(lang_label, key="sb_lang", use_container_width=True):
-            st.session_state.language = "hi" if lang == "en" else "en"
-            st.rerun()
-        if st.button("❓  Help & Support", key="sb_help", use_container_width=True):
-            st.session_state.screen = "help"
-            st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+                section[data-testid="stSidebar"] nav {
+                    display: none !important;
+                }
 
-        # ── LOGOUT ────────────────────────────────────────────────────────────
-        if role:
-            _sb_divider()
-            st.markdown('<div class="sb-logout">', unsafe_allow_html=True)
-            if st.button("🔓 Logout", key="sb_logout", use_container_width=True):
-                logout()
-            st.markdown('</div>', unsafe_allow_html=True)
+                section[data-testid="stSidebar"] ul {
+                    display: none !important;
+                }
 
-        # ── FOOTER ────────────────────────────────────────────────────────────
+                /* REMOVE "VIEW MORE" */
+                button[kind="header"] {
+                    display: none !important;
+                }
+
+    /* Kill default sidebar padding and nav */
+    section[data-testid="stSidebar"] > div:first-child { padding: 0 !important; }
+    section[data-testid="stSidebar"] .block-container { padding: 0 !important; margin: 0 !important; }
+    section[data-testid="stSidebarNav"], section[data-testid="stSidebarNavItems"] { display: none !important; }
+    
+    /* Brand header */
+    /* ─────────────────────────────────────────────
+   SIDEBAR HEADER CARD
+───────────────────────────────────────────── */
+
+.sb-top-wrap{
+    padding: 14px 14px 10px 14px;
+}
+
+.sb-top-card{
+
+    position: relative;
+    overflow: hidden;
+
+    border-radius: 22px;
+
+    padding: 26px 18px 20px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0B1220 0%,
+            #142B6F 45%,
+            #1D4ED8 100%
+        );
+
+    box-shadow:
+        0 10px 30px rgba(29,78,216,0.18);
+
+    text-align: center;
+}
+
+/* background building glow */
+
+.sb-top-card::before{
+
+    content: "";
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        radial-gradient(circle at top left,
+        rgba(255,255,255,0.06),
+        transparent 45%);
+
+    pointer-events: none;
+}
+
+/* govt building watermark */
+
+.sb-top-card::after{
+
+    content: "🏛️";
+
+    position: absolute;
+
+    bottom: -18px;
+    right: 12px;
+
+    font-size: 7rem;
+
+    opacity: 0.05;
+}
+
+/* title */
+
+.sb-top-title{
+
+    color: white;
+
+    font-size: 1.35rem;
+    font-weight: 800;
+
+    letter-spacing: -0.4px;
+
+    position: relative;
+    z-index: 2;
+}
+
+/* hindi */
+
+.sb-top-hi{
+
+    color: rgba(255,255,255,0.72);
+
+    font-size: 0.82rem;
+
+    margin-top: 6px;
+
+    font-family: 'Noto Sans Devanagari', sans-serif;
+
+    position: relative;
+    z-index: 2;
+}
+
+/* tricolor line */
+
+.sb-top-line{
+
+    width: 120px;
+    height: 6px;
+
+    margin: 18px auto 0;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #FF9933 0%,
+            #FF9933 33%,
+            #FFFFFF 33%,
+            #FFFFFF 66%,
+            #138808 66%,
+            #138808 100%
+        );
+
+    position: relative;
+    z-index: 2;
+}
+
+/* login card */
+
+.sb-login-card{
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 14px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    padding: 14px;
+
+    border: 1px solid #E2E8F0;
+
+    box-shadow:
+        0 4px 14px rgba(15,23,42,0.05);
+}
+
+/* icon */
+
+.sb-login-icon{
+
+    width: 48px;
+    height: 48px;
+
+    border-radius: 16px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #EEF2FF,
+            #E0E7FF
+        );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.25rem;
+
+    color: #4F46E5;
+
+    flex-shrink: 0;
+}
+
+/* login title */
+
+.sb-login-title{
+
+    font-size: 0.95rem;
+    font-weight: 700;
+
+    color: #0F172A;
+}
+
+/* subtitle */
+
+.sb-login-sub{
+
+    font-size: 0.72rem;
+
+    color: #64748B;
+
+    margin-top: 2px;
+}
+/* ─────────────────────────────────────────────
+   SIDEBAR TOP UI
+───────────────────────────────────────────── */
+
+.sb-top-wrap{
+    padding: 14px;
+}
+
+.sb-top-card{
+
+    position: relative;
+    overflow: hidden;
+
+    border-radius: 22px;
+
+    padding: 26px 18px 22px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #0F172A 0%,
+            #1E3A8A 45%,
+            #2563EB 100%
+        );
+
+    text-align: center;
+
+    box-shadow:
+        0 10px 28px rgba(37,99,235,0.18);
+}
+
+.sb-top-card::after{
+
+    content: "🏛️";
+
+    position: absolute;
+
+    right: -10px;
+    bottom: -18px;
+
+    font-size: 6rem;
+
+    opacity: 0.05;
+}
+
+.sb-top-title{
+
+    color: white;
+
+    font-size: 1.25rem;
+    font-weight: 800;
+
+    letter-spacing: -0.4px;
+
+    position: relative;
+    z-index: 2;
+}
+
+.sb-top-hi{
+
+    color: rgba(255,255,255,0.72);
+
+    margin-top: 5px;
+
+    font-size: 0.78rem;
+
+    font-family: 'Noto Sans Devanagari', sans-serif;
+
+    position: relative;
+    z-index: 2;
+}
+
+.sb-top-line{
+
+    width: 110px;
+    height: 5px;
+
+    margin: 18px auto 0;
+
+    border-radius: 999px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #FF9933 0%,
+            #FF9933 33%,
+            #FFFFFF 33%,
+            #FFFFFF 66%,
+            #138808 66%,
+            #138808 100%
+        );
+
+    position: relative;
+    z-index: 2;
+}
+
+/* ─────────────────────────────────────────────
+   LOGIN CARD
+───────────────────────────────────────────── */
+
+.sb-login-card{
+
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    background: white;
+
+    border: 1px solid #E2E8F0;
+
+    border-radius: 18px;
+
+    padding: 14px;
+
+    margin-top: 14px;
+
+    box-shadow:
+        0 4px 12px rgba(15,23,42,0.05);
+}
+
+.sb-login-icon{
+
+    width: 46px;
+    height: 46px;
+
+    border-radius: 14px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #EEF2FF,
+            #E0E7FF
+        );
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 1.2rem;
+
+    flex-shrink: 0;
+}
+
+.sb-login-title{
+
+    font-size: 0.92rem;
+    font-weight: 700;
+
+    color: #0F172A;
+}
+
+.sb-login-sub{
+
+    font-size: 0.72rem;
+
+    color: #64748B;
+
+    margin-top: 2px;
+}
+    
+    /* Compact buttons – same geometry for all */
+    div[data-testid="stSidebar"] div[data-testid="stButton"] > button {
+        width: calc(100% - 16px) !important;
+        margin: 4px 8px !important;
+        padding: 7px 12px !important;
+        border-radius: 10px !important;
+        border: 1px solid #E8E4DC !important;
+        background: white !important;
+        color: #4A4540 !important;
+        font-size: 12.5px !important;
+        font-weight: 500 !important;
+        text-align: left !important;
+        transition: all 0.1s ease !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    div[data-testid="stSidebar"] div[data-testid="stButton"] > button:hover {
+        background: #FFF2E6 !important;
+        border-color: #FDD0A0 !important;
+        color: #B84D00 !important;
+    }
+    /* Active style */
+    .sb-active div[data-testid="stButton"] > button {
+        background: #FFF0E2 !important;
+        border-left: 3px solid #E8660A !important;
+        font-weight: 700 !important;
+        color: #C2410C !important;
+    }
+    /* Logout button */
+    .sb-logout div[data-testid="stButton"] > button {
+        background: #FEF2F2 !important;
+        border-color: #FEE2E2 !important;
+        color: #DC2626 !important;
+        font-weight: 600 !important;
+    }
+    .sb-logout div[data-testid="stButton"] > button:hover {
+        background: #FEE2E2 !important;
+        border-color: #FCA5A5 !important;
+        color: #991B1B !important;
+    }
+    /* Divider */
+    .sb-divider { height: 1px; background: #E8E4DC; margin: 6px 12px; }
+    /* Section label */
+    .sb-section { font-size: 8.5px; font-weight: 700; letter-spacing: 1px; color: #B0A898; padding: 10px 13px 3px; }
+    /* Footer */
+    .sb-footer { border-top: 1px solid #E8E4DC; margin: 12px 12px 0; padding: 10px 0 12px; text-align: center; font-size: 9px; color: #A8A199; }
+    .sb-footer-flag { font-size: 16px; display: block; margin-bottom: 4px; }
+    </style>
+    """, unsafe_allow_html=True)
+
+    # ----- Translation helper -----
+    lang = st.session_state.get("language", "en")
+    hi = (lang == "hi")
+    def _(en, hi_text=""):
+        return hi_text if (hi and hi_text) else en
+
+    role = st.session_state.get("role")  # None, "user", "official", "admin"
+
+    with st.sidebar:
+        # 1. Brand (never changes)
         st.markdown("""
-<div class="sb-footer">
-    <div class="sb-footer-logo">🇮🇳</div>
-    <strong>Digital India Initiative</strong> ✅<br>
-    Powering Smart Governance
+        <div class="sb-brand">
+            <div class="sb-brand-name">Jan Seva Portal</div>
+            <div class="sb-brand-sub">जन सेवा पोर्टल</div>
+            <div class="sb-tricolor"></div>
+        </div>
+        """, unsafe_allow_html=True)
+
+        # 2. Simple welcome / profile info (no AI badge to avoid complexity)
+        if role == "user":
+            user = st.session_state.get("user") or {}
+            name = user.get("name", _("Citizen", "नागरिक"))
+            phone = user.get("phone", "")
+            st.sidebar.markdown(f"**👤 {name}**  \n📞 {phone}")
+        elif role == "official":
+            off = st.session_state.get("official") or {}
+            name = off.get("name", _("Official", "अधिकारी"))
+            dept = off.get("department", "")
+            st.sidebar.markdown(f"**🏢 {name}**  \n{dept}")
+        elif role == "admin":
+            st.sidebar.markdown("**👑 " + _("System Admin", "सिस्टम एडमिन") + "**")
+        else:
+            st.markdown("""
+<div class="sb-top-wrap">
+
+    <div class="sb-top-card">
+
+        <div class="sb-top-title">
+            Jan Seva Portal
+        </div>
+
+        <div class="sb-top-hi">
+            जन सेवा पोर्टल
+        </div>
+
+        <div class="sb-top-line"></div>
+
+    </div>
+
+    <div class="sb-login-card">
+
+        <div class="sb-login-icon">
+            🏛️
+        </div>
+
+        <div>
+            <div class="sb-login-title">
+                Jan Seva Portal
+            </div>
+
+            <div class="sb-login-sub">
+                Login to continue
+            </div>
+        </div>
+
+    </div>
+
 </div>
 """, unsafe_allow_html=True)
-        
+
+        st.sidebar.markdown("---")
+
+        # 3. Navigation buttons
+        def nav_button(icon, label, screen, badge=0):
+            active = (st.session_state.get("screen") == screen)
+            btn_label = f"{icon}  {label}" + (f"  ({badge})" if badge else "")
+            if active:
+                st.markdown('<div class="sb-active">', unsafe_allow_html=True)
+            if st.sidebar.button(btn_label, key=f"nav_{screen}", use_container_width=True):
+                st.session_state.screen = screen
+                st.rerun()
+            if active:
+                st.markdown('</div>', unsafe_allow_html=True)
+
+        # Define menu based on role
+        if role == "user":
+            st.markdown('<div class="sb-section">' + _("MAIN MENU", "मुख्य मेनू") + '</div>', unsafe_allow_html=True)
+            nav_button("🏠", _("Dashboard", "डैशबोर्ड"), "user_dashboard")
+            nav_button("📢", _("File Complaint", "शिकायत दर्ज"), "file_complaint")
+            nav_button("🔍", _("Track Complaint", "शिकायत ट्रैक"), "tracking")
+            nav_button("📜", _("Govt Schemes", "सरकारी योजनाएं"), "schemes")
+            nav_button("🤖", _("AI Assistant", "AI सहायक"), "assistant")
+            # Notification badge (dummy – replace with real count)
+            unread = 0
+            nav_button("🔔", _("Notifications", "सूचनाएं"), "notifications", unread)
+
+        elif role == "official":
+            st.markdown('<div class="sb-section">' + _("WORKSPACE", "कार्यक्षेत्र") + '</div>', unsafe_allow_html=True)
+            nav_button("📊", _("Dashboard", "डैशबोर्ड"), "official_dashboard")
+            nav_button("📋", _("Complaints", "शिकायतें"), "official_complaints")
+            nav_button("🏆", _("Leaderboard", "लीडरबोर्ड"), "official_leaderboard")
+
+        elif role == "admin":
+            st.markdown('<div class="sb-section">' + _("MAIN MENU", "मुख्य मेनू") + '</div>', unsafe_allow_html=True)
+            nav_button("📊", _("Dashboard", "डैशबोर्ड"), "admin_dashboard")
+            nav_button("🏢", _("Departments", "विभाग"), "admin_departments")
+            nav_button("👥", _("Officials", "अधिकारी"), "admin_officials")
+            nav_button("📢", _("All Complaints", "सभी शिकायतें"), "admin_complaints")
+            nav_button("🏆", _("Leaderboard", "लीडरबोर्ड"), "admin_leaderboard")
+            nav_button("🔮", _("Predictive AI", "पूर्वानुमान AI"), "predictive_analytics")
+            nav_button("⏱️", _("SLA Tracking", "SLA ट्रैकिंग"), "sla_management")
+            nav_button("🏙️", _("City Health", "शहर स्वास्थ्य"), "city_health_score")
+            nav_button("📈", _("Live Dashboard", "लाइव डैशबोर्ड"), "live_dashboard")
+            nav_button("🗺️", _("Heatmap", "हीटमैप"), "admin_heatmap")
+            nav_button("📜", _("Schemes", "योजनाएं"), "admin_schemes")
+
+        else:  # Not logged in
+            st.markdown('<div class="sb-section">' + _("LOGIN", "लॉगिन") + '</div>', unsafe_allow_html=True)
+            nav_button("👤", _("Citizen", "नागरिक"), "user_login")
+            nav_button("🏢", _("Official", "अधिकारी"), "official_login")
+            nav_button("👑", _("Admin", "एडमिन"), "admin_login")
+
+        # 4. Preferences
+        st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="sb-section">' + _("PREFERENCES", "प्राथमिकताएं") + '</div>', unsafe_allow_html=True)
+        nav_button("🌐", _("Switch to Hindi", "Switch to English"), "lang_toggle")
+        nav_button("❓", _("Help & Support", "सहायता"), "help")
+
+        # 5. Logout
+        if role:
+            st.markdown('<div class="sb-divider"></div>', unsafe_allow_html=True)
+            st.markdown('<div class="sb-logout">', unsafe_allow_html=True)
+            if st.sidebar.button(f"🔓  {_('Logout', 'लॉगआउट')}", key="logout_button", use_container_width=True):
+                # Clear session
+                for k in list(st.session_state.keys()):
+                    del st.session_state[k]
+                st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
+
+        # 6. Footer
+        st.markdown(f"""
+        <div class="sb-footer">
+            <span class="sb-footer-flag">🇮🇳</span>
+            <strong>{_("Digital India Initiative", "डिजिटल इंडिया")}</strong><br>
+            {_("Powering Smart Governance", "स्मार्ट शासन की शक्ति")}
+        </div>
+        """, unsafe_allow_html=True)
+
+
+# =============================================================================
+# LANGUAGE TOGGLE HANDLER – call AFTER render_sidebar() in your main flow
+# =============================================================================
+def handle_special_screens():
+    if st.session_state.get("screen") == "lang_toggle":
+        new_lang = "hi" if st.session_state.get("language", "en") == "en" else "en"
+        st.session_state.language = new_lang
+        # Return to previous screen if stored, else a safe default
+        prev = st.session_state.get("prev_screen", "login_type")
+        st.session_state.screen = prev
+        st.rerun()
 # ═════════════════════════════════════════════════════════════════════════════
 # ROUTER
 # ═════════════════════════════════════════════════════════════════════════════
@@ -1401,10 +1383,234 @@ def analyze_sentiment(rating, comment=""):
             return "negative"
         return "neutral"
     return "neutral"
-# ═════════════════════════════════════════════════════════════════════════════
-# PUBLIC SCREENS
-# ═════════════════════════════════════════════════════════════════════════════
- 
+
+
+import streamlit as st
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# BILINGUAL CONTENT DICTIONARY
+# ══════════════════════════════════════════════════════════════════════════════
+_CONTENT = {
+    "en": {
+        # Hero
+        "portal_name_en":   "Jan Seva Portal",
+        "portal_name_hi":   "जन सेवा पोर्टल",
+        "hero_sub":         "AI-Powered Citizen Grievance Management System",
+        "badge_digital":    "🇮🇳 Digital India",
+        "badge_gov":        "⚙️ Smart Governance",
+        "badge_secure":     "🔒 Secure & Trusted",
+        "badge_mobile":     "📱 Mobile Ready",
+
+        # Stats
+        "stat1_num":  "2.4<span class='jsp-stat-unit'>M+</span>",
+        "stat1_lbl":  "Complaints Resolved",
+        "stat2_num":  "98<span class='jsp-stat-unit'>%</span>",
+        "stat2_lbl":  "Resolution Rate",
+        "stat3_num":  "4.8<span class='jsp-stat-unit'>★</span>",
+        "stat3_lbl":  "Citizen Satisfaction",
+        "stat4_num":  "72<span class='jsp-stat-unit'>hr</span>",
+        "stat4_lbl":  "Avg Resolution Time",
+
+        # Language section
+        "lang_sec_title":   "🌐 Choose Your Language",
+        "lang_sec_sub":     "अपनी भाषा चुनें · Select your preferred language to continue",
+        "card1_flag":       "🇬🇧",
+        "card1_name":       "English",
+        "card1_native":     "International Language",
+        "card1_pill":       "Widely Spoken",
+        "card2_flag":       "🇮🇳",
+        "card2_name":       "हिंदी",
+        "card2_native":     "भारत की राष्ट्रीय भाषा",
+        "card2_pill":       "National Language",
+        "btn_en":           "🌐 Continue in English",
+        "btn_hi":           "🇮🇳 हिंदी में जारी रखें",
+
+        # Transparency
+        "portal_title":     "📊 Public Transparency Portal",
+        "portal_sub":       "View real-time grievance statistics, department performance & open data reports",
+        "portal_btn":       "📊 Open Transparency Portal",
+
+        # How it works
+        "how_sec_title":    "📚 How It Works",
+        "how_sec_sub":      "Simple 3-step process to get your grievance resolved",
+        "step1_num":        "Step 01",
+        "step1_icon":       "📝",
+        "step1_title":      "File a Complaint",
+        "step1_desc":       "Describe your issue in text or voice, add your location and photos. Our AI auto-categorises it and routes it to the right department instantly.",
+        "step2_num":        "Step 02",
+        "step2_icon":       "⚙️",
+        "step2_title":      "Track Progress",
+        "step2_desc":       "Receive real-time SMS and email alerts. Watch live status updates on a transparent dashboard and escalate automatically if SLA is breached.",
+        "step3_num":        "Step 03",
+        "step3_icon":       "✅",
+        "step3_title":      "Get Resolution",
+        "step3_desc":       "Officials submit action reports with photos. Rate your experience and give feedback to improve government service quality continuously.",
+
+        # Schemes
+        "schemes_sec_title": "🏅 Government Schemes",
+        "schemes_sec_sub":   "Major citizen welfare initiatives — file complaints or queries about these schemes",
+        "s1_name":  "PM Awas Yojana",
+        "s1_desc":  "Housing for All — report issues with allotment, construction quality or beneficiary enrolment.",
+        "s2_name":  "Jal Jeevan Mission",
+        "s2_desc":  "Tap water for every household — complaints about supply disruptions or pipeline damage.",
+        "s3_name":  "PM KUSUM / SAUBHAGYA",
+        "s3_desc":  "Solar energy & rural electrification — report outages, metering issues or connection delays.",
+        "s4_name":  "PM Gram Sadak Yojana",
+        "s4_desc":  "All-weather rural roads — raise concerns about poor quality, potholes or missing links.",
+        "s5_name":  "PM Kisan Samman Nidhi",
+        "s5_desc":  "Direct income support to farmers — flag payment delays, KYC issues or enrolment problems.",
+        "s6_name":  "Ayushman Bharat",
+        "s6_desc":  "Health coverage up to ₹5 lakh — report denial of treatment, card issues or hospital fraud.",
+
+        # Features
+        "feat_sec_title": "✨ Platform Features",
+        "feat1_title": "AI-Powered",       "feat1_sub": "Smart auto-categorisation",
+        "feat2_title": "Voice Input",      "feat2_sub": "Speak your complaint",
+        "feat3_title": "GPS Location",     "feat3_sub": "Auto-detect address",
+        "feat4_title": "Real-time Alerts", "feat4_sub": "SMS & email notifications",
+        "feat5_title": "SLA Tracking",     "feat5_sub": "Time-bound resolution",
+        "feat6_title": "Analytics",        "feat6_sub": "Data-driven insights",
+        "feat7_title": "Secure & Private", "feat7_sub": "End-to-end encryption",
+
+        # Help
+        "help_title": "📞 Need Help? We're Here.",
+        "help_email": "support@janseva.gov.in",
+        "help_hours": "Working Hours: Monday – Saturday, 9:00 AM to 6:00 PM IST",
+        "help_num":   "📲 1800-XXX-XXXX",
+        "help_num_sub": "Toll-Free Helpline",
+
+        # Footer
+        "footer_copy":  "© 2024 Jan Seva Portal",
+        "footer_sub1":  "An Initiative by the Government of India &nbsp;|&nbsp; Version 2.0",
+        "footer_sub2":  "Empowering Citizens &nbsp;·&nbsp; Ensuring Accountability &nbsp;·&nbsp; Enhancing Governance",
+        "footer_sub3":  "Built on <strong>Digital India</strong> infrastructure &nbsp;·&nbsp; Data localised in India",
+        "footer_priv":  "Privacy Policy",
+        "footer_terms": "Terms of Use",
+
+        # Voice greeting
+        "voice_msg":  "Welcome to Jan Seva Portal. An AI-powered Citizen Grievance Management System. Please select your preferred language to continue.",
+        "voice_lang": "en-IN",
+
+        # Lang toggle button
+        "toggle_btn": "🇮🇳 हिंदी में देखें",
+    },
+
+    "hi": {
+        # Hero
+        "portal_name_en":   "Jan Seva Portal",
+        "portal_name_hi":   "जन सेवा पोर्टल",
+        "hero_sub":         "AI-संचालित नागरिक शिकायत प्रबंधन प्रणाली",
+        "badge_digital":    "🇮🇳 डिजिटल इंडिया",
+        "badge_gov":        "⚙️ स्मार्ट शासन",
+        "badge_secure":     "🔒 सुरक्षित एवं विश्वसनीय",
+        "badge_mobile":     "📱 मोबाइल तैयार",
+
+        # Stats
+        "stat1_num":  "2.4<span class='jsp-stat-unit'>M+</span>",
+        "stat1_lbl":  "शिकायतें हल हुईं",
+        "stat2_num":  "98<span class='jsp-stat-unit'>%</span>",
+        "stat2_lbl":  "समाधान दर",
+        "stat3_num":  "4.8<span class='jsp-stat-unit'>★</span>",
+        "stat3_lbl":  "नागरिक संतुष्टि",
+        "stat4_num":  "72<span class='jsp-stat-unit'>घं.</span>",
+        "stat4_lbl":  "औसत समाधान समय",
+
+        # Language section
+        "lang_sec_title":   "🌐 अपनी भाषा चुनें",
+        "lang_sec_sub":     "Choose your language · जारी रखने के लिए अपनी भाषा चुनें",
+        "card1_flag":       "🇬🇧",
+        "card1_name":       "English",
+        "card1_native":     "अंतर्राष्ट्रीय भाषा",
+        "card1_pill":       "व्यापक रूप से बोली जाती है",
+        "card2_flag":       "🇮🇳",
+        "card2_name":       "हिंदी",
+        "card2_native":     "भारत की राष्ट्रीय भाषा",
+        "card2_pill":       "राष्ट्रीय भाषा",
+        "btn_en":           "🌐 Continue in English",
+        "btn_hi":           "🇮🇳 हिंदी में जारी रखें",
+
+        # Transparency
+        "portal_title":     "📊 सार्वजनिक पारदर्शिता पोर्टल",
+        "portal_sub":       "वास्तविक समय की शिकायत सांख्यिकी, विभाग प्रदर्शन और खुले डेटा रिपोर्ट देखें",
+        "portal_btn":       "📊 पारदर्शिता पोर्टल खोलें",
+
+        # How it works
+        "how_sec_title":    "📚 यह कैसे काम करता है",
+        "how_sec_sub":      "आपकी शिकायत हल करने की सरल 3-चरण प्रक्रिया",
+        "step1_num":        "चरण 01",
+        "step1_icon":       "📝",
+        "step1_title":      "शिकायत दर्ज करें",
+        "step1_desc":       "अपनी समस्या टेक्स्ट या आवाज़ में बताएं, स्थान और फ़ोटो जोड़ें। हमारा AI इसे स्वतः वर्गीकृत करके तुरंत सही विभाग को भेज देता है।",
+        "step2_num":        "चरण 02",
+        "step2_icon":       "⚙️",
+        "step2_title":      "प्रगति ट्रैक करें",
+        "step2_desc":       "वास्तविक समय SMS और ईमेल अलर्ट प्राप्त करें। पारदर्शी डैशबोर्ड पर लाइव स्थिति अपडेट देखें और SLA उल्लंघन पर स्वचालित एस्केलेशन करें।",
+        "step3_num":        "चरण 03",
+        "step3_icon":       "✅",
+        "step3_title":      "समाधान पाएं",
+        "step3_desc":       "अधिकारी फ़ोटो सहित कार्यवाही रिपोर्ट प्रस्तुत करते हैं। अपना अनुभव रेट करें और सरकारी सेवा की गुणवत्ता लगातार बेहतर करने में मदद करें।",
+
+        # Schemes
+        "schemes_sec_title": "🏅 सरकारी योजनाएँ",
+        "schemes_sec_sub":   "प्रमुख नागरिक कल्याण पहलें — इन योजनाओं से संबंधित शिकायतें या प्रश्न दर्ज करें",
+        "s1_name":  "पीएम आवास योजना",
+        "s1_desc":  "सबके लिए आवास — आवंटन, निर्माण गुणवत्ता या लाभार्थी नामांकन की समस्याएं रिपोर्ट करें।",
+        "s2_name":  "जल जीवन मिशन",
+        "s2_desc":  "हर घर नल जल — आपूर्ति बाधा या पाइपलाइन क्षति की शिकायत करें।",
+        "s3_name":  "पीएम कुसुम / सौभाग्य",
+        "s3_desc":  "सौर ऊर्जा और ग्रामीण विद्युतीकरण — बिजली कटौती, मीटरिंग समस्या या कनेक्शन विलंब रिपोर्ट करें।",
+        "s4_name":  "पीएम ग्राम सड़क योजना",
+        "s4_desc":  "सर्वमौसम ग्रामीण सड़कें — खराब गुणवत्ता, गड्ढे या मिसिंग लिंक की समस्या उठाएं।",
+        "s5_name":  "पीएम किसान सम्मान निधि",
+        "s5_desc":  "किसानों को प्रत्यक्ष आय सहायता — भुगतान विलंब, KYC समस्या या नामांकन की समस्या बताएं।",
+        "s6_name":  "आयुष्मान भारत",
+        "s6_desc":  "₹5 लाख तक स्वास्थ्य कवरेज — उपचार अस्वीकृति, कार्ड समस्या या अस्पताल धोखाधड़ी रिपोर्ट करें।",
+
+        # Features
+        "feat_sec_title": "✨ प्लेटफ़ॉर्म की विशेषताएँ",
+        "feat1_title": "AI-संचालित",       "feat1_sub": "स्मार्ट स्वतः वर्गीकरण",
+        "feat2_title": "वॉयस इनपुट",       "feat2_sub": "अपनी शिकायत बोलें",
+        "feat3_title": "GPS स्थान",         "feat3_sub": "पता स्वतः पहचानें",
+        "feat4_title": "रियल-टाइम अलर्ट",  "feat4_sub": "SMS और ईमेल सूचनाएं",
+        "feat5_title": "SLA ट्रैकिंग",     "feat5_sub": "समयबद्ध समाधान",
+        "feat6_title": "विश्लेषण",          "feat6_sub": "डेटा-आधारित जानकारी",
+        "feat7_title": "सुरक्षित एवं निजी", "feat7_sub": "एंड-टू-एंड एन्क्रिप्शन",
+
+        # Help
+        "help_title": "📞 सहायता चाहिए? हम यहाँ हैं।",
+        "help_email": "support@janseva.gov.in",
+        "help_hours": "कार्य समय: सोमवार – शनिवार, सुबह 9:00 बजे से शाम 6:00 बजे IST",
+        "help_num":   "📲 1800-XXX-XXXX",
+        "help_num_sub": "टोल-फ्री हेल्पलाइन",
+
+        # Footer
+        "footer_copy":  "© 2024 जन सेवा पोर्टल",
+        "footer_sub1":  "भारत सरकार की एक पहल &nbsp;|&nbsp; संस्करण 2.0",
+        "footer_sub2":  "नागरिकों को सशक्त बनाना &nbsp;·&nbsp; जवाबदेही सुनिश्चित करना &nbsp;·&nbsp; शासन को बेहतर बनाना",
+        "footer_sub3":  "<strong>डिजिटल इंडिया</strong> अवसंरचना पर निर्मित &nbsp;·&nbsp; डेटा भारत में स्थानीयकृत",
+        "footer_priv":  "गोपनीयता नीति",
+        "footer_terms": "उपयोग की शर्तें",
+
+        # Voice greeting
+        "voice_msg":  "जन सेवा पोर्टल में आपका स्वागत है। एक AI-संचालित नागरिक शिकायत प्रबंधन प्रणाली। जारी रखने के लिए कृपया अपनी पसंदीदा भाषा चुनें।",
+        "voice_lang": "hi-IN",
+
+        # Lang toggle button
+        "toggle_btn": "🌐 View in English",
+    },
+}
+
+
+def _c(key: str) -> str:
+    
+    preview_lang = st.session_state.get("jsp_preview_lang", "en")
+    return _CONTENT.get(preview_lang, _CONTENT["en"]).get(key, key)
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# MAIN FUNCTION
+# ══════════════════════════════════════════════════════════════════════════════
 def pg_language():
  
     # ══════════════════════════════════════════════════════════════════════════
@@ -1848,7 +2054,7 @@ div[data-testid="stButton"] > button {
     <div class="jsp-feature"><div class="jsp-feature-ico">🔔</div><div class="jsp-feature-title">Real-time Alerts</div><div class="jsp-feature-sub">SMS &amp; email notifications</div></div>
     <div class="jsp-feature"><div class="jsp-feature-ico">⏱️</div><div class="jsp-feature-title">SLA Tracking</div><div class="jsp-feature-sub">Time-bound resolution</div></div>
     <div class="jsp-feature"><div class="jsp-feature-ico">📊</div><div class="jsp-feature-title">Analytics</div><div class="jsp-feature-sub">Data-driven insights</div></div>
-    <div class="jsp-feature"><div class="jsp-feature-ico">🌙</div><div class="jsp-feature-title">Dark Mode</div><div class="jsp-feature-sub">Eye-friendly interface</div></div>
+
     <div class="jsp-feature"><div class="jsp-feature-ico">🔒</div><div class="jsp-feature-title">Secure &amp; Private</div><div class="jsp-feature-sub">End-to-end encryption</div></div>
   </div>
 </div>
@@ -4117,8 +4323,8 @@ def _dashboard_render_hero(user: dict, comps: list, lang: str) -> None:
                   (17,"Good Afternoon","नमस्कार","👋"),
                   (24,"Good Evening","शुभ संध्या","🌙")]
     greet, emoji = next(
-        ((_t(lang, g, h), e) for lim, g, h, e in greet_map if hour < lim),
-        (_t(lang,"Good Evening","शुभ संध्या"), "🌙")
+        ((_tr(lang, g, h), e) for lim, g, h, e in greet_map if hour < lim),
+        (_tr(lang,"Good Evening","शुभ संध्या"), "🌙")
     )
     user_name = user.get("name", "User").split()[0]
     initials  = "".join(p[0].upper() for p in user.get("name", "U U").split()[:2])
@@ -4131,16 +4337,16 @@ def _dashboard_render_hero(user: dict, comps: list, lang: str) -> None:
         f'<div class="prem-hero">'
         f'<div class="prem-hero-avatar">{initials}</div>'
         f'<div class="prem-hero-title">{emoji} {greet}, {_html.escape(user_name)}!</div>'
-        f'<div class="prem-hero-sub">{_t(lang,"Welcome to your complaint dashboard","आपकी सेवा में तत्पर हैं")}</div>'
+        f'<div class="prem-hero-sub">{_tr(lang,"Welcome to your complaint dashboard","आपकी सेवा में तत्पर हैं")}</div>'
         f'<div class="prem-hero-stats">'
         f'<div class="prem-hstat h-blue"><div class="prem-hstat-num">{total}</div>'
-        f'<div class="prem-hstat-lbl">📋 {_t(lang,"Total","कुल")}</div></div>'
+        f'<div class="prem-hstat-lbl">📋 {_tr(lang,"Total","कुल")}</div></div>'
         f'<div class="prem-hstat h-amber"><div class="prem-hstat-num">{active}</div>'
-        f'<div class="prem-hstat-lbl">🔄 {_t(lang,"Active","सक्रिय")}</div></div>'
+        f'<div class="prem-hstat-lbl">🔄 {_tr(lang,"Active","सक्रिय")}</div></div>'
         f'<div class="prem-hstat h-green"><div class="prem-hstat-num">{resolved}</div>'
-        f'<div class="prem-hstat-lbl">✅ {_t(lang,"Resolved","समाधान")}</div></div>'
+        f'<div class="prem-hstat-lbl">✅ {_tr(lang,"Resolved","समाधान")}</div></div>'
         f'<div class="prem-hstat h-red"><div class="prem-hstat-num">{pending}</div>'
-        f'<div class="prem-hstat-lbl">⏳ {_t(lang,"Pending","लंबित")}</div></div>'
+        f'<div class="prem-hstat-lbl">⏳ {_tr(lang,"Pending","लंबित")}</div></div>'
         f'</div></div>',
         unsafe_allow_html=True,
     )
@@ -4518,7 +4724,7 @@ def _clean(text):
     return _SPACE_RE.sub(" ", text).strip()
  
  
-def _t(lang, en, hi):
+def _tr(lang, en, hi):
     return en if lang == "en" else hi
  
  
@@ -4547,8 +4753,8 @@ def _render_heros(user, comps, lang):
                  (17,"Good Afternoon","नमस्कार","👋"),
                  (24,"Good Evening","शुभ संध्या","🌙")]
     greet, emoji = next(
-        ((_t(lang,g,h),e) for lim,g,h,e in greet_map if hour < lim),
-        (_t(lang,"Good Evening","शुभ संध्या"),"🌙")
+        ((_tr(lang,g,h),e) for lim,g,h,e in greet_map if hour < lim),
+        (_tr(lang,"Good Evening","शुभ संध्या"),"🌙")
     )
     name     = user.get("name","User")
     initials = "".join(p[0].upper() for p in name.split()[:2])
@@ -4561,16 +4767,16 @@ def _render_heros(user, comps, lang):
         f"<div class='prem-hero'>"
         f"<div class='prem-hero-avatar'>{initials}</div>"
         f"<div class='prem-hero-title'>{emoji} {greet}, {_html.escape(name.split()[0])}!</div>"
-        f"<div class='prem-hero-sub'>{_t(lang,'Welcome to your complaint dashboard','आपकी सेवा में तत्पर हैं')}</div>"
+        f"<div class='prem-hero-sub'>{_tr(lang,'Welcome to your complaint dashboard','आपकी सेवा में तत्पर हैं')}</div>"
         f"<div class='prem-hero-stats'>"
         f"<div class='prem-hstat h-blue'><div class='prem-hstat-num'>{total}</div>"
-        f"<div class='prem-hstat-lbl'>📋 {_t(lang,'Total','कुल')}</div></div>"
+        f"<div class='prem-hstat-lbl'>📋 {_tr(lang,'Total','कुल')}</div></div>"
         f"<div class='prem-hstat h-amber'><div class='prem-hstat-num'>{active}</div>"
-        f"<div class='prem-hstat-lbl'>🔄 {_t(lang,'Active','सक्रिय')}</div></div>"
+        f"<div class='prem-hstat-lbl'>🔄 {_tr(lang,'Active','सक्रिय')}</div></div>"
         f"<div class='prem-hstat h-green'><div class='prem-hstat-num'>{resolved}</div>"
-        f"<div class='prem-hstat-lbl'>✅ {_t(lang,'Resolved','समाधान')}</div></div>"
+        f"<div class='prem-hstat-lbl'>✅ {_tr(lang,'Resolved','समाधान')}</div></div>"
         f"<div class='prem-hstat h-red'><div class='prem-hstat-num'>{pending}</div>"
-        f"<div class='prem-hstat-lbl'>⏳ {_t(lang,'Pending','लंबित')}</div></div>"
+        f"<div class='prem-hstat-lbl'>⏳ {_tr(lang,'Pending','लंबित')}</div></div>"
         f"</div></div>",
         unsafe_allow_html=True,
     )
@@ -4578,14 +4784,14 @@ def _render_heros(user, comps, lang):
  
 def _render_quick_actions(lang):
     st.markdown(
-        f"<div class='d-section-header'>⚡ {_t(lang,'Quick Actions','त्वरित कार्य')}</div>",
+        f"<div class='d-section-header'>⚡ {_tr(lang,'Quick Actions','त्वरित कार्य')}</div>",
         unsafe_allow_html=True,
     )
     actions = [
-        ("📢",_t(lang,"File Complaint","शिकायत दर्ज"),"file_complaint","#E8590C","rgba(232,89,12,0.08)"),
-        ("🔍",_t(lang,"Track Status","ट्रैक करें"),   "tracking",      "#D4500B","rgba(212,80,11,0.08)"),
-        ("📜",_t(lang,"Govt Schemes","सरकारी योजनाएं"),"schemes",      "#059669","rgba(5,150,105,0.08)"),
-        ("🤖",_t(lang,"AI Assistant","एआई सहायक"),    "assistant",     "#0EA5E9","rgba(14,165,233,0.08)"),
+        ("📢",_tr(lang,"File Complaint","शिकायत दर्ज"),"file_complaint","#E8590C","rgba(232,89,12,0.08)"),
+        ("🔍",_tr(lang,"Track Status","ट्रैक करें"),   "tracking",      "#D4500B","rgba(212,80,11,0.08)"),
+        ("📜",_tr(lang,"Govt Schemes","सरकारी योजनाएं"),"schemes",      "#059669","rgba(5,150,105,0.08)"),
+        ("🤖",_tr(lang,"AI Assistant","एआई सहायक"),    "assistant",     "#0EA5E9","rgba(14,165,233,0.08)"),
     ]
     cols = st.columns(4)
     for col,(icon,label,screen,color,bg) in zip(cols,actions):
@@ -4613,7 +4819,7 @@ def _render_notification_banner(notifs, lang):
         f"<div class='notif-inline'><div class='ni-dot'></div>"
         f"<div class='ni-text'>🔔 {_html.escape(str(first.get('title','')))} — "
         f"{_html.escape(str(first.get('message',''))[:65])}…</div>"
-        f"<span class='ni-badge'>{len(unread)} {_t(lang,'new','नई')}</span></div>",
+        f"<span class='ni-badge'>{len(unread)} {_tr(lang,'new','नई')}</span></div>",
         unsafe_allow_html=True,
     )
  
@@ -4623,25 +4829,25 @@ def _render_feedback_section(comps, lang):
     if not need:
         return
     st.markdown(
-        f"<div class='d-section-header'>✅ {_t(lang,'Confirm Resolution','समाधान की पुष्टि करें')}</div>",
+        f"<div class='d-section-header'>✅ {_tr(lang,'Confirm Resolution','समाधान की पुष्टि करें')}</div>",
         unsafe_allow_html=True,
     )
     for c in need:
         cid      = c.get("complaint_id")
-        deadline = c.get("feedback_deadline", _t(lang,"within 2 days","2 दिनों के भीतर"))
+        deadline = c.get("feedback_deadline", _tr(lang,"within 2 days","2 दिनों के भीतर"))
         desc     = _clean(c.get("description",""))
         st.markdown(
             f"<div class='fb-card'><div class='fb-head'><div class='fb-icon'>✅</div>"
-            f"<div><div class='fb-title'>{_t(lang,'Complaint Resolved — Please Confirm!','शिकायत समाधान हुई — पुष्टि करें!')}</div>"
+            f"<div><div class='fb-title'>{_tr(lang,'Complaint Resolved — Please Confirm!','शिकायत समाधान हुई — पुष्टि करें!')}</div>"
             f"<div class='fb-sub'>#{cid}</div></div></div>"
             f"<div class='fb-desc'>{_html.escape(desc[:120])}…"
-            f"<br><small>⏰ {_t(lang,'Respond by','उत्तर दें:')} {_html.escape(str(deadline))}</small>"
+            f"<br><small>⏰ {_tr(lang,'Respond by','उत्तर दें:')} {_html.escape(str(deadline))}</small>"
             f"</div></div>",
             unsafe_allow_html=True,
         )
         c1,c2 = st.columns(2)
         with c1:
-            if st.button(_t(lang,"👍 Yes, Satisfied!","👍 हाँ, संतुष्ट हूँ!"), key=f"fb_ok_{cid}"):
+            if st.button(_tr(lang,"👍 Yes, Satisfied!","👍 हाँ, संतुष्ट हूँ!"), key=f"fb_ok_{cid}"):
                 resp = _api_put(f"/complaints/{cid}/feedback", {"feedback":"satisfied"})
                 if resp.get("success"):
                     st.session_state[f"pending_rating_{cid}"] = True
@@ -4649,7 +4855,7 @@ def _render_feedback_section(comps, lang):
                 else:
                     st.error(f"Error: {resp.get('error','Unknown')}")
         with c2:
-            if st.button(_t(lang,"❌ Not Resolved — Reopen","❌ समाधान नहीं — पुनः खोलें"), key=f"fb_no_{cid}"):
+            if st.button(_tr(lang,"❌ Not Resolved — Reopen","❌ समाधान नहीं — पुनः खोलें"), key=f"fb_no_{cid}"):
                 resp = _api_put(f"/complaints/{cid}/feedback", {"feedback":"not_satisfied"})
                 if resp.get("success"):
                     _fetch_complaints.clear(); st.toast("Complaint reopened 🔄"); st.rerun()
@@ -4669,31 +4875,33 @@ def _render_rating_section(comps, lang):
         return
  
     officials_map = _fetch_officials_map()
-    STAR_LABELS = {1:_t(lang,"Very Poor","बहुत खराब"),2:_t(lang,"Poor","खराब"),
-                   3:_t(lang,"Average","औसत"),4:_t(lang,"Good","अच्छा"),5:_t(lang,"Excellent","उत्कृष्ट")}
+    STAR_LABELS = {1:_tr(lang,"Very Poor","बहुत खराब"),2:_tr(lang,"Poor","खराब"),
+                   3:_tr(lang,"Average","औसत"),4:_tr(lang,"Good","अच्छा"),5:_tr(lang,"Excellent","उत्कृष्ट")}
     st.markdown(
-        f"<div class='d-section-header'>⭐ {_t(lang,'Rate the Service','सेवा को रेट करें')}</div>",
+        f"<div class='d-section-header'>⭐ {_tr(lang,'Rate the Service','सेवा को रेट करें')}</div>",
         unsafe_allow_html=True,
     )
  
     for rt in need:
+        num_id = rt.get("id") 
         cid      = rt.get("complaint_id")
         off_id   = rt.get("official_id")
-        off_name = rt.get("official_name") or officials_map.get(off_id) or _t(lang,"the department","विभाग")
+        off_name = rt.get("official_name") or officials_map.get(off_id) or _tr(lang,"the department","विभाग")
         star_key = f"_star_val_{cid}"
         cmnt_key = f"_comment_val_{cid}"
+        
         cur      = st.session_state.get(star_key, 0)
         disp     = "★"*cur if cur > 0 else "☆☆☆☆☆"
         desc     = _clean(rt.get("description",""))
  
         st.markdown(
             f"<div class='rt-card'><div class='rt-head'><div class='rt-icon'>⭐</div>"
-            f"<div><div class='rt-title'>{_t(lang,'Rate the Service','सेवा को रेट करें')}</div>"
-            f"<div class='rt-sub'>{_t(lang,'Resolved by','समाधानकर्ता')}: "
+            f"<div><div class='rt-title'>{_tr(lang,'Rate the Service','सेवा को रेट करें')}</div>"
+            f"<div class='rt-sub'>{_tr(lang,'Resolved by','समाधानकर्ता')}: "
             f"<strong>{_html.escape(str(off_name))}</strong> · #{cid}</div>"
             f"</div></div><div class='rt-desc'>{_html.escape(desc[:100])}…</div>"
             f"<div class='rt-display'><div class='rt-stars-large'>{disp}</div>"
-            f"<div class='rt-lbl'>{_t(lang,'Select your rating below','नीचे रेटिंग चुनें')}</div>"
+            f"<div class='rt-lbl'>{_tr(lang,'Select your rating below','नीचे रेटिंग चुनें')}</div>"
             f"</div></div>",
             unsafe_allow_html=True,
         )
@@ -4704,12 +4912,12 @@ def _render_rating_section(comps, lang):
                 if st.button(f"{icon} {STAR_LABELS[val]}", key=f"star_{cid}_{val}"):
                     st.session_state[star_key] = val; st.rerun()
  
-        comment = st.text_area(_t(lang,"Additional feedback (optional)","अतिरिक्त प्रतिक्रिया (वैकल्पिक)"),
+        comment = st.text_area(_tr(lang,"Additional feedback (optional)","अतिरिक्त प्रतिक्रिया (वैकल्पिक)"),
                                 key=cmnt_key, height=80)
         if cur == 0:
-            st.info(_t(lang,"⭐ Select a star rating above before submitting.","⭐ सबमिट से पहले स्टार रेटिंग चुनें।"))
+            st.info(_tr(lang,"⭐ Select a star rating above before submitting.","⭐ सबमिट से पहले स्टार रेटिंग चुनें।"))
         else:
-            if st.button(f"{'⭐'*cur} {_t(lang,'Submit Rating','रेटिंग सबमिट करें')}", key=f"rate_sub_{cid}"):
+            if st.button(f"{'⭐'*cur} {_tr(lang,'Submit Rating','रेटिंग सबमिट करें')}", key=f"rate_sub_{cid}"):
                 resp = _api_post(f"/complaints/{cid}/rate",
                     {"stars":cur,"comment":comment or None,
                      "user_id":st.session_state.user.get("user_id"),
@@ -4718,7 +4926,7 @@ def _render_rating_section(comps, lang):
                     for k in (star_key,cmnt_key,f"pending_rating_{cid}"):
                         st.session_state.pop(k,None)
                     _fetch_complaints.clear()
-                    st.success(_t(lang,"✅ Rating submitted! Thank you.","✅ रेटिंग सबमिट हो गई! धन्यवाद।"))
+                    st.success(_tr(lang,"✅ Rating submitted! Thank you.","✅ रेटिंग सबमिट हो गई! धन्यवाद।"))
                     st.balloons(); st.rerun()
                 else:
                     st.error(f"Error: {resp.get('detail',resp.get('error','Unknown'))}")
@@ -4762,13 +4970,13 @@ def _render_single_complaint_card(c, lang, skip_ids, idx):
                  + f"{idx}. #{cid}  ·  {category}  ·  {s_icon} {s_lbl}{img_badge}")
  
     # number label
-    st.markdown(f"<div class='cc-number'>{_t(lang,'Complaint','शिकायत')} #{idx}</div>",
+    st.markdown(f"<div class='cc-number'>{_tr(lang,'Complaint','शिकायत')} #{idx}</div>",
                 unsafe_allow_html=True)
     # open card (light border)
     st.markdown(f"<div class='cc-outer {card_cls}'>", unsafe_allow_html=True)
  
     with st.expander(exp_title, expanded=False):
-        if st.button(f"🔊 {_t(lang,'Listen','सुनें')}", key=f"voice_{cid}"):
+        if st.button(f"🔊 {_tr(lang,'Listen','सुनें')}", key=f"voice_{cid}"):
             try:
                 speak_text(f"Complaint {cid}: {desc}", lang)  # noqa: F821
             except NameError:
@@ -4798,26 +5006,26 @@ def _render_single_complaint_card(c, lang, skip_ids, idx):
             st.markdown(
                 "<div class='evidence-box'>"
                 "<div class='evidence-title'>🖼️ "
-                + _t(lang,"Complaint Evidence","शिकायत साक्ष्य") +
+                + _tr(lang,"Complaint Evidence","शिकायत साक्ष्य") +
                 "</div></div>",
                 unsafe_allow_html=True,
             )
             if st.button(
-                f"👁️ {_t(lang,'View Uploaded Photo','अपलोड की गई फ़ोटो देखें')}",
+                f"👁️ {_tr(lang,'View Uploaded Photo','अपलोड की गई फ़ोटो देखें')}",
                 key=f"show_img_{cid}",
                 use_container_width=True,
             ):
                 img_url = (img_path if img_path.startswith("http")
                            else f"https://bfo-backend.onrender.com{img_path}")
                 st.image(img_url,
-                         caption=_t(lang,"Uploaded Complaint Evidence","शिकायत का प्रमाण"),
+                         caption=_tr(lang,"Uploaded Complaint Evidence","शिकायत का प्रमाण"),
                          use_column_width=True)
  
         if sla:
             if overdue:
-                st.error(f"⏰ {_t(lang,'OVERDUE! Expected by:','अतिदेय! समय सीमा:')} {sla}")
+                st.error(f"⏰ {_tr(lang,'OVERDUE! Expected by:','अतिदेय! समय सीमा:')} {sla}")
             else:
-                st.info(f"⏱️ {_t(lang,'Expected by:','अपेक्षित:')} {sla}")
+                st.info(f"⏱️ {_tr(lang,'Expected by:','अपेक्षित:')} {sla}")
  
     # close card
     st.markdown("</div>", unsafe_allow_html=True)
@@ -4830,25 +5038,25 @@ def _render_complaint_list(comps, lang, skip_ids):
             f"<div class='prem-empty-state' style='margin-top:12px;'>"
             f"<span class='prem-empty-icon'>📭</span>"
             f"<div class='prem-empty-title'>"
-            f"{_t(lang,'No complaints filed yet.','अभी तक कोई शिकायत दर्ज नहीं।')}"
+            f"{_tr(lang,'No complaints filed yet.','अभी तक कोई शिकायत दर्ज नहीं।')}"
             f"</div><div class='prem-empty-sub'>"
-            f"{_t(lang,'Use Quick Actions above to file your first complaint.','ऊपर Quick Actions से पहली शिकायत दर्ज करें।')}"
+            f"{_tr(lang,'Use Quick Actions above to file your first complaint.','ऊपर Quick Actions से पहली शिकायत दर्ज करें।')}"
             f"</div></div>",
             unsafe_allow_html=True,
         )
         return
  
     st.markdown(
-        f"<div class='d-section-header'>📋 {_t(lang,'Your Complaints','आपकी शिकायतें')}</div>",
+        f"<div class='d-section-header'>📋 {_tr(lang,'Your Complaints','आपकी शिकायतें')}</div>",
         unsafe_allow_html=True,
     )
  
     filters = [
-        ("all",        _t(lang,"All","सभी"),               "📋"),
-        ("pending",    _t(lang,"Pending","लंबित"),          "⏳"),
-        ("in_progress",_t(lang,"In Progress","प्रगति में"), "🔄"),
-        ("resolved",   _t(lang,"Resolved","समाधान"),        "✅"),
-        ("closed",     _t(lang,"Closed","बंद"),             "🔒"),
+        ("all",        _tr(lang,"All","सभी"),               "📋"),
+        ("pending",    _tr(lang,"Pending","लंबित"),          "⏳"),
+        ("in_progress",_tr(lang,"In Progress","प्रगति में"), "🔄"),
+        ("resolved",   _tr(lang,"Resolved","समाधान"),        "✅"),
+        ("closed",     _tr(lang,"Closed","बंद"),             "🔒"),
     ]
     active_filter = st.session_state.get("dash_filter","all")
  
@@ -4881,9 +5089,9 @@ def _render_complaint_list(comps, lang, skip_ids):
  
     st.markdown(
         f"<div class='page-row'><span class='page-info'>"
-        f"{_t(lang,'Showing','दिखा रहे हैं')} "
+        f"{_tr(lang,'Showing','दिखा रहे हैं')} "
         f"<strong>{len(page_slice)}</strong> / <strong>{len(filtered)}</strong> "
-        f"{_t(lang,'complaints','शिकायतें')}</span></div>",
+        f"{_tr(lang,'complaints','शिकायतें')}</span></div>",
         unsafe_allow_html=True,
     )
  
@@ -4897,7 +5105,7 @@ def _render_complaint_list(comps, lang, skip_ids):
             f"<div class='prem-empty-state' style='margin-top:12px;'>"
             f"<span class='prem-empty-icon'>🔍</span>"
             f"<div class='prem-empty-title'>"
-            f"{_t(lang,'No complaints match this filter.','इस फ़िल्टर से कोई शिकायत नहीं मिली।')}"
+            f"{_tr(lang,'No complaints match this filter.','इस फ़िल्टर से कोई शिकायत नहीं मिली।')}"
             f"</div></div>",
             unsafe_allow_html=True,
         )
@@ -4905,17 +5113,17 @@ def _render_complaint_list(comps, lang, skip_ids):
     if total_pages > 1:
         nav = st.columns([1,3,1])
         with nav[0]:
-            if page > 0 and st.button(f"← {_t(lang,'Prev','पिछला')}", key="page_prev", use_container_width=True):
+            if page > 0 and st.button(f"← {_tr(lang,'Prev','पिछला')}", key="page_prev", use_container_width=True):
                 st.session_state["dash_page"] = page-1; st.rerun()
         with nav[1]:
             st.markdown(
                 f"<div style='text-align:center;font-size:.78rem;"
                 f"color:var(--d-a1);font-weight:800;padding:8px 0;'>"
-                f"{_t(lang,'Page','पृष्ठ')} {page+1} / {total_pages}</div>",
+                f"{_tr(lang,'Page','पृष्ठ')} {page+1} / {total_pages}</div>",
                 unsafe_allow_html=True,
             )
         with nav[2]:
-            if page < total_pages-1 and st.button(f"{_t(lang,'Next','अगला')} →", key="page_next", use_container_width=True):
+            if page < total_pages-1 and st.button(f"{_tr(lang,'Next','अगला')} →", key="page_next", use_container_width=True):
                 st.session_state["dash_page"] = page+1; st.rerun()
  
  
@@ -4924,10 +5132,10 @@ def _render_notifications_footer(notifs, lang):
     if not unread:
         return
     st.markdown(
-        f"<div class='d-section-header'>🔔 {_t(lang,'Notifications','सूचनाएं')} "
+        f"<div class='d-section-header'>🔔 {_tr(lang,'Notifications','सूचनाएं')} "
         f"<span style='background:var(--d-a1);color:#fff;border-radius:20px;"
         f"padding:2px 10px;font-size:.66rem;font-weight:800;'>"
-        f"{len(unread)} {_t(lang,'new','नई')}</span></div>",
+        f"{len(unread)} {_tr(lang,'new','नई')}</span></div>",
         unsafe_allow_html=True,
     )
     for n in unread[:3]:
@@ -4942,9 +5150,11 @@ def _render_notifications_footer(notifs, lang):
             f"</div></div>",
             unsafe_allow_html=True,
         )
-    if st.button(_t(lang,"View All Notifications →","सभी सूचनाएं देखें →"), key="va_notifs_dash"):
+    if st.button(_tr(lang,"View All Notifications →","सभी सूचनाएं देखें →"), key="va_notifs_dash"):
         st.session_state.screen = "notifications"; st.rerun()
  
+def _tr(lang, en, hi):
+    return hi if lang == "hi" else en
  
 # ═══════════════════════════════════════════════════════════════════════════
 # MAIN ENTRY POINT
@@ -4997,8 +5207,8 @@ def pg_user_dashboard():
     # 6. Tip bar
     st.markdown(
         f"<div class='tip-bar'><span style='font-size:1.1rem;'>💡</span>"
-        f"<div class='tip-text'><strong>{_t(lang,'Pro Tip:','सुझाव:')}</strong> "
-        f"{_t(lang,'Track your complaint in real-time and get instant notifications on every update.','अपनी शिकायत को रियल-टाइम में ट्रैक करें और हर अपडेट पर तुरंत सूचना पाएं।')}"
+        f"<div class='tip-text'><strong>{_tr(lang,'Pro Tip:','सुझाव:')}</strong> "
+        f"{_tr(lang,'Track your complaint in real-time and get instant notifications on every update.','अपनी शिकायत को रियल-टाइम में ट्रैक करें और हर अपडेट पर तुरंत सूचना पाएं।')}"
         f"</div></div>",
         unsafe_allow_html=True,
     )
@@ -5006,7 +5216,7 @@ def pg_user_dashboard():
     # 7. Refresh — centered
     c1,c2,c3 = st.columns([1,2,1])
     with c2:
-        if st.button(_t(lang,"🔄 Refresh Dashboard","🔄 डैशबोर्ड रिफ्रेश करें"),
+        if st.button(_tr(lang,"🔄 Refresh Dashboard","🔄 डैशबोर्ड रिफ्रेश करें"),
                      key="refresh_dash", use_container_width=True):
             _fetch_complaints.clear(); _fetch_notifications.clear(); st.rerun()
 
@@ -13436,10 +13646,10 @@ def _dept_drill():
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
 
-    _CARD = "#10161F" if dark else "#FFFFFF"
-    _BOR  = "#1E2A3D" if dark else "#E2E8F4"
-    _TXT  = "#F0F4FF" if dark else "#0F172A"
-    _SUB  = "#8896B0" if dark else "#64748B"
+    _CARD =  "#FFFFFF"
+    _BOR  =  "#E2E8F4"
+    _TXT  = "#0F172A"
+    _SUB  =  "#64748B"
     _A1   = "#6366F1"
     _A2   = "#8B5CF6"
 
@@ -13612,50 +13822,6 @@ button[data-testid="baseButton-secondary"][kind="secondary"]:has(div:contains("�
         approved_o = [o for o in officials if     o.get("is_approved")]
 
         # pending
-        st.markdown(
-            f"<div class='dd-sec'>⏳ Pending Approval"
-            f"{' (' + str(len(pending_o)) + ')' if pending_o else ''}"
-            f"</div>",
-            unsafe_allow_html=True,
-        )
-        if not pending_o:
-            st.info("No pending officials in this department.")
-        else:
-            for o in pending_o:
-                oid = o.get("id")
-                joined_tag = (
-                    f"<span class='dd-meta-tag'>📅 {o['joined']}</span>"
-                    if o.get("joined") else ""
-                )
-
-                # Use a container with custom class to wrap card + buttons
-                with st.container():
-                    st.markdown(
-                        f"<div class='dd-pending-wrap'>"
-                        f"<div class='dd-off-name'>👤 {o.get('name','—')}</div>"
-                        f"<div class='dd-off-meta'>"
-                        f"<span class='dd-meta-tag'>📧 {o.get('email','—')}</span>"
-                        f"{joined_tag}"
-                        f"</div>",
-                        unsafe_allow_html=True,
-                    )
-
-                    # Buttons inline inside the card visual block
-                    pa1, pa2, pa3 = st.columns([4, 1, 1])
-                    with pa2:
-                        st.markdown("<div class='dd-approve'>", unsafe_allow_html=True)
-                        if st.button("✅ Approve", key=f"da_{oid}", use_container_width=True, help="Approve"):
-                            api("put", f"/admin/officials/{oid}/approve")
-                            st.rerun()
-                        st.markdown("</div>", unsafe_allow_html=True)
-                    with pa3:
-                        st.markdown("<div class='dd-reject'>", unsafe_allow_html=True)
-                        if st.button("❌ Reject", key=f"dr_{oid}", use_container_width=True, help="Reject"):
-                            api("put", f"/admin/officials/{oid}/reject")
-                            st.rerun()
-                        st.markdown("</div>", unsafe_allow_html=True)
-
-                    st.markdown("</div>", unsafe_allow_html=True)
 
         # approved
         st.markdown(
@@ -13731,11 +13897,11 @@ def pg_admin_officials():
     dark  = st.session_state.get("dark_mode", False)
     st.markdown(get_css(dark_mode=dark), unsafe_allow_html=True)
 
-    _CARD = "#10161F" if dark else "#FFFFFF"
-    _BOR  = "#1E2A3D" if dark else "#E2E8F4"
-    _TXT  = "#F0F4FF" if dark else "#0F172A"
-    _SUB  = "#8896B0" if dark else "#64748B"
-    _HOV  = "#16213A" if dark else "#F8FAFF"
+    _CARD =  "#FFFFFF"
+    _BOR  =  "#E2E8F4"
+    _TXT  = "#0F172A"
+    _SUB  =  "#64748B"
+    _HOV  =  "#F8FAFF"
     _A1   = "#6366F1"
     _A2   = "#8B5CF6"
 
@@ -14066,8 +14232,8 @@ def pg_admin_officials():
             # Remove button (icon only) — inside card
             rc1, rc2 = st.columns([8, 1])
             with rc2:
-                st.markdown("<div class='off-btn-remove'>", unsafe_allow_html=True)
-                if st.button("🗑️", key=f"rem_{oid}", use_container_width=True, help="Remove official"):
+                st.markdown("<div class='ooff-stat-pill-num'>", unsafe_allow_html=True)
+                if st.button("🗑️", key=f"rem_{oid}", use_container_width=True,):
                     api("put", f"/admin/officials/{oid}/reject")
                     st.rerun()
                 st.markdown("</div>", unsafe_allow_html=True)
@@ -14400,7 +14566,7 @@ def pg_admin_complaints():
     with f3:
         fsq = st.text_input(
             "", placeholder="🔍 Search description, name, or complaint ID…",
-            key="ac_q", label_visibility="collapsed"
+            key="ac_q"
         )
 
     # ── APPLY FILTERS ─────────────────────────────────────────────────────────
@@ -17394,24 +17560,15 @@ def render_simple_steps(complaint):
    
 def pg_sla_management():
    
-    
     _apply_layout("user")
-    """SLA Management Dashboard — premium prem-* design, no HTML inside expanders."""
 
     DEFAULT_SLA = {
-
         "water":       24,
-
         "electricity": 24,
-
         "road":        72,
-
         "waste":       48,
-
         "drainage":    48,
-
         "health":      36,
-
         "other":       72,
     }
 
@@ -17420,49 +17577,29 @@ def pg_sla_management():
     # ─────────────────────────────────────────────
 
     def get_default_sla(category):
-
         category = str(category).lower().strip()
-
         # Smart automatic SLA mapping
         AUTO_SLA = {
-
             "cyber":     12,
-
             "internet":  12,
-
             "telecom":   18,
-
             "police":     6,
-
             "fire":       2,
-
             "health":    12,
-
             "transport": 24,
-
             "bank":      24,
-
             "finance":   24,
-
             "education": 48,
-
             "housing":   72,
         }
-
         for key, hrs in AUTO_SLA.items():
-
             if key in category:
-
                 return hrs
-
         # Safe fallback
         return DEFAULT_SLA.get(
-
             category,
-
             48
         )
-
     # ── HERO ──────────────────────────────────────────────────────────────────
     st.markdown("""
     <div class="prem-hero">
@@ -18014,4 +18151,5 @@ def pg_sla_management():
 # MAIN
 # ═════════════════════════════════════════════════════════════════════════════
 render_sidebar()
+handle_special_screens()
 route()

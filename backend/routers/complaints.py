@@ -492,27 +492,61 @@ def submit_feedback(complaint_id: str, data: FeedbackIn, db: Session = Depends(g
 # ── Rate Complaint ───────────────────────────────────────────────────────────
 @router.post("/{complaint_id}/rate")
 def rate_complaint(complaint_id: str, data: RatingIn, db: Session = Depends(get_db)):
-    complaint = db.query(models.Complaint).filter(models.Complaint.complaint_id == complaint_id).first()
+    complaint = db.query(models.Complaint).filter(
+        models.Complaint.complaint_id == complaint_id
+    ).first()
     if not complaint:
         raise HTTPException(404, "Complaint not found")
-    if complaint.rating:
+
+    # FIX 1: Check Rating table directly — complaint.rating is a relationship,
+    # not a simple boolean, so `if complaint.rating` crashes when ORM lazy-loads it.
+    existing_rating = db.query(models.Rating).filter(
+        models.Rating.complaint_id == complaint.id
+    ).first()
+    if existing_rating:
         raise HTTPException(400, "Already rated")
+
+    # Clamp stars to valid range
+    stars = max(1, min(5, int(data.stars)))
+
+    # FIX 2: official_id may be 0 or None (complaint had no assigned official).
+    # Fall back to the complaint's own official, then to any dept official.
+    official_id = data.official_id if (data.official_id and data.official_id > 0) else complaint.official_id
+
+    if not official_id and complaint.department_id:
+        fallback = db.query(models.Official).filter(
+            models.Official.department_id == complaint.department_id,
+            models.Official.is_approved == True
+        ).first()
+        if fallback:
+            official_id = fallback.id
+
+    if not official_id:
+        raise HTTPException(400, "No official assigned to this complaint — cannot rate")
+
+    official = db.query(models.Official).filter(models.Official.id == official_id).first()
+    if not official:
+        raise HTTPException(404, f"Official {official_id} not found")
+
     rating = models.Rating(
         complaint_id=complaint.id,
         user_id=data.user_id,
-        official_id=data.official_id,
-        stars=data.stars,
-        comment=data.comment
+        official_id=official_id,
+        stars=stars,
+        comment=data.comment,
     )
     db.add(rating)
     db.flush()
-    official = db.query(models.Official).filter(models.Official.id == data.official_id).first()
-    if official:
-        old_sum = (official.avg_rating or 0) * (official.rating_count or 0)
-        official.rating_count = (official.rating_count or 0) + 1
-        official.avg_rating = round((old_sum + data.stars) / official.rating_count, 2)
+
+    # Update running average safely
+    old_count = official.rating_count or 0
+    old_avg   = official.avg_rating or 0.0
+    new_count = old_count + 1
+    official.rating_count = new_count
+    official.avg_rating   = round((old_avg * old_count + stars) / new_count, 2)
+
     db.commit()
-    return {"success": True, "avg_rating": official.avg_rating if official else data.stars}
+    return {"success": True, "avg_rating": official.avg_rating, "rating_count": new_count}
 
 # ── Get Stats ────────────────────────────────────────────────────────────────
 @router.get("/stats")
