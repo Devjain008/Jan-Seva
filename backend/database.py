@@ -8,6 +8,8 @@ from typing import Generator
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import declarative_base, sessionmaker, Session
+from dotenv import load_dotenv
+load_dotenv()
 
 log = logging.getLogger(__name__)
 
