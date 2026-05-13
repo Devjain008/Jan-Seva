@@ -90,15 +90,13 @@ class ComplaintTimeline(Base):
 
 class Rating(Base):
     __tablename__ = "ratings"
-    id = Column(Integer, primary_key=True, index=True)
-    complaint_id = Column(Integer, ForeignKey("complaints.id"), unique=True)
-    user_id = Column(Integer, ForeignKey("users.id"))
-    official_id = Column(Integer, ForeignKey("officials.id"))
-    stars = Column(Integer, nullable=False)
-    comment = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    complaint = relationship("Complaint", back_populates="rating_obj")
-    official = relationship("Official", back_populates="ratings")
+    id           = Column(Integer, primary_key=True)
+    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False)
+    user_id      = Column(Integer, ForeignKey("users.id"), nullable=False)
+    official_id  = Column(Integer, ForeignKey("officials.id"), nullable=True)  # ← nullable=True
+    stars        = Column(Integer, nullable=False)
+    comment      = Column(String, nullable=True)
+    created_at   = Column(DateTime, default=datetime.utcnow)
 
 class Scheme(Base):
     __tablename__ = "schemes"

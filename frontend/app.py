@@ -4920,8 +4920,8 @@ def _render_rating_section(comps, lang):
             if st.button(f"{'⭐'*cur} {_tr(lang,'Submit Rating','रेटिंग सबमिट करें')}", key=f"rate_sub_{cid}"):
                 resp = _api_post(f"/complaints/{cid}/rate",
                     {"stars":cur,"comment":comment or None,
-                     "user_id":st.session_state.user.get("user_id"),
-                     "official_id":off_id if off_id else 1})
+                    "user_id":st.session_state.user.get("user_id"),
+                    "official_id":off_id if off_id else 0})
                 if resp.get("success"):
                     for k in (star_key,cmnt_key,f"pending_rating_{cid}"):
                         st.session_state.pop(k,None)
@@ -5414,7 +5414,7 @@ def _rating_card(c, uid, idx=0):
             "stars": stars,
             "comment": comment or None,
             "user_id": uid,
-            "official_id": off_id if off_id else 1  # fallback to admin official (ID 1)
+            "official_id": off_id if off_id else 0  # fallback to admin official (ID 1)
         }
         resp = api("post", f"/complaints/{cid}/rate", json=payload)
         if resp.get("success"):
