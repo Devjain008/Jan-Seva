@@ -15,6 +15,10 @@ class User(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     complaints = relationship("Complaint", back_populates="user")
     notifications = relationship("Notification", back_populates="user")
+    ratings = relationship(
+        "Rating",
+        back_populates="user"
+    )
 
 class Department(Base):
     __tablename__ = "departments"
@@ -90,13 +94,54 @@ class ComplaintTimeline(Base):
 
 class Rating(Base):
     __tablename__ = "ratings"
+
     id           = Column(Integer, primary_key=True)
-    complaint_id = Column(Integer, ForeignKey("complaints.id"), nullable=False)
-    user_id      = Column(Integer, ForeignKey("users.id"), nullable=False)
-    official_id  = Column(Integer, ForeignKey("officials.id"), nullable=True)  # ← nullable=True
+
+    complaint_id = Column(
+        Integer,
+        ForeignKey("complaints.id"),
+        nullable=False
+    )
+
+    user_id      = Column(
+        Integer,
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    official_id  = Column(
+        Integer,
+        ForeignKey("officials.id"),
+        nullable=True
+    )
+
     stars        = Column(Integer, nullable=False)
+
     comment      = Column(String, nullable=True)
-    created_at   = Column(DateTime, default=datetime.utcnow)
+
+    created_at   = Column(
+        DateTime,
+        default=datetime.utcnow
+    )
+
+    # ─────────────────────────────────────────
+    # RELATIONSHIPS
+    # ─────────────────────────────────────────
+
+    complaint = relationship(
+        "Complaint",
+        back_populates="rating_obj"
+    )
+
+    user = relationship(
+        "User",
+        back_populates="ratings"
+    )
+
+    official = relationship(
+        "Official",
+        back_populates="ratings"
+    )
 
 class Scheme(Base):
     __tablename__ = "schemes"
